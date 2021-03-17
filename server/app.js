@@ -73,6 +73,50 @@ console.log(`Scanning audio files, folders and samples. Collected: \n${folders} 
 
 
 
+
+
+
+/*
+
+Socket passing to function:
+===========================
+
+io.on('connection', function(socket){
+  socket.on('need data', function(msg) {
+    getLinkBacks(msg, function(content) {
+      socket.emit("data", content);
+    });
+  });
+});
+//
+var getLinkBacks = function(title, fn) {
+  request.get("relevant url", function(err, res, body) {
+    fn(body);
+  });
+};
+
+I agree with you, Node's style is passing a callback function, so I would rewrite this code as follows:
+This will keep each part of your app isolated, and getLinkBacks function will not have to know about what socket is. This is of course a good programming practice. Besides you could reuse getLinkBacks function in other parts of your app, which are not connected with socket object.
+P.S. I would recommend Robert Martin's "Clean Code: A Handbook of Agile Software Craftsmanship". He gives very valuable advises about how to structure your code to make it "clean".
+Good luck!
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // SOCKET IO
 // ================================================================
 
@@ -110,7 +154,7 @@ io.on('connection', function(socket) {
 
 
 
-	
+
 
 	// USER INTERACTION:
 	// ================================================================
