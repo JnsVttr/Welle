@@ -58,6 +58,7 @@ var folders = [];
 
 
 // test for return arrow functions
+/*
 let varGlobal = {};
 let testReturn = (_varGlobal) => {
 	let tempVar = {model: 'ford'};
@@ -67,94 +68,110 @@ let testReturn = (_varGlobal) => {
 console.log('varGlobal before ' + varGlobal);
 varGlobal = testReturn(varGlobal);
 console.log('varGlobal after ' + varGlobal);
-console.log('varGlobal after content: ' + varGlobal.model);
+console.log('varGlobal after content: ' + varGlobal.model); 
+*/
+
+/*
+Return multiple variables:
+function getValues() {
+    return [getFirstValue(), getSecondValue()];
+}
+var values = getValues();
+var first = values[0];
+var second = values[1];
+
+// fs.readdir async function:
+function getDirectories(path, callback) {
+    fs.readdir(path, function (err, content) {
+        if (err) return callback(err)
+        callback(null, content)
+    })
+}
+getDirectories('./XML', function (err, content) {
+    console.log(content)
+})
+ */
 
 
-
-
-
-
-
-function readCollection(state) {
-	checkFolders(audioPath);
-	// this is a test change to the audio function
-	// wait a bit and print the result:
-	setTimeout(function(){ 
-		if (state == true ) {printFiles(folders, 'Folders');}
-	}, 200);  
-};
-
-function checkFolders( url ) {
-	fs.readdir(url, function (err, files) {
-		// empty the array:
-	    folders = []
-	    //handling error
-	    if (err) {
-	        return console.log('Unable to scan directory: ' + err);
-	    } 
-	    
-	    files.forEach(function (file) {
-	        var ext = path.parse(file).ext;
-	        // if file is folder
-	        if (ext == '' && file[0] != '.') {
-	        	// console.log('is folder')
-	        	folders.push(file);
-	        };
-	    });
-	    console.log(' ');
-	    console.log('Sample-folders at data/audio: ');
-	    console.log(folders);
-	    console.log(' ');
-	    
-	    for (let i=0; i<folders.length; i++) {
-	    	var fileUrl = path.join(url, folders[i]);
-	    	checkFiles(fileUrl);
-	    };
+let readMediaFolders = (_audioPath) => {   // async function!!
+	// var folders
+	let _folders = [];
+	let files = [];
+	// check for each folder entry in the audioPath
+	files = fs.readdirSync(_audioPath, function (err, files) {
+		//handling error
+	    if (err) return console.log(err); 
 	});
+
+	files.forEach(function (file) {
+		var ext = path.parse(file).ext;
+		// if file is folder
+		if (ext == '' && file[0] != '.') {
+			// console.log('is folder')
+			_folders.push(file);
+		};
+	});
+	// console.log('readMeadiaFolders: Sample-folders at data/audio: ');
+	// console.log(_folders);	
+	return _folders;
+}
+
+let readMediaFoldersFiles = (_audioPath, _folders) => {
+	let _samples = {};
+
+	// for every folder entry => check the contents
+	for (let i=0; i<_folders.length; i++) {
+		// url for folder
+		var fileUrl = path.join(_audioPath, _folders[i]);
+		
+		let folder = fileUrl.substring(fileUrl.lastIndexOf('/')).substring(1); 
+		let listOfFiles = [];
+		let numFiles = 0;
+		// data URL for the browser
+		let shortURL = fileUrl.substring(fileUrl.indexOf("audio")) + '/';
+		// var to store files from folders
+		let files = [];
+
+		// get files from each folder
+		files = fs.readdirSync(fileUrl, function (err, files) {
+			//handling error
+			if (err) return console.log('Unable to scan directory: ' + err);
+		});
 	
-};
+		// add each file to list of files in folder
+		files.forEach(function (file, c) {
+			var ext = path.parse(file).ext;
+			// if file is file
+			if (ext != '') {
+				listOfFiles.push(file); 
+				numFiles += 1
+			};
+		});
+		
+		// check, if server is local or on tangible.uber.space
+		if ( path.join(__dirname) != '/var/www/virtual/tangible/html/server') {
+			shortURL = 'http://localhost:3000/' + shortURL;
+		};
+		if ( path.join(__dirname) == '/var/www/virtual/tangible/html/server') {
+			shortURL = ('https://tangible.uber.space/' + shortURL);
+			// console.log('shortURL: ' + shortURL);
+		};
+		
+		// saving samples as Objects
+		_samples[folder] = {folderName: folder, url: fileUrl, shortURL: shortURL, files: listOfFiles, count: numFiles};
 
-function checkFiles(url, _samples) {
-	fs.readdir(url, function (err, files) {
-	    //handling error
-	    if (err) {
-	        return console.log('Unable to scan directory: ' + err);
-	    }; 
-
-	    // saving samples as Objects
-	    let folder = url.substring(url.lastIndexOf('/')).substring(1); 
-	    let listOfFiles = [];
-	    let numFiles = 0;
-	    
-	    files.forEach(function (file, c) {
-	        var ext = path.parse(file).ext;
-	        var name = path.parse(file).name; // remove etx  
-	        // if file is file
-	        if (ext != '') {
-	       		listOfFiles.push(file); 
-	       		numFiles += 1
-	        };
-	    });
-	    
-	    let shortURL = url.substring(url.indexOf("audio")) + '/';
-	    // console.log('shortURL: ' + shortURL);
-
-	    // check, if server is local or on tangible.uber.space
-	    if ( path.join(__dirname) == '/Users/Maschine/Sites/welle/server') {
-	    	shortURL = 'http://localhost:3000/' + shortURL;
-	    };
-	    if ( path.join(__dirname) == ' /var/www/virtual/tangible/html/server') {
-	    	shortURL = ('https://tangible.uber.space/' + shortURL);
-	    	// console.log('shortURL: ' + shortURL);
-	    };
-	    
-	    // console.log('shortURL: ' + String(shortURL));
-	    // printFiles(samples, String(folder) );
-	    samples[folder] = {folderName: folder, url: url, shortURL: shortURL, files: listOfFiles, count: numFiles};
-	});
+		// console.log('shortURL: ' + shortURL);
+		// console.log('shortURL: ' + String(shortURL));
+		// printFiles(samples, String(folder) );
+	};
+	return _samples;
 };
 
 
+folders = readMediaFolders(audioPath);
+samples = readMediaFoldersFiles(audioPath, folders);
+// console.log(samples);
+// console.log(`folders and samples are collected. \n${folders} \ntest samples entry: ${Object.keys(samples)[0]}`)
 
 
 
@@ -176,6 +193,15 @@ function printFiles () {
 	console.log('');
 };
 
+
+function readCollection(state) {
+	// checkFolders(audioPath);
+	// this is a test change to the audio function
+	// wait a bit and print the result:
+	setTimeout(function(){ 
+		if (state == true ) {printFiles(folders, 'Folders');}
+	}, 200);  
+};
 
 
 // print out at server start:
