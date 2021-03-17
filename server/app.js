@@ -168,10 +168,42 @@ let readMediaFoldersFiles = (_audioPath, _folders) => {
 };
 
 
-folders = readMediaFolders(audioPath);
-samples = readMediaFoldersFiles(audioPath, folders);
-// console.log(samples);
-// console.log(`folders and samples are collected. \n${folders} \ntest samples entry: ${Object.keys(samples)[0]}`)
+
+
+
+let scanMediaFolders = (_audioPath, _folders, _samples) => {
+	_folders = readMediaFolders(_audioPath);
+	_samples = readMediaFoldersFiles(_audioPath, _folders);
+	return [_folders, _samples]
+}
+
+let mediaResults = scanMediaFolders(audioPath, folders, samples);
+
+folders = mediaResults[0];
+samples = mediaResults[1];
+console.log(`folders and samples are collected. \n${folders} \ntest samples entry: ${Object.keys(samples)[0]}`)
+
+
+
+
+
+function readCollection(state) {
+	// checkFolders(audioPath);
+	// this is a test change to the audio function
+	// wait a bit and print the result:
+	setTimeout(function(){ 
+		if (state == true ) {printFiles(folders, 'Folders');}
+	}, 200);  
+};
+
+
+// print out at server start:
+readCollection(false);   // true = print files at server start..
+
+
+
+
+
 
 
 
@@ -194,18 +226,6 @@ function printFiles () {
 };
 
 
-function readCollection(state) {
-	// checkFolders(audioPath);
-	// this is a test change to the audio function
-	// wait a bit and print the result:
-	setTimeout(function(){ 
-		if (state == true ) {printFiles(folders, 'Folders');}
-	}, 200);  
-};
-
-
-// print out at server start:
-readCollection(false);   // true = print files at server start..
 
 
 
