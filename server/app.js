@@ -56,6 +56,25 @@ console.clear();
 var samples = {};
 var folders = [];
 
+
+// test for return arrow functions
+let varGlobal = {};
+let testReturn = (_varGlobal) => {
+	let tempVar = {model: 'ford'};
+	_varGlobal = tempVar;
+	return _varGlobal;
+};
+console.log('varGlobal before ' + varGlobal);
+varGlobal = testReturn(varGlobal);
+console.log('varGlobal after ' + varGlobal);
+console.log('varGlobal after content: ' + varGlobal.model);
+
+
+
+
+
+
+
 function readCollection(state) {
 	checkFolders(audioPath);
 	// this is a test change to the audio function
@@ -95,7 +114,7 @@ function checkFolders( url ) {
 	
 };
 
-function checkFiles( url) {
+function checkFiles(url, _samples) {
 	fs.readdir(url, function (err, files) {
 	    //handling error
 	    if (err) {
@@ -135,6 +154,14 @@ function checkFiles( url) {
 	});
 };
 
+
+
+
+
+
+
+
+
 function printFiles () {
 	console.log('');
 	console.log('============================');
@@ -150,8 +177,12 @@ function printFiles () {
 };
 
 
+
 // print out at server start:
 readCollection(false);   // true = print files at server start..
+
+
+
 
 
 
