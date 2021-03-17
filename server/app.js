@@ -58,6 +58,7 @@ var folders = [];
 
 function readCollection(state) {
 	checkFolders(audioPath);
+	
 	// wait a bit and print the result:
 	setTimeout(function(){ 
 		if (state == true ) {printFiles(folders, 'Folders');}
