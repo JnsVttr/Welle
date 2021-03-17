@@ -1,4 +1,14 @@
+// ============================================================
+// WELLE - server app 
+// ============================================================
 
+/*
+re-working the app file
+trying to sort things
+*/
+
+
+// libraries
 const 	express = require('express');
 const 	app = express();
 const 	http = require('http').Server(app);
@@ -7,25 +17,22 @@ const 	port = process.env.PORT || 3000;
 const 	path = require('path');
 const 	fs = require('fs');
 const 	SocketIOFile = require('socket.io-file');
+
+// local resources and folder structure
 const 	pageSource = '../client';
 const 	audioSource = '../data/audio';
 const 	alertSource = '../data/alert';
 const 	historySource = '../data/history';
 const 	presetsSource = '../data/presets';
-console.clear();
 
+// variables paths, data etc.
 const audioPath = path.join(__dirname, audioSource);
 const historyURL = path.join(__dirname, historySource);
 const presetsURL = path.join(__dirname, presetsSource);
-
-
-
 let presetData = '';
 let onlineSessions = {};
 
-
-// set folder structure for access
-// ================================================================
+// allow, indicate app access to folder structure
 app.use(express.static(path.join(__dirname, pageSource)));
 app.use('/audio', express.static(path.join(__dirname, audioSource)));
 app.use('/alert', express.static(path.join(__dirname, alertSource)));
@@ -35,7 +42,8 @@ app.get('/', function(req, res) {
    res.sendFile('index.html');
 });
 
-
+// start fresh console
+console.clear();
 
 
 
