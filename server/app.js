@@ -15,10 +15,12 @@ const 	http = require('http').Server(app);
 const 	io = require('socket.io')(http);
 const 	port = process.env.PORT || 3000;
 const 	path = require('path');
-const 	fs = require('fs');
+const   fs = require('fs');
 const 	SocketIOFile = require('socket.io-file');
 const { readMediaFolders } = require("./readMediaFolders");
 const { readMediaFoldersFiles } = require("./readMediaFoldersFiles");
+const { updateHistory } = require("./updateHistory");
+const { presetHandling } = require("./presetHandling");
 
 // local resources and folder structure
 const 	pageSource = '../client';
@@ -31,7 +33,6 @@ const 	presetsSource = '../data/presets';
 const audioPath = path.join(__dirname, audioSource);
 const historyURL = path.join(__dirname, historySource);
 const presetsURL = path.join(__dirname, presetsSource);
-let presetData = '';
 let onlineSessions = {};
 
 // allow, indicate app access to folder structure
@@ -68,263 +69,6 @@ console.log(`folders and samples are collected. \n${folders} \ntest samples entr
 
 
 
-
-
-
-
-// print files to do
-function printFiles () {
-	console.log('');
-	console.log('============================');
-	console.log('Folders[] stored on Server:')
-	console.log(folders);
-	console.log('');
-	console.log('Samples{} Collection: ')
-	// print global collection "samples"
-	console.log(samples);
-	console.log('');
-	console.log('============================');
-	console.log('');
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function encryptName(value) {
-  var result="";
-  for(i=0;i<value.length;i++) {
-    if(i<value.length-1) {
-        result+=value.charCodeAt(i)+10;
-        result+="-";
-    } else {
-        result+=value.charCodeAt(i)+10;
-    };
-  };
-  return result;
-};
-
-
-function updateHistory (url, user, id, string, date) {
-	fs.readdir(url, function (err, files) {
-	    //handling error
-	    if (err) {
-	        return console.log('Unable to scan directory: ' + err);
-	    }; 
-	    let encryptedUser = encryptName(user);
-	    let historyFile = false;
-	    let historyFileName = '';
-	    let historyFileID = '';
-	    let newFileName = '';
-		let newFilePath = '';
-		let exsitingFileName = '';
-		let exsitingFilePath = '';
-
-	    if (user == 'local') {
-		    files.forEach(function (file, c) {
-		        let ext = path.parse(file).ext;
-		        file = path.parse(file).name; // remove etx  
-		        let fileID = file.substring(file.indexOf('_') +1 );
-		        // if file is file
-		        if (ext != '') {
-		        	// console.log(`Detected file: ${file}`);
-	        		if (fileID == id) {
-	        			// if there,  append file
-	        			historyFile = true;
-	        			historyFileID = id; 
-	        		} else {
-	        			// if create not there create file
-	        			historyFile = false;
-	        		};
-		        };
-		    });
-		    newFileName = 'client_' + id + '.txt';
-			newFilePath = path.join(url, newFileName);
-			exsitingFileName = 'client_' + id + '.txt';
-			exsitingFilePath = path.join(url, newFileName);
-		}; 
-		if (user != 'local' && user != 'guest') {
-		    files.forEach(function (file, c) {
-		        let ext = path.parse(file).ext;
-		        file = path.parse(file).name; // without extension  
-		        let fileID = file.substring(file.indexOf('_') +1 );
-		        // if file is file
-		        if (ext != '') {
-		        	// console.log(`Detected file: ${file}`);
-	        		if (file == encryptedUser) {
-	        			// if there,  append file
-	        			historyFile = true;
-	        			historyFileID = id; 
-	        		} else {
-	        			// if create not there create file
-	        			historyFile = false;
-	        		};
-		        };
-		    });
-		    newFileName = encryptedUser + '.txt';
-			newFilePath = path.join(url, newFileName);
-			exsitingFileName = encryptedUser + '.txt';
-			exsitingFilePath = path.join(url, newFileName);
-		}; 
-
-
-		
-
-	    if (historyFileID!='') {
-	    	// if there,  append file
-	    	// console.log(`File there! Concurrent file ID: ${id}`);
-	    	fs.appendFile(exsitingFilePath, (string + '\r\n'), function (err) {
-			  if (err) throw err;
-			  // console.log(`updateHistory: file updated..`);
-			}); 
-	    } else {
-	    	// if create not there create file
-	    	// console.log(`File not there! create new file..`);
-			fs.writeFile(newFilePath, (date + '\r\n \r\n' + string + '\r\n'), function (err, file) {
-				if (err) throw err;
-				// console.log(`updateHistory: new file saved!`);
-			}); 
-	    };
-	});
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function presetHandling (action, url, presetName, data) {    //presetHandling('store', presetsURL, presetName, savedParts);
-	fs.readdir(url, function (err, files) {
-	    //handling error
-	    if (err) {
-	        return console.log('presetHandling: Unable to scan directory: ' + err);
-	    }; 
-	    
-	    let presetFile = false; 
-	    let newFileName = '';
-		let newFilePath = '';
-		let exsitingFileName = '';
-		let exsitingFilePath = '';
-		let stringData = '';
-
-
-		files.forEach(function (file, c) {
-	        let ext = path.parse(file).ext;
-	        file = path.parse(file).name; // remove etx  
-	        // if file is file
-	        if (ext != '') {
-	        	// console.log(`Detected file: ${file}`);
-        		if (file == presetName) {
-        			// file is there: replace
-        			presetFile = true;
-        		} 
-	        };
-	    });
-	    if (presetFile){ console.log(`--> file there`); };
-	    exsitingFileName = presetName + '.txt';
-		exsitingFilePath = path.join(url, exsitingFileName);
-		newFileName = presetName + '.txt';
-		newFilePath = path.join(url, newFileName);
-
-
-	    if (action == 'store') {
-	    	stringData = JSON.stringify(data, null, 2);
-			// console.log(`presetHandling: Data = ${JSON.stringify(data, null, 2)}`);
-		    
-			if (presetFile) {
-		    	// if there,  append file
-		    	console.log(`presetHandling: File there! Concurrent file name: ${exsitingFileName} at ${exsitingFilePath}`);
-		    	fs.writeFile(exsitingFilePath, stringData, function (err) {
-				  if (err) throw err;
-				  console.log(`presetHandling: file replaced ..`);
-				}); 
-		    } else {
-		    	// if create not there create file
-		    	console.log(`File not there! create new file..`);
-				fs.writeFile(newFilePath, stringData, function (err, file) {
-					if (err) throw err;
-					console.log(`presetHandling: new file saved!`);
-				}); 
-		    };
-	    };
-
-
-	     if (action == 'reload') {
-			if (presetFile) {
-		    	// if there,  reload file
-		    	console.log(`presetHandling: File there: ${exsitingFileName} at ${exsitingFilePath}`);
-		    	// stringData = JSON.stringify(data, null, 2);
-				// console.log(`presetHandling: Data = ${JSON.stringify(data, null, 2)}`);
-		    	fs.readFile(exsitingFilePath, stringData, function (err, data) {
-				  if (err) throw err;
-				  console.log(`presetHandling: reload: Read File: ${exsitingFileName} to 'data'`);
-				  stringData = JSON.parse(data);
-				  console.log(`presetHandling: reload: file data: ${stringData}`);
-				  processReloadPreset (presetName, stringData)
-				}); 
-		    } else {
-		    	// if create not there, return null
-		    	console.log(`presetHandling: No preset-file there ..`);
-		    	processReloadPreset (presetName, 'none')
-		    };
-	    };
-	});
-};
-
-function processReloadPreset (presetName, data) {
-	console.log(`processReloadPreset: presetName "${presetName}, "data: ${data} `);
-	presetData = {name: presetName, data: data};
-};
 
 
 
@@ -378,6 +122,7 @@ io.on('connection', function(socket) {
 	socket.on('clientEvent', function(data) {
 		socket.clientID =  socket.id;
 		// console.log(`Msg. from client: user="${data.user}", string="${data.string}", id: ${socket.clientID}`);
+		console.log("");
 		console.log(`Msg. from client: user="${data.user}", string="${data.string}"`);
 		updateHistory (historyURL, data.user, socket.clientID, data.string, date);
 	});
@@ -545,17 +290,28 @@ io.on('connection', function(socket) {
 	});
 
 
+	// socket preset handling
+
 	socket.on('storePreset', function(presetName, savedPartsNames, savedParts) {
 		console.log(`StorePresets: presetName=${presetName}, savedPartsNames "${savedPartsNames}" .. `);
 		presetHandling('store', presetsURL, presetName, savedParts);
 	});
+
 	socket.on('reloadPreset', function(presetName) {
 		console.log(`ReloadPreset: presetName=${presetName} `);
-		presetHandling('reload', presetsURL, presetName);
+		let _presetName = "";
+		let _presetContent = "";
+		let _presetValues = [];
+		_presetValues = presetHandling('reload', presetsURL, presetName);
+		_presetName = _presetValues[0];
+		_presetContent = _presetValues[1];
+		let presetData = {name: _presetName, data: _presetContent};
 		setTimeout(function(){
-			console.log(`ReloadPreset: timeOut --> presetName "${presetData.name}" and data: "${presetData.data}"`);
+			console.log(`socket --> send preset: ${presetData.name}`);
 			socket.emit('reloadPreset', presetData.name, presetData.data);
 		}, 200);
+		
+		
 	});
 
 

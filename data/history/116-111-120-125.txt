@@ -189,3 +189,19 @@ reload preset jens
 
  --> new session - Sun Aug 25 2019 14:22:05 GMT+0200 (GMT+02:00)
  
+
+ --> new session - Wed Mar 17 2021 16:56:41 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+metal #-#-#-#-
+reload jens
+reloadpreset jens
+store test
+ help commands 
+ help instruments 
+ help files 
+reload preset jens
+reload preset jens
+reload preset jens
+reload preset jens
+.
+reload preset jens
