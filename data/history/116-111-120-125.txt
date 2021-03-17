@@ -205,3 +205,17 @@ reload preset jens
 reload preset jens
 .
 reload preset jens
+
+ --> new session - Wed Mar 17 2021 21:32:17 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+join jens
+
+ --> new session - Wed Mar 17 2021 21:33:19 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+drums
+
+ --> new session - Wed Mar 17 2021 21:37:03 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+
+ --> new session - Wed Mar 17 2021 21:38:40 GMT+0100 (Mitteleuropäische Normalzeit)
+ 

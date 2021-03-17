@@ -33,7 +33,8 @@ const presetsSource = '../data/presets';
 const audioPath = path.join(__dirname, audioSource);
 const historyURL = path.join(__dirname, historySource);
 const presetsURL = path.join(__dirname, presetsSource);
-let onlineSessions = {};
+let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
+
 
 // allow, indicate app access to folder structure
 app.use(express.static(path.join(__dirname, pageSource)));
@@ -107,24 +108,16 @@ Good luck!
 
 
 
-
-
-
-
-
-
-
-
-
-
 // SOCKET IO
 // ================================================================
 
-var users = [];
+let users = [];
 let uploadFolder = 'default';
-var uploadDir = 'data/audio';
+let uploadDir = 'data/audio';
 let newUploadDir = path.join(uploadDir, uploadFolder);
-
+let sessionState = false;
+let userState = false;
+let onlineSessions = {};
 
 
 // if a client connects to the server:
@@ -143,7 +136,6 @@ io.on('connection', socket => {
 	// on each client event add the interaction to the history
 	socket.on('clientEvent', (data) => {
 		socket.clientID = socket.id;
-		// console.log(`Msg. from client: user="${data.user}", string="${data.string}", id: ${socket.clientID}`);
 		console.log("");
 		console.log(`Msg. from client: user="${data.user}", string="${data.string}"`);
 		updateHistory(historyURL, data.user, socket.clientID, data.string, date);
@@ -151,9 +143,7 @@ io.on('connection', socket => {
 
 	// receive a simple message
 	socket.on('msg', function (data) {
-		// check message: state, string, result, user
 		console.log(socket.username + '\'s message to all: ' + data.string + " - from " + data.user);
-		//socket.username = data.user;
 		// send to everyone
 		io.sockets.emit('msgToAll', data);
 	});
@@ -165,7 +155,6 @@ io.on('connection', socket => {
 
 	// socket preset handling
 	socket.on('storePreset', function (presetName, savedPartsNames, savedParts) {
-		console.log(`StorePresets: presetName=${presetName}, savedPartsNames "${savedPartsNames}" .. `);
 		presetHandling('store', presetsURL, presetName, savedParts);
 	});
 
@@ -174,8 +163,6 @@ io.on('connection', socket => {
 		let _presetContent = "";
 		let _presetValues = [];
 		let presetData = [];
-		console.log(`ReloadPreset: presetName=${presetName} `);
-
 		_presetValues = presetHandling('reload', presetsURL, presetName);
 		_presetName = _presetValues[0];
 		_presetContent = _presetValues[1];
@@ -208,9 +195,18 @@ io.on('connection', socket => {
 	// USER INTERACTION:
 	// ================================================================
 	socket.on('setUser', function (name, session) {
-		let sessionState = false;
-		let userState = false;
-		if (session == undefined) { sessionState = false } else { sessionState = true };
+		
+		// even different sessions are possible
+		sessionState = false;
+		if (session == undefined) { 
+			sessionState = false;
+			console.log("sessionState false"); 
+		} else { 
+			sessionState = true; 
+			console.log("sessionState true"); 
+		};
+		
+		// message
 		console.log('');
 		console.log("setUser: incoming request from: " + name);
 
@@ -428,15 +424,13 @@ io.on('connection', socket => {
 
 	// send Files
 	// ================================================================
-	socket.on('readFiles', function (what) {
-		console.log('client requests files on: ' + what);
+	socket.on('readFiles', function (sounds) {
+		console.log("");
+		console.log(`List files - client requests files on: ${sounds}`);
 		// read & print files
 		scanMediaFolders(audioPath);
-		setTimeout(function () {
-			console.log('sending files to client');
-			socket.emit('files', folders, samples, what);
-		}, 200);
-
+		console.log('sending files to client');
+		socket.emit('files', folders, samples, sounds);	
 	});
 
 
@@ -452,7 +446,7 @@ io.on('connection', socket => {
 
 
 
-	
+
 
 	// restart the server
 	socket.on('restart', function () {
@@ -461,7 +455,8 @@ io.on('connection', socket => {
 		var exec = require('child_process').exec;
 		var child;
 
-		child = exec('. /home/tangible/bin/restart_app.sh ',
+		
+		child = exec(restartServerScript,
 			function (error, stdout, stderr) {
 				console.log('stdout: ' + stdout);
 				console.log('stderr: ' + stderr);
@@ -487,8 +482,9 @@ io.on('connection', socket => {
 
 // set server + listening port 
 http.listen(port, function () {
-	console.log('Welle Server listening on *: ' + port);
-	// console.log("This is pid " + process.pid);
+	console.log('Welle - Server listening on *: ' + port);
+	console.log("(PID " + process.pid + ")");
+	console.log("");
 });
 
 
