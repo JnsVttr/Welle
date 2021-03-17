@@ -53,7 +53,7 @@ console.clear();
 
 
 
-// audio files
+// handle audio files
 // ================================================================
 var samples = {};
 var folders = [];
@@ -64,34 +64,7 @@ let scanMediaFolders = (_audioPath) => {
 	// return [_folders, _samples]
 }
 scanMediaFolders(audioPath);
-console.log(`folders and samples are collected. \n${folders} \ntest samples entry: ${Object.keys(samples)[0]}\n`)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+console.log(`Scanning audio files, folders and samples. Collected: \n${folders} \nrandom test samples entry: "${Object.keys(samples)[0]}"\n`)
 
 
 
@@ -102,23 +75,28 @@ console.log(`folders and samples are collected. \n${folders} \ntest samples entr
 
 // SOCKET IO
 // ================================================================
-// chat example
-var clients = 0;
-var roomno = 1;
+
 var users = [];
 let uploadFolder = 'default';
 var uploadDir = 'data/audio';
 let newUploadDir = path.join(uploadDir, uploadFolder);
+
+
+
+// if a client connects to the server:
 
 io.on('connection', function(socket) {
 	let date = new Date();
 
 	// console.log('client connects to server.. server URL: ' + path.join(__dirname));
 	console.log('client connects to server.. ');
+
+	// send the audio content to client on each connection
 	setTimeout(function(){
 		socket.emit('files', folders, samples, "store"); 	
 	}, 700);
 
+	// on each client event add the interaction to the history
 	socket.on('clientEvent', function(data) {
 		socket.clientID =  socket.id;
 		// console.log(`Msg. from client: user="${data.user}", string="${data.string}", id: ${socket.clientID}`);
@@ -132,14 +110,7 @@ io.on('connection', function(socket) {
 
 
 
-
-
-
-
-
-
-
-
+	
 
 	// USER INTERACTION:
 	// ================================================================
@@ -332,7 +303,7 @@ io.on('connection', function(socket) {
 
    	// UPLOAD FILES
    	// ================================================================
-	var count = 0;
+	
 	
 	socket.on('uploadDest', function(dest){
 		newUploadDir = path.join(uploadDir, dest);
@@ -419,13 +390,6 @@ io.on('connection', function(socket) {
 
 // EOF socket IO
 });
-
-
-
-
-
-
-
 
 
 
