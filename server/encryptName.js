@@ -9,6 +9,7 @@ function encryptName(value) {
 		};
 	};
 	return result;
-}
+};
+
 exports.encryptName = encryptName;
-;
+
