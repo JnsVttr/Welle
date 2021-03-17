@@ -1,0 +1,94 @@
+Wed Aug 21 2019 13:45:07 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Wed Aug 21 2019 13:45:07 GMT+0200 (GMT+02:00)
+ 
+> bass
+> bass
+
+ --> new session - Wed Aug 21 2019 13:50:30 GMT+0200 (GMT+02:00)
+ 
+> metal
+.
+
+ --> new session - Wed Aug 21 2019 14:04:13 GMT+0200 (GMT+02:00)
+ 
+> bass
+.
+
+ --> new session - Wed Aug 21 2019 14:08:26 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 14:09:09 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 14:48:25 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Wed Aug 21 2019 14:51:58 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 14:53:47 GMT+0200 (GMT+02:00)
+ 
+. bass
+. bass
+join alex
+
+ --> new session - Wed Aug 21 2019 14:58:43 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 14:58:43 GMT+0200 (GMT+02:00)
+ 
+. bass
+. bass
+
+ --> new session - Wed Aug 21 2019 15:02:47 GMT+0200 (GMT+02:00)
+ 
+. bass
+. string
+
+ --> new session - Wed Aug 21 2019 15:14:09 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Wed Aug 21 2019 15:14:09 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 15:15:27 GMT+0200 (GMT+02:00)
+ 
+. bass
+
+ --> new session - Wed Aug 21 2019 15:34:45 GMT+0200 (GMT+02:00)
+ 
+store preset xxx
+. bass
+
+ --> new session - Wed Aug 21 2019 15:42:55 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Wed Aug 21 2019 15:44:46 GMT+0200 (GMT+02:00)
+ 
+reload preset jens
+
+ --> new session - Wed Aug 21 2019 15:45:27 GMT+0200 (GMT+02:00)
+ 
+reload preset jens
+reload preset jens
+reload preset jens
+reload preset jens
+
+ --> new session - Wed Aug 21 2019 16:09:33 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Wed Aug 21 2019 16:09:33 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Sun Aug 25 2019 12:17:27 GMT+0200 (GMT+02:00)
+ 
+
+ --> new session - Sun Aug 25 2019 14:20:52 GMT+0200 (GMT+02:00)
+ 

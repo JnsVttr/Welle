@@ -1,0 +1,18 @@
+Wed Aug 21 2019 11:22:20 GMT+0200 (GMT+02:00)
+ 
+ store preset sxxx
+> metal drums #--#-
+> metal -#
+: beat
+> metal drums #--#-
+> metal -#
+save beat
+delete beat store preset sxxx
+clear
+save beat
+> acid #-
+save song
+.
+store preset jens-preset
+store preset jens
+store preset jens

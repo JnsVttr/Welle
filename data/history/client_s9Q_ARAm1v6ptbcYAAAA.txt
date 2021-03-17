@@ -1,0 +1,22 @@
+Wed Aug 21 2019 19:46:45 GMT+0200 (GMT+02:00)
+ 
+> metal #---
+save beat
+: beat
+s_kick #-#
+save beat
+: beat
+.
+: beat
+s_kick = kick[0]
+s_kick #-#
+save bass
+: bass
+: beat
+: bass
+: beat
+: bass
+s_kick = kick[1]
+s_kick --#-
+save beat
+: bass

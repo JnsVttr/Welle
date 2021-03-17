@@ -1,0 +1,13 @@
+Sun Aug 25 2019 14:23:42 GMT+0200 (GMT+02:00)
+ 
+ help instruments 
+s_hit #--
+>s_hh -#
+> drums
+> drums #-
+save beat
+mute on
+mute off
+mute on
+mute off
+.

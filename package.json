@@ -1,0 +1,32 @@
+{
+  "name": "welle",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost",
+    "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
+    "start": "nodemon server/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  
+  "dependencies": {
+    "ohm-js": "^0.14.0",
+    "parcel-bundler": "^1.12.3",
+    "tone": "^13.8.22",
+    "express": "^4.17.1",
+    "index": "^0.4.0",
+    "mp3-mediarecorder": "^3.4.4",
+    "nodemon": "^1.19.1",
+    "socket.io": "^2.2.0",
+    "socket.io-file": "^2.0.31",
+    "socket.io-file-client": "^2.0.2",
+    "uws": "^10.148.1"
+  },
+  "bugs": {
+    "url": "https://github.com/JnsVttr/welle/issues"
+  },
+  "homepage": "https://github.com/JnsVttr/welle#readme",
+  "description": ""
+}

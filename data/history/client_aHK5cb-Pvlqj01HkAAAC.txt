@@ -1,0 +1,6 @@
+Wed Aug 21 2019 17:32:39 GMT+0200 (GMT+02:00)
+ 
+: bass
+> bass
+> bass #1#2#3#4
+save bass

@@ -1,0 +1,11 @@
+Sun Aug 25 2019 14:03:47 GMT+0200 (GMT+02:00)
+ 
+ > drums  
+ > bass #1#2#3#4 --#123- 
+ > drums #-#-#-##3 
+ . bass 
+ save beat 
+ > metal -#-# 
+ .  
+ >  
+ vol 0.8 bass  

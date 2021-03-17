@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,900&display=swap" rel="stylesheet"> 
+	
+<!-- 	<script src="https://unpkg.com/mp3-mediarecorder"></script> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script> -->
+	<!-- <script type="text/javascript" src="./indexStart.js"></script>   -->
+
+	<title>WELLE</title>
+	<style>body {
+			background: black;
+			font-family: 'Roboto', sans-serif;
+			color: white;
+		}
+		#audioPlayer {
+			padding-bottom: 0em;
+			color: black;
+		}
+		#audioDiv {
+			padding-bottom: 0em;
+			color: black;
+		}
+		#page-title {
+			/*padding-top: 1em;
+			padding-bottom: 0em;*/
+			font-size: 2.3em;
+			font-weight:500;
+			color: white;
+		}
+		hr {
+			margin-bottom: 1em;
+			border-color: #7f7f82;
+		}
+		#localUser {
+			padding-top: 0.3em;
+			padding-bottom: 0.2em;
+			font-size: 0.8em;
+			font-weight:500;
+			color: white;
+		}
+		#textarea:focus, #input:focus{
+		    background-color: #252526;
+		}
+		#textarea {
+			background: black;
+			color: white;
+			outline: none;
+			box-sizing: border-box;
+			border: 0px solid black;
+			border: 1px solid black;
+			
+			border-radius: 1px;
+			border-color: #bfbfbf;	
+			padding: 5px 2px;
+			font-size: 0.8em;
+			width:100%;
+			word-wrap: break-word;
+		}
+		#console {
+			font-size: 0.9em;
+			word-wrap: break-word;
+		}
+		#consoleLine {
+			color: white;
+			font-size: 0.9em;
+			margin-top: 0.02em;
+			margin-bottom: 0.02em;
+			width:97%;
+			text-indent: -0.8em;
+			margin-left: 0.8em;
+		}
+		#parts-container {
+			padding-top: 0.2em;
+			padding-bottom: 1em;
+			font-size: 0.8em;
+			color: #bfbfbf;	
+		}
+		#instrument-container {
+			margin-top: 0.6em;
+			padding-top: 0em;
+			padding-bottom: 0em;
+			font-size: 0.8em;
+			color: #bfbfbf;	
+		}
+		#help-overview {
+			font-size: 0.8em;
+			color: #bfbfbf;	
+		}
+		#help-container {
+			padding-top: 0.2em;
+			font-size: 0.8em;
+			color: #bfbfbf;	
+		}
+		#info {
+			padding-top: 1em;
+			padding-bottom: 2em;
+			margin: 0px;
+			font-size: 0.8em;
+			width: 100%;
+			color: #bfbfbf;	
+			background-color: black;
+			text-align: left;
+		}
+		p {
+			font-size: 0.8em;
+			width: 100%;
+			color: #bfbfbf;	
+			background-color: black;
+			text-align: left;
+			padding-bottom: 0.5em;
+		}
+		usr {
+			font-size: 1.2em;
+		}
+		h2 {
+			font-size: 0.8em;
+			color: white;	
+		}
+		div {
+			margin: auto;
+		}
+		a {
+			color:white; 
+			text-decoration: none;
+		}
+		button {
+			background: black;
+			color: white;
+			border-color: #444445;
+		}
+		table {
+		 /* font-family: arial, sans-serif;*/
+		  border-collapse: collapse;
+		  width: 100%;
+		  font-size: 0.8em;
+		  color: #bfbfbf;	
+		}
+		caption {
+			text-align: left;
+		}
+		td, th {
+		  /*border: 1px solid #dddddd;*/
+		  text-align: left;
+		  padding: 1px;
+		  min-width: 30%;
+		}
+		tr:nth-child(even) {
+		 /* background-color: #dddddd;*/
+		}
+
+
+
+		 /* Extra small devices (phones, 600px and down) */
+		@media only screen and (max-width: 600px) {
+			div {
+				width:95%;
+			}
+			#info {
+				padding-top: 12em;
+				padding-bottom: 2em;
+			/*	position: fixed;
+  				bottom: 0px;*/
+			}
+		}
+		/* Small devices (portrait tablets and large phones, 600px and up) */
+		@media only screen and (min-width: 600px) {
+			div {
+				width:85%;
+			}
+			#info {
+				padding-top: 12em;
+				padding-bottom: 2em;
+			/*	position: fixed;
+  				bottom: 0px;*/
+			}
+		}
+		/* Large devices (laptops/desktops, 992px and up) */
+		@media only screen and (min-width: 992px) {
+			div {
+				width:65%;
+			}
+			#page-title {
+				padding-top: 1em;
+			}
+			#info {
+				padding-top: 1em;
+				padding-bottom: 2em;
+				position: fixed;
+  				bottom: 0px;
+			}
+		}
+		/* Extra large devices (large laptops and desktops, 1200px and up) */
+		@media only screen and (min-width: 1200px) {
+			div {
+				width:700px;
+			}
+			#page-title {
+				padding-top: 1em;
+			}
+			#info {
+				padding-top: 1em;
+				padding-bottom: 2em;
+				position: fixed;
+  				bottom: 0px;
+			}
+		}</style>
+	<script>function linkPrint(content) {
+  // console.log('hello link, content: ' + content);
+  document.getElementById("textarea").value = content;
+  document.getElementById("textarea").dispatchEvent(new KeyboardEvent('keydown', {
+    'keyCode': 13
+  }));
+}
+
+;</script>
+	
+</head>
+<body>
+	<div>
+	    <h1 id="page-title">WELLE</h1>
+	    
+
+	    <h2>controls</h2>
+	    <table style="width:100%">
+		  <caption></caption>
+		  <tr>
+		    <td style="width:20%">sound & alerts</td>
+		    <td>
+		    	 <input type="checkbox" id="checkMuteSound"> mute sound. &nbsp;&nbsp;
+		    	 <input type="checkbox" id="checkMuteAlerts"> mute alerts.  
+		    </td>
+		  </tr>
+		  <tr>
+		    <td>recorder</td>
+		    <td>
+		    	<!-- audio player only for internal processing, not shown -->
+		    	<div id="audioDiv" style="display: none;"> <audio controls="" id="audioPlayer"></audio>  </div>
+		    	<button id="buttonPlay" style="display: none;">Play</button> 
+				<button id="buttonPause" style="display: none;">Pause</button> 
+				<button id="recordStatus" style="display: none;">record: </button>
+				
+		    </td>
+		  </tr>
+		  <tr>
+		    <td id="group">group</td>
+		    <td> <usr id="localUser"></usr> </td>
+		  </tr>
+		</table>
+
+	    <br>
+	    
+
+	   	<!-- not shown, form handles upload -->
+		<form id="form" style="display: none;">
+			<input type="file" id="file">
+			<input type="submit" id="uploader" value="Upload">
+		</form>
+		
+		
+
+		<h2> input & console</h2>
+	    <p id="console"></p>
+
+	    <input id="textarea" type="text" autofocus="" size="50" autocomplete="off" value="">
+	  
+	    <br>
+	    <br>
+
+	    <x id="instruments:">
+	    	<table><caption>instruments:</caption><tr></tr></table>
+	    </x>
+	    <x id="parts:">
+	    	<table><caption>parts:</caption><tr></tr></table>
+	    </x>
+	    
+
+		<br>
+	    <br>
+	    <h2> help</h2>
+	    <p id="help-overview"></p>
+	    <p id="help-container"></p>
+
+	    <p id="shortDesc"></p>
+	    <p id="info"></p>
+	</div>
+
+	
+
+	<script type="text/javascript" src="/src.e31bb0bc.js"></script>  
+	
+</body>
+</html>
+
+

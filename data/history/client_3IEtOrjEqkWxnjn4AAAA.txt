@@ -1,0 +1,25 @@
+Sun Aug 25 2019 14:05:34 GMT+0200 (GMT+02:00)
+ 
+ > drums  
+ > bass #1#2#3#4 --#123- 
+ > drums #-#-#-##3 
+ . bass 
+ . bass 
+ > metal -#-# 
+ >  
+ vol 0.9 bass  
+ vol 0.3 metal  
+ save song 
+ save xyz 
+ . drums 
+ bpm 220 2.2 
+ bpm 120 
+ bass > drums 
+ bass > drums 
+ >  
+ > drums #-#-#-##3 
+ bass (#3#6#9-)3 (##33)2 
+ rand bass 
+ record start 
+ record stop 
+ .  

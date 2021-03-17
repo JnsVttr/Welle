@@ -1,0 +1,14 @@
+Wed Aug 21 2019 12:21:27 GMT+0200 (GMT+02:00)
+ 
+reload preset jens
+: beat
+>
+> bass
+> bass -#
+> bass -#12
+save beat
+: drums
+> acird -#3#4#5#6
+> acid -#3#4#5#6
+save drums
+store preset jens

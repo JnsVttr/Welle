@@ -1,0 +1,6 @@
+Wed Aug 21 2019 17:29:44 GMT+0200 (GMT+02:00)
+ 
+> metal 
+save beat
+: beat
+reload preset test

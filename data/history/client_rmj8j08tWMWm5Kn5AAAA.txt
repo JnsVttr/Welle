@@ -1,0 +1,12 @@
+Wed Aug 21 2019 19:41:02 GMT+0200 (GMT+02:00)
+ 
+s_kick #--
+save beat
+s_kick = kick[0]
+s_kick #--
+save bass
+: beat
+: beat
+>
+: bass
+: beat

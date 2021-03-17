@@ -1,0 +1,21 @@
+Wed Aug 21 2019 17:39:38 GMT+0200 (GMT+02:00)
+ 
+> bass
+save bass
+store preset test
+reload preset test
+: bass
+bpm 190
+store preset test
+bpm 120
+reload preset test
+: bass
+reload preset jens
+: beat
+bpm 130
+store preset jens
+reload preset test
+: bass
+reload preset jens
+: beat
+.
