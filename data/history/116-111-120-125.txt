@@ -224,3 +224,20 @@ drums
  
 drums #-#
 .
+
+ --> new session - Thu Mar 18 2021 15:28:09 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+> bass
+.
+> bass
+
+ --> new session - Thu Mar 18 2021 15:48:08 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+> bass
+> bass
+join jens
+> bass
+
+ --> new session - Thu Mar 18 2021 15:49:42 GMT+0100 (Mitteleuropäische Normalzeit)
+ 
+> bass

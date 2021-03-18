@@ -21,6 +21,7 @@ const { readMediaFolders } = require("./readMediaFolders");
 const { readMediaFoldersFiles } = require("./readMediaFoldersFiles");
 const { updateHistory } = require("./updateHistory");
 const { presetHandling } = require("./presetHandling");
+const { printer } = require('./printer');
 
 // local resources and folder structure
 const pageSource = '../client';
@@ -29,12 +30,14 @@ const alertSource = '../data/alert';
 const historySource = '../data/history';
 const presetsSource = '../data/presets';
 
+
 // variables paths, data etc.
 const audioPath = path.join(__dirname, audioSource);
 const historyURL = path.join(__dirname, historySource);
 const presetsURL = path.join(__dirname, presetsSource);
 let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
-
+let debug = true;
+let context = "app.js";
 
 // allow, indicate app access to folder structure
 app.use(express.static(path.join(__dirname, pageSource)));
@@ -65,16 +68,13 @@ let scanMediaFolders = (_audioPath) => {
 	// return [_folders, _samples]
 }
 scanMediaFolders(audioPath);
-console.log(`Scanning audio files, folders and samples. Collected: \n${folders} \nrandom test samples entry: "${Object.keys(samples)[0]}"\n`)
+printer(debug, context, "audio files", `
+	Scanning audio files, folders and samples. 
+	Collected: ${folders}
+	random test samples entry: "${Object.keys(samples)[0]}"
 
-
-
-
-
-
-
-
-
+==============
+`);
 
 
 /*
@@ -126,7 +126,7 @@ io.on('connection', socket => {
 	let date = new Date();
 
 	// console.log('client connects to server.. server URL: ' + path.join(__dirname));
-	console.log('client connects to server.. ');
+	printer(debug, context, "socket connection", 'client connects to server.. ');
 
 	// send the audio content to client on each connection
 	setTimeout(function () {
@@ -136,14 +136,17 @@ io.on('connection', socket => {
 	// on each client event add the interaction to the history
 	socket.on('clientEvent', (data) => {
 		socket.clientID = socket.id;
-		console.log("");
-		console.log(`Msg. from client: user="${data.user}", string="${data.string}"`);
+		printer(debug, context, "clientEvent", `Msg. from client: user="${data.user}", string="${data.string}"`)
 		updateHistory(historyURL, data.user, socket.clientID, data.string, date);
 	});
 
 	// receive a simple message
 	socket.on('msg', function (data) {
-		console.log(socket.username + '\'s message to all: ' + data.string + " - from " + data.user);
+		printer(debug, context, "msg to all", ` 
+		socket.username: ${socket.username} 
+		user: ${data.user} 
+		data: ${data.string}
+		`);
 		// send to everyone
 		io.sockets.emit('msgToAll', data);
 	});

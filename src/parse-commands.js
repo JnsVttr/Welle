@@ -20,7 +20,7 @@ import { transport }  from '/tone/main-tone'
 import { renderHtmlHelp }  from  '/html/renderHTML';
 import { help }  from '/text/helpText';
 import { 
-    setUser, 
+    setUser,
     showFiles, 
     playAlerts, 
     alertState, 
