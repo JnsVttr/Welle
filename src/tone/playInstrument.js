@@ -1,5 +1,7 @@
 import { startTransport } from './startTransport';
-import { debugTone, instruments, updateSequence, playSequence, adaptPattern, updateInstrument } from './main-tone';
+import { debugTone, instruments, playSequence, adaptPattern } from './main-tone';
+import { updateSequence } from "./updateSequence";
+import { updateInstrument } from "./updateInstrument";
 
 // INSTRUMENTS - CONTROL
 // ===================================================================

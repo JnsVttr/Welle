@@ -10345,250 +10345,112 @@ function startTransport() {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/playInstrument.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/updateSequence.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.playInstrument = playInstrument;
-
-var _startTransport = require("./startTransport");
-
-var _mainTone = require("./main-tone");
-
-// INSTRUMENTS - CONTROL
-// ===================================================================
-function playInstrument(instName, patternIn, rand, url) {
-  if (_mainTone.debugTone) {
-    console.log('Tone: playInstrument: playInstrument() at Tone', instName, patternIn, rand);
-  }
-
-  ;
-  (0, _startTransport.startTransport)();
-  var action = ''; // checking
-
-  if (_mainTone.instruments[instName] != null) {
-    // instrument exists
-    if (_mainTone.debugTone) {
-      console.log('Tone: playInstrument: instrument exists!');
-    }
-
-    ;
-
-    if (patternIn[0] === null) {
-      // empty call => instrument & pattern exists, just play instrument
-      if (_mainTone.instruments[instName].pattern != null) {
-        if (_mainTone.debugTone) {
-          console.log("Tone: playInstrument: empty call => instrument & pattern \"".concat(_mainTone.instruments[instName].pattern, "\" exists, just play instrument!"));
-        }
-
-        ;
-        action = 'playInstrument';
-      }
-
-      ;
-    }
-
-    ;
-
-    if (patternIn[0] != null) {
-      // NON-empty call => instrument & pattern exists, assign new pattern to sequence
-      if (_mainTone.debugTone) {
-        console.log("Tone: playInstrument: NON-empty call => instrument & pattern exists, assign new pattern \"".concat(patternIn, "\" to sequence"));
-      }
-
-      ;
-      action = 'assignNewPattern';
-    } // instrument NOT exists & new pattern is empty
-
-  } else {
-    if (patternIn.length == 1 && patternIn[0] === null) {
-      // change new pattern to [1] & create new instrument
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: instrument NOT exists & new pattern is empty');
-      }
-
-      ;
-      action = 'createNewInstrumentPatternEmpty';
-    } else {
-      // new pattern is not empty, create new Instrument with new pattern
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: instrument NOT exists & new pattern is Not empty: ' + patternIn);
-      }
-
-      ;
-      action = 'createNewInstrumentPatternNonEmpty';
-    }
-
-    ;
-  }
-
-  ;
-
-  if (_mainTone.debugTone) {
-    console.log("Tone: playInstrument: incoming action: ", action);
-  }
-
-  ;
-
-  switch (action) {
-    case "playInstrument":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: play instrument without changes');
-      }
-
-      ; // just play it.. 
-
-      (0, _mainTone.updateSequence)(instName, _mainTone.instruments[instName].pattern);
-      (0, _mainTone.playSequence)(instName);
-      break;
-
-    case "assignNewPattern":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: assign new pattern & play instrument');
-      }
-
-      ;
-      patternIn = (0, _mainTone.adaptPattern)(patternIn);
-      (0, _mainTone.updateInstrument)(instName, patternIn, rand, url);
-      (0, _mainTone.updateSequence)(instName, patternIn);
-      (0, _mainTone.playSequence)(instName);
-      break;
-
-    case "createNewInstrumentPatternEmpty":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: create new instrument, replace empty pattern with [1]');
-      }
-
-      ;
-      patternIn = [1];
-      patternIn = (0, _mainTone.adaptPattern)(patternIn);
-      (0, _mainTone.updateInstrument)(instName, patternIn, rand, url);
-      (0, _mainTone.updateSequence)(instName, patternIn);
-      (0, _mainTone.playSequence)(instName);
-      break;
-
-    case "createNewInstrumentPatternNonEmpty":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: create new instrument w/ pattern');
-      }
-
-      ;
-      patternIn = (0, _mainTone.adaptPattern)(patternIn);
-      (0, _mainTone.updateInstrument)(instName, patternIn, rand, url);
-      (0, _mainTone.updateSequence)(instName, patternIn);
-      (0, _mainTone.playSequence)(instName);
-      break;
-  }
-
-  ;
-}
-
-;
-},{"./startTransport":"tone/startTransport.js","./main-tone":"tone/main-tone.js"}],"tone/copyPattern.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.copyPattern = copyPattern;
-
-var _playInstrument = require("./playInstrument");
-
-var _mainTone = require("./main-tone");
-
-function copyPattern(instName, instArray) {
-  // copy patterns
-  if (_mainTone.instruments[instName] != null) {
-    for (var i = 0; i < instArray.length; i++) {
-      var singleInst = instArray[i];
-
-      if (_mainTone.instruments[singleInst] != null) {
-        _mainTone.instruments[singleInst].pattern = _mainTone.instruments[instName].pattern;
-        (0, _playInstrument.playInstrument)(singleInst, _mainTone.instruments[singleInst].pattern);
-      }
-
-      ;
-    }
-
-    ;
-  }
-
-  ;
-}
-
-;
-},{"./playInstrument":"tone/playInstrument.js","./main-tone":"tone/main-tone.js"}],"tone/handleParameters.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setVolume = setVolume;
-exports.setRandom = setRandom;
-exports.setBPM = setBPM;
+exports.updateSequence = updateSequence;
 
 var _tone = _interopRequireDefault(require("tone"));
-
-var _index = require("/index");
 
 var _mainTone = require("./main-tone");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function setVolume(instName, vol) {
-  if (_mainTone.instruments[instName] != null) {
-    var volume = vol;
-    volume = vol * _index.instrumentsList[instName].gain;
-    _mainTone.instruments[instName].vol = volume;
-    _index.instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
-    // if (debugTone){console.log(`Tone: setVolume vol ${vol} * gain ${instrumentsList[instName].gain} to ${volume}`)};
+function updateSequence(instName, pat) {
+  var inst = _mainTone.instruments[instName].synth;
+  var patAdapt = pat; //adaptPattern(pat);
 
-    _mainTone.instruments[instName].synth.setVolume(volume);
+  if (_mainTone.debugTone) {
+    console.log("Tone: updateSequence: create New Sequence: ".concat(instName, " with this pattern: "), patAdapt);
   }
 
   ;
-}
 
-;
+  var setInst = function setInst() {
+    _mainTone.instruments[instName].sequence = new _tone.default.Sequence(function (time, note) {
+      // set note first
+      note = inst.getBaseNote() + note * 10; // console.log(`freq ${note}`);
+      // set sequence:
 
-function setRandom(instName, rand) {
-  if (_mainTone.instruments[instName] != null) {
-    _mainTone.instruments[instName].rand = rand;
-  }
+      switch (_mainTone.instruments[instName].type) {
+        case "MetalSynth":
+          inst.synth.triggerAttackRelease("16n", '@8n'); // toggle @16n -->time
 
-  ;
-}
+          break;
 
-;
+        case "NoiseSynth":
+          inst.synth.triggerAttackRelease("32n", '@8n');
+          break;
 
-function setBPM(bpm, num) {
-  if (num == '') {
+        case "FMSynth":
+          inst.synth.triggerAttackRelease(note, "32n", '@8n', 0.8);
+          break;
+
+        case "AMSynth":
+          inst.synth.triggerAttackRelease(note, "8n", '@8n', 1);
+          break;
+
+        case "PluckSynth":
+          inst.synth.resonance.value = 0.1;
+          inst.synth.dampening.value = 5000;
+          inst.synth.triggerAttackRelease(note, "32n", '@8n');
+
+          if (_mainTone.debugTone) {
+            console.log("Tone: pattern PluckSynth, resonance: ".concat(inst.synth.resonance.value, ".. "));
+          }
+
+          ;
+          break;
+
+        case "Sampler":
+          inst.synth.triggerAttackRelease(note, "1n", '@8n');
+          break;
+
+        default:
+          inst.synth.triggerAttackRelease(note, "32n", '@8n');
+        // if (debugTone){console.log(`pattern synth, inst: ${inst}, instSynth: ${inst.synth}.. `)};
+      }
+
+      ;
+      _mainTone.instruments[instName].ticks++;
+      (0, _mainTone.randInPattern)(instName); // if (debugTone){console.log(`updateSequence: CHECK time: ${time},  Tone.Transport.ticks: ${Tone.Transport.ticks}, instrumentTicks: ${instruments[instName].ticks}`)};
+    }, patAdapt, '8n');
+  };
+
+  if (_mainTone.instruments[instName].sequence != null) {
     if (_mainTone.debugTone) {
-      console.log('Tone: setBPM: set bpm to ' + bpm);
+      console.log('Tone: updateSequence: Instrument Sequence existing, delete sequence..');
     }
 
     ;
-    _mainTone.thisBPM = (bpm, function () {
-      throw new Error('"' + "thisBPM" + '" is read-only.');
-    }());
-    _tone.default.Transport.bpm.value = bpm;
+
+    _mainTone.instruments[instName].sequence.stop();
+
+    _mainTone.instruments[instName].sequence.dispose();
+
+    if (_mainTone.debugTone) {
+      console.log('Tone: updateSequence: set new Sequence');
+    }
+
+    ;
+    setInst();
   } else {
-    _tone.default.Transport.bpm.rampTo(bpm, num);
-
     if (_mainTone.debugTone) {
-      console.log('Tone: setBPM: set bpm to ' + bpm + ' in seconds: ' + num);
+      console.log('Tone: updateSequence: set new Sequence');
     }
 
     ;
+    setInst();
   }
 
   ;
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/instruments.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","./main-tone":"tone/main-tone.js"}],"tone/instruments.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11003,112 +10865,254 @@ function updateInstrument(instName, pat, rand, newUrl) {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/updateSequence.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/playInstrument.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.updateSequence = updateSequence;
+exports.playInstrument = playInstrument;
 
-var _tone = _interopRequireDefault(require("tone"));
+var _startTransport = require("./startTransport");
 
 var _mainTone = require("./main-tone");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _updateSequence = require("./updateSequence");
 
-function updateSequence(instName, pat) {
-  var inst = _mainTone.instruments[instName].synth;
-  var patAdapt = pat; //adaptPattern(pat);
+var _updateInstrument = require("./updateInstrument");
 
+// INSTRUMENTS - CONTROL
+// ===================================================================
+function playInstrument(instName, patternIn, rand, url) {
   if (_mainTone.debugTone) {
-    console.log("Tone: updateSequence: create New Sequence: ".concat(instName, " with this pattern: "), patAdapt);
+    console.log('Tone: playInstrument: playInstrument() at Tone', instName, patternIn, rand);
+  }
+
+  ;
+  (0, _startTransport.startTransport)();
+  var action = ''; // checking
+
+  if (_mainTone.instruments[instName] != null) {
+    // instrument exists
+    if (_mainTone.debugTone) {
+      console.log('Tone: playInstrument: instrument exists!');
+    }
+
+    ;
+
+    if (patternIn[0] === null) {
+      // empty call => instrument & pattern exists, just play instrument
+      if (_mainTone.instruments[instName].pattern != null) {
+        if (_mainTone.debugTone) {
+          console.log("Tone: playInstrument: empty call => instrument & pattern \"".concat(_mainTone.instruments[instName].pattern, "\" exists, just play instrument!"));
+        }
+
+        ;
+        action = 'playInstrument';
+      }
+
+      ;
+    }
+
+    ;
+
+    if (patternIn[0] != null) {
+      // NON-empty call => instrument & pattern exists, assign new pattern to sequence
+      if (_mainTone.debugTone) {
+        console.log("Tone: playInstrument: NON-empty call => instrument & pattern exists, assign new pattern \"".concat(patternIn, "\" to sequence"));
+      }
+
+      ;
+      action = 'assignNewPattern';
+    } // instrument NOT exists & new pattern is empty
+
+  } else {
+    if (patternIn.length == 1 && patternIn[0] === null) {
+      // change new pattern to [1] & create new instrument
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: instrument NOT exists & new pattern is empty');
+      }
+
+      ;
+      action = 'createNewInstrumentPatternEmpty';
+    } else {
+      // new pattern is not empty, create new Instrument with new pattern
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: instrument NOT exists & new pattern is Not empty: ' + patternIn);
+      }
+
+      ;
+      action = 'createNewInstrumentPatternNonEmpty';
+    }
+
+    ;
   }
 
   ;
 
-  var setInst = function setInst() {
-    _mainTone.instruments[instName].sequence = new _tone.default.Sequence(function (time, note) {
-      // set note first
-      note = inst.getBaseNote() + note * 10; // console.log(`freq ${note}`);
-      // set sequence:
+  if (_mainTone.debugTone) {
+    console.log("Tone: playInstrument: incoming action: ", action);
+  }
 
-      switch (_mainTone.instruments[instName].type) {
-        case "MetalSynth":
-          inst.synth.triggerAttackRelease("16n", '@8n'); // toggle @16n -->time
+  ;
 
-          break;
+  switch (action) {
+    case "playInstrument":
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: play instrument without changes');
+      }
 
-        case "NoiseSynth":
-          inst.synth.triggerAttackRelease("32n", '@8n');
-          break;
+      ; // just play it.. 
 
-        case "FMSynth":
-          inst.synth.triggerAttackRelease(note, "32n", '@8n', 0.8);
-          break;
+      (0, _updateSequence.updateSequence)(instName, _mainTone.instruments[instName].pattern);
+      (0, _mainTone.playSequence)(instName);
+      break;
 
-        case "AMSynth":
-          inst.synth.triggerAttackRelease(note, "8n", '@8n', 1);
-          break;
-
-        case "PluckSynth":
-          inst.synth.resonance.value = 0.1;
-          inst.synth.dampening.value = 5000;
-          inst.synth.triggerAttackRelease(note, "32n", '@8n');
-
-          if (_mainTone.debugTone) {
-            console.log("Tone: pattern PluckSynth, resonance: ".concat(inst.synth.resonance.value, ".. "));
-          }
-
-          ;
-          break;
-
-        case "Sampler":
-          inst.synth.triggerAttackRelease(note, "1n", '@8n');
-          break;
-
-        default:
-          inst.synth.triggerAttackRelease(note, "32n", '@8n');
-        // if (debugTone){console.log(`pattern synth, inst: ${inst}, instSynth: ${inst.synth}.. `)};
+    case "assignNewPattern":
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: assign new pattern & play instrument');
       }
 
       ;
-      _mainTone.instruments[instName].ticks++;
-      (0, _mainTone.randInPattern)(instName); // if (debugTone){console.log(`updateSequence: CHECK time: ${time},  Tone.Transport.ticks: ${Tone.Transport.ticks}, instrumentTicks: ${instruments[instName].ticks}`)};
-    }, patAdapt, '8n');
-  };
+      patternIn = (0, _mainTone.adaptPattern)(patternIn);
+      (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
+      (0, _updateSequence.updateSequence)(instName, patternIn);
+      (0, _mainTone.playSequence)(instName);
+      break;
 
-  if (_mainTone.instruments[instName].sequence != null) {
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: Instrument Sequence existing, delete sequence..');
-    }
+    case "createNewInstrumentPatternEmpty":
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: create new instrument, replace empty pattern with [1]');
+      }
 
-    ;
+      ;
+      patternIn = [1];
+      patternIn = (0, _mainTone.adaptPattern)(patternIn);
+      (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
+      (0, _updateSequence.updateSequence)(instName, patternIn);
+      (0, _mainTone.playSequence)(instName);
+      break;
 
-    _mainTone.instruments[instName].sequence.stop();
+    case "createNewInstrumentPatternNonEmpty":
+      if (_mainTone.debugTone) {
+        console.log('Tone: playInstrument: create new instrument w/ pattern');
+      }
 
-    _mainTone.instruments[instName].sequence.dispose();
-
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: set new Sequence');
-    }
-
-    ;
-    setInst();
-  } else {
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: set new Sequence');
-    }
-
-    ;
-    setInst();
+      ;
+      patternIn = (0, _mainTone.adaptPattern)(patternIn);
+      (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
+      (0, _updateSequence.updateSequence)(instName, patternIn);
+      (0, _mainTone.playSequence)(instName);
+      break;
   }
 
   ;
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","./main-tone":"tone/main-tone.js"}],"tone/savePart.js":[function(require,module,exports) {
+},{"./startTransport":"tone/startTransport.js","./main-tone":"tone/main-tone.js","./updateSequence":"tone/updateSequence.js","./updateInstrument":"tone/updateInstrument.js"}],"tone/copyPattern.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.copyPattern = copyPattern;
+
+var _playInstrument = require("./playInstrument");
+
+var _mainTone = require("./main-tone");
+
+function copyPattern(instName, instArray) {
+  // copy patterns
+  if (_mainTone.instruments[instName] != null) {
+    for (var i = 0; i < instArray.length; i++) {
+      var singleInst = instArray[i];
+
+      if (_mainTone.instruments[singleInst] != null) {
+        _mainTone.instruments[singleInst].pattern = _mainTone.instruments[instName].pattern;
+        (0, _playInstrument.playInstrument)(singleInst, _mainTone.instruments[singleInst].pattern);
+      }
+
+      ;
+    }
+
+    ;
+  }
+
+  ;
+}
+
+;
+},{"./playInstrument":"tone/playInstrument.js","./main-tone":"tone/main-tone.js"}],"tone/handleParameters.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setVolume = setVolume;
+exports.setRandom = setRandom;
+exports.setBPM = setBPM;
+
+var _tone = _interopRequireDefault(require("tone"));
+
+var _index = require("/index");
+
+var _mainTone = require("./main-tone");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function setVolume(instName, vol) {
+  if (_mainTone.instruments[instName] != null) {
+    var volume = vol;
+    volume = vol * _index.instrumentsList[instName].gain;
+    _mainTone.instruments[instName].vol = volume;
+    _index.instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
+    // if (debugTone){console.log(`Tone: setVolume vol ${vol} * gain ${instrumentsList[instName].gain} to ${volume}`)};
+
+    _mainTone.instruments[instName].synth.setVolume(volume);
+  }
+
+  ;
+}
+
+;
+
+function setRandom(instName, rand) {
+  if (_mainTone.instruments[instName] != null) {
+    _mainTone.instruments[instName].rand = rand;
+  }
+
+  ;
+}
+
+;
+
+function setBPM(bpm, num) {
+  if (num == '') {
+    if (_mainTone.debugTone) {
+      console.log('Tone: setBPM: set bpm to ' + bpm);
+    }
+
+    ;
+    _mainTone.thisBPM = (bpm, function () {
+      throw new Error('"' + "thisBPM" + '" is read-only.');
+    }());
+    _tone.default.Transport.bpm.value = bpm;
+  } else {
+    _tone.default.Transport.bpm.rampTo(bpm, num);
+
+    if (_mainTone.debugTone) {
+      console.log('Tone: setBPM: set bpm to ' + bpm + ' in seconds: ' + num);
+    }
+
+    ;
+  }
+
+  ;
+}
+
+;
+},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/savePart.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
