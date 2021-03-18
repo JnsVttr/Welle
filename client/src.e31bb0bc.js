@@ -11819,6 +11819,8 @@ var _printer = require("/helper/printer");
 
 var _restartServer = require("/socket/restartServer");
 
+var _playAlerts = require("/helper/playAlerts");
+
 // WELLE - parse commands //
 // =============================================================
 
@@ -12131,16 +12133,16 @@ var parseInput = function parseInput(input) {
         // render with links
         var links = true;
         (0, _renderHTML.renderHtmlHelp)(_helpText.help[helpText], 'help-container', 100, links);
-        (0, _index.playAlerts)('bottom', _index.alertState);
+        (0, _playAlerts.playAlerts)('bottom', _index.alertState);
       } else {
         // render without links
         (0, _renderHTML.renderHtmlHelp)(_helpText.help[helpText], 'help-container', 100);
-        (0, _index.playAlerts)('bottom', _index.alertState);
+        (0, _playAlerts.playAlerts)('bottom', _index.alertState);
       }
 
       ;
     } else {
-      (0, _index.playAlerts)('error', _index.alertState);
+      (0, _playAlerts.playAlerts)('error', _index.alertState);
     }
 
     ;
@@ -12150,7 +12152,7 @@ var parseInput = function parseInput(input) {
 
   if (desc == "savePart") {
     (0, _mainTone.transport)('savePart', inst, instArray, patternParse, rand, vol, bpm, name, num);
-    (0, _index.playAlerts)('bottom', _index.alertState);
+    (0, _playAlerts.playAlerts)('bottom', _index.alertState);
   }
 
   ; // set part
@@ -12193,7 +12195,7 @@ var parseInput = function parseInput(input) {
 };
 
 exports.parseInput = parseInput;
-},{"/tone/main-tone":"tone/main-tone.js","/html/renderHTML":"html/renderHTML.js","/text/helpText":"text/helpText.js","/index":"index.js","/helper/printer":"helper/printer.js","/socket/restartServer":"socket/restartServer.js"}],"helper/createAlerts.js":[function(require,module,exports) {
+},{"/tone/main-tone":"tone/main-tone.js","/html/renderHTML":"html/renderHTML.js","/text/helpText":"text/helpText.js","/index":"index.js","/helper/printer":"helper/printer.js","/socket/restartServer":"socket/restartServer.js","/helper/playAlerts":"helper/playAlerts.js"}],"helper/createAlerts.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

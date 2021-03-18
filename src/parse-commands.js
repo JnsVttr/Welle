@@ -22,12 +22,12 @@ import { help }  from '/text/helpText';
 import { 
     setUser,
     showFiles, 
-    playAlerts, 
     alertState, 
     presetHandling
 }  from '/index' 
 import { printer } from '/helper/printer';
 import { restartServer } from '/socket/restartServer';
+import { playAlerts } from '/helper/playAlerts';
 
 
 let debug = true;
