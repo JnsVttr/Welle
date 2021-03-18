@@ -49,8 +49,6 @@ export let consoleLength = 20; // how many lines are displayed
 let checkMuteSound = document.getElementById("checkMuteSound");
 let checkMuteAlerts = document.getElementById("checkMuteAlerts");
 
-
-
 // handle direct sound alerts
 createAlerts(alerts);
 
@@ -178,10 +176,53 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 
 
-export {  
-
-}
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+overview keycodes
+
+The available properties for KeyboardEvents are described on the linked page on MDN. They include:
+https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+
+KeyboardEvent.altKey
+KeyboardEvent.charCode (Deprecated)
+KeyboardEvent.code
+KeyboardEvent.ctrlKey
+KeyboardEvent.isComposing
+KeyboardEvent.key
+KeyboardEvent.keyCode (Deprecated)
+KeyboardEvent.location
+KeyboardEvent.metaKey
+KeyboardEvent.shiftKey
+KeyboardEvent.which (Deprecated)
+
+also a tester here:
+https://css-tricks.com/snippets/javascript/javascript-keycodes/
+
+*/

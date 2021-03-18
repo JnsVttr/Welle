@@ -1,5 +1,15 @@
 
+// WELLE - audio system with Tone //
+// =============================================================
+
+/*
+needs urgent re-work
+*/
+
+// libraries
 import Tone from 'tone';
+
+// import files
 import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
 import { sampleURL, instrumentsList, recorderDeal, handleForm, alertMuteState }  from '/index' ;
@@ -11,37 +21,23 @@ import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 // debug
 export let debug = true;
 export let context = "main-tone";
+let debugTone = true;  // old debug, needs to be removed
 
-// old debug
-let debugTone = true;
-// printer(debug, context, "test", "sth.")
+// device ?
+let device = checkDevice(); // check device, ios is not allowd to load mediarecorder
 
-
-//console.clear();
+// tone variables
 var instruments = {};
 var savedParts = {};
-// master output
-let masterOut = new Tone.Gain(0.9);
-masterOut.toMaster();
-// check device, ios is not allowd to load mediarecorder
-let device = checkDevice();
+let masterOut = new Tone.Gain(0.9);   // master output
+masterOut.toMaster();  // assign master
 let thisBPM = 120;
 
 
+// clear console
+// console.clear();
 
 
-
-
-
-
-
-
-// SAMPLER / SERVER FILES
-// ========================================================
-
-let soundDataURLs = {};
-let sampleDefault;
-// let sampleURL = {default: ['../']};
 
 
 
@@ -52,7 +48,8 @@ let sampleDefault;
 // init Instrument/ Sampler
 // ========================================================
 function initInstrument(dest, source, num) {
-	if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
+	// if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
+	printer(debug, context, "initInstrument", `assign new sounds from source[num]: ${source[num]} to dest: ${dest}`)
 	
 	let error = function () {
 		let printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
@@ -62,26 +59,26 @@ function initInstrument(dest, source, num) {
 	};
 	if (sampleURL[source] != undefined){
 		if (sampleURL[source][num] != undefined) {
-			if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
-			if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
+			// if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
+			// if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
 			
 			let inst = dest;
-			if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
+			// if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
 			stopInstrument(inst);
 			delete instruments[inst];
 			
 			// delete from saved Parts, otherwise throws errors
-			if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
+			// if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
 			Object.keys(savedParts).forEach(key => {
 				if (key!='bpm'){
-					if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
+					// if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
 					if(savedParts[key].instruments[dest]!=undefined){
-						if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
+						// if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
 						// delete savedParts[key].instruments[dest];
 					}
 				};
 		    });
-			if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
+			// if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
 			instrumentsList[dest].url = sampleURL[source][num];
 
 		} else { error(); };

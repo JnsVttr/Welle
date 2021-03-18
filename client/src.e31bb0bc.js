@@ -10335,36 +10335,39 @@ var _update_InstrumentsList = require("/tone/update_InstrumentsList");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// WELLE - audio system with Tone //
+// =============================================================
+
+/*
+needs urgent re-work
+*/
+// libraries
+// import files
 // debug
 var debug = true;
 exports.debug = debug;
-var context = "main-tone"; // old debug
-
+var context = "main-tone";
 exports.context = context;
-var debugTone = true; // printer(debug, context, "test", "sth.")
-//console.clear();
+var debugTone = true; // old debug, needs to be removed
+// device ?
+
+var device = (0, _checkDevice.checkDevice)(); // check device, ios is not allowd to load mediarecorder
+// tone variables
 
 var instruments = {};
-var savedParts = {}; // master output
+var savedParts = {};
+var masterOut = new _tone.default.Gain(0.9); // master output
 
-var masterOut = new _tone.default.Gain(0.9);
-masterOut.toMaster(); // check device, ios is not allowd to load mediarecorder
+masterOut.toMaster(); // assign master
 
-var device = (0, _checkDevice.checkDevice)();
-var thisBPM = 120; // SAMPLER / SERVER FILES
-// ========================================================
-
-var soundDataURLs = {};
-var sampleDefault; // let sampleURL = {default: ['../']};
+var thisBPM = 120; // clear console
+// console.clear();
 // init Instrument/ Sampler
 // ========================================================
 
 function initInstrument(dest, source, num) {
-  if (debugTone) {
-    console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest);
-  }
-
-  ;
+  // if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
+  printer(debug, context, "initInstrument", "assign new sounds from source[num]: ".concat(source[num], " to dest: ").concat(dest));
 
   var error = function error() {
     var printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
@@ -10375,57 +10378,25 @@ function initInstrument(dest, source, num) {
 
   if (_index.sampleURL[source] != undefined) {
     if (_index.sampleURL[source][num] != undefined) {
-      if (debugTone) {
-        console.log("Tone: initInstrument: file ".concat(source, "[").concat(num, "] is availible."));
-      }
+      // if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
+      // if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
+      var inst = dest; // if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
 
-      ;
-
-      if (debugTone) {
-        console.log("Tone: initInstrument: URL =  ".concat(_index.sampleURL[source][0]));
-      }
-
-      ;
-      var inst = dest;
-
-      if (debugTone) {
-        console.log('Tone: initInstrument: Stop instrument: ' + inst + 'and remove from Instrument List');
-      }
-
-      ;
       stopInstrument(inst);
       delete instruments[inst]; // delete from saved Parts, otherwise throws errors
+      // if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
 
-      if (debugTone) {
-        console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: ' + inst);
-      }
-
-      ;
       Object.keys(savedParts).forEach(function (key) {
         if (key != 'bpm') {
-          if (debugTone) {
-            console.log('Tone: initInstrument: savedParts: ' + key);
-          }
-
-          ;
-
-          if (savedParts[key].instruments[dest] != undefined) {
-            if (debugTone) {
-              console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]);
-            }
-
-            ; // delete savedParts[key].instruments[dest];
+          // if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
+          if (savedParts[key].instruments[dest] != undefined) {// if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
+            // delete savedParts[key].instruments[dest];
           }
         }
 
         ;
-      });
+      }); // if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
 
-      if (debugTone) {
-        console.log("Tone: initInstrument: assign new sample to instrumentsList collection.. ");
-      }
-
-      ;
       _index.instrumentsList[dest].url = _index.sampleURL[source][num];
     } else {
       error();
@@ -20516,6 +20487,28 @@ socket.on("filesOnServer", function (folder, samples, what) {
   exports.sampleURL = sampleURL = (0, _extractSamplePaths.extractSamplePaths)(serverSamples);
   exports.instrumentsList = instrumentsList = (0, _update_InstrumentsList.update_InstrumentsList)();
 });
+/*
+overview keycodes
+
+The available properties for KeyboardEvents are described on the linked page on MDN. They include:
+https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+
+KeyboardEvent.altKey
+KeyboardEvent.charCode (Deprecated)
+KeyboardEvent.code
+KeyboardEvent.ctrlKey
+KeyboardEvent.isComposing
+KeyboardEvent.key
+KeyboardEvent.keyCode (Deprecated)
+KeyboardEvent.location
+KeyboardEvent.metaKey
+KeyboardEvent.shiftKey
+KeyboardEvent.which (Deprecated)
+
+also a tester here:
+https://css-tricks.com/snippets/javascript/javascript-keycodes/
+
+*/
 },{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/renderHTML":"html/renderHTML.js","/parse-commands":"parse-commands.js","/text/helpText":"text/helpText.js","/tone/main-tone":"tone/main-tone.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","/helper/alerts":"helper/alerts.js","/helper/createAlerts":"helper/createAlerts.js","/helper/enterFunction":"helper/enterFunction.js","/helper/clearTextfield":"helper/clearTextfield.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/socket/requestServerFiles":"socket/requestServerFiles.js","./helper/extractSamplePaths":"helper/extractSamplePaths.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
