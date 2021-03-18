@@ -144,7 +144,7 @@ function getBundleURL() {
 }
 
 function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)\/[^/]+$/, '$1') + '/';
+  return ('' + url).replace(/^((?:https?|file|ftp|chrome-extension|moz-extension):\/\/.+)?\/[^/]+(?:\?.*)?$/, '$1') + '/';
 }
 
 exports.getBundleURL = getBundleURLCached;
@@ -212,7 +212,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52126" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63237" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -243,8 +243,9 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
         assetsToAccept.forEach(function (v) {
           hmrAcceptRun(v[0], v[1]);
         });
-      } else {
-        window.location.reload();
+      } else if (location.reload) {
+        // `location` global exists in a web worker context but lacks `.reload()` function.
+        location.reload();
       }
     }
 

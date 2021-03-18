@@ -6,11 +6,11 @@ import io from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
 
 // files
-import { livecode, semantics }  from '/language/semantic';
+import { livecode, semantics }  from '/html/ohm/semantic';
 import { renderHtml, renderHtmlArrows, renderHtmlHelpMenu }  from  '/html/renderHTML';
-import { parseInput }  from '/sound/parseInput';
-import { help }  from '/help/helpText';
-import { setDataURL, handlePresetsInTone } from '/sound/toneTest';
+import { parseInput }  from '/html/ohm/parseInput';
+import { help }  from '/html/help/helpText';
+import { setDataURL, handlePresetsInTone } from '/tone/main-tone';
 
 let debugIndex = true;
 if (debugIndex) { console.log(' ')};
