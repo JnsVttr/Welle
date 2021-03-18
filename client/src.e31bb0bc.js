@@ -17247,7 +17247,6 @@ var livecode = _ohmJs.default.grammar(_grammar.default); // taken from grammar.j
 exports.livecode = livecode;
 var semantics = livecode.createSemantics();
 exports.semantics = semantics;
-var debugSemantic = true;
 var debug = true; // ========================  Grammar & Semantic ====================== //
 // SEMANTICS FOR OHM.JS LANGUAGE:
 
@@ -17273,13 +17272,9 @@ semantics.addOperation('eval', {
     var instArray = instToArray(inst);
     var random = handleRand(rand.eval());
     var pattern = handlePattern(pat.eval());
-    var command = key.eval();
-    printer(debug, "Semantic", "Sequence_seqPattern", "process pattern in Control: \"".concat(pat.sourceString, "\" calc: \"").concat(pat.eval(), "\" handle: \"").concat(pattern, "\""));
-    printer(debug, "Semantic", "Sequence_seqPattern", "return: [\"SEQUENCE-LOG\", \"sequenceStart\", ".concat(command, ", ").concat(instArray, ", ").concat(pattern, ", ").concat(random, "]")); // if (debugSemantic) {
-    //     console.log("Semantic: Sequence_seqPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern);
-    //     console.log('Semantic: Sequence_seqPattern: ' + ["SEQUENCE-LOG", "sequenceStart", command, instArray, pattern, random]);
-    // };
+    var command = key.eval(); //printer(debug, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
 
+    printer(debug, "Sequence_seqPattern", "\n        return [\n            \"transport\", \"sequenceStart\", \n            [\"command\", ".concat(command, "], \n            [\"instArray\", ").concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "]\n        ]"));
     return ["transport", "sequenceStart", ["command", command], ["instArray", instArray], ["pattern", pattern], ["rand", random]];
   },
   General_savePart: function General_savePart(_, name) {
@@ -17310,8 +17305,7 @@ semantics.addOperation('eval', {
     return ["helper", "uploadFiles"];
   },
   General_uploadFiles: function General_uploadFiles(_, file) {
-    var string = file.sourceString; // console.log('semantics: ' + string);
-
+    var string = file.sourceString;
     return ["helper", "uploadFiles", ["inst", string]];
   },
   General_restart: function General_restart(cmd) {
@@ -17331,30 +17325,18 @@ semantics.addOperation('eval', {
   Controls_copyPattern: function Controls_copyPattern(instSource, _, instDest) {
     var inst = instSource.sourceString;
     var dest = instToArray(instDest);
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_copyPattern: ' + ["CONTROL-LOG", "patternCopy", inst, dest]);
-    }
-
+    printer(debug, "Controls_copyPattern", "\n            return [\n                \"control\", \"patternCopy\", \n                [\"inst\", ".concat(inst, "], \n                [\"instArray\", ").concat(dest, "]\n            ];\n        "));
     return ["control", "patternCopy", ["inst", inst], ["instArray", dest]];
   },
   Controls_listInstruments: function Controls_listInstruments(_, inst) {
     var inst = inst.sourceString;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_listInstruments: ' + ["CONTROL-LOG", "list", inst]);
-    }
-
+    printer(debug, "Controls_listInstruments", "\n        return [\n            \"helper\", \"list\", \n            [\"inst\", ".concat(inst, "]\n        ]"));
     return ["helper", "list", ["inst", inst]];
   },
   Controls_selectInstrument: function Controls_selectInstrument(_, inst, sel) {
     var inst = inst.sourceString;
     sel = sel.eval();
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_selectInstrument: '[("CONTROL-LOG", "instSelect", inst.sourceString, sel)]);
-    }
-
+    printer(debug, "Controls_selectInstrument", "\n        return [\n            \"control\", \"instSelect\", \n            [\"inst\", ".concat(inst, "], \n            [\"sel\", ").concat(sel, "],\n        ];\n        "));
     return ["control", "instSelect", ["inst", inst], ["sel", sel]];
   },
   Controls_setInstrumentVolume: function Controls_setInstrumentVolume(_, volume, inst) {
@@ -17366,22 +17348,14 @@ semantics.addOperation('eval', {
     }
 
     ;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_setInstrumentVolume: ' + ["CONTROL-LOG", "instVolume", instArray, vol]);
-    }
-
+    printer(debug, "Controls_setInstrumentVolume", "\n        return [\n            \"control\", \"instVolume\",\n            [\"instArray\", ".concat(instArray, "],\n            [\"vol\", ").concat(vol, "],\n        ];\n        "));
     return ["control", "instVolume", ["instArray", instArray], ["vol", vol]];
   },
   Controls_assignRandom: function Controls_assignRandom(rand, inst) {
     var instArray = instToArray(inst);
     var random = handleRand(rand.eval());
     var random = rand.eval();
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_assignRandom: ' + ["CONTROL-LOG", "instRand", instArray, random]);
-    }
-
+    printer(debug, "Controls_assignRandom", "\n        return [\n            \"control\", \"instRand\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"rand\", ").concat(random, "],\n        ];\n        "));
     return ["control", "instRand", ["instArray", instArray], ["rand", random]];
   },
   Controls_assignPattern: function Controls_assignPattern(inst, pat, rand) {
@@ -17391,43 +17365,25 @@ semantics.addOperation('eval', {
 
     pattern = handlePattern(pattern);
     var instArray = instToArray(inst);
-
-    if (debugSemantic) {
-      console.log("Semantic: Controls_assignPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern, random);
-      console.log('Semantic: Controls_assignPattern: ' + ["CONTROL-LOG", "patternAssign", instArray, pattern, random]);
-    }
-
-    ;
+    printer(debug, "Controls_assignPattern", "\n        return [\n            \"control\", \"patternAssign\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "] \n        ];\n        "));
     return ["control", "patternAssign", ["instArray", instArray], ["pattern", pattern], ["rand", random]];
   },
   Controls_initInstrument: function Controls_initInstrument(inst, _, name, a, num, b) {
     inst = inst.sourceString;
     name = name.sourceString;
     num = num.sourceString;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_initInstrument: ' + ["CONTROL-LOG", "initInst", inst, name, num]);
-    }
-
+    printer(debug, "Controls_initInstrument", "\n        return [\n            \"control\", \"initInst\", \n            [\"inst\", ".concat(inst, "], \n            [\"initInst\", ").concat(name, "],\n            [\"num\", ").concat(num, "],\n        ];\n        "));
     return ["control", "initInst", ["inst", inst], ["initInst", name], ["num", num]];
   },
   Controls_showInstrument: function Controls_showInstrument(_, instrument) {
     var inst = instrument.sourceString;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_showInstrument: ' + ["CONTROL-LOG", "show", inst]);
-    }
-
+    printer(debug, "Controls_showInstrument", "\n        return [\n            \"helper\", \"show\", \n            [\"inst\", ".concat(inst, "],\n        ];    \n        "));
     return ["helper", "show", ["inst", inst]];
   },
   Controls_bpm: function Controls_bpm(_, bpm, time) {
     bpm = bpm.sourceString;
     time = time.sourceString;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_bpm: ' + ["CONTROL-LOG", "setBPM", bpm, time]);
-    }
-
+    printer(debug, "Controls_bpm", "\n        return [\n            \"control\", \"setBPM\", \n            [\"bpm\", ".concat(bpm, "],\n            [\"num\", ").concat(time, "],\n        ];\n        "));
     return ["control", "setBPM", ["bpm", bpm], ["num", time]];
   },
   // Controls_concatInstruments: function(concat) {
@@ -17442,25 +17398,15 @@ semantics.addOperation('eval', {
   // },
   Controls_helpText: function Controls_helpText(_, text) {
     text = text.sourceString;
-
-    if (debugSemantic) {
-      console.log('Semantic: Controls_helpText: ' + ["CONTROL-LOG", "helpText", text]);
-    }
-
+    printer(debug, "Controls_helpText", "\n        return [\n            \"helper\", \"helpText\",\n            [\"help\", ".concat(text, "]\n        ]; \n        "));
     return ["helper", "helpText", ["help", text]];
   },
   Controls_help: function Controls_help(_) {
-    if (debugSemantic) {
-      console.log('Semantic: Controls_help: ' + ["CONTROL-LOG", "help"]);
-    }
-
+    printer(debug, "Controls_help", "\n        return [\n            \"helper\", \"help\",\n        ];\n        ");
     return ["helper", "help"];
   },
   Controls_clear: function Controls_clear(_) {
-    if (debugSemantic) {
-      console.log('Semantic: Controls_clear: ' + ["CONTROL-LOG", "clear"]);
-    }
-
+    printer(debug, "Controls_clear", "\n        return [\n            \"helper\", \"clear\",\n        ];");
     return ["helper", "clear"];
   },
 
@@ -17509,11 +17455,7 @@ semantics.addOperation('eval', {
 
     ;
     var arr = [instrument, repeat];
-
-    if (debugSemantic) {
-      console.log('Semantic: InstrumentRepeat_instrumentEntry: ' + ["CONTROL-LOG", "instrumentConcat", arr]);
-    }
-
+    printer(debug, "InstrumentRepeat_instrumentEntry", "\n        return ".concat(arr, ";\n        "));
     return arr;
   },
   PatternRandom_randomize: function PatternRandom_randomize(cmd, count) {
@@ -17669,9 +17611,9 @@ function handlePattern(pat) {
 
 ; // printer(debug, topic, element, value)
 
-var printer = function printer(debug, topic, element, value) {
+var printer = function printer(debug, element, value) {
   if (debug == true) {
-    console.log("".concat(topic, " - ").concat(element, " - ").concat(value));
+    console.log("Semantics - ".concat(element, " >> ").concat(value));
   }
 
   ;
