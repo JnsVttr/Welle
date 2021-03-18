@@ -1,10 +1,11 @@
 
 import { printer } from '/helper/printer';
-import { debug, context, playInstrument, stopInstrument, playAllInstruments, stopAllInstruments } from './main-tone';
+
+import { debug, context, playInstrument, stopInstrument, stopAllInstruments, playAllInstruments, copyPattern, setVolume, setRandom, setBPM, savePart, setPart, deleteElement, clearParts, resetAction, muteAll, device, audioRecord, uploadToServer, initInstrument } from './main-tone';
 import { checkIfInstValid } from './checkIfInstValid';
 
 // translate incoming messages (parseInput) to sound functions:
-function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
+export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
 	
 	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
 	printer(debug, context, "transport", 'INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );
