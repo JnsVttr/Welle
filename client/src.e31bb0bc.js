@@ -19193,7 +19193,7 @@ not nice
 // debug import from index.js > index-symlink.js > parser
 // import { debugParser }  from './../index-symlink';
 var debug = true; // debug = debugParser;
-// printer(debug, topic, element, value)
+// printer(debug, element, value)
 
 var printer = function printer(debug, element, value) {
   if (debug == true) {
@@ -19400,37 +19400,33 @@ var parseInput = function parseInput(input) {
   if (desc == "list") {
     var string = inst; // e.g. files
 
-    if (debugParser) {
-      console.log('Parser: send: list ' + string);
-    }
-
     (0, _index.showFiles)(string);
   }
 
   ; // mute On
 
   if (desc == "muteOn") {
-    console.log('mute the Audio Output');
+    printer(debug, "muteOn", "mute audio");
     (0, _mainTone.transport)('muteOn');
   }
 
   ; // mute Off
 
   if (desc == "muteOff") {
-    console.log('unmute the Audio Output');
+    printer(debug, "muteOff", "unmute audio");
     (0, _mainTone.transport)('muteOff');
   }
 
   ; // record start
 
   if (desc == "recordStart") {
-    (0, _mainTone.transport)('recordStart'); // showFiles('.. recording started. Type "record stop" to stop recording!');
+    (0, _mainTone.transport)('recordStart');
   }
 
   ; // record stop
 
   if (desc == "recordStop") {
-    (0, _mainTone.transport)('recordStop'); // showFiles('.. recording stopped. See audio at the top of the page!');
+    (0, _mainTone.transport)('recordStop');
   }
 
   ; // upload Files
@@ -19438,13 +19434,12 @@ var parseInput = function parseInput(input) {
   if (desc == "uploadFiles") {
     var file = inst;
     (0, _mainTone.transport)('uploadFiles', file);
-    console.log('parser: upload to server: ' + file);
   }
 
   ; // restart server
 
   if (type == "restart server") {
-    console.log('parser: restart server..');
+    printer(debug, "restart server", "restart server");
     (0, _index.restartServer)();
   }
 
@@ -19453,7 +19448,7 @@ var parseInput = function parseInput(input) {
   if (type == "join") {
     var session = desc[1];
     var user = desc[0];
-    console.log("Parser: join session \"".concat(session, "\" as user \"").concat(user, "\""));
+    printer(debug, "join", "join session \"".concat(session, "\" as user \"").concat(user, "\""));
     (0, _index.setUser)(user, session);
   }
 
@@ -19464,14 +19459,14 @@ var parseInput = function parseInput(input) {
     var preset = inst;
 
     if (action == 'store') {
-      console.log("Parser: ".concat(action, " preset \"").concat(preset, "\" on server..\""));
+      printer(debug, "preset store", "".concat(action, " preset \"").concat(preset, "\" on server\""));
       (0, _index.presetHandling)(preset, action);
     }
 
     ;
 
     if (action == 'reload') {
-      console.log("Parser: ".concat(action, " preset \"").concat(preset, "\" on server..\""));
+      printer(debug, "preset reload", "".concat(action, " preset \"").concat(preset, "\" on server\""));
       (0, _index.presetHandling)(preset, action);
     }
 
@@ -19485,7 +19480,7 @@ var parseInput = function parseInput(input) {
     var _preset = inst;
 
     if (_action == 'reload') {
-      console.log("Parser: ".concat(_action, " preset \"").concat(_preset, "\" on server..\""));
+      printer(debug, "preset reload to all", "".concat(_action, " preset \"").concat(_preset, "\" on server\""));
       (0, _index.presetHandling)(_preset, _action);
     }
 
@@ -19498,10 +19493,8 @@ var parseInput = function parseInput(input) {
     helpText; // this is the destination
 
     _helpText.help; // this is the help container
-    // console.log('check help container for this element: ' + helpText);
 
     if (_helpText.help[helpText] != undefined) {
-      // console.log('render help.' + helpText);
       if (helpText == 'examples') {
         // render with links
         var links = true;
@@ -19583,7 +19576,7 @@ exports.checkDevice = checkDevice;
 exports.playAlerts = playAlerts;
 exports.restartServer = restartServer;
 exports.presetHandling = presetHandling;
-exports.alertState = exports.debugSemantic = exports.debugParser = void 0;
+exports.alertState = exports.debugSemantic = void 0;
 
 var _socket = _interopRequireDefault(require("socket.io-client"));
 
@@ -19612,8 +19605,7 @@ https://github.com/harc/ohm
 // files
 // global variables
 // let debugSemantic = true;
-var debugParser = true;
-exports.debugParser = debugParser;
+// export const debugParser = true;
 var debugSemantic = true;
 exports.debugSemantic = debugSemantic;
 var debugIndex = true; // if (debugIndex) { console.log(' ')};
@@ -20915,7 +20907,7 @@ exports.checkDevice = checkDevice;
 exports.playAlerts = playAlerts;
 exports.restartServer = restartServer;
 exports.presetHandling = presetHandling;
-exports.alertState = exports.debugSemantic = exports.debugParser = void 0;
+exports.alertState = exports.debugSemantic = void 0;
 
 var _socket = _interopRequireDefault(require("socket.io-client"));
 
@@ -20944,8 +20936,7 @@ https://github.com/harc/ohm
 // files
 // global variables
 // let debugSemantic = true;
-var debugParser = true;
-exports.debugParser = debugParser;
+// export const debugParser = true;
 var debugSemantic = true;
 exports.debugSemantic = debugSemantic;
 var debugIndex = true; // if (debugIndex) { console.log(' ')};

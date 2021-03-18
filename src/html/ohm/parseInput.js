@@ -31,7 +31,7 @@ let debug = true;
 // debug = debugParser;
 
 
-// printer(debug, topic, element, value)
+// printer(debug, element, value)
 let printer = (debug, element, value) => {
     if (debug==true) {
         console.log(`Parser \t - ${element} >> ${value}`);
@@ -202,45 +202,41 @@ const parseInput = (input) => {
     // list stuff
     if (desc=="list"){
         let string = inst; // e.g. files
-        if (debugParser) {console.log('Parser: send: list ' + string);}
         showFiles(string);
     };
     // mute On
     if (desc=="muteOn"){
-        console.log('mute the Audio Output');
+        printer(debug, "muteOn", "mute audio")
         transport('muteOn');
     };
     // mute Off
     if (desc=="muteOff"){
-        console.log('unmute the Audio Output');
+        printer(debug, "muteOff", "unmute audio")
         transport('muteOff');
     };
     // record start
     if (desc=="recordStart"){
         transport('recordStart');
-        // showFiles('.. recording started. Type "record stop" to stop recording!');
     };
     // record stop
     if (desc=="recordStop"){
         transport('recordStop');
-        // showFiles('.. recording stopped. See audio at the top of the page!');
     };
     // upload Files
     if (desc=="uploadFiles"){
         var file = inst;
         transport('uploadFiles', file);
-        console.log('parser: upload to server: ' + file);
     };
     // restart server
     if (type=="restart server"){
-        console.log('parser: restart server..');
+        printer(debug, "restart server", "restart server")
         restartServer();
     };
     // join session    
     if (type=="join"){
         let session = desc[1];
         let user = desc[0];
-        console.log(`Parser: join session "${session}" as user "${user}"`);
+        printer(debug, "join", `join session "${session}" as user "${user}"`);
         setUser(user, session);
     };
     // presets store
@@ -248,11 +244,11 @@ const parseInput = (input) => {
         let action = desc;
         let preset = inst;
         if (action=='store') {
-            console.log(`Parser: ${action} preset "${preset}" on server.."`);
+            printer(debug, "preset store", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
         if (action=='reload') {
-            console.log(`Parser: ${action} preset "${preset}" on server.."`);
+            printer(debug, "preset reload", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
     };
@@ -261,7 +257,7 @@ const parseInput = (input) => {
         let action = desc;
         let preset = inst;
         if (action=='reload') {
-            console.log(`Parser: ${action} preset "${preset}" on server.."`);
+            printer(debug, "preset reload to all", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
     };
@@ -277,9 +273,7 @@ const parseInput = (input) => {
     if (desc=="helpText"){
         helpText; // this is the destination
         help; // this is the help container
-        // console.log('check help container for this element: ' + helpText);
         if (help[helpText] != undefined) {
-            // console.log('render help.' + helpText);
             if (helpText=='examples') { 
                 // render with links
                 let links = true;

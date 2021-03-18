@@ -21,7 +21,7 @@ import { setDataURL, handlePresetsInTone } from '/tone/main-tone';
 
 // global variables
 // let debugSemantic = true;
-export const debugParser = true;
+// export const debugParser = true;
 export const debugSemantic = true;
 
 
