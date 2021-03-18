@@ -1,5 +1,5 @@
 import Tone from 'tone';
-import { Instrument } from '/sound/instruments';
+import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
 import { recorderDeal, handleForm, renderTextToConsole, checkDevice, playAlerts, alertState }  from '/index' ;
 

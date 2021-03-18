@@ -1,4 +1,4 @@
-import grammarText from '/language/grammar';
+import grammarText from '/html/ohm/grammar';
 import ohm from 'ohm-js';
 
 

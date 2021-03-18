@@ -1,6 +1,6 @@
-import { transport }  from '/sound/toneTest' 
+import { transport }  from '/tone/main-tone' 
 import { renderHtml, renderHtmlArrows, renderHtmlHelp }  from  '/html/renderHTML';
-import { help }  from '/help/helpText';
+import { help }  from '/html/help/helpText';
 import { setUser, showFiles, playAlerts, alertState, restartServer, presetHandling }  from '/index' 
 
 
