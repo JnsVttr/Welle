@@ -1,19 +1,28 @@
+
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+naming relates to grammar functions:
+Sequence_seqPattern = topic Sequence, subFunction seqPattern
+*/
+
+
+// libraries
 import grammarText from '/html/ohm/grammar';
 import ohm from 'ohm-js';
+// variables
+let livecode = ohm.grammar(grammarText);  // taken from grammar.js
+let semantics = livecode.createSemantics();
+let debugSemantic=true;
+let debug = true;
+
 
 
 // ========================  Grammar & Semantic ====================== //
-
-
-
-let livecode = ohm.grammar(grammarText);  // taken from grammar.js
-let semantics = livecode.createSemantics();
-
-let debugSemantic=true;
-
-
-
-
 
 // SEMANTICS FOR OHM.JS LANGUAGE:
 semantics.addOperation('eval', {
@@ -31,6 +40,8 @@ semantics.addOperation('eval', {
         vol - float (max 1.0)
         bpm - integer
         concat - ??
+
+        Helper functions: instToArray, handleRand, handlePattern
     */
 
     /* SEQUENCE HANDLING */
@@ -40,10 +51,12 @@ semantics.addOperation('eval', {
         let pattern = handlePattern(pat.eval());
         let command = key.eval();
         
-        if (debugSemantic) {
-            console.log("Semantic: Sequence_seqPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern);
-            console.log('Semantic: Sequence_seqPattern: ' + ["SEQUENCE-LOG", "sequenceStart", command, instArray, pattern, random]);
-        };
+        printer(debug, "Semantic", "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
+        printer(debug, "Semantic", "Sequence_seqPattern", `return: ["SEQUENCE-LOG", "sequenceStart", ${command}, ${instArray}, ${pattern}, ${random}]`)
+        // if (debugSemantic) {
+        //     console.log("Semantic: Sequence_seqPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern);
+        //     console.log('Semantic: Sequence_seqPattern: ' + ["SEQUENCE-LOG", "sequenceStart", command, instArray, pattern, random]);
+        // };
         return [
             "transport", "sequenceStart", 
             ["command", command], 
@@ -456,6 +469,12 @@ function handlePattern(pat){
 
 
 
+// printer(debug, topic, element, value)
+let printer = (debug, topic, element, value) => {
+    if (debug==true) {
+        console.log(`${topic} - ${element} - ${value}`);
+    };
+}
 
 
 

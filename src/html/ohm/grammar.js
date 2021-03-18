@@ -1,4 +1,15 @@
-// grammar //
+
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+save grammar as const var. will be used at semantics.js
+grammar reads from top to bottom
+adding a command needs cmd and destiation function
+*/
 
 
 const grammarText = `

@@ -9514,7 +9514,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-// grammar //
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+save grammar as const var. will be used at semantics.js
+grammar reads from top to bottom
+adding a command needs cmd and destiation function
+*/
 var grammarText = "\nlivecode {\n    Exp =  Sequence | Controls | General\n\n    /*\n      TRANSPORT SEQUENCE & CONTROLS\n    */\n\n    Sequence = Command InstrumentList? Pattern? PatternRandom? --seqPattern\n\n    Command =\n        | \"play\"            --playSeq\n        | \">\"               --playSeqPlus\n        | \"stop\"            --stopSeq\n        | \".\"               --stopSeqPlus\n        | \"for\" intPos      --forSeq\n        | \"in\" intPos       --inSeq\n        | \"reset\"           --reset\n\n    General = \n        | \"store preset\" alnum+ \t--storePreset\n        | \"reload preset\" alnum+ \t--reloadPreset\n        | \"save\" alnum+         \t--savePart\n        | \"delete\" InstrumentList \t--deleteElement\n        | \":\" alnum+            \t--setPart\n        | \"mute on\"             \t--muteOn\n        | \"mute off\"            \t--muteOff\n        | \"record start\"        \t--recordStart\n        | \"record stop\"         \t--recordStop\n        | \"upload\" alnum+       \t--uploadFiles\n        | \"upload\"              \t--uploadDefault\n        | \"restart server\"      \t--restart\n        | \"join\" InstrumentList \t--joinName\n\n\n    Controls =\n        | instrument \">\" InstrumentList         \t--copyPattern\n        | instrument \"=\" instrument \"[\" intPos \"]\"  --initInstrument\n        | \"list\" instrument                     \t--listInstruments\n        | \"sel\" instrument intPos?               \t--selectInstrument\n        | \"vol\" floatPos InstrumentList          \t--setInstrumentVolume\n        | PatternRandom InstrumentList           \t--assignRandom\n        | InstrumentList Pattern PatternRandom? \t--assignPattern\n        | \"show\" instrument                     \t--showInstrument\n        | \"bpm\" intPos floatPos?                  \t--bpm\n        | \"help\" alnum+                         \t--helpText\n        | \"help\"                                \t--help\n        | \"clear\"                               \t--clear\n\n        \n    Pattern = NonemptyListOf<EventPattern, \"\"> \t\t--extractPattern\n\n    EventPattern = \n        | Events \n        | NestedEvents \n    \n    NestedEvents = \"(\" NonemptyListOf<Events, \"\"> \")\" intPos? \n    \n    Events =\n        | \"#\" intPos?\t--soundNote\n        | \"-\"           --soundPause\n\n    instrument =\n        | letter+ \"_\"? (letter+)? intPos? --instDrum\n\n    PatternRandom =\n        | \"rand\" \"off\"      --randomizeOff\n        | \"rand\" intPos?    --randomize\n        \n    InstrumentList = NonemptyListOf<instrument, \"\"> \t--instrumentsList\n    InstrumentRepeat = instrument intPos?  \t\t\t\t--instrumentEntry\n\n  \n    /*\n      HELPERS\n    */\n    \n    floatPos = digit* \".\" digit+    --fullFloatPos\n        | digit \".\"                 --dotPos\n        | digit+                    --intPos\n    float = \"-\"? digit* \".\" digit+  --fullFloat\n        | \"-\"? digit \".\"            --dot\n        | \"-\"? digit+               --int\n    intPos = digit+                 --intPos\n    int = \"-\"? digit+               --int\n\n}\n";
 var _default = grammarText;
 exports.default = _default;
@@ -17219,14 +17229,27 @@ var _ohmJs = _interopRequireDefault(require("ohm-js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// ========================  Grammar & Semantic ====================== //
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+naming relates to grammar functions:
+Sequence_seqPattern = topic Sequence, subFunction seqPattern
+*/
+// libraries
+// variables
 var livecode = _ohmJs.default.grammar(_grammar.default); // taken from grammar.js
 
 
 exports.livecode = livecode;
 var semantics = livecode.createSemantics();
 exports.semantics = semantics;
-var debugSemantic = true; // SEMANTICS FOR OHM.JS LANGUAGE:
+var debugSemantic = true;
+var debug = true; // ========================  Grammar & Semantic ====================== //
+// SEMANTICS FOR OHM.JS LANGUAGE:
 
 semantics.addOperation('eval', {
   /* 
@@ -17242,6 +17265,7 @@ semantics.addOperation('eval', {
       vol - float (max 1.0)
       bpm - integer
       concat - ??
+       Helper functions: instToArray, handleRand, handlePattern
   */
 
   /* SEQUENCE HANDLING */
@@ -17250,13 +17274,12 @@ semantics.addOperation('eval', {
     var random = handleRand(rand.eval());
     var pattern = handlePattern(pat.eval());
     var command = key.eval();
+    printer(debug, "Semantic", "Sequence_seqPattern", "process pattern in Control: \"".concat(pat.sourceString, "\" calc: \"").concat(pat.eval(), "\" handle: \"").concat(pattern, "\""));
+    printer(debug, "Semantic", "Sequence_seqPattern", "return: [\"SEQUENCE-LOG\", \"sequenceStart\", ".concat(command, ", ").concat(instArray, ", ").concat(pattern, ", ").concat(random, "]")); // if (debugSemantic) {
+    //     console.log("Semantic: Sequence_seqPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern);
+    //     console.log('Semantic: Sequence_seqPattern: ' + ["SEQUENCE-LOG", "sequenceStart", command, instArray, pattern, random]);
+    // };
 
-    if (debugSemantic) {
-      console.log("Semantic: Sequence_seqPattern: process pattern in Control: ", pat.sourceString, " calc: ", pat.eval(), " handle: ", pattern);
-      console.log('Semantic: Sequence_seqPattern: ' + ["SEQUENCE-LOG", "sequenceStart", command, instArray, pattern, random]);
-    }
-
-    ;
     return ["transport", "sequenceStart", ["command", command], ["instArray", instArray], ["pattern", pattern], ["rand", random]];
   },
   General_savePart: function General_savePart(_, name) {
@@ -17644,7 +17667,15 @@ function handlePattern(pat) {
   return pattern;
 }
 
-;
+; // printer(debug, topic, element, value)
+
+var printer = function printer(debug, topic, element, value) {
+  if (debug == true) {
+    console.log("".concat(topic, " - ").concat(element, " - ").concat(value));
+  }
+
+  ;
+};
 },{"/html/ohm/grammar":"html/ohm/grammar.js","ohm-js":"../node_modules/ohm-js/src/main.js"}],"html/renderHTML.js":[function(require,module,exports) {
 "use strict";
 
