@@ -9662,23 +9662,6 @@ var renderOutputLine = function renderOutputLine(stringArray, customDiv, limitIn
 };
 
 exports.renderOutputLine = renderOutputLine;
-},{}],"helper/printer.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.printer = void 0;
-
-var printer = function printer(debug, context, element, value) {
-  if (debug == true) {
-    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
-  }
-
-  ;
-};
-
-exports.printer = printer;
 },{}],"../node_modules/tone/build/Tone.js":[function(require,module,exports) {
 var define;
 !function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.Tone=e():t.Tone=e()}("undefined"!=typeof self?self:this,function(){return function(t){var e={};function i(s){if(e[s])return e[s].exports;var n=e[s]={i:s,l:!1,exports:{}};return t[s].call(n.exports,n,n.exports,i),n.l=!0,n.exports}return i.m=t,i.c=e,i.d=function(t,e,s){i.o(t,e)||Object.defineProperty(t,e,{configurable:!1,enumerable:!0,get:s})},i.r=function(t){Object.defineProperty(t,"__esModule",{value:!0})},i.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(e,"a",e),e},i.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},i.p="",i(i.s=148)}([function(t,e,i){"use strict";i.r(e),function(t){var s=i(93),n=function(){if(!(this instanceof n))throw new Error("constructor needs to be called with the 'new' keyword")};
@@ -10138,7 +10121,24 @@ function playAlerts(name, alertMuteState) {
 }
 
 ;
-},{"/helper/alerts":"helper/alerts.js"}],"tone/update_InstrumentsList.js":[function(require,module,exports) {
+},{"/helper/alerts":"helper/alerts.js"}],"helper/printer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.printer = void 0;
+
+var printer = function printer(debug, context, element, value) {
+  if (debug == true) {
+    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
+  }
+
+  ;
+};
+
+exports.printer = printer;
+},{}],"tone/update_InstrumentsList.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10348,15 +10348,215 @@ function startTransport() {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/main-tone.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/checkIfInstValid.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.checkIfInstValid = checkIfInstValid;
+
+var _index = require("/index");
+
+var _renderTextToConsole = require("/helper/renderTextToConsole");
+
+var _playAlerts = require("/helper/playAlerts");
+
+var _printer = require("/helper/printer");
+
+var _mainTone = require("./main-tone");
+
+function checkIfInstValid(instNameIncoming) {
+  // if (debugTone){ console.log('');};
+  // if (debugTone){ console.log('Tone: checkIfInstValid: check valid for this inst: ' + instNameIncoming);};
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, 'checkIfInstValid', "check valid for this inst: ".concat(instNameIncoming)); // check, if instrument is valid
+
+  var instAvailible = false;
+  Object.keys(_index.instrumentsList).forEach(function (instName) {
+    // if (debugTone){console.log('checkIfInstValid: instrumentsList{} .name: ' + instrumentsList[instName].name + ' .type: ' + instrumentsList[instName].type);};
+    if (instNameIncoming == _index.instrumentsList[instName].name) {
+      instAvailible = true;
+    }
+
+    ;
+  });
+
+  if (instAvailible == false) {
+    var string = 'no such instrument ..';
+    (0, _renderTextToConsole.renderTextToConsole)(false, 's', string, 'local');
+    (0, _playAlerts.playAlerts)('error', _index.alertMuteState);
+  }
+
+  ;
+
+  if (instAvailible == true) {
+    // if (debugTone){console.log('Tone: checkIfInstValid: found ' + instNameIncoming) };
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, 'checkIfInstValid', "found: ".concat(instNameIncoming));
+    return instAvailible;
+  }
+
+  ;
+  return instAvailible;
+}
+
+;
+},{"/index":"index.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/muteAll.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.muteAll = muteAll;
+
+var _tone = _interopRequireDefault(require("tone"));
+
+var _index = require("/index");
+
+var _playAlerts = require("/helper/playAlerts");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function muteAll(state) {
+  if (state) {
+    _tone.default.Master.mute = true;
+    (0, _playAlerts.playAlerts)('return', _index.alertMuteState);
+  }
+
+  if (state == false) {
+    _tone.default.Master.mute = false;
+    (0, _playAlerts.playAlerts)('return', _index.alertMuteState);
+  }
+}
+
+;
+},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","/helper/playAlerts":"helper/playAlerts.js"}],"tone/initInstrument.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.initInstrument = initInstrument;
-exports.muteAll = muteAll;
+
+var _index = require("/index");
+
+var _renderTextToConsole = require("/helper/renderTextToConsole");
+
+var _playAlerts = require("/helper/playAlerts");
+
+var _printer = require("/helper/printer");
+
+var _mainTone = require("./main-tone");
+
+// init Instrument/ Sampler
+// ========================================================
+function initInstrument(dest, source, num) {
+  // if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "initInstrument", "assign new sounds from source[num]: ".concat(source[num], " to dest: ").concat(dest));
+
+  var error = function error() {
+    var printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
+    (0, _renderTextToConsole.renderTextToConsole)(false, 'local', printData, 'local');
+    (0, _playAlerts.playAlerts)('error', _index.alertMuteState);
+    return false;
+  };
+
+  if (_index.sampleURL[source] != undefined) {
+    if (_index.sampleURL[source][num] != undefined) {
+      // if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
+      // if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
+      var inst = dest; // if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
+
+      (0, _mainTone.stopInstrument)(inst);
+      delete _mainTone.instruments[inst]; // delete from saved Parts, otherwise throws errors
+      // if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
+
+      Object.keys(_mainTone.savedParts).forEach(function (key) {
+        if (key != 'bpm') {
+          // if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
+          if (_mainTone.savedParts[key].instruments[dest] != undefined) {// if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
+            // delete savedParts[key].instruments[dest];
+          }
+        }
+
+        ;
+      }); // if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
+
+      _index.instrumentsList[dest].url = _index.sampleURL[source][num];
+    } else {
+      error();
+    }
+
+    ;
+  } else {
+    error();
+  }
+}
+
+;
+},{"/index":"index.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/resetAction.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.resetAction = resetAction;
+
+var _tone = _interopRequireDefault(require("tone"));
+
+var _printer = require("/helper/printer");
+
+var _mainTone = require("./main-tone");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function resetAction() {
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "resetAction", "resetting");
+  setTimeout(function () {
+    (0, _mainTone.stopAllInstruments)();
+  }, 20);
+  setTimeout(function () {
+    (0, _mainTone.clearParts)();
+  }, 40);
+  setTimeout(function () {
+    // console.clear();
+    Object.keys(_mainTone.instruments).forEach(function (inst) {
+      // if (debugTone) {console.log('Tone: ResetAction: instrument: ' + instruments[inst].name)};
+      _mainTone.instruments[inst].synth.synth.dispose();
+
+      _mainTone.instruments[inst].sequence.dispose();
+    });
+    _mainTone.instruments = ({}, function () {
+      throw new Error('"' + "instruments" + '" is read-only.');
+    }());
+  }, 60);
+  setTimeout(function () {
+    _tone.default.Transport.stop(); // console.log("testing stop & sync the Tone.Transport");
+
+  }, 80);
+  setTimeout(function () {
+    // Tone.Transport.ticks = 0;
+    // Tone.context.latencyHint = 'fastest';
+    _mainTone.thisBPM = (120, function () {
+      throw new Error('"' + "thisBPM" + '" is read-only.');
+    }());
+    _tone.default.Transport.bpm.value = _mainTone.thisBPM; // if (debugTone) {console.log('Tone: ResetAction: set global BPM to:  ' + thisBPM)};
+
+    var now = _tone.default.now(); // if (debugTone) {console.log('Tone: ResetAction: Time now =  ' + now)};
+
+
+    _tone.default.Transport.start(now); // if (debugTone) {console.log('Tone: resetAction: Finished: Tone.Transport State = ', Tone.Transport.state)} ;
+
+  }, 100);
+}
+
+;
+},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/main-tone.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.transport = transport;
 exports.playInstrument = playInstrument;
 exports.stopInstrument = stopInstrument;
 exports.stopAllInstruments = stopAllInstruments;
@@ -10372,7 +10572,7 @@ exports.clearParts = clearParts;
 exports.uploadToServer = uploadToServer;
 exports.audioRecord = audioRecord;
 exports.handlePresetsInTone = handlePresetsInTone;
-exports.thisBPM = exports.device = exports.context = exports.debug = void 0;
+exports.thisBPM = exports.savedParts = exports.instruments = exports.device = exports.context = exports.debug = void 0;
 
 var _tone = _interopRequireDefault(require("tone"));
 
@@ -10393,6 +10593,14 @@ var _update_InstrumentsList = require("/tone/update_InstrumentsList");
 var _printer = require("/helper/printer");
 
 var _startTransport = require("./startTransport");
+
+var _checkIfInstValid = require("./checkIfInstValid");
+
+var _muteAll = require("./muteAll");
+
+var _initInstrument = require("./initInstrument");
+
+var _resetAction = require("./resetAction");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -10417,7 +10625,9 @@ var device = (0, _checkDevice.checkDevice)(); // check device, ios is not allowd
 
 exports.device = device;
 var instruments = {};
+exports.instruments = instruments;
 var savedParts = {};
+exports.savedParts = savedParts;
 var masterOut = new _tone.default.Gain(0.9); // master output
 
 masterOut.toMaster(); // assign master
@@ -10425,129 +10635,133 @@ masterOut.toMaster(); // assign master
 var thisBPM = 120;
 exports.thisBPM = thisBPM;
 _tone.default.Transport.bpm.value = thisBPM;
-_tone.default.context.latencyHint = 'balanced';
+_tone.default.context.latencyHint = 'balanced'; // let now = Tone.now(); // not really needed
+// export at the end
 
-var now = _tone.default.now(); // init Instrument/ Sampler
-// ========================================================
+function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
+  // if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
+  (0, _printer.printer)(debug, context, "transport", "incoming transport: cmd , instName , instArray , patternIn , rand , vol , bpm , name , num");
+  var state; // instrument valid state
 
+  switch (cmd) {
+    case 'play':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
 
-function initInstrument(dest, source, num) {
-  // if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
-  (0, _printer.printer)(debug, context, "initInstrument", "assign new sounds from source[num]: ".concat(source[num], " to dest: ").concat(dest));
-
-  var error = function error() {
-    var printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
-    (0, _renderTextToConsole.renderTextToConsole)(false, 'local', printData, 'local');
-    (0, _playAlerts.playAlerts)('error', _index.alertMuteState);
-    return false;
-  };
-
-  if (_index.sampleURL[source] != undefined) {
-    if (_index.sampleURL[source][num] != undefined) {
-      // if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
-      // if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
-      var inst = dest; // if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
-
-      stopInstrument(inst);
-      delete instruments[inst]; // delete from saved Parts, otherwise throws errors
-      // if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
-
-      Object.keys(savedParts).forEach(function (key) {
-        if (key != 'bpm') {
-          // if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
-          if (savedParts[key].instruments[dest] != undefined) {// if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
-            // delete savedParts[key].instruments[dest];
-          }
-        }
-
-        ;
-      }); // if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
-
-      _index.instrumentsList[dest].url = _index.sampleURL[source][num];
-    } else {
-      error();
-    }
-
-    ;
-  } else {
-    error();
-  }
-}
-
-; // SYSTEM CONTROL
-// ===================================================================
-
-function muteAll(state) {
-  if (debugTone) {
-    console.log('Tone: muteAll: Transport: change mute state..');
-  }
-
-  ;
-
-  if (state) {
-    _tone.default.Master.mute = true;
-    (0, _playAlerts.playAlerts)('return', _index.alertMuteState);
-  }
-
-  if (state == false) {
-    _tone.default.Master.mute = false;
-    (0, _playAlerts.playAlerts)('return', _index.alertMuteState);
-  }
-}
-
-;
-
-function resetAction() {
-  setTimeout(function () {
-    stopAllInstruments();
-  }, 20);
-  setTimeout(function () {
-    clearParts();
-  }, 40);
-  setTimeout(function () {
-    // console.clear();
-    Object.keys(instruments).forEach(function (inst) {
-      if (debugTone) {
-        console.log('Tone: ResetAction: instrument: ' + instruments[inst].name);
+      if (state) {
+        playInstrument(instName, patternIn, rand);
       }
 
       ;
-      instruments[inst].synth.synth.dispose();
-      instruments[inst].sequence.dispose();
-    });
-    instruments = {};
-  }, 60);
-  setTimeout(function () {
-    _tone.default.Transport.stop(); // console.log("testing stop & sync the Tone.Transport");
+      break;
 
-  }, 80);
-  setTimeout(function () {
-    // Tone.Transport.ticks = 0;
-    // Tone.context.latencyHint = 'fastest';
-    exports.thisBPM = thisBPM = 120;
-    _tone.default.Transport.bpm.value = thisBPM;
+    case 'stop':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
 
-    if (debugTone) {
-      console.log('Tone: ResetAction: set global BPM to:  ' + thisBPM);
-    }
+      if (state) {
+        stopInstrument(instName);
+      }
 
-    ;
-    now = _tone.default.now();
+      ;
+      break;
 
-    if (debugTone) {
-      console.log('Tone: ResetAction: Time now =  ' + now);
-    }
+    case 'stopAll':
+      stopAllInstruments();
+      break;
 
-    ;
+    case 'playAll':
+      playAllInstruments();
+      break;
 
-    _tone.default.Transport.start(now);
+    case 'patternCopy':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
 
-    if (debugTone) {
-      console.log('Tone: resetAction: Finished: Tone.Transport State = ', _tone.default.Transport.state);
-    }
+      if (state) {
+        copyPattern(instName, instArray);
+      }
 
-    ;
-  }, 100);
+      ;
+      break;
+
+    case 'setVolume':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
+
+      if (state) {
+        setVolume(instName, vol);
+      }
+
+      ;
+      break;
+
+    case 'setRandom':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
+
+      if (state) {
+        setRandom(instName, rand);
+      }
+
+      break;
+
+    case 'setBPM':
+      setBPM(bpm, num);
+      break;
+
+    case 'savePart':
+      savePart(name);
+      break;
+
+    case 'setPart':
+      setPart(name);
+      break;
+
+    case 'deleteElement':
+      deleteElement(instArray);
+      break;
+
+    case 'clearPart':
+      clearParts();
+      break;
+
+    case 'reset':
+      (0, _resetAction.resetAction)();
+      break;
+
+    case 'muteOn':
+      (0, _muteAll.muteAll)(true);
+      break;
+
+    case 'muteOff':
+      (0, _muteAll.muteAll)(false);
+      break;
+
+    case 'recordStart':
+      if (device != 'ios') {
+        audioRecord(true);
+      }
+
+      ;
+      break;
+
+    case 'recordStop':
+      if (device != 'ios') {
+        audioRecord(false);
+      }
+
+      ;
+      break;
+
+    case 'uploadFiles':
+      uploadToServer(instName);
+      break;
+
+    case 'initInst':
+      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
+
+      if (state) {
+        (0, _initInstrument.initInstrument)(instName, name, num);
+      }
+
+      break;
+  }
 }
 
 ; // INSTRUMENTS - CONTROL
@@ -10719,7 +10933,7 @@ function playAllInstruments() {
 
   ; //Tone.Transport.start();
 
-  now = _tone.default.now();
+  var now = _tone.default.now();
 
   var n = _tone.default.Transport.nextSubdivision('1n'); // parseFloat("1.555").toFixed(2);
   // n = n.toFixed(0);
@@ -11265,7 +11479,7 @@ function playPartInstrument(instName, patternIn, rand, isPlaying, url) {
 ;
 
 function clearParts() {
-  savedParts = {};
+  exports.savedParts = savedParts = {};
   renderParts();
 }
 
@@ -11304,7 +11518,7 @@ function handlePresetsInTone(action, data) {
   ;
 
   if (action == 'set') {
-    savedParts = data;
+    exports.savedParts = savedParts = data;
     renderParts(); // let c = 0;
     // Object.keys(savedParts).forEach(name => {
     // 	if (c==0) {
@@ -11410,201 +11624,7 @@ function resetRecorder() {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js","/helper/checkDevice":"helper/checkDevice.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","./startTransport":"tone/startTransport.js"}],"tone/checkIfInstValid.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.checkIfInstValid = checkIfInstValid;
-
-var _index = require("/index");
-
-var _renderTextToConsole = require("/helper/renderTextToConsole");
-
-var _playAlerts = require("/helper/playAlerts");
-
-var _printer = require("/helper/printer");
-
-var _mainTone = require("./main-tone");
-
-function checkIfInstValid(instNameIncoming) {
-  // if (debugTone){ console.log('');};
-  // if (debugTone){ console.log('Tone: checkIfInstValid: check valid for this inst: ' + instNameIncoming);};
-  (0, _printer.printer)(_mainTone.debug, _mainTone.context, 'checkIfInstValid', "check valid for this inst: ".concat(instNameIncoming)); // check, if instrument is valid
-
-  var instAvailible = false;
-  Object.keys(_index.instrumentsList).forEach(function (instName) {
-    // if (debugTone){console.log('checkIfInstValid: instrumentsList{} .name: ' + instrumentsList[instName].name + ' .type: ' + instrumentsList[instName].type);};
-    if (instNameIncoming == _index.instrumentsList[instName].name) {
-      instAvailible = true;
-    }
-
-    ;
-  });
-
-  if (instAvailible == false) {
-    var string = 'no such instrument ..';
-    (0, _renderTextToConsole.renderTextToConsole)(false, 's', string, 'local');
-    (0, _playAlerts.playAlerts)('error', _index.alertMuteState);
-  }
-
-  ;
-
-  if (instAvailible == true) {
-    // if (debugTone){console.log('Tone: checkIfInstValid: found ' + instNameIncoming) };
-    (0, _printer.printer)(_mainTone.debug, _mainTone.context, 'checkIfInstValid', "found: ".concat(instNameIncoming));
-    return instAvailible;
-  }
-
-  ;
-  return instAvailible;
-}
-
-;
-},{"/index":"index.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/transport.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.transport = transport;
-
-var _printer = require("/helper/printer");
-
-var _mainTone = require("./main-tone");
-
-var _checkIfInstValid = require("./checkIfInstValid");
-
-// translate incoming messages (parseInput) to sound functions:
-function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
-  // if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
-  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "transport", 'INCOMING transport (', cmd, instName, instArray, patternIn, rand, vol, bpm, name, num, ')');
-  var state; // instrument valid state
-
-  switch (cmd) {
-    case 'play':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.playInstrument)(instName, patternIn, rand);
-      }
-
-      ;
-      break;
-
-    case 'stop':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.stopInstrument)(instName);
-      }
-
-      ;
-      break;
-
-    case 'stopAll':
-      (0, _mainTone.stopAllInstruments)();
-      break;
-
-    case 'playAll':
-      (0, _mainTone.playAllInstruments)();
-      break;
-
-    case 'patternCopy':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.copyPattern)(instName, instArray);
-      }
-
-      ;
-      break;
-
-    case 'setVolume':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.setVolume)(instName, vol);
-      }
-
-      ;
-      break;
-
-    case 'setRandom':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.setRandom)(instName, rand);
-      }
-
-      break;
-
-    case 'setBPM':
-      (0, _mainTone.setBPM)(bpm, num);
-      break;
-
-    case 'savePart':
-      (0, _mainTone.savePart)(name);
-      break;
-
-    case 'setPart':
-      (0, _mainTone.setPart)(name);
-      break;
-
-    case 'deleteElement':
-      (0, _mainTone.deleteElement)(instArray);
-      break;
-
-    case 'clearPart':
-      (0, _mainTone.clearParts)();
-      break;
-
-    case 'reset':
-      (0, _mainTone.resetAction)();
-      break;
-
-    case 'muteOn':
-      (0, _mainTone.muteAll)(true);
-      break;
-
-    case 'muteOff':
-      (0, _mainTone.muteAll)(false);
-      break;
-
-    case 'recordStart':
-      if (_mainTone.device != 'ios') {
-        (0, _mainTone.audioRecord)(true);
-      }
-
-      ;
-      break;
-
-    case 'recordStop':
-      if (_mainTone.device != 'ios') {
-        (0, _mainTone.audioRecord)(false);
-      }
-
-      ;
-      break;
-
-    case 'uploadFiles':
-      (0, _mainTone.uploadToServer)(instName);
-      break;
-
-    case 'initInst':
-      state = (0, _checkIfInstValid.checkIfInstValid)(instName);
-
-      if (state) {
-        (0, _mainTone.initInstrument)(instName, name, num);
-      }
-
-      break;
-  }
-}
-
-;
-},{"/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js","./checkIfInstValid":"tone/checkIfInstValid.js"}],"text/helpText.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js","/helper/checkDevice":"helper/checkDevice.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","./startTransport":"tone/startTransport.js","./checkIfInstValid":"tone/checkIfInstValid.js","./muteAll":"tone/muteAll.js","./initInstrument":"tone/initInstrument.js","./resetAction":"tone/resetAction.js"}],"text/helpText.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11648,7 +11668,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.parseInput = void 0;
 
-var _transport = require("/tone/transport");
+var _mainTone = require("/tone/main-tone");
 
 var _renderHTML = require("/html/renderHTML");
 
@@ -11780,7 +11800,7 @@ var parseInput = function parseInput(input) {
         var singleInst = instArray[i];
         setTimeout(function () {
           //do what you need here
-          (0, _transport.transport)('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
+          (0, _mainTone.transport)('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
         }, (i + 1) * 30);
       };
 
@@ -11791,7 +11811,7 @@ var parseInput = function parseInput(input) {
 
       ; // playAgainFunc() - if just "play" command without instruments
     } else if (cmd == "play") {
-      (0, _transport.transport)('playAll');
+      (0, _mainTone.transport)('playAll');
     }
 
     ; // stopFunc() - for individual instruments
@@ -11799,18 +11819,18 @@ var parseInput = function parseInput(input) {
     if (cmd == "stop" && instArray.length > 0) {
       for (var _i = 0; _i < instArray.length; _i++) {
         var singleInst = instArray[_i];
-        (0, _transport.transport)('stop', singleInst);
+        (0, _mainTone.transport)('stop', singleInst);
       }
 
       ; // stopAll() - for overall stop     
     } else if (cmd == "stop") {
-      (0, _transport.transport)('stopAll');
+      (0, _mainTone.transport)('stopAll');
     }
 
     ;
 
     if (cmd[0] == "reset") {
-      (0, _transport.transport)('reset');
+      (0, _mainTone.transport)('reset');
     }
 
     ;
@@ -11823,7 +11843,7 @@ var parseInput = function parseInput(input) {
       var singleInst = instArray[_i2];
       setTimeout(function () {
         //do what you need here
-        (0, _transport.transport)('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
+        (0, _mainTone.transport)('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
       }, (_i2 + 1) * 30);
     };
 
@@ -11837,7 +11857,7 @@ var parseInput = function parseInput(input) {
   ; // patternCopyFunc() - copy pattern to multiple instruments and play them
 
   if (desc == "patternCopy") {
-    (0, _transport.transport)('patternCopy', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('patternCopy', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // setVolFunc
@@ -11845,7 +11865,7 @@ var parseInput = function parseInput(input) {
   if (desc == "instVolume") {
     for (var _i3 = 0; _i3 < instArray.length; _i3++) {
       var _singleInst = instArray[_i3];
-      (0, _transport.transport)('setVolume', _singleInst, instArray, patternParse, rand, vol, bpm, name, num);
+      (0, _mainTone.transport)('setVolume', _singleInst, instArray, patternParse, rand, vol, bpm, name, num);
     }
 
     ;
@@ -11856,7 +11876,7 @@ var parseInput = function parseInput(input) {
   if (desc == "instRand") {
     for (var _i4 = 0; _i4 < instArray.length; _i4++) {
       var _singleInst2 = instArray[_i4];
-      (0, _transport.transport)('setRandom', _singleInst2, instArray, patternParse, rand, vol, bpm, name, num);
+      (0, _mainTone.transport)('setRandom', _singleInst2, instArray, patternParse, rand, vol, bpm, name, num);
     }
 
     ;
@@ -11865,7 +11885,7 @@ var parseInput = function parseInput(input) {
   ; // ctrlBpmFunc() - set BPM 
 
   if (desc == "setBPM") {
-    (0, _transport.transport)('setBPM', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('setBPM', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // list stuff
@@ -11880,33 +11900,33 @@ var parseInput = function parseInput(input) {
 
   if (desc == "muteOn") {
     (0, _printer.printer)(debug, context, "muteOn", "mute audio");
-    (0, _transport.transport)('muteOn');
+    (0, _mainTone.transport)('muteOn');
   }
 
   ; // mute Off
 
   if (desc == "muteOff") {
     (0, _printer.printer)(debug, context, "muteOff", "unmute audio");
-    (0, _transport.transport)('muteOff');
+    (0, _mainTone.transport)('muteOff');
   }
 
   ; // record start
 
   if (desc == "recordStart") {
-    (0, _transport.transport)('recordStart');
+    (0, _mainTone.transport)('recordStart');
   }
 
   ; // record stop
 
   if (desc == "recordStop") {
-    (0, _transport.transport)('recordStop');
+    (0, _mainTone.transport)('recordStop');
   }
 
   ; // upload Files
 
   if (desc == "uploadFiles") {
     var file = inst;
-    (0, _transport.transport)('uploadFiles', file);
+    (0, _mainTone.transport)('uploadFiles', file);
   }
 
   ; // restart server
@@ -11990,32 +12010,32 @@ var parseInput = function parseInput(input) {
   ; // save part
 
   if (desc == "savePart") {
-    (0, _transport.transport)('savePart', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('savePart', inst, instArray, patternParse, rand, vol, bpm, name, num);
     (0, _index.playAlerts)('bottom', _index.alertState);
   }
 
   ; // set part
 
   if (desc == "setPart") {
-    (0, _transport.transport)('setPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('setPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // delete element
 
   if (desc == "deleteElement") {
-    (0, _transport.transport)('deleteElement', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('deleteElement', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // clear part
 
   if (desc == "clear") {
-    (0, _transport.transport)('clearPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('clearPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // initInstrument
 
   if (desc == "initInst") {
-    (0, _transport.transport)('initInst', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    (0, _mainTone.transport)('initInst', inst, instArray, patternParse, rand, vol, bpm, name, num);
   }
 
   ; // ctrlShowFunc
@@ -12034,7 +12054,7 @@ var parseInput = function parseInput(input) {
 };
 
 exports.parseInput = parseInput;
-},{"/tone/transport":"tone/transport.js","/html/renderHTML":"html/renderHTML.js","/text/helpText":"text/helpText.js","/index":"index.js","/helper/printer":"helper/printer.js","/socket/restartServer":"socket/restartServer.js"}],"helper/createAlerts.js":[function(require,module,exports) {
+},{"/tone/main-tone":"tone/main-tone.js","/html/renderHTML":"html/renderHTML.js","/text/helpText":"text/helpText.js","/index":"index.js","/helper/printer":"helper/printer.js","/socket/restartServer":"socket/restartServer.js"}],"helper/createAlerts.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

@@ -12,13 +12,17 @@ import Tone from 'tone';
 // import files
 import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
-import { sampleURL, instrumentsList, recorderDeal, handleForm, alertMuteState }  from '/index' ;
+import { instrumentsList, recorderDeal, handleForm, alertMuteState }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
 import { renderTextToConsole } from '/helper/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList';
 import { printer } from '/helper/printer';
 import { startTransport } from './startTransport';
+import { checkIfInstValid } from './checkIfInstValid';
+import { muteAll } from './muteAll';
+import { initInstrument } from './initInstrument';
+import { resetAction } from './resetAction';
 
 // debug
 export let debug = true;
@@ -29,14 +33,14 @@ let debugTone = true;  // old debug, needs to be removed
 export let device = checkDevice(); // check device, ios is not allowd to load mediarecorder
 
 // tone variables
-var instruments = {};
-var savedParts = {};
+export var instruments = {};
+export var savedParts = {};
 let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
 export let thisBPM = 120;
 Tone.Transport.bpm.value = thisBPM;
 Tone.context.latencyHint = 'balanced';
-let now = Tone.now();
+// let now = Tone.now(); // not really needed
 
 
 
@@ -44,45 +48,87 @@ let now = Tone.now();
 
 
 
-// init Instrument/ Sampler
-// ========================================================
-export function initInstrument(dest, source, num) {
-	// if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
-	printer(debug, context, "initInstrument", `assign new sounds from source[num]: ${source[num]} to dest: ${dest}`)
+
+
+
+
+
+
+// export at the end
+
+export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
 	
-	let error = function () {
-		let printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
-		renderTextToConsole (false, 'local', printData, 'local');
-		playAlerts('error', alertMuteState);
-		return false;
-	};
-	if (sampleURL[source] != undefined){
-		if (sampleURL[source][num] != undefined) {
-			// if (debugTone) {console.log(`Tone: initInstrument: file ${source}[${num}] is availible.`) };
-			// if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
-			
-			let inst = dest;
-			// if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
-			stopInstrument(inst);
-			delete instruments[inst];
-			
-			// delete from saved Parts, otherwise throws errors
-			// if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
-			Object.keys(savedParts).forEach(key => {
-				if (key!='bpm'){
-					// if (debugTone) { console.log('Tone: initInstrument: savedParts: ' + key) };
-					if(savedParts[key].instruments[dest]!=undefined){
-						// if (debugTone) { console.log('Tone: initInstrument: savedParts: delete ' + savedParts[key].instruments[dest]) };
-						// delete savedParts[key].instruments[dest];
-					}
-				};
-		    });
-			// if (debugTone) {console.log(`Tone: initInstrument: assign new sample to instrumentsList collection.. `)};
-			instrumentsList[dest].url = sampleURL[source][num];
+	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
+	printer(debug, context, "transport", `incoming transport: cmd , instName , instArray , patternIn , rand , vol , bpm , name , num`);
 
-		} else { error(); };
-
-	} else {error();}
+	let state;  // instrument valid state
+	
+	
+	switch (cmd) {
+		case 'play':
+			state = checkIfInstValid (instName);
+			if (state) {playInstrument (instName, patternIn, rand)};
+		break;
+		case 'stop':
+			state = checkIfInstValid (instName);
+			if (state) {stopInstrument (instName);};
+		break;
+		case 'stopAll':
+			stopAllInstruments();
+		break;
+		case 'playAll':
+			playAllInstruments ();
+		break;
+		case 'patternCopy':
+			state = checkIfInstValid (instName);
+			if (state) {copyPattern (instName, instArray)};
+		break;
+		case 'setVolume':
+			state = checkIfInstValid (instName);
+			if (state) {setVolume(instName, vol)};
+		break;
+		case 'setRandom':
+			state = checkIfInstValid (instName);	
+			if (state) {setRandom(instName, rand)}
+		break;
+		case 'setBPM':
+			setBPM(bpm, num)
+		break;
+		case 'savePart':
+			savePart(name);
+		break;
+		case 'setPart':
+			setPart(name);
+		break;
+		case 'deleteElement':
+			deleteElement(instArray);
+		break;
+		case 'clearPart':
+			clearParts();
+		break;
+		case 'reset':
+			resetAction();
+		break;
+		case 'muteOn':
+			muteAll(true);
+		break;
+		case 'muteOff':
+			muteAll(false);
+		break;
+		case 'recordStart':
+			if (device != 'ios') {audioRecord(true)};
+		break;
+		case 'recordStop':
+			if (device != 'ios') {audioRecord(false)};
+		break;
+		case 'uploadFiles':
+			uploadToServer(instName);
+		break;
+		case 'initInst':
+			state = checkIfInstValid (instName);
+			if (state) {initInstrument(instName, name, num);}
+		break;
+	}
 };
 
 
@@ -100,83 +146,6 @@ export function initInstrument(dest, source, num) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// SYSTEM CONTROL
-// ===================================================================
-
-
-export function muteAll(state) {
-	if (debugTone){ console.log('Tone: muteAll: Transport: change mute state..') };
-	if (state) {Tone.Master.mute = true;  playAlerts('return', alertMuteState)}
-	if (state == false ) {Tone.Master.mute = false; playAlerts('return', alertMuteState)}
-};
-
-
-export function resetAction() {
-	setTimeout(function() {
-	  stopAllInstruments ();
-	}, 20);
-	setTimeout(function() {
-	  clearParts ();
-	}, 40);
-	setTimeout(function() {
-	  	// console.clear();
-	  	Object.keys(instruments).forEach((inst) => {
-	  		if (debugTone) {console.log('Tone: ResetAction: instrument: ' + instruments[inst].name)};
-	  		instruments[inst].synth.synth.dispose();
-	  		instruments[inst].sequence.dispose();
-	  	});
-	  	instruments = {};
-	}, 60);
-	setTimeout(function() {
-	  Tone.Transport.stop();
-	  // console.log("testing stop & sync the Tone.Transport");
-	}, 80);
-	setTimeout(function() {
-		// Tone.Transport.ticks = 0;
-		// Tone.context.latencyHint = 'fastest';
-		thisBPM = 120;
-		Tone.Transport.bpm.value = thisBPM;
-		if (debugTone) {console.log('Tone: ResetAction: set global BPM to:  ' + thisBPM)};
-		now = Tone.now();
-		if (debugTone) {console.log('Tone: ResetAction: Time now =  ' + now)};
-	  	Tone.Transport.start(now);
-	  	if (debugTone) {console.log('Tone: resetAction: Finished: Tone.Transport State = ', Tone.Transport.state)} ;
-	}, 100);
-};
 
 
 // INSTRUMENTS - CONTROL
@@ -282,7 +251,7 @@ export function stopAllInstruments () {
 export function playAllInstruments () {
 	if (debugTone){console.log('Tone: playAllInstruments: playing all instruments!')};
 	//Tone.Transport.start();
-	now = Tone.now();
+	let now = Tone.now();
 	let n = Tone.Transport.nextSubdivision('1n');
 	// parseFloat("1.555").toFixed(2);
 	// n = n.toFixed(0);
