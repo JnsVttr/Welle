@@ -1,15 +1,21 @@
+
 import Tone from 'tone';
 import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
-import { recorderDeal, handleForm, alertMuteState }  from '/index' ;
+import { sampleURL, instrumentsList, recorderDeal, handleForm, alertMuteState }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
-import { printer } from '/helper/printer';
 import { renderTextToConsole } from '/helper/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
+import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 
-// test
+// debug
+export let debug = true;
+export let context = "main-tone";
+
+// old debug
 let debugTone = true;
-if (debugTone){console.log('-- ')};
+// printer(debug, context, "test", "sth.")
+
 
 //console.clear();
 var instruments = {};
@@ -35,85 +41,13 @@ let thisBPM = 120;
 
 let soundDataURLs = {};
 let sampleDefault;
-let sampleURL = {default: ['../']};
-let instrumentsList = {};
+// let sampleURL = {default: ['../']};
 
 
 
 
-function update_InstrumentsList () {
-	instrumentsList = {
-		
-		drums: 		{name: 'drums', 	type: 'MembraneSynth',baseNote: 30, gain: 1,   vol:0.7, 	}, 
-		metal: 		{name: 'metal', 	type: 'MetalSynth', baseNote: 30, 	gain: 0.4, vol:0.7, 	},
-		bass: 		{name: 'bass', 		type: 'DuoSynth', 	baseNote: 70, 	gain: 1,   vol:0.7, 	},
-		string: 	{name: 'string', 	type: 'AMSynth', 	baseNote: 180, 	gain: 1,   vol:0.7, 	},
-		acid: 		{name: 'acid', 		type: 'MonoSynth', 	baseNote: 30, 	gain: 0.23,vol:0.7, 	},
-		pad: 		{name: 'pad', 		type: 'Synth', 		baseNote: 130, 	gain: 1,   vol:0.7, 	},
-		
-		s_ambient: 	{name: 's_ambient', type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[0]	},
-		s_bass: 	{name: 's_bass', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[1]	},
-		s_fx: 		{name: 's_fx', 		type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[2]	},
-		
-		s_hh: 		{name: 's_hh', 		type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[3]	},
-		s_hit: 		{name: 's_hit', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[4]	},
-		s_kick: 	{name: 's_kick', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[5]	},
-		s_loop: 	{name: 's_loop', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[6]	},
-		s_mix: 		{name: 's_mix', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[7]	},
-		s_noise: 	{name: 's_noise', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[8]	},
-		s_perc: 	{name: 's_perc', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[9]	},
-		
-		s_snare: 	{name: 's_snare', 		type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[10]	},
-		s_voc: 		{name: 's_voc', 	type: 'Sampler',	baseNote: 100, 	gain: 1.4, vol:0.7, url: sampleURL.default[11]	},
-	};
-
-	console.log('update_InstrumentsList: default file URL = ' + sampleURL.default[0]);
-	
-};
 
 
-function load_InstrumentsList () {
-	// Object.keys(instrumentsList).forEach((inst, c) => {
-	// 	let time = (c+1) * 20;
-	// 	setTimeout(function(){
-	// 		let name = instrumentsList[inst].name;
-	// 		updateInstrument(name, [1], 0);
-	// 		updateSequence(name, [1]);
-	// 	}, time);		
-	// });
-};
-
-
-
-// incoming data collection via socket.io, copied to 'soundDataURLs{}'
-function setDataURL (data) {
-	soundDataURLs = data;	
-	console.log('Tone.js: stored in soundDataURLs, e.g. default: ' + soundDataURLs.default.shortURL);
-	
-	// setting a default sample;
-	sampleDefault = (soundDataURLs.default.shortURL + soundDataURLs.default.files[1]);
-	// console.log('sampleDefault = files[0]: ' + sampleDefault);
-	
-	// generate URL data to local container
-	Object.keys(soundDataURLs).forEach((folder) => {
-		let count = soundDataURLs[folder].count;
-		sampleURL[folder] = [];
-		for (let i=0; i<count; i++) {
-			let newURL = soundDataURLs[folder].shortURL + soundDataURLs[folder].files[i];
-			// console.log(`newURL at sampleURL.${folder}[${i}] = ${newURL}`);
-			sampleURL[folder].push(newURL)
-		};
-	});
-
-	// important: UPDATE only arrives after connection to server
-	update_InstrumentsList();
-	load_InstrumentsList ();
-};
-
-
-
-
-	
 
 // init Instrument/ Sampler
 // ========================================================
@@ -1132,4 +1066,4 @@ function renderInstruments() {
 
 
 
-export { transport, setDataURL, handlePresetsInTone } 
+export { transport, handlePresetsInTone } 

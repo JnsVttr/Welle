@@ -15,14 +15,17 @@ import SocketIOFileClient from 'socket.io-file-client';
 import { renderHtmlArrows, renderHtmlHelpMenu }  from  '/html/renderHTML';
 import { parseInput }  from '/parse-commands';
 import { help }  from '/text/helpText';
-import { setDataURL, handlePresetsInTone } from '/tone/main-tone';
-import { printer } from './helper/printer';
-import { alerts } from './helper/alerts';
-import { createAlerts } from './helper/createAlerts';
-import { enterFunction } from './helper/enterFunction';
-import { clearTextfield } from './helper/clearTextfield';
-import { renderTextToConsole } from './helper/renderTextToConsole';
-import { playAlerts } from './helper/playAlerts';
+import { handlePresetsInTone } from '/tone/main-tone';
+import { update_InstrumentsList } from '/tone/update_InstrumentsList'
+import { printer } from '/helper/printer';
+import { alerts } from '/helper/alerts';
+import { createAlerts } from '/helper/createAlerts';
+import { enterFunction } from '/helper/enterFunction';
+import { clearTextfield } from '/helper/clearTextfield';
+import { renderTextToConsole } from '/helper/renderTextToConsole';
+import { playAlerts } from '/helper/playAlerts';
+import { requestServerFiles } from '/socket/requestServerFiles';
+import { extractSamplePaths } from './helper/extractSamplePaths';
 
 
 // global variables
@@ -32,6 +35,10 @@ export var socket = io.connect();   // socket var - server connect, also for exp
 export let user = 'local';
 export let soundMuteState = true;
 export let alertMuteState = false;  // alerts muted or not?
+let serverFolders = "";
+export let serverSamples = "";
+export let sampleURL = {};
+export let instrumentsList = "";
 
 // input & console varibles
 export let consolePointer = 0; // for arrow functions
@@ -115,7 +122,8 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			let string = ""
 			if (result.string != '!') { string = `! ${result.string}`; } 
 				else { string = `${result.string}`; };
-			renderTextToConsole(validState, user, string, 'local')
+			renderTextToConsole(validState, user, string, 'local');
+			// nothing to parse
 		};
 		// printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
 		clearTextfield();
@@ -133,7 +141,39 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 		consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'down', "textarea");
 		playAlerts('return', alertMuteState);
 	};
+	if (e.code=='Digit1') {
+		requestServerFiles ("samples");
+		printer(debug, context, "request Server Files", `Index: socket send "requestServerFiles", 'samples'.. `)
+	}
 });
+
+
+
+
+
+
+
+
+
+// SOCKET HANDLING
+
+// initial request for samples on server
+requestServerFiles ("samples");
+
+
+// receive files via socket, assign them to global variables
+socket.on("filesOnServer", function(folder, samples, what) {
+	serverFolders = folder;
+	serverSamples = samples;
+	printer(debug, context, "receive filesOnServer", `receiving 
+		folders: ${serverFolders} 
+		files: ${serverSamples}`);
+	sampleURL = extractSamplePaths (serverSamples);
+	instrumentsList = update_InstrumentsList(); 
+});
+
+
+
 
 
 

@@ -9993,23 +9993,6 @@ function checkDevice() {
   ;
   return device;
 }
-},{}],"helper/printer.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.printer = void 0;
-
-var printer = function printer(debug, context, element, value) {
-  if (debug == true) {
-    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
-  }
-
-  ;
-};
-
-exports.printer = printer;
 },{}],"helper/renderTextToConsole.js":[function(require,module,exports) {
 "use strict";
 
@@ -10138,15 +10121,201 @@ function playAlerts(name, alertMuteState) {
 }
 
 ;
-},{"/helper/alerts":"helper/alerts.js"}],"tone/main-tone.js":[function(require,module,exports) {
+},{"/helper/alerts":"helper/alerts.js"}],"helper/printer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.printer = void 0;
+
+var printer = function printer(debug, context, element, value) {
+  if (debug == true) {
+    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
+  }
+
+  ;
+};
+
+exports.printer = printer;
+},{}],"tone/update_InstrumentsList.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.update_InstrumentsList = update_InstrumentsList;
+
+var _index = require("/index");
+
+var _printer = require("/helper/printer");
+
+var _mainTone = require("/tone/main-tone");
+
+// important: UPDATE only arrives after connection to server
+// update_InstrumentsList();
+function update_InstrumentsList() {
+  var _instrumentsList = {};
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "sampleURL: ".concat(_index.sampleURL));
+
+  if (_index.sampleURL != undefined) {
+    _instrumentsList = {
+      drums: {
+        name: 'drums',
+        type: 'MembraneSynth',
+        baseNote: 30,
+        gain: 1,
+        vol: 0.7
+      },
+      metal: {
+        name: 'metal',
+        type: 'MetalSynth',
+        baseNote: 30,
+        gain: 0.4,
+        vol: 0.7
+      },
+      bass: {
+        name: 'bass',
+        type: 'DuoSynth',
+        baseNote: 70,
+        gain: 1,
+        vol: 0.7
+      },
+      string: {
+        name: 'string',
+        type: 'AMSynth',
+        baseNote: 180,
+        gain: 1,
+        vol: 0.7
+      },
+      acid: {
+        name: 'acid',
+        type: 'MonoSynth',
+        baseNote: 30,
+        gain: 0.23,
+        vol: 0.7
+      },
+      pad: {
+        name: 'pad',
+        type: 'Synth',
+        baseNote: 130,
+        gain: 1,
+        vol: 0.7
+      },
+      s_ambient: {
+        name: 's_ambient',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[0]
+      },
+      s_bass: {
+        name: 's_bass',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[1]
+      },
+      s_fx: {
+        name: 's_fx',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[2]
+      },
+      s_hh: {
+        name: 's_hh',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[3]
+      },
+      s_hit: {
+        name: 's_hit',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[4]
+      },
+      s_kick: {
+        name: 's_kick',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[5]
+      },
+      s_loop: {
+        name: 's_loop',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[6]
+      },
+      s_mix: {
+        name: 's_mix',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[7]
+      },
+      s_noise: {
+        name: 's_noise',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[8]
+      },
+      s_perc: {
+        name: 's_perc',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[9]
+      },
+      s_snare: {
+        name: 's_snare',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[10]
+      },
+      s_voc: {
+        name: 's_voc',
+        type: 'Sampler',
+        baseNote: 100,
+        gain: 1.4,
+        vol: 0.7,
+        url: _index.sampleURL.default[11]
+      }
+    };
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "with all sampleURLs");
+    return _instrumentsList;
+  }
+
+  ;
+}
+
+;
+},{"/index":"index.js","/helper/printer":"helper/printer.js","/tone/main-tone":"tone/main-tone.js"}],"tone/main-tone.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.transport = transport;
-exports.setDataURL = setDataURL;
 exports.handlePresetsInTone = handlePresetsInTone;
+exports.context = exports.debug = void 0;
 
 var _tone = _interopRequireDefault(require("tone"));
 
@@ -10158,22 +10327,22 @@ var _index = require("/index");
 
 var _checkDevice = require("/helper/checkDevice");
 
-var _printer = require("/helper/printer");
-
 var _renderTextToConsole = require("/helper/renderTextToConsole");
 
 var _playAlerts = require("/helper/playAlerts");
 
+var _update_InstrumentsList = require("/tone/update_InstrumentsList");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// test
-var debugTone = true;
+// debug
+var debug = true;
+exports.debug = debug;
+var context = "main-tone"; // old debug
 
-if (debugTone) {
-  console.log('-- ');
-}
-
-; //console.clear();
+exports.context = context;
+var debugTone = true; // printer(debug, context, "test", "sth.")
+//console.clear();
 
 var instruments = {};
 var savedParts = {}; // master output
@@ -10186,195 +10355,8 @@ var thisBPM = 120; // SAMPLER / SERVER FILES
 // ========================================================
 
 var soundDataURLs = {};
-var sampleDefault;
-var sampleURL = {
-  default: ['../']
-};
-var instrumentsList = {};
-
-function update_InstrumentsList() {
-  instrumentsList = {
-    drums: {
-      name: 'drums',
-      type: 'MembraneSynth',
-      baseNote: 30,
-      gain: 1,
-      vol: 0.7
-    },
-    metal: {
-      name: 'metal',
-      type: 'MetalSynth',
-      baseNote: 30,
-      gain: 0.4,
-      vol: 0.7
-    },
-    bass: {
-      name: 'bass',
-      type: 'DuoSynth',
-      baseNote: 70,
-      gain: 1,
-      vol: 0.7
-    },
-    string: {
-      name: 'string',
-      type: 'AMSynth',
-      baseNote: 180,
-      gain: 1,
-      vol: 0.7
-    },
-    acid: {
-      name: 'acid',
-      type: 'MonoSynth',
-      baseNote: 30,
-      gain: 0.23,
-      vol: 0.7
-    },
-    pad: {
-      name: 'pad',
-      type: 'Synth',
-      baseNote: 130,
-      gain: 1,
-      vol: 0.7
-    },
-    s_ambient: {
-      name: 's_ambient',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[0]
-    },
-    s_bass: {
-      name: 's_bass',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[1]
-    },
-    s_fx: {
-      name: 's_fx',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[2]
-    },
-    s_hh: {
-      name: 's_hh',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[3]
-    },
-    s_hit: {
-      name: 's_hit',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[4]
-    },
-    s_kick: {
-      name: 's_kick',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[5]
-    },
-    s_loop: {
-      name: 's_loop',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[6]
-    },
-    s_mix: {
-      name: 's_mix',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[7]
-    },
-    s_noise: {
-      name: 's_noise',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[8]
-    },
-    s_perc: {
-      name: 's_perc',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[9]
-    },
-    s_snare: {
-      name: 's_snare',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[10]
-    },
-    s_voc: {
-      name: 's_voc',
-      type: 'Sampler',
-      baseNote: 100,
-      gain: 1.4,
-      vol: 0.7,
-      url: sampleURL.default[11]
-    }
-  };
-  console.log('update_InstrumentsList: default file URL = ' + sampleURL.default[0]);
-}
-
-;
-
-function load_InstrumentsList() {// Object.keys(instrumentsList).forEach((inst, c) => {
-  // 	let time = (c+1) * 20;
-  // 	setTimeout(function(){
-  // 		let name = instrumentsList[inst].name;
-  // 		updateInstrument(name, [1], 0);
-  // 		updateSequence(name, [1]);
-  // 	}, time);		
-  // });
-}
-
-; // incoming data collection via socket.io, copied to 'soundDataURLs{}'
-
-function setDataURL(data) {
-  soundDataURLs = data;
-  console.log('Tone.js: stored in soundDataURLs, e.g. default: ' + soundDataURLs.default.shortURL); // setting a default sample;
-
-  sampleDefault = soundDataURLs.default.shortURL + soundDataURLs.default.files[1]; // console.log('sampleDefault = files[0]: ' + sampleDefault);
-  // generate URL data to local container
-
-  Object.keys(soundDataURLs).forEach(function (folder) {
-    var count = soundDataURLs[folder].count;
-    sampleURL[folder] = [];
-
-    for (var i = 0; i < count; i++) {
-      var newURL = soundDataURLs[folder].shortURL + soundDataURLs[folder].files[i]; // console.log(`newURL at sampleURL.${folder}[${i}] = ${newURL}`);
-
-      sampleURL[folder].push(newURL);
-    }
-
-    ;
-  }); // important: UPDATE only arrives after connection to server
-
-  update_InstrumentsList();
-  load_InstrumentsList();
-}
-
-; // init Instrument/ Sampler
+var sampleDefault; // let sampleURL = {default: ['../']};
+// init Instrument/ Sampler
 // ========================================================
 
 function initInstrument(dest, source, num) {
@@ -10391,8 +10373,8 @@ function initInstrument(dest, source, num) {
     return false;
   };
 
-  if (sampleURL[source] != undefined) {
-    if (sampleURL[source][num] != undefined) {
+  if (_index.sampleURL[source] != undefined) {
+    if (_index.sampleURL[source][num] != undefined) {
       if (debugTone) {
         console.log("Tone: initInstrument: file ".concat(source, "[").concat(num, "] is availible."));
       }
@@ -10400,7 +10382,7 @@ function initInstrument(dest, source, num) {
       ;
 
       if (debugTone) {
-        console.log("Tone: initInstrument: URL =  ".concat(sampleURL[source][0]));
+        console.log("Tone: initInstrument: URL =  ".concat(_index.sampleURL[source][0]));
       }
 
       ;
@@ -10444,7 +10426,7 @@ function initInstrument(dest, source, num) {
       }
 
       ;
-      instrumentsList[dest].url = sampleURL[source][num];
+      _index.instrumentsList[dest].url = _index.sampleURL[source][num];
     } else {
       error();
     }
@@ -10776,9 +10758,9 @@ function checkIfInstValid(instNameIncoming) {
   ; // check, if instrument is valid
 
   var instAvailible = false;
-  Object.keys(instrumentsList).forEach(function (instName) {
+  Object.keys(_index.instrumentsList).forEach(function (instName) {
     // if (debugTone){console.log('checkIfInstValid: instrumentsList{} .name: ' + instrumentsList[instName].name + ' .type: ' + instrumentsList[instName].type);};
-    if (instNameIncoming == instrumentsList[instName].name) {
+    if (instNameIncoming == _index.instrumentsList[instName].name) {
       instAvailible = true;
     }
 
@@ -11038,12 +11020,12 @@ function copyPattern(instName, instArray) {
 function setVolume(instName, vol) {
   if (instruments[instName] != null) {
     var volume = vol;
-    volume = vol * instrumentsList[instName].gain;
+    volume = vol * _index.instrumentsList[instName].gain;
     instruments[instName].vol = volume;
-    instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
+    _index.instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
 
     if (debugTone) {
-      console.log("Tone: setVolume vol ".concat(vol, " * gain ").concat(instrumentsList[instName].gain, " to ").concat(volume));
+      console.log("Tone: setVolume vol ".concat(vol, " * gain ").concat(_index.instrumentsList[instName].gain, " to ").concat(volume));
     }
 
     ;
@@ -11106,9 +11088,9 @@ function updateInstrument(instName, pat, rand, newUrl) {
 
     var inst = new _instruments.Instrument(); // params taken from instrumentsList
 
-    var instType = instrumentsList[instName].type;
-    var defaultVol = instrumentsList[instName].vol * instrumentsList[instName].gain;
-    var url = instrumentsList[instName].url;
+    var instType = _index.instrumentsList[instName].type;
+    var defaultVol = _index.instrumentsList[instName].vol * _index.instrumentsList[instName].gain;
+    var url = _index.instrumentsList[instName].url;
 
     if (newUrl != undefined) {
       url = newUrl;
@@ -11120,17 +11102,17 @@ function updateInstrument(instName, pat, rand, newUrl) {
       ;
     }
 
-    var note = instrumentsList[instName].baseNote; // update the new Instrument:
+    var note = _index.instrumentsList[instName].baseNote; // update the new Instrument:
 
     inst.setVolume(defaultVol);
 
-    if (instrumentsList[instName].baseNote != undefined) {
+    if (_index.instrumentsList[instName].baseNote != undefined) {
       inst.setBaseNote(note);
     }
 
     ;
 
-    if (instrumentsList[instName].type == 'Sampler') {
+    if (_index.instrumentsList[instName].type == 'Sampler') {
       inst.updateSampleURL(url);
 
       if (debugTone) {
@@ -11610,7 +11592,7 @@ function renderInstruments() {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js","/helper/checkDevice":"helper/checkDevice.js","/helper/printer":"helper/printer.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js"}],"text/helpText.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js","/helper/checkDevice":"helper/checkDevice.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js"}],"text/helpText.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20293,13 +20275,70 @@ var clearTextfield = function clearTextfield() {
 };
 
 exports.clearTextfield = clearTextfield;
-},{}],"index.js":[function(require,module,exports) {
+},{}],"socket/requestServerFiles.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.consoleLength = exports.consoleArray = exports.consolePointer = exports.alertMuteState = exports.soundMuteState = exports.user = exports.socket = exports.context = exports.debug = void 0;
+exports.requestServerFiles = requestServerFiles;
+
+var _index = require("/index");
+
+// manage server request & receive, e.g. Samples
+function requestServerFiles(string) {
+  _index.socket.emit('requestServerFiles', string);
+}
+
+;
+},{"/index":"index.js"}],"helper/extractSamplePaths.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.extractSamplePaths = extractSamplePaths;
+
+var _printer = require("/helper/printer");
+
+var _index = require("/index");
+
+// incoming data collection via socket.io, copied to 'soundDataURLs{}'
+function extractSamplePaths(data) {
+  (0, _printer.printer)(_index.debug, _index.context, "extractSamplePaths", "URLs paths from ".concat(data));
+  var _sampleURL = {
+    default: ['../']
+  }; // setting a default sample;
+  // sampleDefault = (soundDataURLs.default.shortURL + soundDataURLs.default.files[1]);
+  // console.log('sampleDefault = files[0]: ' + sampleDefault);
+  // generate URL data to local container
+
+  Object.keys(data).forEach(function (folder) {
+    var count = data[folder].count; // count = how many elements a folder contains
+
+    _sampleURL[folder] = [];
+    (0, _printer.printer)(_index.debug, _index.context, "extractPaths", "\n\t\tcount: ".concat(count, ", \n\t\tfolder: ").concat(folder, ", \n\t\tsampleURL[folder]: ").concat(_sampleURL[folder]));
+
+    for (var i = 0; i < count; i++) {
+      var newURL = data[folder].shortURL + data[folder].files[i];
+      (0, _printer.printer)(_index.debug, _index.context, "extractPaths", "newURL at sampleURL.".concat(folder, "[").concat(i, "] = ").concat(newURL));
+
+      _sampleURL[folder].push(newURL);
+    }
+
+    ;
+  });
+  return _sampleURL;
+}
+
+;
+},{"/helper/printer":"helper/printer.js","/index":"index.js"}],"index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.consoleLength = exports.consoleArray = exports.consolePointer = exports.instrumentsList = exports.sampleURL = exports.serverSamples = exports.alertMuteState = exports.soundMuteState = exports.user = exports.socket = exports.context = exports.debug = void 0;
 
 var _socket = _interopRequireDefault(require("socket.io-client"));
 
@@ -20313,19 +20352,25 @@ var _helpText = require("/text/helpText");
 
 var _mainTone = require("/tone/main-tone");
 
-var _printer = require("./helper/printer");
+var _update_InstrumentsList = require("/tone/update_InstrumentsList");
 
-var _alerts = require("./helper/alerts");
+var _printer = require("/helper/printer");
 
-var _createAlerts = require("./helper/createAlerts");
+var _alerts = require("/helper/alerts");
 
-var _enterFunction = require("./helper/enterFunction");
+var _createAlerts = require("/helper/createAlerts");
 
-var _clearTextfield = require("./helper/clearTextfield");
+var _enterFunction = require("/helper/enterFunction");
 
-var _renderTextToConsole = require("./helper/renderTextToConsole");
+var _clearTextfield = require("/helper/clearTextfield");
 
-var _playAlerts = require("./helper/playAlerts");
+var _renderTextToConsole = require("/helper/renderTextToConsole");
+
+var _playAlerts = require("/helper/playAlerts");
+
+var _requestServerFiles = require("/socket/requestServerFiles");
+
+var _extractSamplePaths = require("./helper/extractSamplePaths");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -20353,9 +20398,16 @@ exports.user = user;
 var soundMuteState = true;
 exports.soundMuteState = soundMuteState;
 var alertMuteState = false; // alerts muted or not?
-// input & console varibles
 
 exports.alertMuteState = alertMuteState;
+var serverFolders = "";
+var serverSamples = "";
+exports.serverSamples = serverSamples;
+var sampleURL = {};
+exports.sampleURL = sampleURL;
+var instrumentsList = ""; // input & console varibles
+
+exports.instrumentsList = instrumentsList;
 var consolePointer = 0; // for arrow functions
 
 exports.consolePointer = consolePointer;
@@ -20422,7 +20474,7 @@ document.getElementById("textarea").addEventListener("keydown", function (e) {
       }
 
       ;
-      (0, _renderTextToConsole.renderTextToConsole)(validState, user, string, 'local');
+      (0, _renderTextToConsole.renderTextToConsole)(validState, user, string, 'local'); // nothing to parse
     }
 
     ; // printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
@@ -20447,8 +20499,24 @@ document.getElementById("textarea").addEventListener("keydown", function (e) {
   }
 
   ;
+
+  if (e.code == 'Digit1') {
+    (0, _requestServerFiles.requestServerFiles)("samples");
+    (0, _printer.printer)(debug, context, "request Server Files", "Index: socket send \"requestServerFiles\", 'samples'.. ");
+  }
+}); // SOCKET HANDLING
+// initial request for samples on server
+
+(0, _requestServerFiles.requestServerFiles)("samples"); // receive files via socket, assign them to global variables
+
+socket.on("filesOnServer", function (folder, samples, what) {
+  serverFolders = folder;
+  exports.serverSamples = serverSamples = samples;
+  (0, _printer.printer)(debug, context, "receive filesOnServer", "receiving \n\t\tfolders: ".concat(serverFolders, " \n\t\tfiles: ").concat(serverSamples));
+  exports.sampleURL = sampleURL = (0, _extractSamplePaths.extractSamplePaths)(serverSamples);
+  exports.instrumentsList = instrumentsList = (0, _update_InstrumentsList.update_InstrumentsList)();
 });
-},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/renderHTML":"html/renderHTML.js","/parse-commands":"parse-commands.js","/text/helpText":"text/helpText.js","/tone/main-tone":"tone/main-tone.js","./helper/printer":"helper/printer.js","./helper/alerts":"helper/alerts.js","./helper/createAlerts":"helper/createAlerts.js","./helper/enterFunction":"helper/enterFunction.js","./helper/clearTextfield":"helper/clearTextfield.js","./helper/renderTextToConsole":"helper/renderTextToConsole.js","./helper/playAlerts":"helper/playAlerts.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/renderHTML":"html/renderHTML.js","/parse-commands":"parse-commands.js","/text/helpText":"text/helpText.js","/tone/main-tone":"tone/main-tone.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","/helper/alerts":"helper/alerts.js","/helper/createAlerts":"helper/createAlerts.js","/helper/enterFunction":"helper/enterFunction.js","/helper/clearTextfield":"helper/clearTextfield.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/socket/requestServerFiles":"socket/requestServerFiles.js","./helper/extractSamplePaths":"helper/extractSamplePaths.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

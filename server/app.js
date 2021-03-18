@@ -63,15 +63,15 @@ var samples = {};
 var folders = [];
 
 let scanMediaFolders = (_audioPath) => {
-	folders = readMediaFolders(_audioPath);
-	samples = readMediaFoldersFiles(_audioPath, folders);
-	// return [_folders, _samples]
+	let _folders = readMediaFolders(_audioPath);
+	let _samples = readMediaFoldersFiles(_audioPath, _folders);
+	return {folders: _folders, samples: _samples};
 }
-scanMediaFolders(audioPath);
+let scanResults = scanMediaFolders(audioPath);
 printer(debug, context, "audio files", `
 	Scanning audio files, folders and samples. 
-	Collected: ${folders}
-	random test samples entry: "${Object.keys(samples)[0]}"
+	Collected: ${scanResults.folders}
+	random test samples entry: "${Object.keys(scanResults.samples)[0]}"
 
 ==============
 `);
@@ -178,6 +178,19 @@ io.on('connection', socket => {
 
 
 
+
+	// receive request for server files. scan & send Files
+	// ================================================================
+	socket.on('requestServerFiles', function (string) {
+		printer(debug, context, "requestServerFiles", `client requests files on: ${string}`);
+		
+		// read & print files 'samples'
+		if (string == 'samples') {
+			let scanResults = scanMediaFolders(audioPath);
+			printer(debug, context, "requestServerFiles", `sending files ${scanResults}`);
+			socket.emit('filesOnServer', scanResults.folders, scanResults.samples, string);	
+		};
+	});
 
 
 
@@ -425,16 +438,7 @@ io.on('connection', socket => {
 
 
 
-	// send Files
-	// ================================================================
-	socket.on('readFiles', function (sounds) {
-		console.log("");
-		console.log(`List files - client requests files on: ${sounds}`);
-		// read & print files
-		scanMediaFolders(audioPath);
-		console.log('sending files to client');
-		socket.emit('files', folders, samples, sounds);	
-	});
+	
 
 
 
