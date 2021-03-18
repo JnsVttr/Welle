@@ -16,7 +16,9 @@ import { sampleURL, instrumentsList, recorderDeal, handleForm, alertMuteState } 
 import { checkDevice } from '/helper/checkDevice';
 import { renderTextToConsole } from '/helper/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
-import { update_InstrumentsList } from '/tone/update_InstrumentsList'
+import { update_InstrumentsList } from '/tone/update_InstrumentsList';
+import { printer } from '/helper/printer';
+import { startTransport } from './startTransport';
 
 // debug
 export let debug = true;
@@ -24,20 +26,17 @@ export let context = "main-tone";
 let debugTone = true;  // old debug, needs to be removed
 
 // device ?
-let device = checkDevice(); // check device, ios is not allowd to load mediarecorder
+export let device = checkDevice(); // check device, ios is not allowd to load mediarecorder
 
 // tone variables
 var instruments = {};
 var savedParts = {};
 let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
-let thisBPM = 120;
-
-
-// clear console
-// console.clear();
-
-
+export let thisBPM = 120;
+Tone.Transport.bpm.value = thisBPM;
+Tone.context.latencyHint = 'balanced';
+let now = Tone.now();
 
 
 
@@ -47,7 +46,7 @@ let thisBPM = 120;
 
 // init Instrument/ Sampler
 // ========================================================
-function initInstrument(dest, source, num) {
+export function initInstrument(dest, source, num) {
 	// if (debugTone) {console.log('Tone: initInstrument: assign new sounds from: ' + source + '[' + num + '] ' + 'to ' + dest)};
 	printer(debug, context, "initInstrument", `assign new sounds from source[num]: ${source[num]} to dest: ${dest}`)
 	
@@ -101,200 +100,6 @@ function initInstrument(dest, source, num) {
 
 
 
-// UPLOAD FILES
-// ========================================================
-function uploadToServer(instName) {
-	let name = instName;
-	console.log('uploadToServer: toneTest: upload to server: ' + name);
-	handleForm(name);
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// RECORDER
-// ========================================================
-const audioContext  	= Tone.context;
-const recDestination  	= audioContext.createMediaStreamDestination();
-let recorder;
-let recorderStatus = 'stopped';
-masterOut.connect(recDestination);
-let chunks = [];
-
-// doesn't work on IOS
-if (device != 'ios') {
-	recorder = new MediaRecorder(recDestination.stream);
-	recorder.ondataavailable = evt => chunks.push(evt.data);
-	recorder.onstop = evt => {
-		let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-		let audioSrc = URL.createObjectURL(blob);
-		recorderDeal('stopped', audioSrc);
-		playAlerts('stop_recording', alertMuteState);
-	};
-};
-
-function audioRecord(state) {
-	if (state == true && recorderStatus == 'stopped') { recorderStatus = 'started'; recorder.start(); recorderDeal('started'); };
-	if (state == false && recorderStatus == 'started' ){ recorderStatus = 'stopped'; recorder.stop(); resetRecorder(); };
-};
-function resetRecorder () { 
-	chunks = []; 
-};	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TONE TRANSPORT
-// =====================================================================
-Tone.Transport.bpm.value = thisBPM;
-Tone.context.latencyHint = 'balanced';
-
-function startTransport () {
-	if (Tone.Transport.state=='stopped') {
-		if (debugTone){console.log('Tone: startTransport: Tone.Transport State: ', Tone.Transport.state, ' --> starting Tone Transport..');};
-		// Tone.Transport.ticks = 0;
-		Tone.Transport.bpm.value = thisBPM;
-		now = Tone.now();
-		Tone.context.latencyHint = 'balanced';
-		Tone.Transport.start();
-		if (debugTone){ console.log('Tone: startTransport: Check Done: Tone.Transport State = ', Tone.Transport.state);}
-	} else { 
-		if (debugTone){console.log("Tone: startTransport: Tone is playing");}
-	};
-};
-
-
-// translate incoming messages (parseInput) to sound functions:
-function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
-	console.log('');
-	console.log('');
-	if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
-
-	let state;  // instrument valid state
-	
-	
-	switch (cmd) {
-		case 'play':
-			state = checkIfInstValid (instName);
-			if (state) {playInstrument (instName, patternIn, rand)};
-		break;
-		case 'stop':
-			state = checkIfInstValid (instName);
-			if (state) {stopInstrument (instName);};
-		break;
-		case 'stopAll':
-			stopAllInstruments();
-		break;
-		case 'playAll':
-			playAllInstruments ();
-		break;
-		case 'patternCopy':
-			state = checkIfInstValid (instName);
-			if (state) {copyPattern (instName, instArray)};
-		break;
-		case 'setVolume':
-			state = checkIfInstValid (instName);
-			if (state) {setVolume(instName, vol)};
-		break;
-		case 'setRandom':
-			state = checkIfInstValid (instName);	
-			if (state) {setRandom(instName, rand)}
-		break;
-		case 'setBPM':
-			setBPM(bpm, num)
-		break;
-		case 'savePart':
-			savePart(name);
-		break;
-		case 'setPart':
-			setPart(name);
-		break;
-		case 'deleteElement':
-			deleteElement(instArray);
-		break;
-		case 'clearPart':
-			clearParts();
-		break;
-		case 'reset':
-			resetAction();
-		break;
-		case 'muteOn':
-			muteAll(true);
-		break;
-		case 'muteOff':
-			muteAll(false);
-		break;
-		case 'recordStart':
-			if (device != 'ios') {audioRecord(true)};
-		break;
-		case 'recordStop':
-			if (device != 'ios') {audioRecord(false)};
-		break;
-		case 'uploadFiles':
-			uploadToServer(instName);
-		break;
-		case 'initInst':
-			state = checkIfInstValid (instName);
-			if (state) {initInstrument(instName, name, num);}
-		break;
-	}
-};
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -333,14 +138,14 @@ function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, n
 // ===================================================================
 
 
-function muteAll(state) {
+export function muteAll(state) {
 	if (debugTone){ console.log('Tone: muteAll: Transport: change mute state..') };
 	if (state) {Tone.Master.mute = true;  playAlerts('return', alertMuteState)}
 	if (state == false ) {Tone.Master.mute = false; playAlerts('return', alertMuteState)}
 };
 
-let now = 0;
-function resetAction() {
+
+export function resetAction() {
 	setTimeout(function() {
 	  stopAllInstruments ();
 	}, 20);
@@ -374,69 +179,11 @@ function resetAction() {
 };
 
 
-function checkIfInstValid (instNameIncoming) {
-	if (debugTone){ console.log('');};
-	if (debugTone){ console.log('Tone: checkIfInstValid: check valid for this inst: ' + instNameIncoming);};
-	// check, if instrument is valid
-	let instAvailible = false;
-
-	Object.keys(instrumentsList).forEach((instName) => {
-		// if (debugTone){console.log('checkIfInstValid: instrumentsList{} .name: ' + instrumentsList[instName].name + ' .type: ' + instrumentsList[instName].type);};
-		if (instNameIncoming == instrumentsList[instName].name) {
-			instAvailible = true;
-		};
-	});
-
-	
-	if (instAvailible == false ) {
-		let string = 'no such instrument ..';
-		renderTextToConsole(false, 's', string, 'local');
-		playAlerts('error', alertMuteState);
-	};
-	if (instAvailible == true) {
-		if (debugTone){console.log('Tone: checkIfInstValid: found ' + instNameIncoming) };
-		return instAvailible;
-	};
-	return instAvailible;
-	if (debugTone){ console.log('');};
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // INSTRUMENTS - CONTROL
 // ===================================================================
 
 
-function playInstrument (instName, patternIn, rand, url) {
+export function playInstrument (instName, patternIn, rand, url) {
 	if (debugTone){ console.log('Tone: playInstrument: playInstrument() at Tone', instName, patternIn, rand) };
 	startTransport();
 	
@@ -511,7 +258,7 @@ function playInstrument (instName, patternIn, rand, url) {
 
 
 
-function stopInstrument (instName) {
+export function stopInstrument (instName) {
 	// store all new items (before calling part)
 	if (instruments[instName]!=null) {
 		instruments[instName].sequence.stop();
@@ -520,7 +267,7 @@ function stopInstrument (instName) {
 	};
 	renderInstruments();
 };
-function stopAllInstruments () {
+export function stopAllInstruments () {
 	if (debugTone){console.log('Tone: stopAllInstruments: stopping all instruments!')};
 	Object.keys(instruments).forEach((instName) => {
 		instruments[instName].sequence.stop();		
@@ -532,7 +279,7 @@ function stopAllInstruments () {
 	// };
 	renderInstruments();
 };
-function playAllInstruments () {
+export function playAllInstruments () {
 	if (debugTone){console.log('Tone: playAllInstruments: playing all instruments!')};
 	//Tone.Transport.start();
 	now = Tone.now();
@@ -553,7 +300,7 @@ function playAllInstruments () {
 	renderInstruments();
 };
 
-function copyPattern (instName, instArray) {
+export function copyPattern (instName, instArray) {
 	// copy patterns
 	if (instruments[instName]!=null) {
 		for (let i=0;i<instArray.length;i++){
@@ -565,7 +312,7 @@ function copyPattern (instName, instArray) {
 		};
 	};
 };
-function setVolume(instName, vol) {
+export function setVolume(instName, vol) {
 	if (instruments[instName]!=null) {
 		let volume = vol;
 		volume = vol * instrumentsList[instName].gain;
@@ -575,12 +322,12 @@ function setVolume(instName, vol) {
 		instruments[instName].synth.setVolume(volume);
 	};
 };
-function setRandom(instName, rand) {
+export function setRandom(instName, rand) {
 	if (instruments[instName]!=null) {
 		instruments[instName].rand = rand;
 	};
 };
-function setBPM(bpm, num) {
+export function setBPM(bpm, num) {
 	if (num == '') {
 		if (debugTone){console.log('Tone: setBPM: set bpm to ' + bpm)};
 		thisBPM = bpm; 
@@ -843,7 +590,7 @@ function shuffleArray(array) {
 // PARTS
 // ===================================================================
 
-function savePart(name) {
+export function savePart(name) {
 	//console.log("save part under this name: ", name);
     savedParts[name] = {name: name};
     savedParts[name].instruments = {};
@@ -875,7 +622,7 @@ function savePart(name) {
 
 };
 
-function setPart (name) {
+export function setPart (name) {
 	startTransport();
 	if (savedParts.bpm != undefined) {
 		setBPM(savedParts.bpm, '');        			
@@ -920,7 +667,7 @@ function setPart (name) {
     };
 };
 
-function deleteElement (elements) {
+export function deleteElement (elements) {
 	// check if element exists before settings
     var check = false;
     if (debugTone){console.log(`Tone: deleteElement: delete this: ${elements} ..`)};
@@ -978,7 +725,7 @@ function playPartInstrument (instName, patternIn, rand, isPlaying, url) {
 
 
 
-function clearParts () {
+export function clearParts () {
 	savedParts = {};
 	renderParts();
 };
@@ -1056,6 +803,13 @@ function renderInstruments() {
 
 
 
+// UPLOAD FILES
+// ========================================================
+export function uploadToServer(instName) {
+	let name = instName;
+	console.log('uploadToServer: toneTest: upload to server: ' + name);
+	handleForm(name);
+};
 
 
 
@@ -1063,4 +817,54 @@ function renderInstruments() {
 
 
 
-export { transport, handlePresetsInTone } 
+
+
+
+
+
+
+
+
+
+
+// RECORDER
+// ========================================================
+const audioContext  	= Tone.context;
+const recDestination  	= audioContext.createMediaStreamDestination();
+let recorder;
+let recorderStatus = 'stopped';
+masterOut.connect(recDestination);
+let chunks = [];
+
+// doesn't work on IOS
+if (device != 'ios') {
+	recorder = new MediaRecorder(recDestination.stream);
+	recorder.ondataavailable = evt => chunks.push(evt.data);
+	recorder.onstop = evt => {
+		let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+		let audioSrc = URL.createObjectURL(blob);
+		recorderDeal('stopped', audioSrc);
+		playAlerts('stop_recording', alertMuteState);
+	};
+};
+
+export function audioRecord(state) {
+	if (state == true && recorderStatus == 'stopped') { recorderStatus = 'started'; recorder.start(); recorderDeal('started'); };
+	if (state == false && recorderStatus == 'started' ){ recorderStatus = 'stopped'; recorder.stop(); resetRecorder(); };
+};
+function resetRecorder () { 
+	chunks = []; 
+};	
+
+
+
+
+
+
+
+
+
+
+
+
+export { handlePresetsInTone } 
