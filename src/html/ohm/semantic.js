@@ -16,23 +16,22 @@ all returns are send to parseInput file
 // libraries
 import grammarText from '/html/ohm/grammar';
 import ohm from 'ohm-js';
-// import from symlink, because can't reach src root
-import { debugSemantic }  from './../index-symlink';
+import { printer } from '/helper/printer';
 
 // variables
 let livecode = ohm.grammar(grammarText);  // taken from grammar.js
 let semantics = livecode.createSemantics();
-let debug = false;
-debug = debugSemantic;
+let debug = true;
+let context = "semantics";
 
-// printer(debug, topic, element, value)
-let printer = (debug, element, value) => {
-    if (debug==true) {
-        console.log(`Semantics \t - ${element} >> ${value}`);
-    };
-}
+// printer(debug, context, topic, element, value)
+// let printer = (debug, element, value) => {
+//     if (debug==true) {
+//         console.log(`Semantics \t - ${element} >> ${value}`);
+//     };
+// }
 
-// printer(debug, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
+// printer(debug, context, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
 
 
 
@@ -67,8 +66,8 @@ semantics.addOperation('eval', {
         let pattern = handlePattern(pat.eval());
         let command = key.eval();
         
-        //printer(debug, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
-        printer(debug, "Sequence_seqPattern", `
+        //printer(debug, context, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
+        printer(debug, context, "Sequence_seqPattern", `
         return [
             "transport", "sequenceStart", 
             ["command", ${command}], 
@@ -169,7 +168,7 @@ semantics.addOperation('eval', {
     Controls_copyPattern: function(instSource, _,  instDest) {
         var inst = instSource.sourceString;
         var dest = instToArray(instDest);
-        printer(debug, "Controls_copyPattern", `
+        printer(debug, context, "Controls_copyPattern", `
             return [
                 "control", "patternCopy", 
                 ["inst", ${inst}], 
@@ -185,7 +184,7 @@ semantics.addOperation('eval', {
 
     Controls_listInstruments: function(_, inst) {
         var inst = inst.sourceString;
-        printer(debug, "Controls_listInstruments", `
+        printer(debug, context, "Controls_listInstruments", `
         return [
             "helper", "list", 
             ["inst", ${inst}]
@@ -200,7 +199,7 @@ semantics.addOperation('eval', {
         var inst = inst.sourceString;
         sel = sel.eval();
         
-        printer(debug, "Controls_selectInstrument", `
+        printer(debug, context, "Controls_selectInstrument", `
         return [
             "control", "instSelect", 
             ["inst", ${inst}], 
@@ -219,7 +218,7 @@ semantics.addOperation('eval', {
         var vol = volume.eval();
         if (vol>1) {vol=1};
     
-        printer(debug, "Controls_setInstrumentVolume", `
+        printer(debug, context, "Controls_setInstrumentVolume", `
         return [
             "control", "instVolume",
             ["instArray", ${instArray}],
@@ -238,7 +237,7 @@ semantics.addOperation('eval', {
         var random = handleRand(rand.eval());
         var random = rand.eval();
         
-        printer(debug, "Controls_assignRandom", `
+        printer(debug, context, "Controls_assignRandom", `
         return [
             "control", "instRand", 
             ["instArray", ${instArray}], 
@@ -260,7 +259,7 @@ semantics.addOperation('eval', {
         
         var instArray = instToArray(inst);
         
-        printer(debug, "Controls_assignPattern", `
+        printer(debug, context, "Controls_assignPattern", `
         return [
             "control", "patternAssign", 
             ["instArray", ${instArray}], 
@@ -281,7 +280,7 @@ semantics.addOperation('eval', {
         name = name.sourceString;
         num = num.sourceString;
         
-        printer(debug, "Controls_initInstrument", `
+        printer(debug, context, "Controls_initInstrument", `
         return [
             "control", "initInst", 
             ["inst", ${inst}], 
@@ -299,7 +298,7 @@ semantics.addOperation('eval', {
 
     Controls_showInstrument: function(_, instrument) {
         var inst = instrument.sourceString;
-        printer(debug, "Controls_showInstrument", `
+        printer(debug, context, "Controls_showInstrument", `
         return [
             "helper", "show", 
             ["inst", ${inst}],
@@ -314,7 +313,7 @@ semantics.addOperation('eval', {
     Controls_bpm: function(_, bpm, time) {
         bpm = bpm.sourceString;
         time = time.sourceString;
-        printer(debug, "Controls_bpm", `
+        printer(debug, context, "Controls_bpm", `
         return [
             "control", "setBPM", 
             ["bpm", ${bpm}],
@@ -341,7 +340,7 @@ semantics.addOperation('eval', {
 
     Controls_helpText: function(_, text) {
         text = text.sourceString;
-        printer(debug, "Controls_helpText", `
+        printer(debug, context, "Controls_helpText", `
         return [
             "helper", "helpText",
             ["help", ${text}]
@@ -353,7 +352,7 @@ semantics.addOperation('eval', {
         ]; 
     },
     Controls_help: function(_) {
-        printer(debug, "Controls_help", `
+        printer(debug, context, "Controls_help", `
         return [
             "helper", "help",
         ];
@@ -363,7 +362,7 @@ semantics.addOperation('eval', {
         ]; 
     },
     Controls_clear: function(_) {
-        printer(debug, "Controls_clear", `
+        printer(debug, context, "Controls_clear", `
         return [
             "helper", "clear",
         ];`);
@@ -427,7 +426,7 @@ semantics.addOperation('eval', {
         var repeat = count.sourceString;
         if (repeat=='') {repeat=1};
         var arr = [instrument, repeat];
-        printer(debug, "InstrumentRepeat_instrumentEntry", `
+        printer(debug, context, "InstrumentRepeat_instrumentEntry", `
         return ${arr};
         `);
         return arr;

@@ -17215,7 +17215,431 @@ Grammar.BuiltInRules = require('../dist/built-in-rules');
 util.announceBuiltInRules(Grammar.BuiltInRules);
 module.exports.ohmGrammar = ohmGrammar = require('../dist/ohm-grammar');
 Grammar.initApplicationParser(ohmGrammar, buildGrammar);
-},{"./Builder":"../node_modules/ohm-js/src/Builder.js","./Grammar":"../node_modules/ohm-js/src/Grammar.js","./Namespace":"../node_modules/ohm-js/src/Namespace.js","./common":"../node_modules/ohm-js/src/common.js","./errors":"../node_modules/ohm-js/src/errors.js","./pexprs":"../node_modules/ohm-js/src/pexprs.js","./util":"../node_modules/ohm-js/src/util.js","./version":"../node_modules/ohm-js/src/version.js","is-buffer":"../node_modules/is-buffer/index.js","../extras":"../node_modules/ohm-js/extras/index.js","../dist/built-in-rules":"../node_modules/ohm-js/dist/built-in-rules.js","../dist/ohm-grammar":"../node_modules/ohm-js/dist/ohm-grammar.js"}],"html/renderHTML.js":[function(require,module,exports) {
+},{"./Builder":"../node_modules/ohm-js/src/Builder.js","./Grammar":"../node_modules/ohm-js/src/Grammar.js","./Namespace":"../node_modules/ohm-js/src/Namespace.js","./common":"../node_modules/ohm-js/src/common.js","./errors":"../node_modules/ohm-js/src/errors.js","./pexprs":"../node_modules/ohm-js/src/pexprs.js","./util":"../node_modules/ohm-js/src/util.js","./version":"../node_modules/ohm-js/src/version.js","is-buffer":"../node_modules/is-buffer/index.js","../extras":"../node_modules/ohm-js/extras/index.js","../dist/built-in-rules":"../node_modules/ohm-js/dist/built-in-rules.js","../dist/ohm-grammar":"../node_modules/ohm-js/dist/ohm-grammar.js"}],"helper/printer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.printer = void 0;
+
+var printer = function printer(debug, context, element, value) {
+  if (debug == true) {
+    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
+  }
+
+  ;
+};
+
+exports.printer = printer;
+},{}],"html/ohm/semantic.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.semantics = exports.livecode = void 0;
+
+var _grammar = _interopRequireDefault(require("/html/ohm/grammar"));
+
+var _ohmJs = _interopRequireDefault(require("ohm-js"));
+
+var _printer = require("/helper/printer");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+naming relates to grammar functions:
+Sequence_seqPattern = topic Sequence, subFunction seqPattern
+
+all returns are send to parseInput file
+*/
+// libraries
+// variables
+var livecode = _ohmJs.default.grammar(_grammar.default); // taken from grammar.js
+
+
+exports.livecode = livecode;
+var semantics = livecode.createSemantics();
+exports.semantics = semantics;
+var debug = true;
+var context = "semantics"; // printer(debug, context, topic, element, value)
+// let printer = (debug, element, value) => {
+//     if (debug==true) {
+//         console.log(`Semantics \t - ${element} >> ${value}`);
+//     };
+// }
+// printer(debug, context, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
+// ========================  Grammar & Semantic ====================== //
+// SEMANTICS FOR OHM.JS LANGUAGE:
+
+semantics.addOperation('eval', {
+  /* 
+      Trying to pre-calculate all values here, 
+      Delivering easy-to-read array to the page
+       Naming convention: [name, val]
+      command - play etc.
+      instArray - multiple instruments
+      pattern - array of pattern
+      rand - integer
+      inst - string ("bass")
+      sel - integer
+      vol - float (max 1.0)
+      bpm - integer
+      concat - ??
+       Helper functions: instToArray, handleRand, handlePattern
+  */
+
+  /* SEQUENCE HANDLING */
+  Sequence_seqPattern: function Sequence_seqPattern(key, inst, pat, rand) {
+    var instArray = instToArray(inst);
+    var random = handleRand(rand.eval());
+    var pattern = handlePattern(pat.eval());
+    var command = key.eval(); //printer(debug, context, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
+
+    (0, _printer.printer)(debug, context, "Sequence_seqPattern", "\n        return [\n            \"transport\", \"sequenceStart\", \n            [\"command\", ".concat(command, "], \n            [\"instArray\", ").concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "]\n        ]"));
+    return ["transport", "sequenceStart", ["command", command], ["instArray", instArray], ["pattern", pattern], ["rand", random]];
+  },
+  General_savePart: function General_savePart(_, name) {
+    name = name.sourceString;
+    return ["general", "savePart", ["savePart", name]];
+  },
+  General_setPart: function General_setPart(_, name) {
+    name = name.sourceString;
+    return ["general", "setPart", ["setPart", name]];
+  },
+  General_deleteElement: function General_deleteElement(_, name) {
+    name = instToArray(name);
+    return ["general", "deleteElement", ["deleteElement", name]];
+  },
+  General_muteOn: function General_muteOn(name) {
+    return ["helper", "muteOn"];
+  },
+  General_muteOff: function General_muteOff(name) {
+    return ["helper", "muteOff"];
+  },
+  General_recordStart: function General_recordStart(name) {
+    return ["helper", "recordStart"];
+  },
+  General_recordStop: function General_recordStop(name) {
+    return ["helper", "recordStop"];
+  },
+  General_uploadDefault: function General_uploadDefault(_) {
+    return ["helper", "uploadFiles"];
+  },
+  General_uploadFiles: function General_uploadFiles(_, file) {
+    var string = file.sourceString;
+    return ["helper", "uploadFiles", ["inst", string]];
+  },
+  General_restart: function General_restart(cmd) {
+    return [cmd.sourceString];
+  },
+  General_joinName: function General_joinName(join, list) {
+    return ['join', instToArray(list)];
+  },
+  General_storePreset: function General_storePreset(_, preset) {
+    return ["helper", 'store', ['inst', preset.sourceString]];
+  },
+  General_reloadPreset: function General_reloadPreset(_, preset) {
+    return ["helper_toAll", 'reload', ['inst', preset.sourceString]];
+  },
+
+  /* TRANSPORT CONTROL HANDLING */
+  Controls_copyPattern: function Controls_copyPattern(instSource, _, instDest) {
+    var inst = instSource.sourceString;
+    var dest = instToArray(instDest);
+    (0, _printer.printer)(debug, context, "Controls_copyPattern", "\n            return [\n                \"control\", \"patternCopy\", \n                [\"inst\", ".concat(inst, "], \n                [\"instArray\", ").concat(dest, "]\n            ];\n        "));
+    return ["control", "patternCopy", ["inst", inst], ["instArray", dest]];
+  },
+  Controls_listInstruments: function Controls_listInstruments(_, inst) {
+    var inst = inst.sourceString;
+    (0, _printer.printer)(debug, context, "Controls_listInstruments", "\n        return [\n            \"helper\", \"list\", \n            [\"inst\", ".concat(inst, "]\n        ]"));
+    return ["helper", "list", ["inst", inst]];
+  },
+  Controls_selectInstrument: function Controls_selectInstrument(_, inst, sel) {
+    var inst = inst.sourceString;
+    sel = sel.eval();
+    (0, _printer.printer)(debug, context, "Controls_selectInstrument", "\n        return [\n            \"control\", \"instSelect\", \n            [\"inst\", ".concat(inst, "], \n            [\"sel\", ").concat(sel, "],\n        ];\n        "));
+    return ["control", "instSelect", ["inst", inst], ["sel", sel]];
+  },
+  Controls_setInstrumentVolume: function Controls_setInstrumentVolume(_, volume, inst) {
+    var instArray = instToArray(inst);
+    var vol = volume.eval();
+
+    if (vol > 1) {
+      vol = 1;
+    }
+
+    ;
+    (0, _printer.printer)(debug, context, "Controls_setInstrumentVolume", "\n        return [\n            \"control\", \"instVolume\",\n            [\"instArray\", ".concat(instArray, "],\n            [\"vol\", ").concat(vol, "],\n        ];\n        "));
+    return ["control", "instVolume", ["instArray", instArray], ["vol", vol]];
+  },
+  Controls_assignRandom: function Controls_assignRandom(rand, inst) {
+    var instArray = instToArray(inst);
+    var random = handleRand(rand.eval());
+    var random = rand.eval();
+    (0, _printer.printer)(debug, context, "Controls_assignRandom", "\n        return [\n            \"control\", \"instRand\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"rand\", ").concat(random, "],\n        ];\n        "));
+    return ["control", "instRand", ["instArray", instArray], ["rand", random]];
+  },
+  Controls_assignPattern: function Controls_assignPattern(inst, pat, rand) {
+    var random = handleRand(rand.eval());
+    var pattern = pat.eval();
+    pattern = [pattern]; // Array conversion only neccessary here, don't know why 
+
+    pattern = handlePattern(pattern);
+    var instArray = instToArray(inst);
+    (0, _printer.printer)(debug, context, "Controls_assignPattern", "\n        return [\n            \"control\", \"patternAssign\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "] \n        ];\n        "));
+    return ["control", "patternAssign", ["instArray", instArray], ["pattern", pattern], ["rand", random]];
+  },
+  Controls_initInstrument: function Controls_initInstrument(inst, _, name, a, num, b) {
+    inst = inst.sourceString;
+    name = name.sourceString;
+    num = num.sourceString;
+    (0, _printer.printer)(debug, context, "Controls_initInstrument", "\n        return [\n            \"control\", \"initInst\", \n            [\"inst\", ".concat(inst, "], \n            [\"initInst\", ").concat(name, "],\n            [\"num\", ").concat(num, "],\n        ];\n        "));
+    return ["control", "initInst", ["inst", inst], ["initInst", name], ["num", num]];
+  },
+  Controls_showInstrument: function Controls_showInstrument(_, instrument) {
+    var inst = instrument.sourceString;
+    (0, _printer.printer)(debug, context, "Controls_showInstrument", "\n        return [\n            \"helper\", \"show\", \n            [\"inst\", ".concat(inst, "],\n        ];    \n        "));
+    return ["helper", "show", ["inst", inst]];
+  },
+  Controls_bpm: function Controls_bpm(_, bpm, time) {
+    bpm = bpm.sourceString;
+    time = time.sourceString;
+    (0, _printer.printer)(debug, context, "Controls_bpm", "\n        return [\n            \"control\", \"setBPM\", \n            [\"bpm\", ".concat(bpm, "],\n            [\"num\", ").concat(time, "],\n        ];\n        "));
+    return ["control", "setBPM", ["bpm", bpm], ["num", time]];
+  },
+  // Controls_concatInstruments: function(concat) {
+  //     // ???
+  //     let instConcat = concat.eval();
+  //     //instConcat = concat.sourceString;
+  //     if (instConcat=="") {
+  //         return ''
+  //     } else {
+  //         return ["control", "instrumentConcat", instConcat];
+  //     }
+  // },
+  Controls_helpText: function Controls_helpText(_, text) {
+    text = text.sourceString;
+    (0, _printer.printer)(debug, context, "Controls_helpText", "\n        return [\n            \"helper\", \"helpText\",\n            [\"help\", ".concat(text, "]\n        ]; \n        "));
+    return ["helper", "helpText", ["help", text]];
+  },
+  Controls_help: function Controls_help(_) {
+    (0, _printer.printer)(debug, context, "Controls_help", "\n        return [\n            \"helper\", \"help\",\n        ];\n        ");
+    return ["helper", "help"];
+  },
+  Controls_clear: function Controls_clear(_) {
+    (0, _printer.printer)(debug, context, "Controls_clear", "\n        return [\n            \"helper\", \"clear\",\n        ];");
+    return ["helper", "clear"];
+  },
+
+  /* LANGUAGE INTERNAL FUNCTION HANDLING */
+  // ============================================= //
+  Command_playSeq: function Command_playSeq(cmd) {
+    return ["play"];
+  },
+  Command_playSeqPlus: function Command_playSeqPlus(cmd) {
+    return ["play"];
+  },
+
+  /*
+  Command_playSeqSolo: function (cmd) {
+      return ["", ""];
+  },
+  */
+  Command_stopSeq: function Command_stopSeq(cmd) {
+    return ["stop"];
+  },
+  Command_stopSeqPlus: function Command_stopSeqPlus(cmd) {
+    return ["stop"];
+  },
+  Command_forSeq: function Command_forSeq(cmd, count) {
+    return [cmd.sourceString, parseInt(count.sourceString)];
+  },
+  Command_inSeq: function Command_inSeq(cmd, count) {
+    return [cmd.sourceString, parseInt(count.sourceString)];
+  },
+  Command_reset: function Command_reset(cmd) {
+    return [cmd.sourceString];
+  },
+  // InstrumentConcat: function (concat) {
+  //     var arr = concat.asIteration().eval()
+  //     var arrString = JSON.stringify(arr);
+  //     if ( (arrString.split(",").length - 1) < 2) {arr=""}
+  //     return arr;
+  // },
+  InstrumentRepeat_instrumentEntry: function InstrumentRepeat_instrumentEntry(inst, count) {
+    var instrument = inst.sourceString;
+    var repeat = count.sourceString;
+
+    if (repeat == '') {
+      repeat = 1;
+    }
+
+    ;
+    var arr = [instrument, repeat];
+    (0, _printer.printer)(debug, context, "InstrumentRepeat_instrumentEntry", "\n        return ".concat(arr, ";\n        "));
+    return arr;
+  },
+  PatternRandom_randomize: function PatternRandom_randomize(cmd, count) {
+    count = count.sourceString;
+    var intCheck = false;
+
+    if (count.length == 0) {
+      intCheck = false;
+      count = 0;
+    } else {
+      intCheck = true;
+      count = parseInt(count);
+    }
+
+    ;
+
+    if (!intCheck) {
+      count = 1;
+    }
+
+    ;
+    return count;
+  },
+  PatternRandom_randomizeOff: function PatternRandom_randomizeOff(cmd, cmd2) {
+    var randVal = 0;
+    return randVal;
+  },
+
+  /*
+  drums (#2#3-#)3-#3 (#11#22) #1#2
+  */
+  Pattern: function Pattern(pat) {
+    var pattern = pat.asIteration().eval(); //console.log('new at Pattern all incoming: ', pattern)
+
+    var newPattern = [];
+
+    for (var i = 0; i < pattern.length; i++) {
+      if (Array.isArray(pattern[i])) {
+        for (var j = 0; j < pattern[i].length; j++) {
+          newPattern.push(pattern[i][j]);
+        }
+
+        ;
+      } else {
+        newPattern.push(pattern[i]);
+      }
+
+      ;
+    }
+
+    ; //console.log('new at Pattern all: ', newPattern)
+
+    return newPattern;
+  },
+  NestedEvents: function NestedEvents(b1, pat, b2, int) {
+    var pattern = pat.asIteration().eval();
+    var newPattern = [];
+    int = int.eval();
+
+    if (int.length != 0) {
+      // if muliplier, then repeat to push each entry to newPattern 
+      for (var i = 0; i < int; i++) {
+        for (var j = 0; j < pattern.length; j++) {
+          newPattern.push(pattern[j]);
+        }
+
+        ;
+      }
+
+      ;
+    } else {
+      newPattern = pattern;
+    }
+
+    ; //console.log('NestedEvents, pattern + newPattern + int: ', pattern, newPattern, int);
+
+    return newPattern;
+  },
+  Events: function Events(a) {
+    return a.eval();
+  },
+  Events_soundNote: function Events_soundNote(a, b) {
+    if (b.sourceString != '') {
+      return parseInt(b.sourceString);
+    } else {
+      return 1;
+    }
+  },
+  Events_soundPause: function Events_soundPause(a) {
+    return 0;
+  },
+  floatPos: function floatPos(a) {
+    var val = parseFloat(a.sourceString);
+    return val;
+  },
+  intPos: function intPos(a) {
+    var val = parseInt(a.sourceString);
+    return val;
+  }
+}); // ============================================================================= //
+// Helper function for semantics.addOperation
+
+function instToArray(b) {
+  // convert multiple instruments from String to Array
+  var list = b.sourceString;
+  var newArray = [];
+
+  if (list == "") {
+    newArray = [];
+  } else {
+    list = list.split(' ');
+
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] != '') {
+        newArray.push(list[i]);
+      }
+
+      ;
+    }
+
+    ;
+  }
+
+  ;
+  return newArray;
+}
+
+;
+
+function handleRand(rand) {
+  if (rand == "") {
+    rand = 0;
+  }
+
+  ;
+  return rand;
+}
+
+;
+
+function handlePattern(pat) {
+  var pattern = pat;
+
+  if (pattern.length == 0) {
+    pattern = [];
+  } else {
+    pattern = pattern[0];
+  }
+
+  ;
+  return pattern;
+}
+
+;
+},{"/html/ohm/grammar":"html/ohm/grammar.js","ohm-js":"../node_modules/ohm-js/src/main.js","/helper/printer":"helper/printer.js"}],"html/renderHTML.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17675,7 +18099,33 @@ var Instrument = /*#__PURE__*/function () {
 }();
 
 exports.Instrument = Instrument;
-},{"tone":"../node_modules/tone/build/Tone.js"}],"tone/main-tone.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js"}],"helper/checkDevice.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.checkDevice = checkDevice;
+
+function checkDevice() {
+  var device = 'else';
+  var isMacLike = /(Mac)/i.test(navigator.platform);
+  var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
+
+  if (isIOS) {
+    device = 'ios';
+  }
+
+  ;
+
+  if (isMacLike) {
+    device = 'mac';
+  }
+
+  ;
+  return device;
+}
+},{}],"tone/main-tone.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17692,6 +18142,10 @@ var _instruments = require("/tone/instruments");
 var _renderHTML = require("/html/renderHTML");
 
 var _index = require("/index");
+
+var _checkDevice = require("/helper/checkDevice");
+
+var _printer = require("/helper/printer");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -17710,7 +18164,7 @@ var savedParts = {}; // master output
 var masterOut = new _tone.default.Gain(0.9);
 masterOut.toMaster(); // check device, ios is not allowd to load mediarecorder
 
-var device = (0, _index.checkDevice)();
+var device = (0, _checkDevice.checkDevice)();
 var thisBPM = 120; // SAMPLER / SERVER FILES
 // ========================================================
 
@@ -19139,7 +19593,7 @@ function renderInstruments() {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js"}],"html/help/helpText.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/html/renderHTML":"html/renderHTML.js","/index":"index.js","/helper/checkDevice":"helper/checkDevice.js","/helper/printer":"helper/printer.js"}],"text/helpText.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19160,7 +19614,22 @@ help.examples = [['Examples:', ''], ['> drums ', 'init & play the instrument "ba
 // ['reset', 'reset everything to zero, to start fresh with other group members'],
 ];
 help.session = [['Session:', ''], ['...', 'it is possible to have an online group session. there will be latency, but if you are in the same room, just switch the sound off on every machine but one.'], ['', 'to exit the session, just reload the browser.'], ['&nbsp;', '&nbsp;'], ['join nathan', 'join an online group session as "nathan"'], ['reset', 'online session needs to reset everything to zero, to start fresh with other group members'], ['join guest', 'join an online group session as a "guest". you will hear & see, but you can\'t interact']];
-},{}],"html/ohm/parseInput.js":[function(require,module,exports) {
+},{}],"socket/restartServer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.restartServer = restartServer;
+
+var _index = require("/index");
+
+function restartServer() {
+  _index.socket.emit('restart');
+}
+
+;
+},{"/index":"index.js"}],"parse-commands.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19172,11 +19641,15 @@ var _mainTone = require("/tone/main-tone");
 
 var _renderHTML = require("/html/renderHTML");
 
-var _helpText = require("/html/help/helpText");
+var _helpText = require("/text/helpText");
 
 var _index = require("/index");
 
-// WELLE - input grammar //
+var _printer = require("/helper/printer");
+
+var _restartServer = require("/socket/restartServer");
+
+// WELLE - parse commands //
 // =============================================================
 
 /*
@@ -19190,19 +19663,8 @@ parser getting/setting plenty of stuff from other parts, tone/html/index
 basically triggers all relevant functions in other files.
 not nice
 */
-// debug import from index.js > index-symlink.js > parser
-// import { debugParser }  from './../index-symlink';
-var debug = true; // debug = debugParser;
-// printer(debug, element, value)
-
-var printer = function printer(debug, element, value) {
-  if (debug == true) {
-    console.log("Parser \t - ".concat(element, " >> ").concat(value));
-  }
-
-  ;
-}; // printer(debug, "consoletest", `debugParser: ${debugParser}/ debug: ${debug}`)
-
+var debug = true;
+var context = "parser";
 
 var parseInput = function parseInput(input) {
   // all possible semantic variables 
@@ -19291,7 +19753,7 @@ var parseInput = function parseInput(input) {
 
     ;
   });
-  printer(debug, "incoming", "\n            type: \t\t ".concat(type, "\n            desc: \t\t ").concat(desc, "\n            cmd: \t\t ").concat(cmd, "\n            inst: \t\t ").concat(inst, "\n            instArray: \t ").concat(instArray, "\n            pattern: \t ").concat(patternParse, "\n            rand: \t\t ").concat(rand, "\n            sel: \t\t ").concat(sel, "\n            vol: \t\t ").concat(vol, "\n            bpm: \t\t ").concat(bpm, "\n            name: \t\t ").concat(name, "\n            help: \t\t ").concat(helpText, "\n            num: \t\t ").concat(num, "\n    ")); // tests:
+  (0, _printer.printer)(debug, context, "incoming", "\n            type: \t\t ".concat(type, "\n            desc: \t\t ").concat(desc, "\n            cmd: \t\t ").concat(cmd, "\n            inst: \t\t ").concat(inst, "\n            instArray: \t ").concat(instArray, "\n            pattern: \t ").concat(patternParse, "\n            rand: \t\t ").concat(rand, "\n            sel: \t\t ").concat(sel, "\n            vol: \t\t ").concat(vol, "\n            bpm: \t\t ").concat(bpm, "\n            name: \t\t ").concat(name, "\n            help: \t\t ").concat(helpText, "\n            num: \t\t ").concat(num, "\n    ")); // tests:
 
   if (patternParse == '' && Array.isArray(patternParse)) {
     patternParse[0] = null;
@@ -19406,14 +19868,14 @@ var parseInput = function parseInput(input) {
   ; // mute On
 
   if (desc == "muteOn") {
-    printer(debug, "muteOn", "mute audio");
+    (0, _printer.printer)(debug, context, "muteOn", "mute audio");
     (0, _mainTone.transport)('muteOn');
   }
 
   ; // mute Off
 
   if (desc == "muteOff") {
-    printer(debug, "muteOff", "unmute audio");
+    (0, _printer.printer)(debug, context, "muteOff", "unmute audio");
     (0, _mainTone.transport)('muteOff');
   }
 
@@ -19439,8 +19901,8 @@ var parseInput = function parseInput(input) {
   ; // restart server
 
   if (type == "restart server") {
-    printer(debug, "restart server", "restart server");
-    (0, _index.restartServer)();
+    (0, _printer.printer)(debug, context, "restart server", "restart server");
+    (0, _restartServer.restartServer)();
   }
 
   ; // join session    
@@ -19448,7 +19910,7 @@ var parseInput = function parseInput(input) {
   if (type == "join") {
     var session = desc[1];
     var user = desc[0];
-    printer(debug, "join", "join session \"".concat(session, "\" as user \"").concat(user, "\""));
+    (0, _printer.printer)(debug, context, "join", "join session \"".concat(session, "\" as user \"").concat(user, "\""));
     (0, _index.setUser)(user, session);
   }
 
@@ -19459,14 +19921,14 @@ var parseInput = function parseInput(input) {
     var preset = inst;
 
     if (action == 'store') {
-      printer(debug, "preset store", "".concat(action, " preset \"").concat(preset, "\" on server\""));
+      (0, _printer.printer)(debug, context, "preset store", "".concat(action, " preset \"").concat(preset, "\" on server\""));
       (0, _index.presetHandling)(preset, action);
     }
 
     ;
 
     if (action == 'reload') {
-      printer(debug, "preset reload", "".concat(action, " preset \"").concat(preset, "\" on server\""));
+      (0, _printer.printer)(debug, context, "preset reload", "".concat(action, " preset \"").concat(preset, "\" on server\""));
       (0, _index.presetHandling)(preset, action);
     }
 
@@ -19480,7 +19942,7 @@ var parseInput = function parseInput(input) {
     var _preset = inst;
 
     if (_action == 'reload') {
-      printer(debug, "preset reload to all", "".concat(_action, " preset \"").concat(_preset, "\" on server\""));
+      (0, _printer.printer)(debug, context, "preset reload to all", "".concat(_action, " preset \"").concat(_preset, "\" on server\""));
       (0, _index.presetHandling)(_preset, _action);
     }
 
@@ -19561,7 +20023,7 @@ var parseInput = function parseInput(input) {
 };
 
 exports.parseInput = parseInput;
-},{"/tone/main-tone":"tone/main-tone.js","/html/renderHTML":"html/renderHTML.js","/html/help/helpText":"html/help/helpText.js","/index":"index.js"}],"html/index-symlink.js":[function(require,module,exports) {
+},{"/tone/main-tone":"tone/main-tone.js","/html/renderHTML":"html/renderHTML.js","/text/helpText":"text/helpText.js","/index":"index.js","/helper/printer":"helper/printer.js","/socket/restartServer":"socket/restartServer.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19572,11 +20034,9 @@ exports.showFiles = showFiles;
 exports.recorderDeal = recorderDeal;
 exports.handleForm = handleForm;
 exports.renderTextToConsole = renderTextToConsole;
-exports.checkDevice = checkDevice;
 exports.playAlerts = playAlerts;
-exports.restartServer = restartServer;
 exports.presetHandling = presetHandling;
-exports.alertState = exports.debugSemantic = void 0;
+exports.alertState = exports.socket = exports.debugIndex = exports.debugSemantic = void 0;
 
 var _socket = _interopRequireDefault(require("socket.io-client"));
 
@@ -19586,11 +20046,13 @@ var _semantic = require("/html/ohm/semantic");
 
 var _renderHTML = require("/html/renderHTML");
 
-var _parseInput = require("/html/ohm/parseInput");
+var _parseCommands = require("/parse-commands");
 
-var _helpText = require("/html/help/helpText");
+var _helpText = require("/text/helpText");
 
 var _mainTone = require("/tone/main-tone");
+
+var _printer = require("/helper/printer");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -19604,41 +20066,12 @@ https://github.com/harc/ohm
 // libraries
 // files
 // global variables
-// let debugSemantic = true;
-// export const debugParser = true;
 var debugSemantic = true;
 exports.debugSemantic = debugSemantic;
-var debugIndex = true; // if (debugIndex) { console.log(' ')};
-// document.getElementById('info').innerHTML = `<br> © 2019, Jens Vetter. This webiste is part of the project <a href="https://tamlab.ufg.at/projects/tangible-signals/">Tangible Signals</a> at <a href="https://tamlab.ufg.at/">Tangible Music Lab</a>, University of Art and Design Linz. `;
-// document.getElementById('shortDesc').innerHTML = `WELLE is a music live-coding system for simplified improvisation and composition.`;
-// user agent:
-
-function checkDevice() {
-  var device = 'else';
-  var isMacLike = /(Mac)/i.test(navigator.platform);
-  var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
-
-  if (isIOS) {
-    device = 'ios';
-  }
-
-  ;
-
-  if (isMacLike) {
-    device = 'mac';
-  }
-
-  ;
-
-  if (debugIndex) {
-    console.log("device: " + device);
-  }
-
-  ;
-  return device;
-}
-
-; // server connect:
+var debugIndex = true;
+exports.debugIndex = debugIndex;
+var debug = true;
+var context = "index"; // server connect:
 
 var socket = _socket.default.connect(); // let holder = setInterval(socketTimer, 1000);
 // function socketTimer() {
@@ -19648,6 +20081,7 @@ var socket = _socket.default.connect(); // let holder = setInterval(socketTimer,
 // arrays to store page console etc. output
 
 
+exports.socket = socket;
 var consoleArray = []; // let partsArray = [''];
 
 var consolePointer = 0;
@@ -19969,7 +20403,7 @@ function organizeInput(data) {
     // parse data
 
     if (message.state == 'succeeded') {
-      (0, _parseInput.parseInput)(message.result);
+      (0, _parseCommands.parseInput)(message.result);
       renderTextToConsole(true, thisUser, message.string, 'local');
     }
 
@@ -19996,7 +20430,7 @@ function organizeInput(data) {
         console.log('organizeInput: Logged in User: ' + thisUser + ' - message: ' + message.result); // parse data
 
         if (message.state == 'succeeded') {
-          (0, _parseInput.parseInput)(message.result); // IO communication:
+          (0, _parseCommands.parseInput)(message.result); // IO communication:
           // send, if message is not meant for local only
 
           if (message.result[0] != 'helper') {
@@ -20032,7 +20466,7 @@ function organizeInput(data) {
         // console.log('');
         // console.log('Logged in User: ' + thisUser + ' - message: ' + message.result);	
 
-        (0, _parseInput.parseInput)(message.result);
+        (0, _parseCommands.parseInput)(message.result);
         renderTextToConsole(true, thisUser, message.string, 'notlocal');
 
         if (user != 'master') {
@@ -20427,18 +20861,6 @@ function recorderDeal(state, audioSrc) {
 
 ;
 
-function restartServer() {
-  socket.emit('restart');
-
-  if (debugIndex) {
-    console.log("Socket.io/Index: send server restart ..");
-  }
-
-  ;
-}
-
-;
-
 function presetHandling(presetName, action) {
   var savedParts = (0, _mainTone.handlePresetsInTone)('get');
   var savedPartsNames = [];
@@ -20481,1338 +20903,7 @@ socket.on('reloadPreset', function (presetName, data) {
 // display & commands
 
 (0, _renderHTML.renderHtmlHelpMenu)(_helpText.help.overview, 'help-overview', 100, true); // renderHtmlHelp(help['examples'],'help-container', 100, true);
-},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/ohm/semantic":"html/ohm/semantic.js","/html/renderHTML":"html/renderHTML.js","/html/ohm/parseInput":"html/ohm/parseInput.js","/html/help/helpText":"html/help/helpText.js","/tone/main-tone":"tone/main-tone.js"}],"html/ohm/semantic.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.semantics = exports.livecode = void 0;
-
-var _grammar = _interopRequireDefault(require("/html/ohm/grammar"));
-
-var _ohmJs = _interopRequireDefault(require("ohm-js"));
-
-var _indexSymlink = require("./../index-symlink");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// WELLE - input grammar //
-// =============================================================
-
-/*
-https://github.com/harc/ohm
-use the online tester 
-
-naming relates to grammar functions:
-Sequence_seqPattern = topic Sequence, subFunction seqPattern
-
-all returns are send to parseInput file
-*/
-// libraries
-// import from symlink, because can't reach src root
-// variables
-var livecode = _ohmJs.default.grammar(_grammar.default); // taken from grammar.js
-
-
-exports.livecode = livecode;
-var semantics = livecode.createSemantics();
-exports.semantics = semantics;
-var debug = false;
-debug = _indexSymlink.debugSemantic; // printer(debug, topic, element, value)
-
-var printer = function printer(debug, element, value) {
-  if (debug == true) {
-    console.log("Semantics \t - ".concat(element, " >> ").concat(value));
-  }
-
-  ;
-}; // printer(debug, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
-// ========================  Grammar & Semantic ====================== //
-// SEMANTICS FOR OHM.JS LANGUAGE:
-
-
-semantics.addOperation('eval', {
-  /* 
-      Trying to pre-calculate all values here, 
-      Delivering easy-to-read array to the page
-       Naming convention: [name, val]
-      command - play etc.
-      instArray - multiple instruments
-      pattern - array of pattern
-      rand - integer
-      inst - string ("bass")
-      sel - integer
-      vol - float (max 1.0)
-      bpm - integer
-      concat - ??
-       Helper functions: instToArray, handleRand, handlePattern
-  */
-
-  /* SEQUENCE HANDLING */
-  Sequence_seqPattern: function Sequence_seqPattern(key, inst, pat, rand) {
-    var instArray = instToArray(inst);
-    var random = handleRand(rand.eval());
-    var pattern = handlePattern(pat.eval());
-    var command = key.eval(); //printer(debug, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
-
-    printer(debug, "Sequence_seqPattern", "\n        return [\n            \"transport\", \"sequenceStart\", \n            [\"command\", ".concat(command, "], \n            [\"instArray\", ").concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "]\n        ]"));
-    return ["transport", "sequenceStart", ["command", command], ["instArray", instArray], ["pattern", pattern], ["rand", random]];
-  },
-  General_savePart: function General_savePart(_, name) {
-    name = name.sourceString;
-    return ["general", "savePart", ["savePart", name]];
-  },
-  General_setPart: function General_setPart(_, name) {
-    name = name.sourceString;
-    return ["general", "setPart", ["setPart", name]];
-  },
-  General_deleteElement: function General_deleteElement(_, name) {
-    name = instToArray(name);
-    return ["general", "deleteElement", ["deleteElement", name]];
-  },
-  General_muteOn: function General_muteOn(name) {
-    return ["helper", "muteOn"];
-  },
-  General_muteOff: function General_muteOff(name) {
-    return ["helper", "muteOff"];
-  },
-  General_recordStart: function General_recordStart(name) {
-    return ["helper", "recordStart"];
-  },
-  General_recordStop: function General_recordStop(name) {
-    return ["helper", "recordStop"];
-  },
-  General_uploadDefault: function General_uploadDefault(_) {
-    return ["helper", "uploadFiles"];
-  },
-  General_uploadFiles: function General_uploadFiles(_, file) {
-    var string = file.sourceString;
-    return ["helper", "uploadFiles", ["inst", string]];
-  },
-  General_restart: function General_restart(cmd) {
-    return [cmd.sourceString];
-  },
-  General_joinName: function General_joinName(join, list) {
-    return ['join', instToArray(list)];
-  },
-  General_storePreset: function General_storePreset(_, preset) {
-    return ["helper", 'store', ['inst', preset.sourceString]];
-  },
-  General_reloadPreset: function General_reloadPreset(_, preset) {
-    return ["helper_toAll", 'reload', ['inst', preset.sourceString]];
-  },
-
-  /* TRANSPORT CONTROL HANDLING */
-  Controls_copyPattern: function Controls_copyPattern(instSource, _, instDest) {
-    var inst = instSource.sourceString;
-    var dest = instToArray(instDest);
-    printer(debug, "Controls_copyPattern", "\n            return [\n                \"control\", \"patternCopy\", \n                [\"inst\", ".concat(inst, "], \n                [\"instArray\", ").concat(dest, "]\n            ];\n        "));
-    return ["control", "patternCopy", ["inst", inst], ["instArray", dest]];
-  },
-  Controls_listInstruments: function Controls_listInstruments(_, inst) {
-    var inst = inst.sourceString;
-    printer(debug, "Controls_listInstruments", "\n        return [\n            \"helper\", \"list\", \n            [\"inst\", ".concat(inst, "]\n        ]"));
-    return ["helper", "list", ["inst", inst]];
-  },
-  Controls_selectInstrument: function Controls_selectInstrument(_, inst, sel) {
-    var inst = inst.sourceString;
-    sel = sel.eval();
-    printer(debug, "Controls_selectInstrument", "\n        return [\n            \"control\", \"instSelect\", \n            [\"inst\", ".concat(inst, "], \n            [\"sel\", ").concat(sel, "],\n        ];\n        "));
-    return ["control", "instSelect", ["inst", inst], ["sel", sel]];
-  },
-  Controls_setInstrumentVolume: function Controls_setInstrumentVolume(_, volume, inst) {
-    var instArray = instToArray(inst);
-    var vol = volume.eval();
-
-    if (vol > 1) {
-      vol = 1;
-    }
-
-    ;
-    printer(debug, "Controls_setInstrumentVolume", "\n        return [\n            \"control\", \"instVolume\",\n            [\"instArray\", ".concat(instArray, "],\n            [\"vol\", ").concat(vol, "],\n        ];\n        "));
-    return ["control", "instVolume", ["instArray", instArray], ["vol", vol]];
-  },
-  Controls_assignRandom: function Controls_assignRandom(rand, inst) {
-    var instArray = instToArray(inst);
-    var random = handleRand(rand.eval());
-    var random = rand.eval();
-    printer(debug, "Controls_assignRandom", "\n        return [\n            \"control\", \"instRand\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"rand\", ").concat(random, "],\n        ];\n        "));
-    return ["control", "instRand", ["instArray", instArray], ["rand", random]];
-  },
-  Controls_assignPattern: function Controls_assignPattern(inst, pat, rand) {
-    var random = handleRand(rand.eval());
-    var pattern = pat.eval();
-    pattern = [pattern]; // Array conversion only neccessary here, don't know why 
-
-    pattern = handlePattern(pattern);
-    var instArray = instToArray(inst);
-    printer(debug, "Controls_assignPattern", "\n        return [\n            \"control\", \"patternAssign\", \n            [\"instArray\", ".concat(instArray, "], \n            [\"pattern\", ").concat(pattern, "], \n            [\"rand\", ").concat(random, "] \n        ];\n        "));
-    return ["control", "patternAssign", ["instArray", instArray], ["pattern", pattern], ["rand", random]];
-  },
-  Controls_initInstrument: function Controls_initInstrument(inst, _, name, a, num, b) {
-    inst = inst.sourceString;
-    name = name.sourceString;
-    num = num.sourceString;
-    printer(debug, "Controls_initInstrument", "\n        return [\n            \"control\", \"initInst\", \n            [\"inst\", ".concat(inst, "], \n            [\"initInst\", ").concat(name, "],\n            [\"num\", ").concat(num, "],\n        ];\n        "));
-    return ["control", "initInst", ["inst", inst], ["initInst", name], ["num", num]];
-  },
-  Controls_showInstrument: function Controls_showInstrument(_, instrument) {
-    var inst = instrument.sourceString;
-    printer(debug, "Controls_showInstrument", "\n        return [\n            \"helper\", \"show\", \n            [\"inst\", ".concat(inst, "],\n        ];    \n        "));
-    return ["helper", "show", ["inst", inst]];
-  },
-  Controls_bpm: function Controls_bpm(_, bpm, time) {
-    bpm = bpm.sourceString;
-    time = time.sourceString;
-    printer(debug, "Controls_bpm", "\n        return [\n            \"control\", \"setBPM\", \n            [\"bpm\", ".concat(bpm, "],\n            [\"num\", ").concat(time, "],\n        ];\n        "));
-    return ["control", "setBPM", ["bpm", bpm], ["num", time]];
-  },
-  // Controls_concatInstruments: function(concat) {
-  //     // ???
-  //     let instConcat = concat.eval();
-  //     //instConcat = concat.sourceString;
-  //     if (instConcat=="") {
-  //         return ''
-  //     } else {
-  //         return ["control", "instrumentConcat", instConcat];
-  //     }
-  // },
-  Controls_helpText: function Controls_helpText(_, text) {
-    text = text.sourceString;
-    printer(debug, "Controls_helpText", "\n        return [\n            \"helper\", \"helpText\",\n            [\"help\", ".concat(text, "]\n        ]; \n        "));
-    return ["helper", "helpText", ["help", text]];
-  },
-  Controls_help: function Controls_help(_) {
-    printer(debug, "Controls_help", "\n        return [\n            \"helper\", \"help\",\n        ];\n        ");
-    return ["helper", "help"];
-  },
-  Controls_clear: function Controls_clear(_) {
-    printer(debug, "Controls_clear", "\n        return [\n            \"helper\", \"clear\",\n        ];");
-    return ["helper", "clear"];
-  },
-
-  /* LANGUAGE INTERNAL FUNCTION HANDLING */
-  // ============================================= //
-  Command_playSeq: function Command_playSeq(cmd) {
-    return ["play"];
-  },
-  Command_playSeqPlus: function Command_playSeqPlus(cmd) {
-    return ["play"];
-  },
-
-  /*
-  Command_playSeqSolo: function (cmd) {
-      return ["", ""];
-  },
-  */
-  Command_stopSeq: function Command_stopSeq(cmd) {
-    return ["stop"];
-  },
-  Command_stopSeqPlus: function Command_stopSeqPlus(cmd) {
-    return ["stop"];
-  },
-  Command_forSeq: function Command_forSeq(cmd, count) {
-    return [cmd.sourceString, parseInt(count.sourceString)];
-  },
-  Command_inSeq: function Command_inSeq(cmd, count) {
-    return [cmd.sourceString, parseInt(count.sourceString)];
-  },
-  Command_reset: function Command_reset(cmd) {
-    return [cmd.sourceString];
-  },
-  // InstrumentConcat: function (concat) {
-  //     var arr = concat.asIteration().eval()
-  //     var arrString = JSON.stringify(arr);
-  //     if ( (arrString.split(",").length - 1) < 2) {arr=""}
-  //     return arr;
-  // },
-  InstrumentRepeat_instrumentEntry: function InstrumentRepeat_instrumentEntry(inst, count) {
-    var instrument = inst.sourceString;
-    var repeat = count.sourceString;
-
-    if (repeat == '') {
-      repeat = 1;
-    }
-
-    ;
-    var arr = [instrument, repeat];
-    printer(debug, "InstrumentRepeat_instrumentEntry", "\n        return ".concat(arr, ";\n        "));
-    return arr;
-  },
-  PatternRandom_randomize: function PatternRandom_randomize(cmd, count) {
-    count = count.sourceString;
-    var intCheck = false;
-
-    if (count.length == 0) {
-      intCheck = false;
-      count = 0;
-    } else {
-      intCheck = true;
-      count = parseInt(count);
-    }
-
-    ;
-
-    if (!intCheck) {
-      count = 1;
-    }
-
-    ;
-    return count;
-  },
-  PatternRandom_randomizeOff: function PatternRandom_randomizeOff(cmd, cmd2) {
-    var randVal = 0;
-    return randVal;
-  },
-
-  /*
-  drums (#2#3-#)3-#3 (#11#22) #1#2
-  */
-  Pattern: function Pattern(pat) {
-    var pattern = pat.asIteration().eval(); //console.log('new at Pattern all incoming: ', pattern)
-
-    var newPattern = [];
-
-    for (var i = 0; i < pattern.length; i++) {
-      if (Array.isArray(pattern[i])) {
-        for (var j = 0; j < pattern[i].length; j++) {
-          newPattern.push(pattern[i][j]);
-        }
-
-        ;
-      } else {
-        newPattern.push(pattern[i]);
-      }
-
-      ;
-    }
-
-    ; //console.log('new at Pattern all: ', newPattern)
-
-    return newPattern;
-  },
-  NestedEvents: function NestedEvents(b1, pat, b2, int) {
-    var pattern = pat.asIteration().eval();
-    var newPattern = [];
-    int = int.eval();
-
-    if (int.length != 0) {
-      // if muliplier, then repeat to push each entry to newPattern 
-      for (var i = 0; i < int; i++) {
-        for (var j = 0; j < pattern.length; j++) {
-          newPattern.push(pattern[j]);
-        }
-
-        ;
-      }
-
-      ;
-    } else {
-      newPattern = pattern;
-    }
-
-    ; //console.log('NestedEvents, pattern + newPattern + int: ', pattern, newPattern, int);
-
-    return newPattern;
-  },
-  Events: function Events(a) {
-    return a.eval();
-  },
-  Events_soundNote: function Events_soundNote(a, b) {
-    if (b.sourceString != '') {
-      return parseInt(b.sourceString);
-    } else {
-      return 1;
-    }
-  },
-  Events_soundPause: function Events_soundPause(a) {
-    return 0;
-  },
-  floatPos: function floatPos(a) {
-    var val = parseFloat(a.sourceString);
-    return val;
-  },
-  intPos: function intPos(a) {
-    var val = parseInt(a.sourceString);
-    return val;
-  }
-}); // ============================================================================= //
-// Helper function for semantics.addOperation
-
-function instToArray(b) {
-  // convert multiple instruments from String to Array
-  var list = b.sourceString;
-  var newArray = [];
-
-  if (list == "") {
-    newArray = [];
-  } else {
-    list = list.split(' ');
-
-    for (var i = 0; i < list.length; i++) {
-      if (list[i] != '') {
-        newArray.push(list[i]);
-      }
-
-      ;
-    }
-
-    ;
-  }
-
-  ;
-  return newArray;
-}
-
-;
-
-function handleRand(rand) {
-  if (rand == "") {
-    rand = 0;
-  }
-
-  ;
-  return rand;
-}
-
-;
-
-function handlePattern(pat) {
-  var pattern = pat;
-
-  if (pattern.length == 0) {
-    pattern = [];
-  } else {
-    pattern = pattern[0];
-  }
-
-  ;
-  return pattern;
-}
-
-;
-},{"/html/ohm/grammar":"html/ohm/grammar.js","ohm-js":"../node_modules/ohm-js/src/main.js","./../index-symlink":"html/index-symlink.js"}],"index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setUser = setUser;
-exports.showFiles = showFiles;
-exports.recorderDeal = recorderDeal;
-exports.handleForm = handleForm;
-exports.renderTextToConsole = renderTextToConsole;
-exports.checkDevice = checkDevice;
-exports.playAlerts = playAlerts;
-exports.restartServer = restartServer;
-exports.presetHandling = presetHandling;
-exports.alertState = exports.debugSemantic = void 0;
-
-var _socket = _interopRequireDefault(require("socket.io-client"));
-
-var _socket2 = _interopRequireDefault(require("socket.io-file-client"));
-
-var _semantic = require("/html/ohm/semantic");
-
-var _renderHTML = require("/html/renderHTML");
-
-var _parseInput = require("/html/ohm/parseInput");
-
-var _helpText = require("/html/help/helpText");
-
-var _mainTone = require("/tone/main-tone");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// WELLE - main index file //
-// =============================================================
-
-/*
-https://github.com/harc/ohm
-
-*/
-// libraries
-// files
-// global variables
-// let debugSemantic = true;
-// export const debugParser = true;
-var debugSemantic = true;
-exports.debugSemantic = debugSemantic;
-var debugIndex = true; // if (debugIndex) { console.log(' ')};
-// document.getElementById('info').innerHTML = `<br> © 2019, Jens Vetter. This webiste is part of the project <a href="https://tamlab.ufg.at/projects/tangible-signals/">Tangible Signals</a> at <a href="https://tamlab.ufg.at/">Tangible Music Lab</a>, University of Art and Design Linz. `;
-// document.getElementById('shortDesc').innerHTML = `WELLE is a music live-coding system for simplified improvisation and composition.`;
-// user agent:
-
-function checkDevice() {
-  var device = 'else';
-  var isMacLike = /(Mac)/i.test(navigator.platform);
-  var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
-
-  if (isIOS) {
-    device = 'ios';
-  }
-
-  ;
-
-  if (isMacLike) {
-    device = 'mac';
-  }
-
-  ;
-
-  if (debugIndex) {
-    console.log("device: " + device);
-  }
-
-  ;
-  return device;
-}
-
-; // server connect:
-
-var socket = _socket.default.connect(); // let holder = setInterval(socketTimer, 1000);
-// function socketTimer() {
-//   socket.emit('status');
-// } 
-// ==========================================
-// arrays to store page console etc. output
-
-
-var consoleArray = []; // let partsArray = [''];
-
-var consolePointer = 0;
-var consoleLength = 20; // vars for Server files/ samples
-
-var folders = [];
-var samples = {}; // SOCKET.IO communication
-
-var user = 'local';
-var activeSession = false; // let	externalUser = 'client';
-
-var allUsers = [];
-var currentSession = 'online'; // alert sounds - not recorded in MediaRecorder (different audio context)
-// ==========================================
-
-var alerts = {
-  return: {
-    name: 'return',
-    file: 'a01',
-    alert: null
-  },
-  enter_input: {
-    name: 'enter_input',
-    file: 'a06',
-    alert: null
-  },
-  leave_input: {
-    name: 'leave_input',
-    file: 'a12',
-    alert: null
-  },
-  error: {
-    name: 'error',
-    file: 'a04',
-    alert: null
-  },
-  stop_recording: {
-    name: 'stop_recording',
-    file: 'a11',
-    alert: null
-  },
-  join: {
-    name: 'join',
-    file: 'a11',
-    alert: null
-  },
-  bottom: {
-    name: 'bottom',
-    file: 'a08',
-    alert: null
-  },
-  mute: {
-    name: 'mute',
-    file: 'a09',
-    alert: null
-  }
-};
-
-function createAlerts(alerts) {
-  Object.keys(alerts).forEach(function (name) {
-    // console.log(alerts[name].name);
-    var alert;
-    var sound = alerts[name].file;
-    var src = "../alert/".concat(sound, ".mp3");
-    alerts[name].alert = document.createElement('audio');
-    alert = alerts[name].alert;
-    alert.style.display = "none";
-    alert.src = src;
-    alert.load(); //call this to just preload the audio without playing
-  });
-}
-
-;
-createAlerts(alerts);
-var alertState = false;
-exports.alertState = alertState;
-
-function playAlerts(name, alertState) {
-  if (alertState) {
-    alerts[name].alert.play();
-  }
-
-  ;
-}
-
-; // sound controls: muting sound / alerts
-
-var checkMuteSound = document.getElementById("checkMuteSound");
-var checkMuteAlerts = document.getElementById("checkMuteAlerts");
-document.getElementById("checkMuteAlerts").checked = true;
-
-checkMuteSound.onclick = function () {
-  if (checkMuteSound.checked) {
-    var val = 'mute on';
-    organizeInput({
-      string: val,
-      user: user
-    });
-  } else {
-    var _val = 'mute off';
-    organizeInput({
-      string: _val,
-      user: user
-    });
-  }
-
-  ;
-};
-
-checkMuteAlerts.onclick = function () {
-  if (checkMuteAlerts.checked) {
-    playAlerts('return', alertState);
-    exports.alertState = alertState = false;
-  } else {
-    exports.alertState = alertState = true;
-    playAlerts('return', alertState);
-  }
-
-  ;
-}; // let muteSound = document.getElementById("muteSound");
-// muteSound.innerHTML = 'Mute Sound';
-// let muteAlert = document.getElementById("muteAlert");
-// muteAlert.innerHTML = 'Mute Alerts [OFF]';
-// muteSound.onclick = function () {
-// 	if (muteSound.innerHTML === "Mute Sound") {
-// 		muteSound.innerHTML = "Mute Sound [OFF]";
-// 		let val = 'mute on';
-// 		organizeInput({string: val, user: user}); 
-// 	} else {
-// 		muteSound.innerHTML = "Mute Sound";
-// 		let val = 'mute off';
-// 		organizeInput({string: val, user: user}); 
-// 	};
-// };
-// muteAlert.onclick = function () {
-// 	if (muteAlert.innerHTML === "Mute Alerts") {
-// 		muteAlert.innerHTML = "Mute Alerts [OFF]";
-// 		playAlerts('return', alertState);
-// 		alertState = false;
-// 	} else {
-// 		muteAlert.innerHTML = "Mute Alerts";
-// 		alertState = true;
-// 		playAlerts('return', alertState);
-// 	};
-// };
-// ==========================================
-
-
-window.onload = function () {
-  setTimeout(function () {
-    playAlerts('enter_input', alertState);
-  }, 500);
-}; // ==========================================
-// UPLOAD FILES TO SERVER
-
-
-var uploader = new _socket2.default(socket);
-var form = document.getElementById('form');
-var uploadDest = 'default';
-uploader.on('ready', function () {// console.log('SocketIOFile ready to go!');
-});
-uploader.on('loadstart', function () {
-  console.log('Loading file to browser before sending...');
-});
-uploader.on('progress', function (progress) {
-  console.log('Loaded ' + progress.loaded + ' / ' + progress.total);
-});
-uploader.on('start', function (fileInfo) {
-  console.log('Start uploading', fileInfo);
-});
-uploader.on('stream', function (fileInfo) {
-  console.log('Streaming... sent ' + fileInfo.sent + ' bytes.');
-});
-uploader.on('complete', function (fileInfo) {
-  console.log('Upload Complete', fileInfo);
-  renderTextToConsole(true, 'local', "upload complete", 'local');
-  playAlerts('return', alertState);
-});
-uploader.on('error', function (err) {
-  console.log('Error!', err);
-});
-uploader.on('abort', function (fileInfo) {
-  console.log('Aborted: ', fileInfo);
-});
-
-form.onsubmit = function (ev) {
-  ev.preventDefault();
-  var fileEl = document.getElementById('file');
-  console.log('');
-  console.log('upload file: ' + fileEl.files[0].name);
-  console.log('file size = ' + fileEl.files[0].size / 1000 + ' KB');
-  var fileSize = fileEl.files[0].size;
-
-  if (fileSize > 200000) {
-    showFiles('File too big for uploading.. ! max. 100KB. ');
-    renderTextToConsole(true, 'local', "File too big for uploading.. ! max. 100KB. ", 'local');
-    playAlerts('error', alertState);
-  } else {
-    socket.emit('uploadDest', uploadDest);
-    var uploadIds = uploader.upload(fileEl.files, {});
-    renderTextToConsole(true, 'local', "start upload..", 'local');
-    playAlerts('return', alertState);
-  }
-
-  ;
-};
-
-function handleForm(name) {
-  // reset upload destination
-  if (name == '') {
-    uploadDest = 'user';
-  }
-
-  if (name != '') {
-    uploadDest = name;
-  } // handle form:
-
-
-  var form = document.getElementById('form');
-  var formInput = document.getElementById('file');
-  var uploader = document.getElementById('uploader');
-  formInput.type = 'file';
-  formInput.accept = ".mp3, .Mp3, .MP3";
-
-  formInput.onchange = function (e) {
-    uploader.click();
-  };
-
-  formInput.click();
-}
-
-; // ==========================================
-// USER input from textarea INPUT field
-
-document.getElementById("textarea").onkeydown = function (e) {
-  // text input with ENTER
-  if (e.keyCode == 13) {
-    if (debugIndex) {
-      console.log(' ');
-    }
-
-    ;
-    consolePointer = 0;
-    var val = document.getElementById("textarea").value;
-    val = val.toLowerCase();
-    document.getElementById("textarea").value = "";
-    console.log("(\"textarea\").onkeydown: user \"".concat(user, "\", value: \"").concat(val, "\""));
-
-    if (user != 'guest') {
-      organizeInput({
-        string: val,
-        user: user
-      });
-    }
-
-    ;
-    playAlerts('return', alertState);
-  }
-
-  ; // using arrows
-
-  if (e.keyCode == 38) {
-    consolePointer = (0, _renderHTML.renderHtmlArrows)(consolePointer, consoleArray, 'up', "textarea");
-    playAlerts('return', alertState);
-  }
-
-  ;
-
-  if (e.keyCode == 40) {
-    consolePointer = (0, _renderHTML.renderHtmlArrows)(consolePointer, consoleArray, 'down', "textarea");
-    playAlerts('return', alertState);
-  }
-
-  ;
-};
-
-document.getElementById("textarea").onfocus = function (e) {
-  playAlerts('enter_input', alertState);
-};
-
-document.getElementById("textarea").onblur = function (e) {
-  playAlerts('leave_input', alertState);
-}; // generating empty containers for links at help examples
-
-
-function linkPrint(content) {
-  // console.log('hello link, content: ' + content);
-  document.getElementById("textarea").value = content;
-  document.getElementById("textarea").dispatchEvent(new KeyboardEvent('keydown', {
-    'keyCode': 13
-  }));
-}
-
-; // document.getElementsByTagName('a').onclick = function () {console.log('Link: ' + document.getElementsByTagName('a').innerHTML)};
-
-document.getElementsByTagName('a').onclick = function () {
-  if (debugIndex) {
-    console.log('Index: Link: ');
-  }
-}; // ==========================================
-// organize input & distribute
-
-
-function organizeInput(data) {
-  var thisUser = data.user;
-  var thisString = data.string;
-  var message;
-
-  if (data.user == user || data.user == 'local') {
-    socket.emit('clientEvent', data);
-  }
-
-  ; // if user is NOT logged in
-
-  if (thisUser == 'local') {
-    // interpret data
-    message = interpretInput(thisString); // returns {state: state, string: data, result: result};	
-    // console.log('local User: ' + data.user + ' - message: ' + message.result);	
-    // parse data
-
-    if (message.state == 'succeeded') {
-      (0, _parseInput.parseInput)(message.result);
-      renderTextToConsole(true, thisUser, message.string, 'local');
-    }
-
-    ;
-
-    if (message.state == 'failed') {
-      renderTextToConsole(false, thisUser, message.string, 'local');
-      playAlerts('error', alertState);
-    }
-
-    ;
-  }
-
-  ; // if logged in & message from some any user
-
-  if (activeSession == true) {
-    if (thisUser != 'local') {
-      // if message from local user 
-      if (thisUser == user) {
-        // interpret data
-        message = interpretInput(thisString); // returns {state: state, string: data, result: result};	
-        // console.log('');
-
-        console.log('organizeInput: Logged in User: ' + thisUser + ' - message: ' + message.result); // parse data
-
-        if (message.state == 'succeeded') {
-          (0, _parseInput.parseInput)(message.result); // IO communication:
-          // send, if message is not meant for local only
-
-          if (message.result[0] != 'helper') {
-            renderTextToConsole(true, thisUser, message.string);
-            message.user = thisUser;
-            sendMessage(message);
-          }
-
-          ; // don't send, if message is meant for local only
-
-          if (message.result[0] == 'helper') {
-            renderTextToConsole(true, thisUser, message.string, 'local');
-          }
-
-          ;
-        }
-
-        ;
-
-        if (message.state == 'failed') {
-          renderTextToConsole(false, thisUser, message.string, 'local');
-          playAlerts('error', alertState);
-        }
-
-        ;
-      }
-
-      ; // if message from other users
-
-      if (thisUser != user) {
-        // interpret data - it is already valid
-        message = interpretInput(thisString); // returns {state: state, string: data, result: result};	
-        // console.log('');
-        // console.log('Logged in User: ' + thisUser + ' - message: ' + message.result);	
-
-        (0, _parseInput.parseInput)(message.result);
-        renderTextToConsole(true, thisUser, message.string, 'notlocal');
-
-        if (user != 'master') {
-          playAlerts('return', alertState);
-        }
-
-        ;
-      }
-
-      ;
-    }
-
-    ;
-  }
-
-  ;
-}
-
-; // handle html/ socket input
-
-function interpretInput(data) {
-  var state;
-  var result; // check & interpret text input
-  // if there is data:
-
-  if (data != '') {
-    // if input is not valid:
-    if (_semantic.livecode.match(data).failed()) {
-      state = 'failed';
-    }
-
-    ; // if input is valid
-
-    if (_semantic.livecode.match(data).succeeded()) {
-      // evaluate input through semantics
-      result = (0, _semantic.semantics)(_semantic.livecode.match(data)).eval();
-      state = 'succeeded';
-    }
-
-    ;
-  }
-
-  ;
-  return {
-    state: state,
-    string: data,
-    result: result
-  };
-}
-
-;
-
-function renderTextToConsole(state, user, string, local) {
-  if (local == 'local') {
-    if (state == true) {
-      consoleArray.push({
-        message: string
-      });
-      (0, _renderHTML.renderHtml)(consoleArray, 'console', consoleLength);
-    }
-
-    ;
-
-    if (state == false) {
-      if (string[0] != '!') {
-        consoleArray.push({
-          message: "! ".concat(string)
-        });
-      } else {
-        consoleArray.push({
-          message: "".concat(string)
-        });
-      }
-
-      ;
-    }
-
-    ;
-  }
-
-  ;
-
-  if (local != 'local') {
-    consoleArray.push({
-      user: user,
-      message: string
-    });
-    (0, _renderHTML.renderHtml)(consoleArray, 'console', consoleLength);
-  }
-
-  ;
-  (0, _renderHTML.renderHtml)(consoleArray, 'console', consoleLength);
-}
-
-; // ====================================================================================
-// SOCKET.IO communication
-// ====================================================================================
-// SOCKET USERS
-
-function setUser(name, session) {
-  if (user == 'local') {
-    console.log("setUser: emit new User: \"".concat(name, "\" to server. Session: ").concat(session));
-    socket.emit('setUser', name, session); // wait form confirmation
-
-    socket.emit("addUserToSocket", name, session);
-  } else {
-    // console.log('already joined as ' + name);
-    console.log("setUser: you already joined a session..");
-    consoleArray.push({
-      message: "You joined already as " + user
-    });
-    (0, _renderHTML.renderHtml)(consoleArray, 'console', consoleLength);
-    playAlerts('error', alertState);
-  }
-
-  ;
-}
-
-;
-socket.on('confirmUserToClient', function (message) {
-  if (message.session == undefined) {
-    message.session = currentSession;
-  }
-
-  ;
-  console.log("confirmUserToClient: username: \"".concat(message.username, "\", session: \"").concat(message.session, "\""));
-  user = message.username;
-  currentSession = message.session;
-  user = user.split('_')[0]; // console.log('user name split join: ' + user);
-
-  if (user != 'guest') {
-    // special session
-    if (currentSession != undefined) {
-      document.getElementById('group').innerHTML = 'group: ' + currentSession;
-      document.getElementById('localUser').innerHTML = user;
-    } else {
-      document.getElementById('localUser').innerHTML = user;
-    }
-
-    ;
-    playAlerts('join', alertState);
-  }
-
-  ;
-  activeSession = true;
-});
-socket.on('updateUsers', function (message) {
-  if (debugIndex) {
-    console.log("updateUsers: users \"".concat(message.users, "\" joined the session: \"").concat(message.session, "\""));
-  }
-
-  ;
-
-  if (message.session == currentSession) {
-    allUsers = message.users;
-  } // remove guest entries from display:
-
-
-  for (var i = 0; i < allUsers.length; i++) {
-    var _user = allUsers[i].split('_')[0];
-
-    if (_user == 'guest') {
-      if (debugIndex) {
-        console.log('Index: guest detected.. delete from display..');
-      }
-
-      ; // allUsers.splice(i, 1);
-
-      allUsers[i] = '';
-    }
-
-    ;
-  }
-
-  ;
-
-  if (debugIndex) {
-    console.log('Index: see update allUsers: ' + allUsers);
-  }
-
-  ;
-  var allUsersString = allUsers.join();
-  allUsersString = allUsersString.split(',').join(' '); // if logged in, then display all users
-
-  if (user != 'local') {
-    // document.getElementById('localUser').innerHTML = currentSession + ':  &nbsp;&nbsp;' + user + '&nbsp;&nbsp; [ ' + allUsersString + ' ]';
-    document.getElementById('localUser').innerHTML = user + ' ----> all members: ' + allUsersString;
-    playAlerts('join', alertState);
-  }
-
-  ;
-}); // ==========================================
-// SOCKET MESSAGES
-
-function sendMessage(message) {
-  socket.emit('msg', message);
-}
-
-;
-socket.on('msgToAll', function (data) {
-  if (debugIndex) {
-    console.log("msgToAll: from user \"".concat(data.user, "\": \"").concat(data.string, "\". listed users: \"").concat(allUsers, "\""));
-  }
-
-  ; // execute only if message from other user
-
-  if (data.user != user) {
-    // execute only, if user is listed in allUsers of current session:
-    for (var i = 0; i < allUsers.length; i++) {
-      if (data.user == allUsers[i]) {
-        organizeInput({
-          user: data.user,
-          string: data.string
-        });
-      }
-    }
-  }
-
-  ;
-}); // REQUEST & RECEIVE FILENAMES
-
-function showFiles(string) {
-  if (debugIndex) {
-    console.log("Index: socket send \"readFiles\", \"".concat(string, "\".. "));
-  }
-
-  ;
-  socket.emit('readFiles', string); // if (string == 'files') { socket.emit('readFiles', 'files'); playAlerts('join', alertState)}
-  // else if (string == 'folders') { socket.emit('readFiles', 'folders'); playAlerts('join', alertState)}
-}
-
-;
-socket.on("files", function (serverFolder, serverSamples, what) {
-  folders = serverFolder;
-  samples = serverSamples;
-  var check = false;
-  var serverData = samples;
-
-  if (debugIndex) {
-    console.log("Socket.io/Index: received data on > " + what + ": ", serverSamples, serverFolder);
-  }
-
-  ;
-
-  if (what == 'store') {
-    if (debugIndex) {
-      console.log('Socket.io/Index: "store" - received server sample database. Sending to client Tone.js.. ');
-    }
-
-    ;
-    (0, _mainTone.setDataURL)(serverData);
-    check = true;
-  }
-
-  ;
-  var printData;
-
-  if (what == 'all') {
-    if (debugIndex) {
-      console.log('Socket.io/Index: "files" - reading incoming files & print them on console ..');
-    }
-
-    ;
-
-    for (var i = 0; i < folders.length; i++) {
-      var data = samples[folders[i]];
-      var files = [];
-
-      for (var j = 0; j < data.files.length; j++) {
-        var temp = data.files[j].replace(".mp3", "");
-        files.push(' [' + j + '] ' + temp + '&nbsp;&nbsp;');
-      }
-
-      ;
-      files = files.join();
-      files = files.split(',').join(' ');
-      printData = data.folderName + '[' + data.count + '] ' + '--> &nbsp;&nbsp; ' + files;
-      renderTextToConsole(true, user, printData, 'local');
-    }
-
-    ;
-    check = true;
-  }
-
-  ;
-
-  if (what == 'folders') {
-    if (debugIndex) {
-      console.log('Socket.io/Index: "folders" - reading incoming folders & print them on console ..');
-    }
-
-    ;
-    var folderString = [];
-
-    for (var _i = 0; _i < folders.length; _i++) {
-      var _data = samples[folders[_i]];
-      folderString.push(_data.folderName + ' [' + _data.count + ']' + '&nbsp;&nbsp;');
-    }
-
-    ;
-    folderString = folderString.join();
-    folderString = folderString.split(',').join(' ');
-    printData = folderString;
-    renderTextToConsole(true, user, printData, 'local');
-    check = true;
-  }
-
-  ;
-
-  for (var _i2 = 0; _i2 < folders.length; _i2++) {
-    if (what == samples[folders[_i2]].folderName) {
-      if (debugIndex) {
-        console.log("Socket.io/Index: \"".concat(what, "\" - reading incoming \"").concat(what, "\" & print them on console .."));
-      }
-
-      ;
-      var _data2 = samples[folders[_i2]];
-      var _files = [];
-
-      for (var _j = 0; _j < _data2.files.length; _j++) {
-        var _temp = _data2.files[_j].replace(".mp3", "");
-
-        _files.push(' [' + _j + '] ' + _temp + '&nbsp;&nbsp;');
-      }
-
-      ;
-      _files = _files.join();
-      _files = _files.split(',').join(' ');
-      printData = _data2.folderName + '[' + _data2.count + '] ' + '--> &nbsp;&nbsp; ' + _files;
-      renderTextToConsole(true, user, printData, 'local');
-      check = true;
-    }
-
-    ;
-  }
-
-  ;
-
-  if (!check) {
-    var _printData = 'no such file';
-    renderTextToConsole(false, 'local', _printData, 'local');
-    playAlerts('error', alertState);
-  } else {
-    playAlerts('join', alertState);
-  }
-
-  ;
-}); // 
-
-function recorderDeal(state, audioSrc) {
-  if (state == 'started') {
-    document.getElementById('buttonPlay').style = "display: none;";
-    document.getElementById('buttonPause').style = "display: none;";
-    document.getElementById('audioDiv').style = "display: none;";
-    document.getElementById('recordStatus').style = "display: inline-block;";
-    document.getElementById('recordStatus').innerHTML = '.. recording';
-  }
-
-  ;
-
-  if (state == 'stopped') {
-    document.getElementById('buttonPlay').style = "display: inline-block;";
-    document.getElementById('buttonPause').style = "display: inline-block;";
-
-    document.getElementById('buttonPlay').onclick = function () {
-      document.getElementById('audioPlayer').play();
-    };
-
-    document.getElementById('buttonPause').onclick = function () {
-      document.getElementById('audioPlayer').pause();
-    };
-
-    var audio = document.getElementById('audioPlayer');
-    var audioDiv = document.getElementById('audioDiv');
-    audio.src = audioSrc; // audio.style="display: inline-block;  height: 20px; width: 240px; outline: none;";
-    // audioDiv.style="display: inline-block;";
-
-    audio.load(); //call this to just preload the audio without playing
-    // audio.play(); //call this to play the song right away
-
-    document.getElementById('recordStatus').style = "display: inline-block;";
-    var d = new Date();
-    var arr = [d.getFullYear(), d.getMonth() + 1, d.getDate(), '-', d.getHours(), d.getMinutes()];
-    arr = arr.join(''); // let audioFileName = 'Welle-' + arr + '.ogg';
-
-    var audioFileName = 'Welle.ogg';
-    document.getElementById('recordStatus').innerHTML = '<a href=\"' + audioSrc + '\" download="' + audioFileName + '" style="text-decoration: none;">download ' + audioFileName + '</a>';
-  }
-
-  ;
-}
-
-;
-
-function restartServer() {
-  socket.emit('restart');
-
-  if (debugIndex) {
-    console.log("Socket.io/Index: send server restart ..");
-  }
-
-  ;
-}
-
-;
-
-function presetHandling(presetName, action) {
-  var savedParts = (0, _mainTone.handlePresetsInTone)('get');
-  var savedPartsNames = [];
-  Object.keys(savedParts).forEach(function (part) {
-    savedPartsNames.push(savedParts[part].name);
-  });
-
-  if (action == 'store') {
-    if (debugIndex) {
-      console.log("Index: ".concat(action, " preset \"").concat(presetName, " on server, including ").concat(savedPartsNames));
-    }
-
-    ;
-    socket.emit('storePreset', presetName, savedPartsNames, savedParts);
-  }
-
-  ;
-
-  if (action == 'reload') {
-    if (debugIndex) {
-      console.log("Index: ".concat(action, " preset \"").concat(presetName, " from server"));
-    }
-
-    ;
-    socket.emit('reloadPreset', presetName);
-  }
-}
-
-;
-socket.on('reloadPreset', function (presetName, data) {
-  var stringData = JSON.stringify(data, null, 2);
-
-  if (debugIndex) {
-    console.log("Socket.io/Index: receive preset \"".concat(presetName, "\" data: ").concat(stringData));
-  }
-
-  ;
-  (0, _mainTone.handlePresetsInTone)('set', data);
-}); // ==========================================
-// display & commands
-
-(0, _renderHTML.renderHtmlHelpMenu)(_helpText.help.overview, 'help-overview', 100, true); // renderHtmlHelp(help['examples'],'help-container', 100, true);
-},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/ohm/semantic":"html/ohm/semantic.js","/html/renderHTML":"html/renderHTML.js","/html/ohm/parseInput":"html/ohm/parseInput.js","/html/help/helpText":"html/help/helpText.js","/tone/main-tone":"tone/main-tone.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","/html/ohm/semantic":"html/ohm/semantic.js","/html/renderHTML":"html/renderHTML.js","/parse-commands":"parse-commands.js","/text/helpText":"text/helpText.js","/tone/main-tone":"tone/main-tone.js","/helper/printer":"helper/printer.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -21840,7 +20931,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61576" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54381" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

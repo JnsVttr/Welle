@@ -14,20 +14,17 @@ import SocketIOFileClient from 'socket.io-file-client';
 // files
 import { livecode, semantics }  from '/html/ohm/semantic';
 import { renderHtml, renderHtmlArrows, renderHtmlHelpMenu }  from  '/html/renderHTML';
-import { parseInput }  from '/html/ohm/parseInput';
-import { help }  from '/html/help/helpText';
+import { parseInput }  from '/parse-commands';
+import { help }  from '/text/helpText';
 import { setDataURL, handlePresetsInTone } from '/tone/main-tone';
+import { printer } from '/helper/printer';
 
 
 // global variables
-// let debugSemantic = true;
-// export const debugParser = true;
 export const debugSemantic = true;
-
-
-let debugIndex = true;
-// if (debugIndex) { console.log(' ')};
-
+export let debugIndex = true;
+let debug = true;
+let context = "index";
 
 
 
@@ -41,24 +38,10 @@ let debugIndex = true;
 
 
 
-// document.getElementById('info').innerHTML = `<br> © 2019, Jens Vetter. This webiste is part of the project <a href="https://tamlab.ufg.at/projects/tangible-signals/">Tangible Signals</a> at <a href="https://tamlab.ufg.at/">Tangible Music Lab</a>, University of Art and Design Linz. `;
-
-// document.getElementById('shortDesc').innerHTML = `WELLE is a music live-coding system for simplified improvisation and composition.`;
-
-// user agent:
-function checkDevice() {
-	let device = 'else';
-	var isMacLike = /(Mac)/i.test(navigator.platform);
-	var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
-	if (isIOS) { device = 'ios'};
-	if (isMacLike) { device = 'mac'}; 
-	if (debugIndex) {console.log("device: " + device) };
-	return device;
-};
 
 
 // server connect:
-var socket = io.connect();
+export var socket = io.connect();
 // let holder = setInterval(socketTimer, 1000);
 // function socketTimer() {
 //   socket.emit('status');
@@ -781,15 +764,6 @@ function recorderDeal (state, audioSrc) {
 
 
 
-function restartServer () {
-	socket.emit('restart');
-	if (debugIndex) { console.log(`Socket.io/Index: send server restart ..`) };
-};
-
-
-
-
-
 function presetHandling(presetName, action) {
 	let savedParts = handlePresetsInTone('get');
 	let savedPartsNames = [];
@@ -826,7 +800,17 @@ renderHtmlHelpMenu(help.overview,'help-overview', 100, true);
 
 
 
-export { setUser, showFiles, recorderDeal, handleForm, renderTextToConsole, 
-		checkDevice, playAlerts, alertState, restartServer, presetHandling,
-		}
+export { 
+	setUser, 
+	showFiles, 
+	recorderDeal, 
+	handleForm, 
+	renderTextToConsole, 
+	playAlerts, 
+	alertState, 
+	presetHandling
+}
+
+
+
 

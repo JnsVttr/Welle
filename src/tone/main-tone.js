@@ -1,8 +1,9 @@
 import Tone from 'tone';
 import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
-import { recorderDeal, handleForm, renderTextToConsole, checkDevice, playAlerts, alertState }  from '/index' ;
-
+import { recorderDeal, handleForm, renderTextToConsole, playAlerts, alertState }  from '/index' ;
+import { checkDevice } from '/helper/checkDevice';
+import { printer } from '/helper/printer';
 
 // test
 let debugTone = true;

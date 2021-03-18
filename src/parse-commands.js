@@ -1,5 +1,5 @@
 
-// WELLE - input grammar //
+// WELLE - parse commands //
 // =============================================================
 
 /*
@@ -18,28 +18,20 @@ not nice
 
 import { transport }  from '/tone/main-tone' 
 import { renderHtmlHelp }  from  '/html/renderHTML';
-import { help }  from '/html/help/helpText';
-import { setUser, showFiles, playAlerts, 
-    alertState, restartServer, presetHandling,
-     }  from '/index' 
-
-// debug import from index.js > index-symlink.js > parser
-// import { debugParser }  from './../index-symlink';
+import { help }  from '/text/helpText';
+import { 
+    setUser, 
+    showFiles, 
+    playAlerts, 
+    alertState, 
+    presetHandling
+}  from '/index' 
+import { printer } from '/helper/printer';
+import { restartServer } from '/socket/restartServer';
 
 
 let debug = true;
-// debug = debugParser;
-
-
-// printer(debug, element, value)
-let printer = (debug, element, value) => {
-    if (debug==true) {
-        console.log(`Parser \t - ${element} >> ${value}`);
-    };
-}
-
-// printer(debug, "consoletest", `debugParser: ${debugParser}/ debug: ${debug}`)
-
+let context = "parser";
 
 const parseInput = (input) => {
     
@@ -103,7 +95,7 @@ const parseInput = (input) => {
         };
     });
 
-    printer(debug, "incoming", `
+    printer(debug, context, "incoming", `
             type: \t\t ${type}
             desc: \t\t ${desc}
             cmd: \t\t ${cmd}
@@ -206,12 +198,12 @@ const parseInput = (input) => {
     };
     // mute On
     if (desc=="muteOn"){
-        printer(debug, "muteOn", "mute audio")
+        printer(debug, context, "muteOn", "mute audio")
         transport('muteOn');
     };
     // mute Off
     if (desc=="muteOff"){
-        printer(debug, "muteOff", "unmute audio")
+        printer(debug, context, "muteOff", "unmute audio")
         transport('muteOff');
     };
     // record start
@@ -229,14 +221,14 @@ const parseInput = (input) => {
     };
     // restart server
     if (type=="restart server"){
-        printer(debug, "restart server", "restart server")
+        printer(debug, context, "restart server", "restart server")
         restartServer();
     };
     // join session    
     if (type=="join"){
         let session = desc[1];
         let user = desc[0];
-        printer(debug, "join", `join session "${session}" as user "${user}"`);
+        printer(debug, context, "join", `join session "${session}" as user "${user}"`);
         setUser(user, session);
     };
     // presets store
@@ -244,11 +236,11 @@ const parseInput = (input) => {
         let action = desc;
         let preset = inst;
         if (action=='store') {
-            printer(debug, "preset store", `${action} preset "${preset}" on server"`);
+            printer(debug, context, "preset store", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
         if (action=='reload') {
-            printer(debug, "preset reload", `${action} preset "${preset}" on server"`);
+            printer(debug, context, "preset reload", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
     };
@@ -257,7 +249,7 @@ const parseInput = (input) => {
         let action = desc;
         let preset = inst;
         if (action=='reload') {
-            printer(debug, "preset reload to all", `${action} preset "${preset}" on server"`);
+            printer(debug, context, "preset reload to all", `${action} preset "${preset}" on server"`);
             presetHandling(preset, action);
         };
     };
