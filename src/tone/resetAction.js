@@ -1,23 +1,7 @@
 import Tone from 'tone';
 import { printer } from '/helper/printer';
-import { debug, context, stopAllInstruments, clearParts, instruments, thisBPM } from './main-tone';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import { debug, context, clearParts, instruments, thisBPM } from './main-tone';
+import { stopAllInstruments } from "./handleInstruments";
 
 
 export function resetAction() {

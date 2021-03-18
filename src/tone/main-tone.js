@@ -10,24 +10,30 @@ needs urgent re-work
 import Tone from 'tone';
 
 // import files
-import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
-import { instrumentsList, recorderDeal, handleForm, alertMuteState }  from '/index' ;
+import { recorderDeal, handleForm, alertMuteState }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
 import { renderTextToConsole } from '/helper/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList';
 import { printer } from '/helper/printer';
-import { startTransport } from './startTransport';
 import { checkIfInstValid } from './checkIfInstValid';
 import { muteAll } from './muteAll';
 import { initInstrument } from './initInstrument';
 import { resetAction } from './resetAction';
+import { playInstrument } from './playInstrument';
+import { stopInstrument, stopAllInstruments, playAllInstruments } from './handleInstruments';
+import { copyPattern } from './copyPattern';
+import { setVolume, setRandom, setBPM } from './handleParameters';
+import { updateInstrument } from './updateInstrument';
+import { updateSequence } from './updateSequence';
+import { savePart } from './savePart';
+import { setPart } from './setPart';
 
 // debug
 export let debug = true;
 export let context = "main-tone";
-let debugTone = true;  // old debug, needs to be removed
+export let debugTone = true;  // old debug, needs to be removed
 
 // device ?
 export let device = checkDevice(); // check device, ios is not allowd to load mediarecorder
@@ -35,7 +41,7 @@ export let device = checkDevice(); // check device, ios is not allowd to load me
 // tone variables
 export var instruments = {};
 export var savedParts = {};
-let masterOut = new Tone.Gain(0.9);   // master output
+export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
 export let thisBPM = 120;
 Tone.Transport.bpm.value = thisBPM;
@@ -43,7 +49,7 @@ Tone.context.latencyHint = 'balanced';
 // let now = Tone.now(); // not really needed
 
 
-
+printer(debug, context, "printer", "value");
 
 
 
@@ -148,330 +154,7 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 
 
 
-// INSTRUMENTS - CONTROL
-// ===================================================================
-
-
-export function playInstrument (instName, patternIn, rand, url) {
-	if (debugTone){ console.log('Tone: playInstrument: playInstrument() at Tone', instName, patternIn, rand) };
-	startTransport();
-	
-	let action = '';
-	// checking
-	if (instruments[instName]!=null) {
-		// instrument exists
-		if (debugTone){console.log('Tone: playInstrument: instrument exists!')};
-		if (patternIn[0]===null) {
-			// empty call => instrument & pattern exists, just play instrument
-			if (instruments[instName].pattern!=null){
-				if (debugTone){console.log(`Tone: playInstrument: empty call => instrument & pattern "${instruments[instName].pattern}" exists, just play instrument!`)};
-				action = 'playInstrument'	
-			};			
-		};
-		if (patternIn[0]!=null){
-			// NON-empty call => instrument & pattern exists, assign new pattern to sequence
-			if (debugTone){console.log(`Tone: playInstrument: NON-empty call => instrument & pattern exists, assign new pattern "${patternIn}" to sequence`)};
-			action = 'assignNewPattern'
-		}
-
-	// instrument NOT exists & new pattern is empty
-	} else {
-		
-		
-		if (patternIn.length==1 && patternIn[0]===null){
-			// change new pattern to [1] & create new instrument
-			if (debugTone){console.log('Tone: playInstrument: instrument NOT exists & new pattern is empty')};
-			action = 'createNewInstrumentPatternEmpty';
-		} else {
-			// new pattern is not empty, create new Instrument with new pattern
-			if (debugTone){console.log('Tone: playInstrument: instrument NOT exists & new pattern is Not empty: ' + patternIn)};
-			action = 'createNewInstrumentPatternNonEmpty';
-		};
-	};
-	if (debugTone){console.log("Tone: playInstrument: incoming action: ", action);};
-
-	switch (action) {
-		case "playInstrument":
-			if (debugTone){console.log('Tone: playInstrument: play instrument without changes')};
-			// just play it.. 
-			updateSequence(instName, instruments[instName].pattern);
-			playSequence(instName);
-		break;
-		case "assignNewPattern":
-			if (debugTone){console.log('Tone: playInstrument: assign new pattern & play instrument')};
-			patternIn = adaptPattern(patternIn);
-			updateInstrument(instName, patternIn, rand, url);
-			updateSequence(instName, patternIn);
-			playSequence(instName);
-		break;
-		case "createNewInstrumentPatternEmpty":
-			if (debugTone){console.log('Tone: playInstrument: create new instrument, replace empty pattern with [1]')};
-			patternIn = [1];
-			patternIn = adaptPattern(patternIn);
-			updateInstrument(instName, patternIn, rand, url);
-			updateSequence(instName, patternIn);
-			playSequence(instName);
-		break;
-		case "createNewInstrumentPatternNonEmpty":
-			if (debugTone){console.log('Tone: playInstrument: create new instrument w/ pattern')};
-			patternIn = adaptPattern(patternIn);
-			updateInstrument(instName, patternIn, rand, url);
-			updateSequence(instName, patternIn);
-			playSequence(instName);
-		break;
-	};
-
-
-	
-};
-
-
-
-export function stopInstrument (instName) {
-	// store all new items (before calling part)
-	if (instruments[instName]!=null) {
-		instruments[instName].sequence.stop();
-		instruments[instName].isPlaying = false;
-		// instruments[instName].synth.dispose();
-	};
-	renderInstruments();
-};
-export function stopAllInstruments () {
-	if (debugTone){console.log('Tone: stopAllInstruments: stopping all instruments!')};
-	Object.keys(instruments).forEach((instName) => {
-		instruments[instName].sequence.stop();		
-		instruments[instName].isPlaying = false;
-		// instruments[instName].synth.dispose();
-	});
-	// if (Tone.Transport.state!='stopped') {
-	// 	Tone.Transport.stop();
-	// };
-	renderInstruments();
-};
-export function playAllInstruments () {
-	if (debugTone){console.log('Tone: playAllInstruments: playing all instruments!')};
-	//Tone.Transport.start();
-	let now = Tone.now();
-	let n = Tone.Transport.nextSubdivision('1n');
-	// parseFloat("1.555").toFixed(2);
-	// n = n.toFixed(0);
-	if (debugTone){console.log('Tone: playAllInstruments: playing all instruments at Tone.now() + 0.01: ' + now)};
-	if (debugTone){console.log('Tone: playAllInstruments: nextTickTime ' + n)};
-	Object.keys(instruments).forEach((instName) => {
-		if (instruments[instName].isPlaying==true){
-			stopInstrument(instName);
-		};
-		// if (instruments[instName].isPlaying==false){
-			instruments[instName].sequence.start().at(0);	
-			instruments[instName].isPlaying = true;	
-		// };
-	});
-	renderInstruments();
-};
-
-export function copyPattern (instName, instArray) {
-	// copy patterns
-	if (instruments[instName]!=null) {
-		for (let i=0;i<instArray.length;i++){
-			let singleInst= instArray[i];
-			if (instruments[singleInst]!=null){
-				instruments[singleInst].pattern = instruments[instName].pattern;	
-				playInstrument (singleInst, instruments[singleInst].pattern)		
-			};
-		};
-	};
-};
-export function setVolume(instName, vol) {
-	if (instruments[instName]!=null) {
-		let volume = vol;
-		volume = vol * instrumentsList[instName].gain;
-		instruments[instName].vol = volume;
-		instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
-		if (debugTone){console.log(`Tone: setVolume vol ${vol} * gain ${instrumentsList[instName].gain} to ${volume}`)};
-		instruments[instName].synth.setVolume(volume);
-	};
-};
-export function setRandom(instName, rand) {
-	if (instruments[instName]!=null) {
-		instruments[instName].rand = rand;
-	};
-};
-export function setBPM(bpm, num) {
-	if (num == '') {
-		if (debugTone){console.log('Tone: setBPM: set bpm to ' + bpm)};
-		thisBPM = bpm; 
-		Tone.Transport.bpm.value = bpm;	
-	} else {
-		Tone.Transport.bpm.rampTo(bpm, num);
-		if (debugTone){console.log('Tone: setBPM: set bpm to ' + bpm + ' in seconds: ' + num)};
-	};
-	
-	
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// INSTRUMENTS & SEQUENCE
-// ===================================================================
-
-function updateInstrument (instName, pat, rand, newUrl) {
-	if (debugTone){console.log('Tone: updateInstrument: Start Instrument Handling..')};
-
-	// if instrument doesn't exists, create a new instrument: 
-	if (instruments[instName]==null) {
-		if (debugTone){console.log('Tone: updateInstrument: Instrument not exisiting - new Instrument()')};
-		
-		// create new instrument, based on stored params:
-		let inst = new Instrument();
-
-
-		// params taken from instrumentsList
-		let instType = instrumentsList[instName].type;
-		let defaultVol = instrumentsList[instName].vol * instrumentsList[instName].gain;
-		let url = instrumentsList[instName].url;
-		if (newUrl!=undefined){
-			url = newUrl;
-			if (debugTone){console.log('Tone: updateInstrument: assign new url = ' + url)};
-		}
-		let note = instrumentsList[instName].baseNote;
-
-		
-
-		// update the new Instrument:
-		
-		inst.setVolume(defaultVol);
-		if (instrumentsList[instName].baseNote !=undefined) { inst.setBaseNote(note) };
-		if (instrumentsList[instName].type == 'Sampler') 	{ 
-			inst.updateSampleURL(url) 
-			if (debugTone){console.log('Tone: updateInstrument: CHECK - sample URL = ' + url)};
-		};
-
-		inst.updateType(instType); 
-		inst.connect(masterOut);
-		
-
-		if (debugTone){console.log('Tone: updateInstrument: CHECK - Tone.Transport.ticks = ' + Tone.Transport.ticks)};
-		// store Instrument in Instrument collection
-		instruments[instName] = {
-	        name: instName, 
-	        synth: inst, 
-	        type: instType, 
-	        vol: defaultVol,
-	        pattern: pat,
-	        rand: rand,
-	        ticks: 0,
-	        url: url,
-	        note: note, 
-	        isPlaying: false,
-	    };
-	    
-	    instruments[instName].randFunction = function () {
-	    	let shufflePattern = shuffleArray(instruments[instName].pattern);
-	    	instruments[instName].pattern = shufflePattern;
-	    	if (instruments[instName].isPlaying) {
-	    		updateSequence(instruments[instName].name, shufflePattern);
-	    		playSequence(instruments[instName].name);	
-	    	} else {
-	    		updateSequence(instruments[instName].name, shufflePattern);
-	    	}
-	    }
-	    if (debugTone){console.log(`Tone: updateInstrument:  New Instrument "${instName}" created!`)};
-	    
-	} else {
-		// store new params in Instrument collection
-		instruments[instName].rand = rand;
-		instruments[instName].pattern = pat;
-	};
-    //return instruments[instName]
-};
-
-
-function updateSequence (instName, pat) {
-	let inst = instruments[instName].synth; 
-	let patAdapt = pat; //adaptPattern(pat);
-	if (debugTone) {console.log(`Tone: updateSequence: create New Sequence: ${instName} with this pattern: `, patAdapt) };
-
-	let setInst = function() {
-  		instruments[instName].sequence = new Tone.Sequence(function(time, note){
-  			// set note first
-			note = inst.getBaseNote() + (note*10);	
-			// console.log(`freq ${note}`);
-
-			// set sequence:
-			switch (instruments[instName].type) {
-				case "MetalSynth":
-					inst.synth.triggerAttackRelease("16n", '@8n');  // toggle @16n -->time
-				break; 
-				case "NoiseSynth":
-					inst.synth.triggerAttackRelease("32n", '@8n');
-				break; 
-				case "FMSynth":
-					inst.synth.triggerAttackRelease(note, "32n", '@8n', 0.8);
-				break; 
-				case "AMSynth":
-					inst.synth.triggerAttackRelease(note, "8n", '@8n', 1);
-				break; 
-				case "PluckSynth":
-					inst.synth.resonance.value = 0.1;
-					inst.synth.dampening.value = 5000;
-					inst.synth.triggerAttackRelease(note, "32n", '@8n');
-					if (debugTone){console.log(`Tone: pattern PluckSynth, resonance: ${inst.synth.resonance.value}.. `)};
-
-				break; 
-				case "Sampler":
-					inst.synth.triggerAttackRelease(note, "1n", '@8n');
-				break; 
-				default: 
-					inst.synth.triggerAttackRelease(note, "32n", '@8n');
-					// if (debugTone){console.log(`pattern synth, inst: ${inst}, instSynth: ${inst.synth}.. `)};
-			};
-			instruments[instName].ticks++;
-			randInPattern (instName);
-			
-			
-			// if (debugTone){console.log(`updateSequence: CHECK time: ${time},  Tone.Transport.ticks: ${Tone.Transport.ticks}, instrumentTicks: ${instruments[instName].ticks}`)};
-		}, patAdapt, '8n');
-  	};
-
-	if (instruments[instName].sequence!= null) {
-		if (debugTone) { console.log('Tone: updateSequence: Instrument Sequence existing, delete sequence..') };
-  		instruments[instName].sequence.stop();
-  		instruments[instName].sequence.dispose();
-  		if (debugTone) { console.log('Tone: updateSequence: set new Sequence')};
-  		setInst();
-  	} else {
-  		if (debugTone) { console.log('Tone: updateSequence: set new Sequence')};
-  		setInst();
-  	};
-};
-
-
-
-function randInPattern (instName) {
+export function randInPattern (instName) {
 	// random:
 	// if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}`) };
 	if (instruments[instName].rand > 0) {
@@ -489,7 +172,7 @@ function randInPattern (instName) {
 
 
 
-function playSequence (instName) {
+export function playSequence (instName) {
 	if (debugTone) { console.log('Tone: playSequence: play new Instrument sequence!')};
 	if (instruments[instName].type == 'Sampler'){
 		setTimeout(function(){
@@ -506,7 +189,7 @@ function playSequence (instName) {
 
 
 
-function adaptPattern (patAdapt) {
+export function adaptPattern (patAdapt) {
     for (let i=0;i<patAdapt.length;i++){
         if (patAdapt[i]==0) {
             patAdapt[i]=null
@@ -517,7 +200,7 @@ function adaptPattern (patAdapt) {
 
 
 // random helper, randomize patterns
-function shuffleArray(array) {
+export function shuffleArray(array) {
     var input = array;
     for (var i = input.length-1; i >=0; i--) {
         var randomIndex = Math.floor(Math.random()*(i+1)); 
@@ -556,86 +239,6 @@ function shuffleArray(array) {
 
 
 
-// PARTS
-// ===================================================================
-
-export function savePart(name) {
-	//console.log("save part under this name: ", name);
-    savedParts[name] = {name: name};
-    savedParts[name].instruments = {};
-    // console.log("followinginst ar playing: "),
-    Object.keys(instruments).forEach(key => {
-        
-            // console.log(instruments[key].name);
-            var instName = instruments[key].name;
-            var pattern = instruments[key].pattern;
-            var sequence = instruments[key].sequence;
-            var isPlaying = instruments[key].isPlaying;
-            var rand = instruments[key].rand;
-            var vol = instruments[key].vol;
-            var url = instruments[key].url;
-            // console.log(name, pattern, rand);
-            savedParts[name].instruments[instName] = {
-                name: instName,
-                pattern: pattern,
-                sequence: sequence,
-                isPlaying: isPlaying,
-                rand: rand,
-                vol: vol,
-                url: url,
-            };
-    });
-    savedParts.bpm = thisBPM;
-    renderParts();
-    if (debugTone) { console.log('Tone: savePart: ' + JSON.stringify(savedParts))};
-
-};
-
-export function setPart (name) {
-	startTransport();
-	if (savedParts.bpm != undefined) {
-		setBPM(savedParts.bpm, '');        			
-	};
-	
-	// check if part exists before settings
-    var check = false;
-    Object.keys(savedParts).forEach(key => {
-        if (key == name) {
-        	stopAllPartInstruments(name);
-        	console.log('OUT stopall, save info: ' + JSON.stringify(savedParts[name].instruments));
-		    Object.keys(savedParts[name].instruments).forEach(key => {
-
-		    	//savedParts[name].instruments
-		    	// check, if all instruments are availible
-		    	
-	    		//console.log("setPart for following instrument: ", key);
-		        let instName = savedParts[name].instruments[key].name;
-		        let pattern = savedParts[name].instruments[key].pattern;
-		        let isPlaying = savedParts[name].instruments[key].isPlaying;
-		        let rand = savedParts[name].instruments[key].rand;
-		        let vol = savedParts[name].instruments[key].vol;
-		        let url = savedParts[name].instruments[key].url;
-		        if (savedParts[name].instruments[key].url!=undefined){
-		        	stopInstrument(instName);
-		    		delete instruments[instName];
-		    	};
-
-		        console.log('OUT playPartInstrument: ', instName, pattern, rand, isPlaying, url);
-		        playPartInstrument (instName, pattern, rand, isPlaying, url);
-		        // setVolume(instName, vol);	
-	    	
-		        
-		    });
-            check = true;
-        };
-    });
-    if (!check) {
-    	let printData = 'no such part ..';
-		renderTextToConsole (false, 'local', printData, 'local');
-		playAlerts('error', alertMuteState);
-    };
-};
-
 export function deleteElement (elements) {
 	// check if element exists before settings
     var check = false;
@@ -671,7 +274,7 @@ export function deleteElement (elements) {
 
 
 
-function stopAllPartInstruments (newPart) {
+export function stopAllPartInstruments (newPart) {
 	// console.log('stopping all instruments!');
 
 	Object.keys(instruments).forEach((instName) => {
@@ -683,7 +286,7 @@ function stopAllPartInstruments (newPart) {
 	});
 };
 
-function playPartInstrument (instName, patternIn, rand, isPlaying, url) {
+export function playPartInstrument (instName, patternIn, rand, isPlaying, url) {
 	//console.log('IN playPartInstrument: ', instName, patternIn, rand, isPlaying);
 	updateInstrument(instName, patternIn, rand, url);
 	updateSequence(instName, patternIn);	
@@ -699,7 +302,7 @@ export function clearParts () {
 	renderParts();
 };
 
-function renderParts() {
+export function renderParts() {
 	let partNames = [];	
     Object.keys(savedParts).forEach(key => {
     	// console.log("render saveParts[keys]: " + savedParts[key].name);
@@ -739,7 +342,7 @@ function handlePresetsInTone(action, data) {
 };
 
 
-function renderInstruments() { 
+export function renderInstruments() { 
 	let instrumentNames = [];
     Object.keys(instruments).forEach(inst => {
     	let newInstName = '';
