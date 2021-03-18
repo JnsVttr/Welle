@@ -359,6 +359,7 @@ function interpretInput (data) {
 	// check & interpret text input
 	// if there is data:
 	if (data !='') {
+		console.log("eval data: " + data);
 		// if input is not valid:
 		if (livecode.match(data).failed() ) {
             state = 'failed';

@@ -1,9 +1,11 @@
 import Tone from 'tone';
 import { Instrument } from '/tone/instruments';
 import { renderOutputLine }  from  '/html/renderHTML';
-import { recorderDeal, handleForm, renderTextToConsole, playAlerts, alertState }  from '/index' ;
+import { recorderDeal, handleForm, alertMuteState }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
 import { printer } from '/helper/printer';
+import { renderTextToConsole } from '/helper/renderTextToConsole';
+import { playAlerts } from '/helper/playAlerts';
 
 // test
 let debugTone = true;
@@ -121,7 +123,7 @@ function initInstrument(dest, source, num) {
 	let error = function () {
 		let printData = 'Mp3 file not existing -- or \"' + source + '\"[ ] is no valid folder!';
 		renderTextToConsole (false, 'local', printData, 'local');
-		playAlerts('error', alertState);
+		playAlerts('error', alertMuteState);
 		return false;
 	};
 	if (sampleURL[source] != undefined){
@@ -209,7 +211,7 @@ if (device != 'ios') {
 		let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
 		let audioSrc = URL.createObjectURL(blob);
 		recorderDeal('stopped', audioSrc);
-		playAlerts('stop_recording', alertState);
+		playAlerts('stop_recording', alertMuteState);
 	};
 };
 
@@ -402,8 +404,8 @@ function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, n
 
 function muteAll(state) {
 	if (debugTone){ console.log('Tone: muteAll: Transport: change mute state..') };
-	if (state) {Tone.Master.mute = true;  playAlerts('return', alertState)}
-	if (state == false ) {Tone.Master.mute = false; playAlerts('return', alertState)}
+	if (state) {Tone.Master.mute = true;  playAlerts('return', alertMuteState)}
+	if (state == false ) {Tone.Master.mute = false; playAlerts('return', alertMuteState)}
 };
 
 let now = 0;
@@ -458,7 +460,7 @@ function checkIfInstValid (instNameIncoming) {
 	if (instAvailible == false ) {
 		let string = 'no such instrument ..';
 		renderTextToConsole(false, 's', string, 'local');
-		playAlerts('error', alertState);
+		playAlerts('error', alertMuteState);
 	};
 	if (instAvailible == true) {
 		if (debugTone){console.log('Tone: checkIfInstValid: found ' + instNameIncoming) };
@@ -983,7 +985,7 @@ function setPart (name) {
     if (!check) {
     	let printData = 'no such part ..';
 		renderTextToConsole (false, 'local', printData, 'local');
-		playAlerts('error', alertState);
+		playAlerts('error', alertMuteState);
     };
 };
 
@@ -1016,7 +1018,7 @@ function deleteElement (elements) {
     if (!check) {
     	let printData = 'no such element to delete..';
 		renderTextToConsole (false, 'local', printData, 'local');
-		playAlerts('error', alertState);
+		playAlerts('error', alertMuteState);
     };
 };
 
