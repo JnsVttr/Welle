@@ -8,16 +8,33 @@ use the online tester
 
 naming relates to grammar functions:
 Sequence_seqPattern = topic Sequence, subFunction seqPattern
+
+all returns are send to parseInput file
 */
 
 
 // libraries
 import grammarText from '/html/ohm/grammar';
 import ohm from 'ohm-js';
+// import from symlink, because can't reach src root
+import { debugSemantic }  from './../index-symlink';
+
 // variables
 let livecode = ohm.grammar(grammarText);  // taken from grammar.js
 let semantics = livecode.createSemantics();
-let debug = true;
+let debug = false;
+debug = debugSemantic;
+
+// printer(debug, topic, element, value)
+let printer = (debug, element, value) => {
+    if (debug==true) {
+        console.log(`Semantics \t - ${element} >> ${value}`);
+    };
+}
+
+// printer(debug, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
+
+
 
 
 
@@ -541,12 +558,7 @@ function handlePattern(pat){
 
 
 
-// printer(debug, topic, element, value)
-let printer = (debug, element, value) => {
-    if (debug==true) {
-        console.log(`Semantics - ${element} >> ${value}`);
-    };
-}
+
 
 
 

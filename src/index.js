@@ -1,4 +1,10 @@
+// WELLE - main index file //
+// =============================================================
 
+/*
+https://github.com/harc/ohm
+
+*/
 
 
 // libraries
@@ -12,8 +18,28 @@ import { parseInput }  from '/html/ohm/parseInput';
 import { help }  from '/html/help/helpText';
 import { setDataURL, handlePresetsInTone } from '/tone/main-tone';
 
+
+// global variables
+// let debugSemantic = true;
+export const debugParser = true;
+export const debugSemantic = true;
+
+
 let debugIndex = true;
-if (debugIndex) { console.log(' ')};
+// if (debugIndex) { console.log(' ')};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // document.getElementById('info').innerHTML = `<br> © 2019, Jens Vetter. This webiste is part of the project <a href="https://tamlab.ufg.at/projects/tangible-signals/">Tangible Signals</a> at <a href="https://tamlab.ufg.at/">Tangible Music Lab</a>, University of Art and Design Linz. `;
 
@@ -801,4 +827,6 @@ renderHtmlHelpMenu(help.overview,'help-overview', 100, true);
 
 
 export { setUser, showFiles, recorderDeal, handleForm, renderTextToConsole, 
-		checkDevice, playAlerts, alertState, restartServer, presetHandling }
+		checkDevice, playAlerts, alertState, restartServer, presetHandling,
+		}
+

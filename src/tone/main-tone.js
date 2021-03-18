@@ -8,7 +8,7 @@ import { recorderDeal, handleForm, renderTextToConsole, checkDevice, playAlerts,
 let debugTone = true;
 if (debugTone){console.log('-- ')};
 
-console.clear();
+//console.clear();
 var instruments = {};
 var savedParts = {};
 // master output
@@ -65,7 +65,7 @@ function update_InstrumentsList () {
 	};
 
 	console.log('update_InstrumentsList: default file URL = ' + sampleURL.default[0]);
-	console.log('');
+	
 };
 
 

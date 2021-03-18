@@ -1,14 +1,48 @@
+
+// WELLE - input grammar //
+// =============================================================
+
+/*
+https://github.com/harc/ohm
+use the online tester 
+
+all commands are coming from semantic.js
+
+parser getting/setting plenty of stuff from other parts, tone/html/index
+
+basically triggers all relevant functions in other files.
+not nice
+*/
+
+
+
 import { transport }  from '/tone/main-tone' 
-import { renderHtml, renderHtmlArrows, renderHtmlHelp }  from  '/html/renderHTML';
+import { renderHtmlHelp }  from  '/html/renderHTML';
 import { help }  from '/html/help/helpText';
-import { setUser, showFiles, playAlerts, alertState, restartServer, presetHandling }  from '/index' 
+import { setUser, showFiles, playAlerts, 
+    alertState, restartServer, presetHandling,
+     }  from '/index' 
+
+// debug import from index.js > index-symlink.js > parser
+// import { debugParser }  from './../index-symlink';
 
 
+let debug = true;
+// debug = debugParser;
 
+
+// printer(debug, topic, element, value)
+let printer = (debug, element, value) => {
+    if (debug==true) {
+        console.log(`Parser \t - ${element} >> ${value}`);
+    };
+}
+
+// printer(debug, "consoletest", `debugParser: ${debugParser}/ debug: ${debug}`)
 
 
 const parseInput = (input) => {
-    let debugParser=true;
+    
     // all possible semantic variables 
     let type='', desc='', cmd='', inst='', instArray='', patternParse='', 
         rand='', sel='', vol='', name='', bpm='', helpText='', num='';
@@ -69,31 +103,30 @@ const parseInput = (input) => {
         };
     });
 
-    if (debugParser) {
-        console.log("Parser: parser Income: ",'\n',  
-            " type: ", type, '\n', 
-            " desc: ", desc, '\n', 
-            " cmd: ", cmd, '\n', 
-            " inst: ", inst, '\n', 
-            " instArray: ", instArray, '\n', 
-            " pattern: ", patternParse, '\n', 
-            " rand: ", rand, '\n', 
-            " sel: ", sel, '\n', 
-            " vol: ", vol, '\n', 
-            " bpm: ", bpm, '\n', 
-            " name: ", name, '\n', 
-            " help: ", helpText, '\n', 
-            " num: ", num, '\n', 
-        );
-    };
+    printer(debug, "incoming", `
+            type: \t\t ${type}
+            desc: \t\t ${desc}
+            cmd: \t\t ${cmd}
+            inst: \t\t ${inst}
+            instArray: \t ${instArray}
+            pattern: \t ${patternParse}
+            rand: \t\t ${rand}
+            sel: \t\t ${sel}
+            vol: \t\t ${vol}
+            bpm: \t\t ${bpm}
+            name: \t\t ${name}
+            help: \t\t ${helpText}
+            num: \t\t ${num}
+    `);
+
+    
 
 
 
 
     // tests:
-    // if (debugParser) {console.log(`Parse: patternParse Test.. if pattern "${patternParse}" is empty + array, then patternParse[0]=0. otherwise Original Value: ${patternParse}.`)};
     if (patternParse=='' && Array.isArray(patternParse)) {patternParse[0] = null};
-    // if (debugParser) {console.log(`Parse: patternParse Test --> patternParse: "${patternParse}"`)};
+    
 
     // ==================================================================== //
     // assign input "Sequence" (play etc.)
@@ -296,6 +329,11 @@ const parseInput = (input) => {
     // update & return valid input
     if (type == '') {return false} else {return true};
 };
+
+
+
+
+
 
 
 
