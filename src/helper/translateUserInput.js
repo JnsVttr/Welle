@@ -1,4 +1,5 @@
 import { livecode, semantics } from '/html/ohm/semantic';
+import { renderTextToConsole } from '/html/renderTextToConsole';
 
 export let translateUserInput = (data) => {
 	let _user = data.user;

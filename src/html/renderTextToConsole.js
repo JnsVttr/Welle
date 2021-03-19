@@ -1,5 +1,5 @@
 import { renderHtml } from '/html/renderHTML';
-import { consoleArray, consoleLength } from '../index';
+import { consoleArray, consoleLength } from '/index';
 
 export function renderTextToConsole(state, user, string, context) {
 	if (context == 'local') {

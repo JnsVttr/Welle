@@ -1,5 +1,5 @@
 import { alertMuteState } from '/index';
-import { renderTextToConsole } from '/helper/renderTextToConsole';
+import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { printer } from '/helper/printer';
 import { startTransport } from './startTransport';

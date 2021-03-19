@@ -13,7 +13,7 @@ import Tone from 'tone';
 import { renderOutputLine }  from  '/html/renderHTML';
 import { recorderDeal, handleForm, alertMuteState }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
-import { renderTextToConsole } from '/helper/renderTextToConsole';
+import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList';
 import { printer } from '/helper/printer';

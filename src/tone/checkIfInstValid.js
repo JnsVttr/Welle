@@ -1,5 +1,5 @@
 import { instrumentsList, alertMuteState } from '/index';
-import { renderTextToConsole } from '/helper/renderTextToConsole';
+import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { printer } from '/helper/printer';
 import { debug, context } from './main-tone';
