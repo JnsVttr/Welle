@@ -34,20 +34,33 @@ let debug = true;
 let context = "parser";
 
 const parseInput = (input) => {
+
+    printer(debug, context, "parser input", `
+    input is an array?: ${Array.isArray(input)}
+    input: ${input}
+    input[0]: ${input[0]}
+    input[1]: ${input[1]}
+    `);
     
-    // all possible semantic variables 
+    // declare containers for all possible semantic variables 
     let type='', desc='', cmd='', inst='', instArray='', patternParse='', 
         rand='', sel='', vol='', name='', bpm='', helpText='', num='';
 
     // extract input from semantic.js parsing:
+    // type & desc mark the main purpose of the message
+    // details are encapsulated in sub arrays and are extracted below
     type = input[0] || '';
     desc = input[1] || '';
 
-    //if messages come ["name", value]
+    // extract subarrays: if messages come ["name", value]
+    // assign values to previously created variables
     Object.keys(input).forEach(key => {
+
+        // only if key of input is an (sub) array
         if (Array.isArray(input[key])){
             var desc = input[key][0];
             var value = input[key][1];
+
             switch (desc) {
                 case "command":
                     cmd = value;
@@ -117,10 +130,11 @@ const parseInput = (input) => {
 
 
     // tests:
-    if (patternParse=='' && Array.isArray(patternParse)) {patternParse[0] = null};
+    if (patternParse =='' && Array.isArray(patternParse)) {patternParse[0] = null};
     
 
-    // ==================================================================== //
+    // ===================== Tone functions =============================================== //
+
     // assign input "Sequence" (play etc.)
     if (desc=="sequenceStart"){
         // play instrument function
@@ -194,7 +208,7 @@ const parseInput = (input) => {
     // list stuff
     if (desc=="list"){
         let string = inst; // e.g. files
-        showFiles(string);
+        showFiles(string); // in index-safe
     };
     // mute On
     if (desc=="muteOn"){
@@ -222,14 +236,14 @@ const parseInput = (input) => {
     // restart server
     if (type=="restart server"){
         printer(debug, context, "restart server", "restart server")
-        restartServer();
+        restartServer(); // in socket/
     };
     // join session    
     if (type=="join"){
         let session = desc[1];
         let user = desc[0];
         printer(debug, context, "join", `join session "${session}" as user "${user}"`);
-        setUser(user, session);
+        setUser(user, session); // in index-safe
     };
     // presets store
     if (type=="helper"){
@@ -237,11 +251,11 @@ const parseInput = (input) => {
         let preset = inst;
         if (action=='store') {
             printer(debug, context, "preset store", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action);
+            presetHandling(preset, action); // in index-safe
         };
         if (action=='reload') {
             printer(debug, context, "preset reload", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action);
+            presetHandling(preset, action);// in index-safe
         };
     };
     // presets reload to all
@@ -250,7 +264,7 @@ const parseInput = (input) => {
         let preset = inst;
         if (action=='reload') {
             printer(debug, context, "preset reload to all", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action);
+            presetHandling(preset, action);// in index-safe
         };
     };
 
@@ -313,6 +327,7 @@ const parseInput = (input) => {
     // ctrlSetFunc
     
     // update & return valid input
+    // if type is empty, then nothing is there to parse, return false, else true
     if (type == '') {return false} else {return true};
 };
 

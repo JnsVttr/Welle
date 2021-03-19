@@ -1,6 +1,7 @@
 import Tone from 'tone';
 import { printer } from '/helper/printer';
-import { instruments, renderInstruments, debugTone, debug, context } from './main-tone';
+import { instruments, debugTone, debug, context } from './main-tone';
+import { renderInstruments } from "../html/renderInstruments";
 
 
 export function stopInstrument(instName) {

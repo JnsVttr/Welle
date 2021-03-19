@@ -29,6 +29,7 @@ import { updateInstrument } from './updateInstrument';
 import { updateSequence } from './updateSequence';
 import { savePart } from './savePart';
 import { setPart } from './setPart';
+import { renderInstruments } from '/html/renderInstruments';
 
 // debug
 export let debug = true;
@@ -167,7 +168,6 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 
 
 export function randInPattern (instName) {
-	printer(debug, context, "randInPattern", "")
 	// random:
 	// if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}`) };
 	if (instruments[instName].rand > 0) {
@@ -176,6 +176,7 @@ export function randInPattern (instName) {
 		if ((count+1) ==  ((instruments[instName].pattern.length * instruments[instName].rand)) ){
 			// if (debugTone){ console.log('updateSequence: execute random func now!') };
 			instruments[instName].randFunction()
+			printer(debug, context, "randInPattern", "")
 		};	
 	};
 };
@@ -349,41 +350,6 @@ function handlePresetsInTone(action, data) {
 		renderParts();
 	};
 };
-
-
-export function renderInstruments() { 
-	printer(debug, context, "renderInstruments", "")
-	let instrumentNames = [];
-    Object.keys(instruments).forEach(inst => {
-    	let newInstName = '';
-    	if (instruments[inst].isPlaying) {
-    		newInstName = '&nbsp;&nbsp;&nbsp;&nbsp;' +  instruments[inst].name + '&nbsp;&nbsp;&nbsp; '; 	
-    	};
-    	if (instruments[inst].isPlaying == false) {
-    		newInstName = '&nbsp;X ' +  instruments[inst].name + '&nbsp;&nbsp;&nbsp; '; 	
-    	};
-    	instrumentNames.push(newInstName);
-    });
-	printer(debug, context, "renderInstruments", `render instruments to page`)
-    
-    renderOutputLine(instrumentNames,'instruments:', 100);
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // UPLOAD FILES
