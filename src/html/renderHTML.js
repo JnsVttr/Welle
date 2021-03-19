@@ -1,8 +1,11 @@
+import { printer } from '/helper/printer';
+import { debug, context } from '/index';
+
 
 
 // set output of console
 
-const renderHtml = (content, chooseDiv, limit) => {
+export const renderHtml = (content, chooseDiv, limit) => {
     //console.log(content, content.length, div);
     if (limit==null){limit=1000;};
 
@@ -39,7 +42,7 @@ const renderHtml = (content, chooseDiv, limit) => {
 
 
 
-const renderHtmlHelp = (content, chooseDiv, limit, links) => {
+export const renderHtmlHelp = (content, chooseDiv, limit, links) => {
     
     let linkState = links; // if true, render including links
     
@@ -78,7 +81,7 @@ const renderHtmlHelp = (content, chooseDiv, limit, links) => {
 
 
 
-const renderHtmlHelpMenu = (content, chooseDiv, limit, links) => {
+export const renderHtmlHelpMenu = (content, chooseDiv, limit, links) => {
     let linkState = links; // if true, render including links
     // output text:
     let div = document.getElementById(chooseDiv);
@@ -119,14 +122,24 @@ const renderHtmlHelpMenu = (content, chooseDiv, limit, links) => {
 
 // navigate console with arrows
 
-const renderHtmlArrows = (pointer, consoleArray, dir, divName) => {
+export const renderHtmlArrows = (pointer, consoleArray, dir, divName) => {
+
 	let length = consoleArray.length;
 
+    // printer(debug, context, "renderHtmlArrows", `
+    // pointer: ${pointer}
+    // consoleArray: ${consoleArray}
+    // length: ${length}
+    // dir: ${dir}
+    // `);
+
 	if (dir=='up') {
-		if (pointer<length) {pointer = pointer+1};
-        document.getElementById("textarea").value = '';
-        document.getElementById("textarea").value = consoleArray[(length-pointer)].message;
-        
+        if (consoleArray.length > 0) {
+            if (pointer<length) {pointer = pointer+1};
+            document.getElementById("textarea").value = '';
+            document.getElementById("textarea").value = consoleArray[(length-pointer)].message;
+        }
+            	
 	} else {
 		if (pointer>0) {
             pointer = pointer-1;
@@ -158,7 +171,7 @@ const renderHtmlArrows = (pointer, consoleArray, dir, divName) => {
 
 // // render 'parts' as one line under the input 
 
-const renderOutputLine = (stringArray, customDiv, limitIn) => {
+export const renderOutputLine = (stringArray, customDiv, limitIn) => {
     var div = document.getElementById(customDiv);
     var html='<table><caption></caption><tr>' + '<td style="width:10%">' + customDiv + '</td>';
     var textLength = stringArray.length;
@@ -193,5 +206,4 @@ const renderOutputLine = (stringArray, customDiv, limitIn) => {
 
 
 
-export { renderHtml, renderHtmlHelp, renderHtmlArrows, renderOutputLine, renderHtmlHelpMenu } 
 

@@ -6,10 +6,12 @@ import { debug, context } from '/tone/main-tone';
 // update_InstrumentsList();
 
 
+// sampleURL.default = a folder on server called "default"
+
 export function update_InstrumentsList() {
     let _instrumentsList = {};
     
-    printer(debug, context, "update_InstrumentsList", `sampleURL: ${sampleURL}`);
+    printer(debug, context, "update_InstrumentsList", `attempting to update sample paths...`);
     if (sampleURL != undefined) {
         _instrumentsList = {
             drums: { name: 'drums', type: 'MembraneSynth', baseNote: 30, gain: 1, vol: 0.7, },
@@ -35,7 +37,7 @@ export function update_InstrumentsList() {
             s_voc: { name: 's_voc', type: 'Sampler', baseNote: 100, gain: 1.4, vol: 0.7, url: sampleURL.default[11] },
         };
 
-        printer(debug, context, "update_InstrumentsList", `with all sampleURLs`);
+        printer(debug, context, "update_InstrumentsList", `updated sample paths based on sampleURL`);
 
         return _instrumentsList;
     };

@@ -49,7 +49,9 @@ Tone.context.latencyHint = 'balanced';
 // let now = Tone.now(); // not really needed
 
 
+/*
 printer(debug, context, "printer", "value");
+*/
 
 
 

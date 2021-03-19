@@ -9507,13 +9507,34 @@ var global = arguments[3];
 		g.SocketIOFileClient = SocketIOFileClient;
 	}
 })();
+},{}],"helper/printer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.printer = void 0;
+
+var printer = function printer(debug, context, element, value) {
+  if (debug == true) {
+    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
+  }
+
+  ;
+};
+
+exports.printer = printer;
 },{}],"html/renderHTML.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.renderHtmlHelpMenu = exports.renderOutputLine = exports.renderHtmlArrows = exports.renderHtmlHelp = exports.renderHtml = void 0;
+exports.renderOutputLine = exports.renderHtmlArrows = exports.renderHtmlHelpMenu = exports.renderHtmlHelp = exports.renderHtml = void 0;
+
+var _printer = require("/helper/printer");
+
+var _index = require("/index");
 
 // set output of console
 var renderHtml = function renderHtml(content, chooseDiv, limit) {
@@ -9614,16 +9635,23 @@ var renderHtmlHelpMenu = function renderHtmlHelpMenu(content, chooseDiv, limit, 
 exports.renderHtmlHelpMenu = renderHtmlHelpMenu;
 
 var renderHtmlArrows = function renderHtmlArrows(pointer, consoleArray, dir, divName) {
-  var length = consoleArray.length;
+  var length = consoleArray.length; // printer(debug, context, "renderHtmlArrows", `
+  // pointer: ${pointer}
+  // consoleArray: ${consoleArray}
+  // length: ${length}
+  // dir: ${dir}
+  // `);
 
   if (dir == 'up') {
-    if (pointer < length) {
-      pointer = pointer + 1;
-    }
+    if (consoleArray.length > 0) {
+      if (pointer < length) {
+        pointer = pointer + 1;
+      }
 
-    ;
-    document.getElementById("textarea").value = '';
-    document.getElementById("textarea").value = consoleArray[length - pointer].message;
+      ;
+      document.getElementById("textarea").value = '';
+      document.getElementById("textarea").value = consoleArray[length - pointer].message;
+    }
   } else {
     if (pointer > 0) {
       pointer = pointer - 1;
@@ -9662,7 +9690,7 @@ var renderOutputLine = function renderOutputLine(stringArray, customDiv, limitIn
 };
 
 exports.renderOutputLine = renderOutputLine;
-},{}],"../node_modules/tone/build/Tone.js":[function(require,module,exports) {
+},{"/helper/printer":"helper/printer.js","/index":"index.js"}],"../node_modules/tone/build/Tone.js":[function(require,module,exports) {
 var define;
 !function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.Tone=e():t.Tone=e()}("undefined"!=typeof self?self:this,function(){return function(t){var e={};function i(s){if(e[s])return e[s].exports;var n=e[s]={i:s,l:!1,exports:{}};return t[s].call(n.exports,n,n.exports,i),n.l=!0,n.exports}return i.m=t,i.c=e,i.d=function(t,e,s){i.o(t,e)||Object.defineProperty(t,e,{configurable:!1,enumerable:!0,get:s})},i.r=function(t){Object.defineProperty(t,"__esModule",{value:!0})},i.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(e,"a",e),e},i.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},i.p="",i(i.s=148)}([function(t,e,i){"use strict";i.r(e),function(t){var s=i(93),n=function(){if(!(this instanceof n))throw new Error("constructor needs to be called with the 'new' keyword")};
 /**
@@ -9826,24 +9854,7 @@ function playAlerts(name, alertMuteState) {
 }
 
 ;
-},{"/helper/alerts":"helper/alerts.js"}],"helper/printer.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.printer = void 0;
-
-var printer = function printer(debug, context, element, value) {
-  if (debug == true) {
-    console.log("".concat(context, " - ").concat(element, " >> ").concat(value));
-  }
-
-  ;
-};
-
-exports.printer = printer;
-},{}],"tone/update_InstrumentsList.js":[function(require,module,exports) {
+},{"/helper/alerts":"helper/alerts.js"}],"tone/update_InstrumentsList.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9859,9 +9870,10 @@ var _mainTone = require("/tone/main-tone");
 
 // important: UPDATE only arrives after connection to server
 // update_InstrumentsList();
+// sampleURL.default = a folder on server called "default"
 function update_InstrumentsList() {
   var _instrumentsList = {};
-  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "sampleURL: ".concat(_index.sampleURL));
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "attempting to update sample paths...");
 
   if (_index.sampleURL != undefined) {
     _instrumentsList = {
@@ -10004,7 +10016,7 @@ function update_InstrumentsList() {
         url: _index.sampleURL.default[11]
       }
     };
-    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "with all sampleURLs");
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "update_InstrumentsList", "updated sample paths based on sampleURL");
     return _instrumentsList;
   }
 
@@ -11333,7 +11345,10 @@ exports.thisBPM = thisBPM;
 _tone.default.Transport.bpm.value = thisBPM;
 _tone.default.context.latencyHint = 'balanced'; // let now = Tone.now(); // not really needed
 
-(0, _printer.printer)(debug, context, "printer", "value"); // export at the end
+/*
+printer(debug, context, "printer", "value");
+*/
+// export at the end
 
 function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
   // if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
@@ -20458,13 +20473,17 @@ exports.requestServerFiles = requestServerFiles;
 
 var _index = require("/index");
 
+var _printer = require("/helper/printer");
+
 // manage server request & receive, e.g. Samples
 function requestServerFiles(string) {
+  (0, _printer.printer)(_index.debug, _index.context, "requestServerFiles", "request sample paths from server...");
+
   _index.socket.emit('requestServerFiles', string);
 }
 
 ;
-},{"/index":"index.js"}],"helper/extractSamplePaths.js":[function(require,module,exports) {
+},{"/index":"index.js","/helper/printer":"helper/printer.js"}],"helper/extractSamplePaths.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20478,7 +20497,7 @@ var _index = require("/index");
 
 // incoming data collection via socket.io, copied to 'soundDataURLs{}'
 function extractSamplePaths(data) {
-  (0, _printer.printer)(_index.debug, _index.context, "extractSamplePaths", "URLs paths from ".concat(data));
+  // printer(debug, context, "extractSamplePaths", `URLs paths from ${data}`);
   var _sampleURL = {
     default: ['../']
   }; // setting a default sample;
@@ -20489,12 +20508,13 @@ function extractSamplePaths(data) {
   Object.keys(data).forEach(function (folder) {
     var count = data[folder].count; // count = how many elements a folder contains
 
-    _sampleURL[folder] = [];
-    (0, _printer.printer)(_index.debug, _index.context, "extractPaths", "\n\t\tcount: ".concat(count, ", \n\t\tfolder: ").concat(folder, ", \n\t\tsampleURL[folder]: ").concat(_sampleURL[folder]));
+    _sampleURL[folder] = []; // printer(debug, context, "extractPaths", `
+    // count: ${count}, 
+    // folder: ${folder}, 
+    // sampleURL[folder]: ${_sampleURL[folder]}`);
 
     for (var i = 0; i < count; i++) {
-      var newURL = data[folder].shortURL + data[folder].files[i];
-      (0, _printer.printer)(_index.debug, _index.context, "extractPaths", "newURL at sampleURL.".concat(folder, "[").concat(i, "] = ").concat(newURL));
+      var newURL = data[folder].shortURL + data[folder].files[i]; // printer(debug, context, "extractPaths", `newURL at sampleURL.${folder}[${i}] = ${newURL}`);
 
       _sampleURL[folder].push(newURL);
     }
@@ -20685,7 +20705,7 @@ document.getElementById("textarea").addEventListener("keydown", function (e) {
 socket.on("filesOnServer", function (folder, samples, what) {
   serverFolders = folder;
   exports.serverSamples = serverSamples = samples;
-  (0, _printer.printer)(debug, context, "receive filesOnServer", "receiving \n\t\tfolders: ".concat(serverFolders, " \n\t\tfiles: ").concat(serverSamples));
+  (0, _printer.printer)(debug, context, "filesOnServer - received", " \n\t\tfolders: ".concat(serverFolders, " \n\t\tfiles: ").concat(serverSamples));
   exports.sampleURL = sampleURL = (0, _extractSamplePaths.extractSamplePaths)(serverSamples);
   exports.instrumentsList = instrumentsList = (0, _update_InstrumentsList.update_InstrumentsList)();
 });
@@ -20739,7 +20759,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59871" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50190" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

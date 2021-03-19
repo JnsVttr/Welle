@@ -163,7 +163,7 @@ requestServerFiles ("samples");
 socket.on("filesOnServer", function(folder, samples, what) {
 	serverFolders = folder;
 	serverSamples = samples;
-	printer(debug, context, "receive filesOnServer", `receiving 
+	printer(debug, context, "filesOnServer - received", ` 
 		folders: ${serverFolders} 
 		files: ${serverSamples}`);
 	sampleURL = extractSamplePaths (serverSamples);
