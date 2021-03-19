@@ -6,7 +6,7 @@ import { debug, context, savedParts, instruments, thisBPM, renderParts } from '.
 
 
 export function savePart(name) {
-	printer(debug, context, "printer", "value");
+	printer(debug, context, "savePart", `${name}`);
 	//console.log("save part under this name: ", name);
 	savedParts[name] = { name: name };
 	savedParts[name].instruments = {};

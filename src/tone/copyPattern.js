@@ -1,7 +1,9 @@
+import { printer } from '/helper/printer';
 import { playInstrument } from './playInstrument';
-import { instruments } from './main-tone';
+import { instruments, debug, context } from './main-tone';
 
-export function copyPattern(instName, instArray) {
+export function copyPattern (instName, instArray) {
+	printer(debug, context, "copyPattern", `for ${instName}`);
 	// copy patterns
 	if (instruments[instName] != null) {
 		for (let i = 0; i < instArray.length; i++) {

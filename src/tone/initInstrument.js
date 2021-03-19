@@ -2,7 +2,8 @@ import { sampleURL, instrumentsList, alertMuteState } from '/index';
 import { renderTextToConsole } from '/helper/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { printer } from '/helper/printer';
-import { debug, context, stopInstrument, instruments, savedParts } from './main-tone';
+import { debug, context, instruments, savedParts } from './main-tone';
+import { stopInstrument } from "./handleInstruments";
 
 // init Instrument/ Sampler
 // ========================================================

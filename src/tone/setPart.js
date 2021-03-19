@@ -9,7 +9,7 @@ import { debug, context, savedParts, stopAllPartInstruments, instruments, playPa
 
 
 export function setPart(name) {
-	printer(debug, context, "printer", "value");
+	printer(debug, context, "setPart", `${name}`);
 	startTransport();
 	if (savedParts.bpm != undefined) {
 		setBPM(savedParts.bpm, '');

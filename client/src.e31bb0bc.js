@@ -10090,9 +10090,15 @@ var _index = require("/index");
 
 var _playAlerts = require("/helper/playAlerts");
 
+var _printer = require("/helper/printer");
+
+var _mainTone = require("./main-tone");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function muteAll(state) {
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "MuteAll", "");
+
   if (state) {
     _tone.default.Master.mute = true;
     (0, _playAlerts.playAlerts)('return', _index.alertMuteState);
@@ -10105,7 +10111,79 @@ function muteAll(state) {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","/helper/playAlerts":"helper/playAlerts.js"}],"tone/initInstrument.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/handleInstruments.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.stopInstrument = stopInstrument;
+exports.stopAllInstruments = stopAllInstruments;
+exports.playAllInstruments = playAllInstruments;
+
+var _tone = _interopRequireDefault(require("tone"));
+
+var _printer = require("/helper/printer");
+
+var _mainTone = require("./main-tone");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function stopInstrument(instName) {
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "stopInstrument", "for ".concat(instName)); // store all new items (before calling part)
+
+  if (_mainTone.instruments[instName] != null) {
+    _mainTone.instruments[instName].sequence.stop();
+
+    _mainTone.instruments[instName].isPlaying = false; // instruments[instName].synth.dispose();
+  }
+
+  ;
+  (0, _mainTone.renderInstruments)();
+}
+
+;
+
+function stopAllInstruments() {
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "stopAllInstruments", "");
+  Object.keys(_mainTone.instruments).forEach(function (instName) {
+    _mainTone.instruments[instName].sequence.stop();
+
+    _mainTone.instruments[instName].isPlaying = false; // instruments[instName].synth.dispose();
+  }); // if (Tone.Transport.state!='stopped') {
+  // 	Tone.Transport.stop();
+  // };
+
+  (0, _mainTone.renderInstruments)();
+}
+
+;
+
+function playAllInstruments() {
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playAllInstruments", ""); //Tone.Transport.start();
+
+  var now = _tone.default.now();
+
+  var n = _tone.default.Transport.nextSubdivision('1n'); // parseFloat("1.555").toFixed(2);
+  // n = n.toFixed(0);
+
+
+  Object.keys(_mainTone.instruments).forEach(function (instName) {
+    if (_mainTone.instruments[instName].isPlaying == true) {
+      stopInstrument(instName);
+    }
+
+    ; // if (instruments[instName].isPlaying==false){
+
+    _mainTone.instruments[instName].sequence.start().at(0);
+
+    _mainTone.instruments[instName].isPlaying = true; // };
+  });
+  (0, _mainTone.renderInstruments)();
+}
+
+;
+},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/initInstrument.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10122,6 +10200,8 @@ var _playAlerts = require("/helper/playAlerts");
 var _printer = require("/helper/printer");
 
 var _mainTone = require("./main-tone");
+
+var _handleInstruments = require("./handleInstruments");
 
 // init Instrument/ Sampler
 // ========================================================
@@ -10142,7 +10222,7 @@ function initInstrument(dest, source, num) {
       // if (debugTone) {console.log(`Tone: initInstrument: URL =  ${sampleURL[source][0]}`) };
       var inst = dest; // if (debugTone) {console.log('Tone: initInstrument: Stop instrument: '+ inst + 'and remove from Instrument List')};
 
-      (0, _mainTone.stopInstrument)(inst);
+      (0, _handleInstruments.stopInstrument)(inst);
       delete _mainTone.instruments[inst]; // delete from saved Parts, otherwise throws errors
       // if (debugTone) {console.log('Tone: initInstrument: delete from saved Parts, otherwise throws errors for instrument: '+ inst)};
 
@@ -10169,95 +10249,7 @@ function initInstrument(dest, source, num) {
 }
 
 ;
-},{"/index":"index.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/handleInstruments.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.stopInstrument = stopInstrument;
-exports.stopAllInstruments = stopAllInstruments;
-exports.playAllInstruments = playAllInstruments;
-
-var _tone = _interopRequireDefault(require("tone"));
-
-var _mainTone = require("./main-tone");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function stopInstrument(instName) {
-  // store all new items (before calling part)
-  if (_mainTone.instruments[instName] != null) {
-    _mainTone.instruments[instName].sequence.stop();
-
-    _mainTone.instruments[instName].isPlaying = false; // instruments[instName].synth.dispose();
-  }
-
-  ;
-  (0, _mainTone.renderInstruments)();
-}
-
-;
-
-function stopAllInstruments() {
-  if (_mainTone.debugTone) {
-    console.log('Tone: stopAllInstruments: stopping all instruments!');
-  }
-
-  ;
-  Object.keys(_mainTone.instruments).forEach(function (instName) {
-    _mainTone.instruments[instName].sequence.stop();
-
-    _mainTone.instruments[instName].isPlaying = false; // instruments[instName].synth.dispose();
-  }); // if (Tone.Transport.state!='stopped') {
-  // 	Tone.Transport.stop();
-  // };
-
-  (0, _mainTone.renderInstruments)();
-}
-
-;
-
-function playAllInstruments() {
-  if (_mainTone.debugTone) {
-    console.log('Tone: playAllInstruments: playing all instruments!');
-  }
-
-  ; //Tone.Transport.start();
-
-  var now = _tone.default.now();
-
-  var n = _tone.default.Transport.nextSubdivision('1n'); // parseFloat("1.555").toFixed(2);
-  // n = n.toFixed(0);
-
-
-  if (_mainTone.debugTone) {
-    console.log('Tone: playAllInstruments: playing all instruments at Tone.now() + 0.01: ' + now);
-  }
-
-  ;
-
-  if (_mainTone.debugTone) {
-    console.log('Tone: playAllInstruments: nextTickTime ' + n);
-  }
-
-  ;
-  Object.keys(_mainTone.instruments).forEach(function (instName) {
-    if (_mainTone.instruments[instName].isPlaying == true) {
-      stopInstrument(instName);
-    }
-
-    ; // if (instruments[instName].isPlaying==false){
-
-    _mainTone.instruments[instName].sequence.start().at(0);
-
-    _mainTone.instruments[instName].isPlaying = true; // };
-  });
-  (0, _mainTone.renderInstruments)();
-}
-
-;
-},{"tone":"../node_modules/tone/build/Tone.js","./main-tone":"tone/main-tone.js"}],"tone/resetAction.js":[function(require,module,exports) {
+},{"/index":"index.js","/helper/renderTextToConsole":"helper/renderTextToConsole.js","/helper/playAlerts":"helper/playAlerts.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js","./handleInstruments":"tone/handleInstruments.js"}],"tone/resetAction.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10367,6 +10359,8 @@ exports.updateSequence = updateSequence;
 
 var _tone = _interopRequireDefault(require("tone"));
 
+var _printer = require("/helper/printer");
+
 var _mainTone = require("./main-tone");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -10375,11 +10369,7 @@ function updateSequence(instName, pat) {
   var inst = _mainTone.instruments[instName].synth;
   var patAdapt = pat; //adaptPattern(pat);
 
-  if (_mainTone.debugTone) {
-    console.log("Tone: updateSequence: create New Sequence: ".concat(instName, " with this pattern: "), patAdapt);
-  }
-
-  ;
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateSequence", "create New Sequence: ".concat(instName, " with this pattern: ").concat(patAdapt));
 
   var setInst = function setInst() {
     _mainTone.instruments[instName].sequence = new _tone.default.Sequence(function (time, note) {
@@ -10433,28 +10423,15 @@ function updateSequence(instName, pat) {
   };
 
   if (_mainTone.instruments[instName].sequence != null) {
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: Instrument Sequence existing, delete sequence..');
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateSequence", "updateSequence: Instrument Sequence existing, delete sequence, set new sequence");
 
     _mainTone.instruments[instName].sequence.stop();
 
     _mainTone.instruments[instName].sequence.dispose();
 
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: set new Sequence');
-    }
-
-    ;
     setInst();
   } else {
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateSequence: set new Sequence');
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateSequence", "updateSequence: Instrument Sequence not existing, set new Sequence");
     setInst();
   }
 
@@ -10462,7 +10439,7 @@ function updateSequence(instName, pat) {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","./main-tone":"tone/main-tone.js"}],"tone/instruments.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/instruments.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10771,25 +10748,21 @@ var _instruments = require("/tone/instruments");
 
 var _index = require("/index");
 
+var _printer = require("/helper/printer");
+
 var _mainTone = require("./main-tone");
+
+var _updateSequence = require("./updateSequence");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // INSTRUMENTS & SEQUENCE
 // ===================================================================
 function updateInstrument(instName, pat, rand, newUrl) {
-  if (_mainTone.debugTone) {
-    console.log('Tone: updateInstrument: Start Instrument Handling..');
-  }
-
-  ; // if instrument doesn't exists, create a new instrument: 
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "Start Instrument Handling.."); // if instrument doesn't exists, create a new instrument: 
 
   if (_mainTone.instruments[instName] == null) {
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateInstrument: Instrument not exisiting - new Instrument()');
-    }
-
-    ; // create new instrument, based on stored params:
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "Instrument not exisiting - new Instrument()"); // create new instrument, based on stored params:
 
     var inst = new _instruments.Instrument(); // params taken from instrumentsList
 
@@ -10799,12 +10772,7 @@ function updateInstrument(instName, pat, rand, newUrl) {
 
     if (newUrl != undefined) {
       url = newUrl;
-
-      if (_mainTone.debugTone) {
-        console.log('Tone: updateInstrument: assign new url = ' + url);
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "assign new url from list, url: ".concat(url));
     }
 
     var note = _index.instrumentsList[instName].baseNote; // update the new Instrument:
@@ -10819,23 +10787,13 @@ function updateInstrument(instName, pat, rand, newUrl) {
 
     if (_index.instrumentsList[instName].type == 'Sampler') {
       inst.updateSampleURL(url);
-
-      if (_mainTone.debugTone) {
-        console.log('Tone: updateInstrument: CHECK - sample URL = ' + url);
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "CHECK - sample URL: ".concat(url));
     }
 
     ;
     inst.updateType(instType);
     inst.connect(_mainTone.masterOut);
-
-    if (_mainTone.debugTone) {
-      console.log('Tone: updateInstrument: CHECK - Tone.Transport.ticks = ' + _tone.default.Transport.ticks);
-    }
-
-    ; // store Instrument in Instrument collection
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "CHECK - Tone.Transport.ticks: ".concat(_tone.default.Transport.ticks)); // store Instrument in Instrument collection
 
     _mainTone.instruments[instName] = {
       name: instName,
@@ -10855,18 +10813,14 @@ function updateInstrument(instName, pat, rand, newUrl) {
       _mainTone.instruments[instName].pattern = shufflePattern;
 
       if (_mainTone.instruments[instName].isPlaying) {
-        (0, _mainTone.updateSequence)(_mainTone.instruments[instName].name, shufflePattern);
+        (0, _updateSequence.updateSequence)(_mainTone.instruments[instName].name, shufflePattern);
         (0, _mainTone.playSequence)(_mainTone.instruments[instName].name);
       } else {
-        (0, _mainTone.updateSequence)(_mainTone.instruments[instName].name, shufflePattern);
+        (0, _updateSequence.updateSequence)(_mainTone.instruments[instName].name, shufflePattern);
       }
     };
 
-    if (_mainTone.debugTone) {
-      console.log("Tone: updateInstrument:  New Instrument \"".concat(instName, "\" created!"));
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "updateInstrument", "New Instrument \"".concat(instName, "\" created!"));
   } else {
     // store new params in Instrument collection
     _mainTone.instruments[instName].rand = rand;
@@ -10877,7 +10831,7 @@ function updateInstrument(instName, pat, rand, newUrl) {
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/playInstrument.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/tone/instruments":"tone/instruments.js","/index":"index.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js","./updateSequence":"tone/updateSequence.js"}],"tone/playInstrument.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10886,6 +10840,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.playInstrument = playInstrument;
 
 var _startTransport = require("./startTransport");
+
+var _printer = require("/helper/printer");
 
 var _mainTone = require("./main-tone");
 
@@ -10896,30 +10852,18 @@ var _updateInstrument = require("./updateInstrument");
 // INSTRUMENTS - CONTROL
 // ===================================================================
 function playInstrument(instName, patternIn, rand, url) {
-  if (_mainTone.debugTone) {
-    console.log('Tone: playInstrument: playInstrument() at Tone', instName, patternIn, rand);
-  }
-
-  ;
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "".concat(instName, ", ").concat(patternIn, ", ").concat(rand));
   (0, _startTransport.startTransport)();
   var action = ''; // checking
 
   if (_mainTone.instruments[instName] != null) {
     // instrument exists
-    if (_mainTone.debugTone) {
-      console.log('Tone: playInstrument: instrument exists!');
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "instrument exists");
 
     if (patternIn[0] === null) {
       // empty call => instrument & pattern exists, just play instrument
       if (_mainTone.instruments[instName].pattern != null) {
-        if (_mainTone.debugTone) {
-          console.log("Tone: playInstrument: empty call => instrument & pattern \"".concat(_mainTone.instruments[instName].pattern, "\" exists, just play instrument!"));
-        }
-
-        ;
+        (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "empty call => instrument & pattern \"".concat(_mainTone.instruments[instName].pattern, "\" exists, just play instrument!"));
         action = 'playInstrument';
       }
 
@@ -10930,30 +10874,18 @@ function playInstrument(instName, patternIn, rand, url) {
 
     if (patternIn[0] != null) {
       // NON-empty call => instrument & pattern exists, assign new pattern to sequence
-      if (_mainTone.debugTone) {
-        console.log("Tone: playInstrument: NON-empty call => instrument & pattern exists, assign new pattern \"".concat(patternIn, "\" to sequence"));
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "NON-empty call => instrument & pattern exists, assign new pattern \"".concat(patternIn, "\" to sequence"));
       action = 'assignNewPattern';
     } // instrument NOT exists & new pattern is empty
 
   } else {
     if (patternIn.length == 1 && patternIn[0] === null) {
       // change new pattern to [1] & create new instrument
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: instrument NOT exists & new pattern is empty');
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "instrument NOT exists & new pattern is empty");
       action = 'createNewInstrumentPatternEmpty';
     } else {
       // new pattern is not empty, create new Instrument with new pattern
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: instrument NOT exists & new pattern is Not empty: ' + patternIn);
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "instrument NOT exists & new pattern is Not empty: ".concat(patternIn));
       action = 'createNewInstrumentPatternNonEmpty';
     }
 
@@ -10961,31 +10893,18 @@ function playInstrument(instName, patternIn, rand, url) {
   }
 
   ;
-
-  if (_mainTone.debugTone) {
-    console.log("Tone: playInstrument: incoming action: ", action);
-  }
-
-  ;
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "incoming action: ".concat(action));
 
   switch (action) {
     case "playInstrument":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: play instrument without changes');
-      }
-
-      ; // just play it.. 
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "play instrument without changes"); // just play it.. 
 
       (0, _updateSequence.updateSequence)(instName, _mainTone.instruments[instName].pattern);
       (0, _mainTone.playSequence)(instName);
       break;
 
     case "assignNewPattern":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: assign new pattern & play instrument');
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "assign new pattern & play instrument");
       patternIn = (0, _mainTone.adaptPattern)(patternIn);
       (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
       (0, _updateSequence.updateSequence)(instName, patternIn);
@@ -10993,11 +10912,7 @@ function playInstrument(instName, patternIn, rand, url) {
       break;
 
     case "createNewInstrumentPatternEmpty":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: create new instrument, replace empty pattern with [1]');
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "create new instrument, replace empty pattern with [1]");
       patternIn = [1];
       patternIn = (0, _mainTone.adaptPattern)(patternIn);
       (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
@@ -11006,11 +10921,7 @@ function playInstrument(instName, patternIn, rand, url) {
       break;
 
     case "createNewInstrumentPatternNonEmpty":
-      if (_mainTone.debugTone) {
-        console.log('Tone: playInstrument: create new instrument w/ pattern');
-      }
-
-      ;
+      (0, _printer.printer)(_mainTone.debug, _mainTone.context, "playInstrument", "create new instrument w/ pattern");
       patternIn = (0, _mainTone.adaptPattern)(patternIn);
       (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
       (0, _updateSequence.updateSequence)(instName, patternIn);
@@ -11022,7 +10933,7 @@ function playInstrument(instName, patternIn, rand, url) {
 }
 
 ;
-},{"./startTransport":"tone/startTransport.js","./main-tone":"tone/main-tone.js","./updateSequence":"tone/updateSequence.js","./updateInstrument":"tone/updateInstrument.js"}],"tone/copyPattern.js":[function(require,module,exports) {
+},{"./startTransport":"tone/startTransport.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js","./updateSequence":"tone/updateSequence.js","./updateInstrument":"tone/updateInstrument.js"}],"tone/copyPattern.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11030,12 +10941,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.copyPattern = copyPattern;
 
+var _printer = require("/helper/printer");
+
 var _playInstrument = require("./playInstrument");
 
 var _mainTone = require("./main-tone");
 
 function copyPattern(instName, instArray) {
-  // copy patterns
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "copyPattern", "for ".concat(instName)); // copy patterns
+
   if (_mainTone.instruments[instName] != null) {
     for (var i = 0; i < instArray.length; i++) {
       var singleInst = instArray[i];
@@ -11055,7 +10969,7 @@ function copyPattern(instName, instArray) {
 }
 
 ;
-},{"./playInstrument":"tone/playInstrument.js","./main-tone":"tone/main-tone.js"}],"tone/handleParameters.js":[function(require,module,exports) {
+},{"/helper/printer":"helper/printer.js","./playInstrument":"tone/playInstrument.js","./main-tone":"tone/main-tone.js"}],"tone/handleParameters.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11068,6 +10982,8 @@ exports.setBPM = setBPM;
 var _tone = _interopRequireDefault(require("tone"));
 
 var _index = require("/index");
+
+var _printer = require("/helper/printer");
 
 var _mainTone = require("./main-tone");
 
@@ -11101,11 +11017,7 @@ function setRandom(instName, rand) {
 
 function setBPM(bpm, num) {
   if (num == '') {
-    if (_mainTone.debugTone) {
-      console.log('Tone: setBPM: set bpm to ' + bpm);
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "setBPM", "set bpm to: ".concat(bpm));
     _mainTone.thisBPM = (bpm, function () {
       throw new Error('"' + "thisBPM" + '" is read-only.');
     }());
@@ -11113,18 +11025,14 @@ function setBPM(bpm, num) {
   } else {
     _tone.default.Transport.bpm.rampTo(bpm, num);
 
-    if (_mainTone.debugTone) {
-      console.log('Tone: setBPM: set bpm to ' + bpm + ' in seconds: ' + num);
-    }
-
-    ;
+    (0, _printer.printer)(_mainTone.debug, _mainTone.context, "setBPM", "set bpm to: ".concat(bpm, " in seconds: ").concat(num));
   }
 
   ;
 }
 
 ;
-},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","./main-tone":"tone/main-tone.js"}],"tone/savePart.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/Tone.js","/index":"index.js","/helper/printer":"helper/printer.js","./main-tone":"tone/main-tone.js"}],"tone/savePart.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11139,7 +11047,7 @@ var _mainTone = require("./main-tone");
 // PARTS
 // ===================================================================
 function savePart(name) {
-  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "printer", "value"); //console.log("save part under this name: ", name);
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "savePart", "".concat(name)); //console.log("save part under this name: ", name);
 
   _mainTone.savedParts[name] = {
     name: name
@@ -11196,7 +11104,7 @@ var _handleParameters = require("./handleParameters");
 var _mainTone = require("./main-tone");
 
 function setPart(name) {
-  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "printer", "value");
+  (0, _printer.printer)(_mainTone.debug, _mainTone.context, "setPart", "".concat(name));
   (0, _startTransport.startTransport)();
 
   if (_mainTone.savedParts.bpm != undefined) {
@@ -11352,7 +11260,7 @@ printer(debug, context, "printer", "value");
 
 function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
   // if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
-  (0, _printer.printer)(debug, context, "transport", "incoming transport: cmd , instName , instArray , patternIn , rand , vol , bpm , name , num");
+  (0, _printer.printer)(debug, context, "transport", "incoming transport: \n\tcmd: \t\t ".concat(cmd, " \n\tinstName: \t ").concat(instName, " \n\tinstArray: \t ").concat(instArray, " \n\tpatternIn: \t ").concat(patternIn, " \n\trand: \t\t ").concat(rand, "\n\tvol: \t\t ").concat(vol, "\n\tbpm: \t\t ").concat(bpm, "\n\tname: \t\t ").concat(name, "\n\tnum: \t\t ").concat(num, "\n\t"));
   var state; // instrument valid state
 
   switch (cmd) {
@@ -11479,8 +11387,9 @@ function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, nu
 ;
 
 function randInPattern(instName) {
-  // random:
+  (0, _printer.printer)(debug, context, "randInPattern", ""); // random:
   // if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}`) };
+
   if (instruments[instName].rand > 0) {
     var count = instruments[instName].ticks % (instruments[instName].pattern.length * instruments[instName].rand); // if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}, count = ${count}, instrument`) };
 
@@ -11498,11 +11407,7 @@ function randInPattern(instName) {
 ;
 
 function playSequence(instName) {
-  if (debugTone) {
-    console.log('Tone: playSequence: play new Instrument sequence!');
-  }
-
-  ;
+  (0, _printer.printer)(debug, context, "playSequence", "");
 
   if (instruments[instName].type == 'Sampler') {
     setTimeout(function () {
@@ -11537,6 +11442,7 @@ function adaptPattern(patAdapt) {
 ; // random helper, randomize patterns
 
 function shuffleArray(array) {
+  (0, _printer.printer)(debug, context, "shuffleArray", "");
   var input = array;
 
   for (var i = input.length - 1; i >= 0; i--) {
@@ -11556,12 +11462,7 @@ function shuffleArray(array) {
 function deleteElement(elements) {
   // check if element exists before settings
   var check = false;
-
-  if (debugTone) {
-    console.log("Tone: deleteElement: delete this: ".concat(elements, " .."));
-  }
-
-  ; // check for each element, could be part or instrument:
+  (0, _printer.printer)(debug, context, "deleteElement", ""); // check for each element, could be part or instrument:
 
   var _loop = function _loop(i) {
     var name = elements[i];
@@ -11604,7 +11505,7 @@ function deleteElement(elements) {
 ;
 
 function stopAllPartInstruments(newPart) {
-  // console.log('stopping all instruments!');
+  (0, _printer.printer)(debug, context, "stopAllPartInstruments", "");
   Object.keys(instruments).forEach(function (instName) {
     // check if instrument doesn't exists in new part:
     if (savedParts[newPart].instruments[instName] == undefined) {
@@ -11619,7 +11520,7 @@ function stopAllPartInstruments(newPart) {
 ;
 
 function playPartInstrument(instName, patternIn, rand, isPlaying, url) {
-  //console.log('IN playPartInstrument: ', instName, patternIn, rand, isPlaying);
+  (0, _printer.printer)(debug, context, "playPartInstrument", "");
   (0, _updateInstrument.updateInstrument)(instName, patternIn, rand, url);
   (0, _updateSequence.updateSequence)(instName, patternIn);
 
@@ -11633,6 +11534,7 @@ function playPartInstrument(instName, patternIn, rand, isPlaying, url) {
 ;
 
 function clearParts() {
+  (0, _printer.printer)(debug, context, "clearParts", "");
   exports.savedParts = savedParts = {};
   renderParts();
 }
@@ -11640,6 +11542,7 @@ function clearParts() {
 ;
 
 function renderParts() {
+  (0, _printer.printer)(debug, context, "renderParts", "");
   var partNames = [];
   Object.keys(savedParts).forEach(function (key) {
     // console.log("render saveParts[keys]: " + savedParts[key].name);
@@ -11651,18 +11554,14 @@ function renderParts() {
 
     ;
   });
-
-  if (debugTone) {
-    console.log("Tone: renderParts: render parts to page..");
-  }
-
-  ;
   (0, _renderHTML.renderOutputLine)(partNames, 'parts:', 100);
 }
 
 ;
 
 function handlePresetsInTone(action, data) {
+  (0, _printer.printer)(debug, context, "handlePresetsInTone", "");
+
   if (action == 'get') {
     savedParts.bpm = thisBPM;
     var parts = savedParts;
@@ -11673,14 +11572,7 @@ function handlePresetsInTone(action, data) {
 
   if (action == 'set') {
     exports.savedParts = savedParts = data;
-    renderParts(); // let c = 0;
-    // Object.keys(savedParts).forEach(name => {
-    // 	if (c==0) {
-    // 		if (savedParts[name].bpm != undefined) {
-    //        	};
-    //        	c++;
-    // 	};
-    // });
+    renderParts();
   }
 
   ;
@@ -11689,6 +11581,7 @@ function handlePresetsInTone(action, data) {
 ;
 
 function renderInstruments() {
+  (0, _printer.printer)(debug, context, "renderInstruments", "");
   var instrumentNames = [];
   Object.keys(instruments).forEach(function (inst) {
     var newInstName = '';
@@ -11706,12 +11599,7 @@ function renderInstruments() {
     ;
     instrumentNames.push(newInstName);
   });
-
-  if (debugTone) {
-    console.log("Tone: renderInstruments: render instruments to page..");
-  }
-
-  ;
+  (0, _printer.printer)(debug, context, "renderInstruments", "render instruments to page");
   (0, _renderHTML.renderOutputLine)(instrumentNames, 'instruments:', 100);
 }
 
@@ -11719,6 +11607,7 @@ function renderInstruments() {
 // ========================================================
 
 function uploadToServer(instName) {
+  (0, _printer.printer)(debug, context, "uploadToServer", "");
   var name = instName;
   console.log('uploadToServer: toneTest: upload to server: ' + name);
   (0, _index.handleForm)(name);
@@ -11754,6 +11643,8 @@ if (device != 'ios') {
 ;
 
 function audioRecord(state) {
+  (0, _printer.printer)(debug, context, "audioRecord", "");
+
   if (state == true && recorderStatus == 'stopped') {
     recorderStatus = 'started';
     recorder.start();
@@ -11774,6 +11665,7 @@ function audioRecord(state) {
 ;
 
 function resetRecorder() {
+  (0, _printer.printer)(debug, context, "resetRecorder", "");
   chunks = [];
 }
 

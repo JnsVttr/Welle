@@ -1,8 +1,10 @@
 import Tone from 'tone';
-import { instruments, renderInstruments, debugTone } from './main-tone';
+import { printer } from '/helper/printer';
+import { instruments, renderInstruments, debugTone, debug, context } from './main-tone';
 
 
 export function stopInstrument(instName) {
+	printer(debug, context, "stopInstrument", `for ${instName}`);
 	// store all new items (before calling part)
 	if (instruments[instName] != null) {
 		instruments[instName].sequence.stop();
@@ -13,7 +15,8 @@ export function stopInstrument(instName) {
 }
 ;
 export function stopAllInstruments() {
-	if (debugTone) { console.log('Tone: stopAllInstruments: stopping all instruments!'); };
+	printer(debug, context, "stopAllInstruments", ``);
+	
 	Object.keys(instruments).forEach((instName) => {
 		instruments[instName].sequence.stop();
 		instruments[instName].isPlaying = false;
@@ -26,14 +29,13 @@ export function stopAllInstruments() {
 }
 ;
 export function playAllInstruments() {
-	if (debugTone) { console.log('Tone: playAllInstruments: playing all instruments!'); };
+	printer(debug, context, "playAllInstruments", ``);
 	//Tone.Transport.start();
 	let now = Tone.now();
 	let n = Tone.Transport.nextSubdivision('1n');
 	// parseFloat("1.555").toFixed(2);
 	// n = n.toFixed(0);
-	if (debugTone) { console.log('Tone: playAllInstruments: playing all instruments at Tone.now() + 0.01: ' + now); };
-	if (debugTone) { console.log('Tone: playAllInstruments: nextTickTime ' + n); };
+	
 	Object.keys(instruments).forEach((instName) => {
 		if (instruments[instName].isPlaying == true) {
 			stopInstrument(instName);

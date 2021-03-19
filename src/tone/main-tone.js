@@ -67,7 +67,17 @@ printer(debug, context, "printer", "value");
 export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
 	
 	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
-	printer(debug, context, "transport", `incoming transport: cmd , instName , instArray , patternIn , rand , vol , bpm , name , num`);
+	printer(debug, context, "transport", `incoming transport: 
+	cmd: \t\t ${cmd} 
+	instName: \t ${instName} 
+	instArray: \t ${instArray} 
+	patternIn: \t ${patternIn} 
+	rand: \t\t ${rand}
+	vol: \t\t ${vol}
+	bpm: \t\t ${bpm}
+	name: \t\t ${name}
+	num: \t\t ${num}
+	`);
 
 	let state;  // instrument valid state
 	
@@ -157,6 +167,7 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 
 
 export function randInPattern (instName) {
+	printer(debug, context, "randInPattern", "")
 	// random:
 	// if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}`) };
 	if (instruments[instName].rand > 0) {
@@ -175,7 +186,8 @@ export function randInPattern (instName) {
 
 
 export function playSequence (instName) {
-	if (debugTone) { console.log('Tone: playSequence: play new Instrument sequence!')};
+	printer(debug, context, "playSequence", "")
+
 	if (instruments[instName].type == 'Sampler'){
 		setTimeout(function(){
 			instruments[instName].sequence.start(0);
@@ -203,6 +215,7 @@ export function adaptPattern (patAdapt) {
 
 // random helper, randomize patterns
 export function shuffleArray(array) {
+	printer(debug, context, "shuffleArray", "")
     var input = array;
     for (var i = input.length-1; i >=0; i--) {
         var randomIndex = Math.floor(Math.random()*(i+1)); 
@@ -244,7 +257,8 @@ export function shuffleArray(array) {
 export function deleteElement (elements) {
 	// check if element exists before settings
     var check = false;
-    if (debugTone){console.log(`Tone: deleteElement: delete this: ${elements} ..`)};
+	printer(debug, context, "deleteElement", "")
+    
 
     // check for each element, could be part or instrument:
     for (let i=0; i< elements.length; i++) {
@@ -277,7 +291,7 @@ export function deleteElement (elements) {
 
 
 export function stopAllPartInstruments (newPart) {
-	// console.log('stopping all instruments!');
+	printer(debug, context, "stopAllPartInstruments", "")
 
 	Object.keys(instruments).forEach((instName) => {
 		// check if instrument doesn't exists in new part:
@@ -289,7 +303,8 @@ export function stopAllPartInstruments (newPart) {
 };
 
 export function playPartInstrument (instName, patternIn, rand, isPlaying, url) {
-	//console.log('IN playPartInstrument: ', instName, patternIn, rand, isPlaying);
+	printer(debug, context, "playPartInstrument", "")
+	
 	updateInstrument(instName, patternIn, rand, url);
 	updateSequence(instName, patternIn);	
 	if (isPlaying == true){
@@ -300,11 +315,13 @@ export function playPartInstrument (instName, patternIn, rand, isPlaying, url) {
 
 
 export function clearParts () {
+	printer(debug, context, "clearParts", "")
 	savedParts = {};
 	renderParts();
 };
 
 export function renderParts() {
+	printer(debug, context, "renderParts", "")
 	let partNames = [];	
     Object.keys(savedParts).forEach(key => {
     	// console.log("render saveParts[keys]: " + savedParts[key].name);
@@ -316,13 +333,12 @@ export function renderParts() {
     	
     });
     
-
-    if (debugTone){console.log(`Tone: renderParts: render parts to page..`)};
     renderOutputLine(partNames,'parts:', 100);
 };
 
 
 function handlePresetsInTone(action, data) {
+	printer(debug, context, "handlePresetsInTone", "")
 	if (action == 'get') {
 		savedParts.bpm = thisBPM;
 		let parts = savedParts;
@@ -331,20 +347,12 @@ function handlePresetsInTone(action, data) {
 	if (action == 'set') {
 		savedParts = data;
 		renderParts();
-		// let c = 0;
-		// Object.keys(savedParts).forEach(name => {
-		// 	if (c==0) {
-		// 		if (savedParts[name].bpm != undefined) {
-	        			
-	 //        	};
-	 //        	c++;
-		// 	};
-		// });
 	};
 };
 
 
 export function renderInstruments() { 
+	printer(debug, context, "renderInstruments", "")
 	let instrumentNames = [];
     Object.keys(instruments).forEach(inst => {
     	let newInstName = '';
@@ -356,7 +364,8 @@ export function renderInstruments() {
     	};
     	instrumentNames.push(newInstName);
     });
-    if (debugTone){console.log(`Tone: renderInstruments: render instruments to page..`)};
+	printer(debug, context, "renderInstruments", `render instruments to page`)
+    
     renderOutputLine(instrumentNames,'instruments:', 100);
 };
 
@@ -380,6 +389,7 @@ export function renderInstruments() {
 // UPLOAD FILES
 // ========================================================
 export function uploadToServer(instName) {
+	printer(debug, context, "uploadToServer", "")
 	let name = instName;
 	console.log('uploadToServer: toneTest: upload to server: ' + name);
 	handleForm(name);
@@ -423,10 +433,12 @@ if (device != 'ios') {
 };
 
 export function audioRecord(state) {
+	printer(debug, context, "audioRecord", "")
 	if (state == true && recorderStatus == 'stopped') { recorderStatus = 'started'; recorder.start(); recorderDeal('started'); };
 	if (state == false && recorderStatus == 'started' ){ recorderStatus = 'stopped'; recorder.stop(); resetRecorder(); };
 };
 function resetRecorder () { 
+	printer(debug, context, "resetRecorder", "")
 	chunks = []; 
 };	
 

@@ -1,7 +1,9 @@
 import Tone from 'tone';
 import { Instrument } from '/tone/instruments';
 import { instrumentsList } from '/index';
-import { debugTone, instruments, masterOut, shuffleArray, updateSequence, playSequence } from './main-tone';
+import { printer } from '/helper/printer';
+import { debug, context, instruments, masterOut, shuffleArray, playSequence } from './main-tone';
+import { updateSequence } from "./updateSequence";
 
 // INSTRUMENTS & SEQUENCE
 // ===================================================================
@@ -9,12 +11,12 @@ import { debugTone, instruments, masterOut, shuffleArray, updateSequence, playSe
 
 
 export function updateInstrument(instName, pat, rand, newUrl) {
-	if (debugTone) { console.log('Tone: updateInstrument: Start Instrument Handling..'); };
+	printer(debug, context, "updateInstrument", `Start Instrument Handling..`);
 
 	// if instrument doesn't exists, create a new instrument: 
 	if (instruments[instName] == null) {
-		if (debugTone) { console.log('Tone: updateInstrument: Instrument not exisiting - new Instrument()'); };
-
+		printer(debug, context, "updateInstrument", `Instrument not exisiting - new Instrument()`);
+		
 		// create new instrument, based on stored params:
 		let inst = new Instrument();
 
@@ -25,7 +27,7 @@ export function updateInstrument(instName, pat, rand, newUrl) {
 		let url = instrumentsList[instName].url;
 		if (newUrl != undefined) {
 			url = newUrl;
-			if (debugTone) { console.log('Tone: updateInstrument: assign new url = ' + url); };
+			printer(debug, context, "updateInstrument", `assign new url from list, url: ${url}`);
 		}
 		let note = instrumentsList[instName].baseNote;
 
@@ -36,14 +38,15 @@ export function updateInstrument(instName, pat, rand, newUrl) {
 		if (instrumentsList[instName].baseNote != undefined) { inst.setBaseNote(note); };
 		if (instrumentsList[instName].type == 'Sampler') {
 			inst.updateSampleURL(url);
-			if (debugTone) { console.log('Tone: updateInstrument: CHECK - sample URL = ' + url); };
+			printer(debug, context, "updateInstrument", `CHECK - sample URL: ${url}`);
 		};
 
 		inst.updateType(instType);
 		inst.connect(masterOut);
 
 
-		if (debugTone) { console.log('Tone: updateInstrument: CHECK - Tone.Transport.ticks = ' + Tone.Transport.ticks); };
+		
+		printer(debug, context, "updateInstrument", `CHECK - Tone.Transport.ticks: ${Tone.Transport.ticks}`);
 		// store Instrument in Instrument collection
 		instruments[instName] = {
 			name: instName,
@@ -68,7 +71,8 @@ export function updateInstrument(instName, pat, rand, newUrl) {
 				updateSequence(instruments[instName].name, shufflePattern);
 			}
 		};
-		if (debugTone) { console.log(`Tone: updateInstrument:  New Instrument "${instName}" created!`); };
+		printer(debug, context, "updateInstrument", `New Instrument "${instName}" created!`);
+		
 
 	} else {
 		// store new params in Instrument collection

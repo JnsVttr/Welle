@@ -1,11 +1,14 @@
 import Tone from 'tone';
-import { instruments, debugTone, randInPattern } from './main-tone';
+import { printer } from '/helper/printer';
+import { instruments, debugTone, randInPattern, debug, context } from './main-tone';
 
 
 export function updateSequence(instName, pat) {
 	let inst = instruments[instName].synth;
 	let patAdapt = pat; //adaptPattern(pat);
-	if (debugTone) { console.log(`Tone: updateSequence: create New Sequence: ${instName} with this pattern: `, patAdapt); };
+
+	printer(debug, context, "updateSequence", `create New Sequence: ${instName} with this pattern: ${patAdapt}`);
+	
 
 	let setInst = function () {
 		instruments[instName].sequence = new Tone.Sequence(function (time, note) {
@@ -49,13 +52,14 @@ export function updateSequence(instName, pat) {
 	};
 
 	if (instruments[instName].sequence != null) {
-		if (debugTone) { console.log('Tone: updateSequence: Instrument Sequence existing, delete sequence..'); };
+		printer(debug, context, "updateSequence", `updateSequence: Instrument Sequence existing, delete sequence, set new sequence`);
+
 		instruments[instName].sequence.stop();
 		instruments[instName].sequence.dispose();
-		if (debugTone) { console.log('Tone: updateSequence: set new Sequence'); };
+
 		setInst();
 	} else {
-		if (debugTone) { console.log('Tone: updateSequence: set new Sequence'); };
+		printer(debug, context, "updateSequence", `updateSequence: Instrument Sequence not existing, set new Sequence`);
 		setInst();
 	};
 }
