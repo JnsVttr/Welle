@@ -106,25 +106,37 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 	if (e.code=='Enter') {
 		playAlerts('return', alertMuteState);
 		consolePointer = -1; // pointer for arrwos
+
+		// send string to validate in enterfunction(), grammar
 		let result = enterFunction();
 		let validState = false;
 
+		// handle returns from enterfunction()
 		if (result.valid == true) { 
-			validState = true 
+			// if return is valid:
+			validState = true;
 			consolePointer += 1;
+			// show text in console
 			renderTextToConsole(validState, user, result.string, 'local')
+			// send results to parser for Tone
 			parseInput(result.result);
 
 		} else {
+			// if return is not valid:
 			validState = false; 
 			consolePointer += 1;
-			let string = ""
+			let string = "";
+			// prepend a '!' to the string
 			if (result.string != '!') { string = `! ${result.string}`; } 
 				else { string = `${result.string}`; };
+			// show text in console
 			renderTextToConsole(validState, user, string, 'local');
 			// nothing to parse
 		};
+		
 		// printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
+
+		// after processing, clear the input field
 		clearTextfield();
 	};
 

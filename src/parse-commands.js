@@ -6,12 +6,10 @@
 https://github.com/harc/ohm
 use the online tester 
 
-all commands are coming from semantic.js
+all commands are validated by semantic.js
 
-parser getting/setting plenty of stuff from other parts, tone/html/index
-
-basically triggers all relevant functions in other files.
-not nice
+sends message via 'transport' to tone
+updates html, server, etc.
 */
 
 
