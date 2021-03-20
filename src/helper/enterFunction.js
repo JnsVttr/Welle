@@ -1,25 +1,53 @@
 
-import { translateUserInput } from './translateUserInput';
-import { user, socket } from '../index';
-// let context = enterFunction;
+import { checkIfInstValid } from '../tone/checkIfInstValid';
+import { livecode, semantics } from '/html/ohm/semantic';
 
-export let enterFunction = () => {
-	// printer(debug, context, "text input", "ENTER pressed");
-	// get text content
-	// consolePointer = 0;
-	let string = document.getElementById("textarea").value;
-	string = string.toLowerCase();
-	let inputData = { string: string, user: user };
-    let result = "";
+export let enterFunction = (_string, _instrumentsList) => {
+	
+    let result = null;
+	let state = null;
 
-	// printer(debug, context, "text input ENTER pressed", `user "${user}", value: "${string}"`);
+	// test input string
+	if (_string != '') {
+		// if input is not valid:
+		if (livecode.match(_string).failed()) {
+			state = 'failed';
+		};
+		// if input is valid
+		if (livecode.match(_string).succeeded()) {
+			// evaluate input through semantics
+			result = semantics(livecode.match(_string)).eval();
+			state = 'succeeded';
+		};
+	};
 
-	if (user == 'local') {
-		socket.emit('clientEvent', inputData);
-		result = translateUserInput(inputData);
-		// printer(debug, context, "check", `result: ${result}`);
-	}
-	// playAlerts('return', alertState);
-    if (result != null) {return {valid: true,  string: string, result:result} }
-    if (result == null) {return {valid: false, string: string, result:null}}
+
+	// proceed on results of semantics:
+	if (state == 'succeeded') {
+		// if result valid in grammar, return result
+		return {valid: true,  string: _string, result: result}
+	};
+	if (state == 'failed') {
+		// if result not valid in grammar, check if string == instrument from list
+		if ( checkIfInstValid(_string, _instrumentsList) ) {
+			// if it is an instrument from list, just return a custom play command
+			let customResult = [
+				"transport", 
+				"sequenceStart",
+				["command", ['play'] ],
+				["instArray", [_string] ],
+				["pattern", [] ],
+				["rand", 0]
+			];
+			return {valid: true, string: _string, result: customResult};
+
+		} else {
+			// if input is not on list, and not valid, than return null
+			return {valid: false, string: _string, result:null}
+		}
+		
+	};
 };
+
+
+

@@ -125,9 +125,21 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 						printer(debug, context, "playInstrument", `create new instrument, replace empty pattern with [1]`);
 						patternIn = [1];
 						patternIn = adaptPattern(patternIn);
-						updateInstrument(instName, patternIn, rand);
-						updateSequence(instName, patternIn);
-						playSequence(instName);
+						// create new instrument and store it in 'instruments'
+						instruments[instName] = createInstrument(instruments, instrumentsList, instName, patternIn, rand, masterOut);
+						printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
+						// create sequence
+						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
+						printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
+						
+						// start Tone
+						startTransport();
+						// play instrument sequence
+						playInstrument(instruments, instName);
+						printer(debug, context, `start playing`, `Tone & instrument started`);
+						// render to html
+						renderInstruments();
+						printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
 						break;
 					case "createNewInstrumentPatternNonEmpty":
 						// create new instrument w/ pattern

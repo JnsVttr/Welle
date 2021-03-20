@@ -105,15 +105,26 @@ checkMuteAlerts.onclick = function () {
 document.getElementById("textarea").addEventListener("keydown", (e) => {
 	// printer(debug, context, "key input", e.code);
 	if (e.code=='Enter') {
+
 		playAlerts('return', alertMuteState);
 		consolePointer = -1; // pointer for arrwos
 
-		// send string to validate in enterfunction(), grammar
-		let result = enterFunction();
+		// get input string
+		let string = document.getElementById("textarea").value;
+		string = string.toLowerCase();
 		let validState = false;
+		let message = { string: string, user: 'local' };
+
+		// send string to validate in enterfunction(), grammar
+		let result = enterFunction(string, instrumentsList);
+		printer(debug, context, "result: ", result)
+
+		
 
 		// handle returns from enterfunction()
 		if (result.valid == true) { 
+			// send to server via sockets
+			socket.emit('clientEvent', message);
 			// if return is valid:
 			validState = true;
 			consolePointer += 1;
