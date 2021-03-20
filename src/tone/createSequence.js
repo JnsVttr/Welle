@@ -16,7 +16,18 @@ export function createSequence(_instruments, _instName, _patternIn, playInstrume
     // init new sequence with callback function
     let sequence = new Tone.Sequence(function (time, note) {
         // set note first - here midi notes ?
-        note = synth.getBaseNote() + (note * 10);
+        //note = synth.getBaseNote() + (note * 10);
+        // note = synth.getBaseNote() + note;
+        
+        // console.log("note: ", note)
+        let changedNote = Tone.Frequency(note, "midi").toNote()
+        let transpose = synth.getTranspose();
+        changedNote = Tone.Frequency(changedNote).transpose(transpose);
+        //console.log("change note: ", changedNote)
+        note = changedNote;
+
+        
+        
         
         // set sequence envelopes:
         switch (_instruments[_instName].type) {

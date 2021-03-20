@@ -60,7 +60,8 @@ Tone.context.latencyHint = 'balanced';
 // Tone.Transport.scheduleRepeat(function(time){
 // }, "8n", "1m");
 
-
+// let changer = new Tone.Frequency ( 103, "midi" );
+// printer (debug, context, "tone changer", Tone.Frequency(69, "midi").toNote())
 
 /*
 printer(debug, context, "printer", "value");

@@ -12,6 +12,7 @@ class Instrument {
     // this.tick = 0;
     this.baseNote = 130;
     this.sampleURL;
+    this.transpose = 2;
   }
 
 
@@ -35,6 +36,12 @@ class Instrument {
   }
   getBaseNote() {
     return this.baseNote;
+  }
+  setTranspose(transpose) {
+    this.transpose = transpose;
+  }
+  getTranspose() {
+    return this.transpose;
   }
   dispose(synthType) {
     if (this.synth) {

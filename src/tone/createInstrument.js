@@ -17,12 +17,15 @@ export function createInstrument(_instruments, _instrumentsList,
     let defaultVol  = _instrumentsList[_instName].vol * _instrumentsList[_instName].gain;
     let url         = _instrumentsList[_instName].url;
     let note        = _instrumentsList[_instName].baseNote;
+    let transpose   = _instrumentsList[_instName].transpose;
 
     // update the new Instrument:
     // set volume
     inst.setVolume(defaultVol);
     // set basenote
     if (_instrumentsList[_instName].baseNote != undefined) { inst.setBaseNote(note); };
+    // set transpose
+    inst.setTranspose(transpose);
     // set URL if sampler
     if (_instrumentsList[_instName].type == 'Sampler') {
         inst.updateSampleURL(url);
