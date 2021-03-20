@@ -28,8 +28,7 @@ import { resetAction } from './resetAction';
 import { stopInstrument, stopAllInstruments, playAllInstruments, adaptPattern, 
 	playInstrument, assignNewPattern } from './handleInstruments';
 import { setVolume, setRandom, muteAll } from './handleParameters';
-import { updateInstrument } from './updateInstrument';
-import { updateSequence } from './updateSequence';
+
 import { savePart } from './savePart';
 import { setPart } from './setPart';
 import { renderInstruments } from '/html/renderInstruments';
@@ -52,7 +51,7 @@ export var instruments = {};
 export var savedParts = {};
 export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
-export let thisBPM = 120;
+export let thisBPM = 165;
 Tone.Transport.bpm.value = thisBPM;
 Tone.context.latencyHint = 'balanced';
 
@@ -262,7 +261,7 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 			muteAll(false);
 		break;
 
-
+		// the parts is a seperate topic
 		case 'savePart':
 			savePart(name);
 		break;
@@ -293,68 +292,6 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 		break;
 	}
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export function randInPattern (instName) {
-	// random:
-	// if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}`) };
-	if (instruments[instName].rand > 0) {
-		let count = instruments[instName].ticks % (instruments[instName].pattern.length * instruments[instName].rand);
-		// if (debugTone){ console.log(`updateSequence: instruments[${instName}].rand = ${instruments[instName].rand}, count = ${count}, instrument`) };
-		if ((count+1) ==  ((instruments[instName].pattern.length * instruments[instName].rand)) ){
-			// if (debugTone){ console.log('updateSequence: execute random func now!') };
-			instruments[instName].randFunction()
-			printer(debug, context, "randInPattern", "")
-		};	
-	};
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-// random helper, randomize patterns
-export function shuffleArray(array) {
-	printer(debug, context, "shuffleArray", "")
-    var input = array;
-    for (var i = input.length-1; i >=0; i--) {
-        var randomIndex = Math.floor(Math.random()*(i+1)); 
-        var itemAtIndex = input[randomIndex]; 
-        input[randomIndex] = input[i]; 
-        input[i] = itemAtIndex;
-    }
-    array = input;
-    //console.log("New shuffleArray: ", array);
-    return array;
-};
-
-
-
-
 
 
 
@@ -475,6 +412,30 @@ function handlePresetsInTone(action, data) {
 };
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // UPLOAD FILES
 // ========================================================
 export function uploadToServer(instName) {
@@ -483,19 +444,6 @@ export function uploadToServer(instName) {
 	console.log('uploadToServer: toneTest: upload to server: ' + name);
 	handleForm(name);
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

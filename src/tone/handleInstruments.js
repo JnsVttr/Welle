@@ -1,8 +1,7 @@
-import Tone from 'tone';
-import { printer } from '/helper/printer';
-import { instruments, debugTone, debug, context } from './main-tone';
-import { renderInstruments } from "../html/renderInstruments";
 
+
+// TRANSPORT
+// =============
 
 export function stopInstrument(_instruments, _instName) {
 	// store all new items (before calling part)
@@ -14,8 +13,6 @@ export function stopInstrument(_instruments, _instName) {
 }
 ;
 export function stopAllInstruments(_instruments) {
-	printer(debug, context, "stopAllInstruments", ``);
-	
 	Object.keys(_instruments).forEach((instName) => {
 		_instruments[instName].sequence.stop();
 		_instruments[instName].isPlaying = false;
@@ -52,6 +49,12 @@ export function playAllInstruments(_instruments) {
 	});
 }
 ;
+
+
+// PATTERN
+// =============
+
+
 export function adaptPattern (patAdapt) {
     for (let i=0;i<patAdapt.length;i++){
         if (patAdapt[i]==0) {
@@ -60,12 +63,6 @@ export function adaptPattern (patAdapt) {
     };
     return patAdapt;
 };
-
-
-
-
-
-
 
 export const assignNewPattern = (_instruments, _instName, _patternIn, _rand) => {
 	// store new params in Instrument collection

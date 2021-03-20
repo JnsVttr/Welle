@@ -1,7 +1,4 @@
 import Tone from 'tone';
-import { printer } from '/helper/printer';
-import { debug, context } from './main-tone';
-
 
 
 export function setVolume(_instrumentsList, _instruments, _instName, _vol) {
@@ -22,7 +19,6 @@ export function setRandom(_instruments, _instName, _rand) {
 	};
 }
 ;
-
 
 export const muteAll = (state) => {
 	if (state) { Tone.Master.mute = true;  }

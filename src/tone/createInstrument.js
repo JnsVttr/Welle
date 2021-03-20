@@ -1,10 +1,8 @@
 
 import { Instrument } from '/tone/instruments';
-import { printer } from '/helper/printer';
-import { debug, context } from './main-tone';
 
 
-// INSTRUMENTS & SEQUENCE
+// CREATE INSTRUMENT
 // ===================================================================
 
 export function createInstrument(_instruments, _instrumentsList, 

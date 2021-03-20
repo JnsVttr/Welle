@@ -1,8 +1,3 @@
-import { printer } from '/helper/printer';
-import { debug, context } from './main-tone';
-
-
-
 
 export const interpretInput = (_instruments, _instName, _patternIn) => {
 	let action = '';
