@@ -74,7 +74,7 @@ livecode {
     NestedEvents = "(" NonemptyListOf<Events, ""> ")" intPos? 
     
     Events =
-        | "#" intPos?	--soundNote
+        | "#" int?	    --soundNote
         | "-"           --soundPause
 
     instrument =
