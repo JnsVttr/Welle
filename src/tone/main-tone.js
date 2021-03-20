@@ -60,21 +60,33 @@ Tone.context.latencyHint = 'balanced';
 // let now = Tone.now(); // not really needed
 
 
+
+// Tone - trigger the callback when the Transport reaches the desired time
+Tone.Transport.scheduleRepeat(function(time){
+	// console.log("trigger Tone transport: Tone.now()", Tone.now())
+	// Object.keys(instruments).forEach((_instName) => {
+	// 	if (instruments[_instName].rand > 0) {
+    //         let count = instruments[_instName].ticks % (instruments[_instName].pattern.length * instruments[_instName].rand);
+    //         if ((count+1) ==  ((instruments[_instName].pattern.length * instruments[_instName].rand)) ){
+    //             // hardcore recursive shit:
+    //             let newPattern = instruments[_instName].randFunction();
+    //             // instruments[_instName].sequence = createSequence(instruments, _instName, newPattern);
+    //             // playInstrument(instruments, _instName);
+    //             console.log(`execute randfunction: with new pattern ${newPattern}`, instruments[_instName].sequence)
+    //         };	
+    //     };
+	// });
+}, "8n", 0.01);
+
+
+
 /*
 printer(debug, context, "printer", "value");
 */
 
 
-
-
-
-
-
-
-
-
-// export at the end
-
+// main handling of sound commands
+// 
 export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {	
 	
 	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
@@ -242,12 +254,14 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 			};
 		break;
 		case 'setVolume':
+			printer(debug, context, "setVolume", ``);
 			state = checkIfInstValid (instName, instrumentsList);
-			if (state) {setVolume(instName, vol)};
+			if (state) {setVolume(instrumentsList, instruments, instName, vol)};
 		break;
 		case 'setRandom':
+			printer(debug, context, "setRandom", ``);
 			state = checkIfInstValid (instName, instrumentsList);	
-			if (state) {setRandom(instName, rand)}
+			if (state) {setRandom(instruments, instName, rand)}
 		break;
 		case 'setBPM':
 			setBPM(bpm, num)

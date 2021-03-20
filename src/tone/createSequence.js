@@ -1,7 +1,8 @@
 import Tone from 'tone';
 
 
-export function createSequence(_instruments, _instName, _patternIn) {
+
+export function createSequence(_instruments, _instName, _patternIn, playInstrument) {
 	let synth = _instruments[_instName].synth;
 
     // if there is already a sequence
@@ -10,7 +11,7 @@ export function createSequence(_instruments, _instName, _patternIn) {
 		_instruments[_instName].sequence.dispose();
 	}
 	
-    // init new sequence
+    // init new sequence with callback function
     let sequence = new Tone.Sequence(function (time, note) {
         // set note first - here midi notes ?
         note = synth.getBaseNote() + (note * 10);
@@ -41,38 +42,34 @@ export function createSequence(_instruments, _instName, _patternIn) {
                 synth.synth.triggerAttackRelease(note, "32n", '@8n');
         };
 
-        // ??
+        // to keep track of timeline
         _instruments[_instName].ticks++;
+        
+        // embed a recursive function to restart the sequence again
+        // relates to instruments[instName].randFunction, which generates a new pattern. 
+        if (_instruments[_instName].rand > 0) {
+            let count = _instruments[_instName].ticks % (_instruments[_instName].pattern.length * _instruments[_instName].rand);
+            if ((count+1) ==  ((_instruments[_instName].pattern.length * _instruments[_instName].rand)) ){
+                // hardcore recursive shit:
+                let newPattern = _instruments[_instName].randFunction();
+                // create new sequence
+                _instruments[_instName].sequence = createSequence(_instruments, _instName, newPattern);
+                // start new sequence
+                if (_instruments[_instName].type == 'Sampler'){
+                    setTimeout(function(){
+                        _instruments[_instName].sequence.start(0);
+                        _instruments[_instName].isPlaying = true;		
+                    }, 80);
+                } else {
+                    _instruments[_instName].sequence.start(0);
+                    _instruments[_instName].isPlaying = true;		
+                };
+                // console.log(`execute randfunction: with new pattern ${newPattern}`, _instruments[_instName].sequence)
+            };	
+        };
         
     }, _patternIn, '8n');
     
     // return new sequence
     return sequence;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-if (_instruments[_instName].sequence != null) {
-		printer(debug, context, "updateSequence", `updateSequence: Instrument Sequence existing, delete sequence, set new sequence`);
-
-		_instruments[_instName].sequence.stop();
-		_instruments[_instName].sequence.dispose();
-
-		setInst();
-	} else {
-		printer(debug, context, "updateSequence", `updateSequence: Instrument Sequence not existing, set new Sequence`);
-		setInst();
-	};
-*/

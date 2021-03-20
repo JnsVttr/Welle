@@ -1,25 +1,24 @@
 import Tone from 'tone';
-import { instrumentsList } from '/index';
 import { printer } from '/helper/printer';
-import { instruments, debug, context, thisBPM } from './main-tone';
+import { debug, context } from './main-tone';
 
 
 
-export function setVolume(instName, vol) {
-	if (instruments[instName] != null) {
-		let volume = vol;
-		volume = vol * instrumentsList[instName].gain;
-		instruments[instName].vol = volume;
-		instrumentsList[instName].vol = volume; // update also the list, don't know why jet : )
+export function setVolume(_instrumentsList, _instruments, _instName, _vol) {
+	if (_instruments[_instName] != null) {
+		let volume = _vol;
+		volume = _vol * _instrumentsList[_instName].gain;
+		_instruments[_instName].vol = volume;
+		_instrumentsList[_instName].vol = volume; // update also the list, don't know why jet : )
 
-		// if (debugTone){console.log(`Tone: setVolume vol ${vol} * gain ${instrumentsList[instName].gain} to ${volume}`)};
-		instruments[instName].synth.setVolume(volume);
+		console.log(`Tone: setVolume vol ${_vol} * gain ${_instrumentsList[_instName].gain} to ${volume}`);
+		_instruments[_instName].synth.setVolume(volume);
 	};
 }
 ;
-export function setRandom(instName, rand) {
-	if (instruments[instName] != null) {
-		instruments[instName].rand = rand;
+export function setRandom(_instruments, _instName, _rand) {
+	if (_instruments[_instName] != null) {
+		_instruments[_instName].rand = _rand;
 	};
 }
 ;

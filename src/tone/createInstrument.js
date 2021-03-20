@@ -35,19 +35,21 @@ export function createInstrument(_instruments, _instrumentsList,
     // connect instrument output to Master
     inst.connect(_masterOut);
 
-    
-    
-
-    // _instruments[_instName].randFunction = function () {
-    //     let shufflePattern = shuffleArray(_instruments[_instName].pattern);
-    //     _instruments[_instName].pattern = shufflePattern;
-    //     if (_instruments[_instName].isPlaying) {
-    //         updateSequence(_instruments[_instName].name, shufflePattern);
-    //         playSequence(_instruments[_instName].name);
-    //     } else {
-    //         updateSequence(_instruments[_instName].name, shufflePattern);
-    //     }
-    // };
+    // create a random function and store in instruments
+    let randFunction = function () {
+        // take pattern as input
+        let input = _instruments[_instName].pattern;
+        let newPattern = null;
+        for (var i = input.length-1; i >=0; i--) {
+            var randomIndex = Math.floor(Math.random()*(i+1)); 
+            var itemAtIndex = input[randomIndex]; 
+            input[randomIndex] = input[i]; 
+            input[i] = itemAtIndex;
+        };
+        newPattern = input; // shuffled input 
+        _instruments[_instName].pattern = newPattern;
+        return newPattern;
+    };
 
 
     // store new instrument in "Instrument" collection as return
@@ -63,5 +65,6 @@ export function createInstrument(_instruments, _instrumentsList,
         url: url,
         note: note,
         isPlaying: false,
+        randFunction: randFunction,
     };
 }
