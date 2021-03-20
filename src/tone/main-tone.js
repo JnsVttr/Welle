@@ -264,7 +264,10 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 
 		// the parts is a seperate topic
 		case 'savePart':
-			savePart(name);
+			printer(debug, context, "savePart", `${name}`);
+			let BPMvalue = Tone.Transport.bpm.value;
+			savePart(name, BPMvalue);
+			renderParts();
 		break;
 		case 'setPart':
 			setPart(name);

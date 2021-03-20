@@ -5,8 +5,8 @@ import { debug, context, savedParts, instruments, thisBPM, renderParts } from '.
 // ===================================================================
 
 
-export function savePart(name) {
-	printer(debug, context, "savePart", `${name}`);
+export function savePart(name, BPMvalue) {
+	
 	//console.log("save part under this name: ", name);
 	savedParts[name] = { name: name };
 	savedParts[name].instruments = {};
@@ -21,6 +21,7 @@ export function savePart(name) {
 		var rand = instruments[key].rand;
 		var vol = instruments[key].vol;
 		var url = instruments[key].url;
+		var transpose = instruments[key].transpose;
 		// console.log(name, pattern, rand);
 		savedParts[name].instruments[instName] = {
 			name: instName,
@@ -30,10 +31,11 @@ export function savePart(name) {
 			rand: rand,
 			vol: vol,
 			url: url,
+			transpose: transpose,
 		};
 	});
-	savedParts.bpm = thisBPM;
-	renderParts();
+	savedParts.bpm = BPMvalue;
+	
 	// if (debugTone) { console.log('Tone: savePart: ' + JSON.stringify(savedParts))};
 }
 ;
