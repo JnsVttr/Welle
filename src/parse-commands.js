@@ -13,16 +13,11 @@ updates html, server, etc.
 */
 
 
-
+// libraries
 import { transport }  from '/tone/main-tone' 
 import { renderHtmlHelp }  from  '/html/renderHTML';
 import { help }  from '/text/helpText';
-import { 
-    setUser,
-    showFiles, 
-    alertState, 
-    presetHandling
-}  from '/index' 
+import { setUser, showFiles, alertState, presetHandling }  from '/index' 
 import { printer } from '/helper/printer';
 import { restartServer } from '/socket/restartServer';
 import { playAlerts } from '/helper/playAlerts';
@@ -31,14 +26,19 @@ import { playAlerts } from '/helper/playAlerts';
 let debug = true;
 let context = "parser";
 
+
+
+
+// function to interpret input and send to TONE via transport
+// or to htmlm etc.
 const parseInput = (input) => {
 
-    printer(debug, context, "parser input", `
-    input is an array?: ${Array.isArray(input)}
-    input: ${input}
-    input[0]: ${input[0]}
-    input[1]: ${input[1]}
-    `);
+    // printer(debug, context, "parser input", `
+    // input is an array?: ${Array.isArray(input)}
+    // input: ${input}
+    // input[0]: ${input[0]}
+    // input[1]: ${input[1]}
+    // `);
     
     // declare containers for all possible semantic variables 
     let type='', desc='', cmd='', inst='', instArray='', patternParse='', 

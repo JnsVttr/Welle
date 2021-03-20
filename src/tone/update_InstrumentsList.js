@@ -38,7 +38,8 @@ export function update_InstrumentsList() {
         };
 
         printer(debug, context, "update_InstrumentsList", `updated sample paths based on sampleURL`);
-
+        printer(debug, context, "update_InstrumentsList: ", _instrumentsList);
+        
         return _instrumentsList;
     };
 	

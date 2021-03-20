@@ -80,5 +80,7 @@ export function updateInstrument(instName, pat, rand, newUrl) {
 		instruments[instName].pattern = pat;
 	};
 	//return instruments[instName]
+	printer(debug, context, "updateInstrument - all instruments", instruments);
+	printer(debug, context, "updateInstrument - this instrument", instruments[instName])
 }
 ;

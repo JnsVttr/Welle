@@ -4,6 +4,8 @@
 
 /*
 needs urgent re-work
+step sequencer example:
+https://tonejs.github.io/examples/stepSequencer
 
 */
 
@@ -14,7 +16,7 @@ import Tone from 'tone';
 
 // import files
 import { renderOutputLine }  from  '/html/renderHTML';
-import { recorderDeal, handleForm, alertMuteState }  from '/index' ;
+import { recorderDeal, handleForm, alertMuteState, instrumentsList }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
 import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
@@ -84,12 +86,21 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 	`);
 
 	let state;  // instrument valid state
+	let result = [];
 	
 	
 	switch (cmd) {
 		case 'play':
-			state = checkIfInstValid (instName);
-			if (state) {playInstrument (instName, patternIn, rand)};
+			state = checkIfInstValid (instName, instrumentsList);
+			printer(debug, context, 'checkIfInstValid', `check valid for this inst: ${instName}: state: ${state}`);
+			if (state) {
+				printer(debug, context, 'checkIfInstValid', `found: ${_instName}`);
+				playInstrument (instName, patternIn, rand);
+			} else {
+				let string = 'no such instrument ..';
+				renderTextToConsole(false, 's', string, 'local');
+				playAlerts('error', alertMuteState);
+			}
 		break;
 		case 'stop':
 			state = checkIfInstValid (instName);
