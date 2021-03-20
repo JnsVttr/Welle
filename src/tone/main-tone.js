@@ -23,13 +23,11 @@ import { playAlerts } from '/helper/playAlerts';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList';
 import { printer } from '/helper/printer';
 import { checkIfInstValid } from './checkIfInstValid';
-import { muteAll } from './muteAll';
 import { initInstrument } from './initInstrument';
 import { resetAction } from './resetAction';
-
 import { stopInstrument, stopAllInstruments, playAllInstruments, adaptPattern, 
 	playInstrument, assignNewPattern } from './handleInstruments';
-import { setVolume, setRandom, setBPM } from './handleParameters';
+import { setVolume, setRandom, muteAll } from './handleParameters';
 import { updateInstrument } from './updateInstrument';
 import { updateSequence } from './updateSequence';
 import { savePart } from './savePart';
@@ -54,29 +52,14 @@ export var instruments = {};
 export var savedParts = {};
 export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
-let thisBPM = 120;
+export let thisBPM = 120;
 Tone.Transport.bpm.value = thisBPM;
 Tone.context.latencyHint = 'balanced';
+
 // let now = Tone.now(); // not really needed
-
-
-
 // Tone - trigger the callback when the Transport reaches the desired time
-Tone.Transport.scheduleRepeat(function(time){
-	// console.log("trigger Tone transport: Tone.now()", Tone.now())
-	// Object.keys(instruments).forEach((_instName) => {
-	// 	if (instruments[_instName].rand > 0) {
-    //         let count = instruments[_instName].ticks % (instruments[_instName].pattern.length * instruments[_instName].rand);
-    //         if ((count+1) ==  ((instruments[_instName].pattern.length * instruments[_instName].rand)) ){
-    //             // hardcore recursive shit:
-    //             let newPattern = instruments[_instName].randFunction();
-    //             // instruments[_instName].sequence = createSequence(instruments, _instName, newPattern);
-    //             // playInstrument(instruments, _instName);
-    //             console.log(`execute randfunction: with new pattern ${newPattern}`, instruments[_instName].sequence)
-    //         };	
-    //     };
-	// });
-}, "8n", 0.01);
+// Tone.Transport.scheduleRepeat(function(time){
+// }, "8n", "1m");
 
 
 
@@ -264,8 +247,22 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 			if (state) {setRandom(instruments, instName, rand)}
 		break;
 		case 'setBPM':
-			setBPM(bpm, num)
+			printer(debug, context, "setBPM", `to ${bpm} in ${num} seconds`);
+			if (num == '') { Tone.Transport.bpm.value = bpm; }
+			else { Tone.Transport.bpm.rampTo(bpm, num) };
 		break;
+		case 'muteOn':
+			printer(debug, context, "MuteAll", "on");
+			playAlerts('return', alertMuteState);
+			muteAll(true);
+		break;
+		case 'muteOff':
+			printer(debug, context, "MuteAll", "off");
+			playAlerts('return', alertMuteState);
+			muteAll(false);
+		break;
+
+
 		case 'savePart':
 			savePart(name);
 		break;
@@ -280,12 +277,6 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 		break;
 		case 'reset':
 			resetAction();
-		break;
-		case 'muteOn':
-			muteAll(true);
-		break;
-		case 'muteOff':
-			muteAll(false);
 		break;
 		case 'recordStart':
 			if (device != 'ios') {audioRecord(true)};

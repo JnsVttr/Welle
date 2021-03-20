@@ -22,14 +22,9 @@ export function setRandom(_instruments, _instName, _rand) {
 	};
 }
 ;
-export function setBPM (bpm, num) {
-	if (num == '') {
-		printer(debug, context, "setBPM", `set bpm to: ${bpm}`);
-		thisBPM = bpm;
-		Tone.Transport.bpm.value = bpm;
-	} else {
-		Tone.Transport.bpm.rampTo(bpm, num);
-		printer(debug, context, "setBPM", `set bpm to: ${bpm} in seconds: ${num}`);
-	};
+
+
+export const muteAll = (state) => {
+	if (state) { Tone.Master.mute = true;  }
+	if (state == false) { Tone.Master.mute = false;  }
 }
-;
