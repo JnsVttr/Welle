@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost",
+    "create-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost",
     "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
-    "start": "nodemon server/app.js"
+    "start-server": "nodemon server/app.js"
   },
   "keywords": [],
   "author": "",

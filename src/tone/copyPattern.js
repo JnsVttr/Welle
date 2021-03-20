@@ -1,5 +1,5 @@
 import { printer } from '/helper/printer';
-import { playInstrument } from './playInstrument';
+
 import { instruments, debug, context } from './main-tone';
 
 export function copyPattern (instName, instArray) {

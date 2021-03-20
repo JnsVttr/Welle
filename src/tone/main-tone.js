@@ -15,8 +15,8 @@ https://tonejs.github.io/examples/stepSequencer
 import Tone from 'tone';
 
 // import files
-import { renderOutputLine }  from  '/html/renderHTML';
-import { recorderDeal, handleForm, alertMuteState, instrumentsList }  from '/index' ;
+import { renderOutputLine, renderHtml }  from  '/html/renderHTML';
+import { recorderDeal, handleForm, alertMuteState, instrumentsList, consoleArray, consoleLength }  from '/index' ;
 import { checkDevice } from '/helper/checkDevice';
 import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
@@ -26,8 +26,8 @@ import { checkIfInstValid } from './checkIfInstValid';
 import { muteAll } from './muteAll';
 import { initInstrument } from './initInstrument';
 import { resetAction } from './resetAction';
-import { playInstrument } from './playInstrument';
-import { stopInstrument, stopAllInstruments, playAllInstruments } from './handleInstruments';
+
+import { stopInstrument, stopAllInstruments, playAllInstruments, adaptPattern, playInstrument } from './handleInstruments';
 import { copyPattern } from './copyPattern';
 import { setVolume, setRandom, setBPM } from './handleParameters';
 import { updateInstrument } from './updateInstrument';
@@ -35,6 +35,11 @@ import { updateSequence } from './updateSequence';
 import { savePart } from './savePart';
 import { setPart } from './setPart';
 import { renderInstruments } from '/html/renderInstruments';
+import { help } from '/text/helpText';
+import { interpretInput } from '/tone/interpretInput'
+import { startTransport } from './startTransport';
+import { createInstrument } from '/tone/createInstrument'
+import { createSequence } from '/tone/createSequence'
 
 // debug
 export let debug = true;
@@ -49,7 +54,7 @@ export var instruments = {};
 export var savedParts = {};
 export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
-export let thisBPM = 120;
+let thisBPM = 120;
 Tone.Transport.bpm.value = thisBPM;
 Tone.context.latencyHint = 'balanced';
 // let now = Tone.now(); // not really needed
@@ -85,20 +90,73 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 	num: \t\t ${num}
 	`);
 
-	let state;  // instrument valid state
+	let state = false;  // instrument valid state
 	let result = [];
 	
 	
 	switch (cmd) {
 		case 'play':
+			// check
 			state = checkIfInstValid (instName, instrumentsList);
 			printer(debug, context, 'checkIfInstValid', `check valid for this inst: ${instName}: state: ${state}`);
-			if (state) {
-				printer(debug, context, 'checkIfInstValid', `found: ${_instName}`);
-				playInstrument (instName, patternIn, rand);
+			// if check valid
+			if (state) { 
+				let action = interpretInput(instruments, instName, patternIn)
+				printer(debug, context, 'play main', `interpret result: ${action}`);
+
+				// action
+				switch (action) {
+					case "playInstrument":
+						// instrument there, just play it.. 
+						printer(debug, context, "playInstrument", `play instrument without changes`);
+						updateSequence(instName, instruments[instName].pattern);
+						playSequence(instName);
+						break;
+					case "assignNewPattern":
+						// assign new pattern & play instrument
+						printer(debug, context, "playInstrument", `assign new pattern & play instrument`);
+						patternIn = adaptPattern(patternIn);
+						updateInstrument(instName, patternIn, rand);
+						updateSequence(instName, patternIn);
+						playSequence(instName);
+						break;
+					case "createNewInstrumentPatternEmpty":
+						// create new instrument, replace empty pattern with [1]
+						printer(debug, context, "playInstrument", `create new instrument, replace empty pattern with [1]`);
+						patternIn = [1];
+						patternIn = adaptPattern(patternIn);
+						updateInstrument(instName, patternIn, rand);
+						updateSequence(instName, patternIn);
+						playSequence(instName);
+						break;
+					case "createNewInstrumentPatternNonEmpty":
+						// create new instrument w/ pattern
+						printer(debug, context, "create new instrument", `create new instrument with pattern`);
+						patternIn = adaptPattern(patternIn);
+						// create new instrument and store it in 'instruments'
+						instruments[instName] = createInstrument(instruments, instrumentsList, instName, patternIn, rand, masterOut);
+						printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
+						// create sequence
+						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
+						printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
+						
+						// start Tone
+						startTransport();
+						// play instrument sequence
+						playInstrument(instruments, instName);
+						printer(debug, context, `start playing`, `Tone & instrument started`);
+						// render to html
+						renderInstruments();
+						printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
+						break;
+				};
+				
+				
 			} else {
-				let string = 'no such instrument ..';
-				renderTextToConsole(false, 's', string, 'local');
+				let errorMessage = help.error[0];
+				printer(debug, context, 'checkIfInstValid', `error message ${errorMessage}`);
+				consoleArray.push({ message: `${instName} - ${errorMessage}` });
+				renderHtml(consoleArray, 'console', consoleLength);
 				playAlerts('error', alertMuteState);
 			}
 		break;
@@ -200,32 +258,11 @@ export function randInPattern (instName) {
 
 
 
-export function playSequence (instName) {
-	printer(debug, context, "playSequence", "")
-
-	if (instruments[instName].type == 'Sampler'){
-		setTimeout(function(){
-			instruments[instName].sequence.start(0);
-			instruments[instName].isPlaying = true;		
-			renderInstruments();
-		}, 200);
-	} else {
-		instruments[instName].sequence.start(0);
-		instruments[instName].isPlaying = true;		
-		renderInstruments();
-	};
-};
 
 
 
-export function adaptPattern (patAdapt) {
-    for (let i=0;i<patAdapt.length;i++){
-        if (patAdapt[i]==0) {
-            patAdapt[i]=null
-        }; 
-    };
-    return patAdapt;
-};
+
+
 
 
 // random helper, randomize patterns

@@ -12,7 +12,7 @@ import io from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
 
 // files
-import { renderHtmlArrows, renderHtmlHelpMenu }  from  '/html/renderHTML';
+import { renderHtmlArrows, renderHtml, renderHtmlHelpMenu }  from  '/html/renderHTML';
 import { parseInput }  from '/parse-commands';
 import { help }  from '/text/helpText';
 import { handlePresetsInTone } from '/tone/main-tone';
@@ -26,6 +26,7 @@ import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
+
 
 
 // global variables
@@ -117,7 +118,9 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			validState = true;
 			consolePointer += 1;
 			// show text in console
-			renderTextToConsole(validState, user, result.string, 'local')
+			consoleArray.push({ message: `${result.string}` });
+			renderHtml(consoleArray, 'console', consoleLength);
+			
 			// send results to parser for Tone
 			parseInput(result.result);
 
@@ -129,8 +132,12 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			// prepend a '!' to the string
 			if (result.string != '!') { string = `! ${result.string}`; } 
 				else { string = `${result.string}`; };
+
 			// show text in console
-			renderTextToConsole(validState, user, string, 'local');
+			consoleArray.push({ message: string });
+			renderHtml(consoleArray, 'console', consoleLength);
+			
+			// renderTextToConsole(validState, user, string, 'local');
 			// nothing to parse
 		};
 		

@@ -182,4 +182,8 @@ help.session = [
 ];
 
 
+help.error = [
+    ['no such instrument']
+];
+
 export { help }

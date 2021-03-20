@@ -49,3 +49,27 @@ export function playAllInstruments() {
 	renderInstruments();
 }
 ;
+export function adaptPattern (patAdapt) {
+    for (let i=0;i<patAdapt.length;i++){
+        if (patAdapt[i]==0) {
+            patAdapt[i]=null
+        }; 
+    };
+    return patAdapt;
+};
+
+
+
+
+export function playInstrument (_instruments,_instName) {
+	// if sampler, than short timeout()
+	if (_instruments[_instName].type == 'Sampler'){
+		setTimeout(function(){
+			_instruments[_instName].sequence.start(0);
+			_instruments[_instName].isPlaying = true;		
+		}, 80);
+	} else {
+		_instruments[_instName].sequence.start(0);
+		_instruments[_instName].isPlaying = true;		
+	};
+};

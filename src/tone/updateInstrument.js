@@ -5,9 +5,7 @@ import { printer } from '/helper/printer';
 import { debug, context, instruments, masterOut, shuffleArray, playSequence } from './main-tone';
 import { updateSequence } from "./updateSequence";
 
-// INSTRUMENTS & SEQUENCE
-// ===================================================================
-
+;
 
 
 export function updateInstrument(instName, pat, rand, newUrl) {
@@ -83,4 +81,3 @@ export function updateInstrument(instName, pat, rand, newUrl) {
 	printer(debug, context, "updateInstrument - all instruments", instruments);
 	printer(debug, context, "updateInstrument - this instrument", instruments[instName])
 }
-;
