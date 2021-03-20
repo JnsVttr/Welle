@@ -29,23 +29,23 @@ export let enterFunction = (_string, _instrumentsList) => {
 	};
 	if (state == 'failed') {
 		// if result not valid in grammar, check if string == instrument from list
-		if ( checkIfInstValid(_string, _instrumentsList) ) {
-			// if it is an instrument from list, just return a custom play command
-			let customResult = [
-				"transport", 
-				"sequenceStart",
-				["command", ['play'] ],
-				["instArray", [_string] ],
-				["pattern", [] ],
-				["rand", 0]
-			];
-			return {valid: true, string: _string, result: customResult};
+		// if ( checkIfInstValid(_string, _instrumentsList) ) {
+		// 	// if it is an instrument from list, just return a custom play command
+		// 	let customResult = [
+		// 		"transport", 
+		// 		"sequenceStart",
+		// 		["command", ['play'] ],
+		// 		["instArray", [_string] ],
+		// 		["pattern", [] ],
+		// 		["rand", 0]
+		// 	];
+		// 	return {valid: true, string: _string, result: customResult};
 
-		} else {
-			// if input is not on list, and not valid, than return null
-			return {valid: false, string: _string, result:null}
-		}
-		
+		// } else {
+		// 	// if input is not on list, and not valid, than return null
+		// 	return {valid: false, string: _string, result:null}
+		// }
+		return {valid: false, string: _string, result:null}
 	};
 };
 

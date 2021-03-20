@@ -27,8 +27,8 @@ import { muteAll } from './muteAll';
 import { initInstrument } from './initInstrument';
 import { resetAction } from './resetAction';
 
-import { stopInstrument, stopAllInstruments, playAllInstruments, adaptPattern, playInstrument } from './handleInstruments';
-import { copyPattern } from './copyPattern';
+import { stopInstrument, stopAllInstruments, playAllInstruments, adaptPattern, 
+	playInstrument, assignNewPattern } from './handleInstruments';
 import { setVolume, setRandom, setBPM } from './handleParameters';
 import { updateInstrument } from './updateInstrument';
 import { updateSequence } from './updateSequence';
@@ -79,15 +79,15 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 	
 	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
 	printer(debug, context, "transport", `incoming transport: 
-	cmd: \t\t ${cmd} 
-	instName: \t ${instName} 
-	instArray: \t ${instArray} 
-	patternIn: \t ${patternIn} 
-	rand: \t\t ${rand}
-	vol: \t\t ${vol}
-	bpm: \t\t ${bpm}
-	name: \t\t ${name}
-	num: \t\t ${num}
+				cmd: \t\t ${cmd} 
+				instName: \t ${instName} 
+				instArray: \t ${instArray} 
+				patternIn: \t ${patternIn} 
+				rand: \t\t ${rand}
+				vol: \t\t ${vol}
+				bpm: \t\t ${bpm}
+				name: \t\t ${name}
+				num: \t\t ${num}
 	`);
 
 	let state = false;  // instrument valid state
@@ -109,16 +109,34 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 					case "playInstrument":
 						// instrument there, just play it.. 
 						printer(debug, context, "playInstrument", `play instrument without changes`);
-						updateSequence(instName, instruments[instName].pattern);
-						playSequence(instName);
+						patternIn = instruments[instName].pattern;
+						rand = instruments[instName].rand;
+						printer(debug, context, `play instrument with existing pattern`, instruments[instName]);
+						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
+						// start Tone
+						startTransport();
+						// play instrument sequence
+						playInstrument(instruments, instName);
+						printer(debug, context, `start playing`, `Tone & instrument started`);
+						// render to html page
+						renderInstruments(instruments);
 						break;
 					case "assignNewPattern":
 						// assign new pattern & play instrument
 						printer(debug, context, "playInstrument", `assign new pattern & play instrument`);
 						patternIn = adaptPattern(patternIn);
-						updateInstrument(instName, patternIn, rand);
-						updateSequence(instName, patternIn);
-						playSequence(instName);
+						// assign new pattern in instruments{}
+						assignNewPattern(instruments, instName, patternIn, rand);
+						// create new sequence
+						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
+						printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
+						// start Tone
+						startTransport();
+						// play instrument sequence
+						playInstrument(instruments, instName);
+						printer(debug, context, `start playing`, `Tone & instrument started`);
+						// render to html page
+						renderInstruments(instruments);
 						break;
 					case "createNewInstrumentPatternEmpty":
 						// create new instrument, replace empty pattern with [1]
@@ -131,14 +149,13 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 						// create sequence
 						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
 						printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
-						
 						// start Tone
 						startTransport();
 						// play instrument sequence
 						playInstrument(instruments, instName);
 						printer(debug, context, `start playing`, `Tone & instrument started`);
 						// render to html
-						renderInstruments();
+						renderInstruments(instruments);
 						printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
 						break;
 					case "createNewInstrumentPatternNonEmpty":
@@ -151,14 +168,13 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 						// create sequence
 						instruments[instName].sequence = createSequence(instruments, instName, patternIn);
 						printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
-						
 						// start Tone
 						startTransport();
 						// play instrument sequence
 						playInstrument(instruments, instName);
 						printer(debug, context, `start playing`, `Tone & instrument started`);
 						// render to html
-						renderInstruments();
+						renderInstruments(instruments);
 						printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
 						break;
 				};
@@ -173,25 +189,64 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 			}
 		break;
 		case 'stop':
-			state = checkIfInstValid (instName);
-			if (state) {stopInstrument (instName);};
+			state = checkIfInstValid (instName, instrumentsList);
+			if (state) {
+				stopInstrument (instruments, instName);
+				printer(debug, context, "stopInstrument", `for ${instName}`);
+			}
+			renderInstruments(instruments);
 		break;
 		case 'stopAll':
-			stopAllInstruments();
+			printer(debug, context, "stop tone: ", Tone.Transport.state)
+			stopAllInstruments(instruments);
+			// render to html page
+			renderInstruments(instruments);
 		break;
 		case 'playAll':
-			playAllInstruments ();
+			printer(debug, context, "playAllInstruments", ``);
+			// stopAllInstruments(instruments);
+			playAllInstruments (instruments);
+			// render to html page
+			renderInstruments(instruments);
 		break;
 		case 'patternCopy':
-			state = checkIfInstValid (instName);
-			if (state) {copyPattern (instName, instArray)};
+			printer(debug, context, "copyPattern", `from ${instName} to ${instArray}`);
+			state = checkIfInstValid (instName, instrumentsList);
+			if (state) {
+				if (instruments[instName] != null) {
+					for (let i = 0; i < instArray.length; i++) {
+						let singleInst = instArray[i];
+						// if instruments exists
+						if (instruments[singleInst] != null) {
+							let pattern = instruments[instName].pattern;
+							instruments[singleInst].sequence = createSequence(instruments, singleInst, pattern);	
+							// play instrument sequence
+							playInstrument(instruments, singleInst);
+							// render to html page
+							renderInstruments(instruments);
+							
+						} else {
+						// if instruments doesn't exist
+							let pattern = instruments[instName].pattern;
+							instruments[singleInst] = createInstrument(instruments, instrumentsList, singleInst, pattern, rand, masterOut);
+							instruments[singleInst].sequence = createSequence(instruments, singleInst, pattern);	
+							// play instrument sequence
+							playInstrument(instruments, singleInst);
+							// render to html page
+							renderInstruments(instruments);
+						};
+					};
+				};
+				
+				
+			};
 		break;
 		case 'setVolume':
-			state = checkIfInstValid (instName);
+			state = checkIfInstValid (instName, instrumentsList);
 			if (state) {setVolume(instName, vol)};
 		break;
 		case 'setRandom':
-			state = checkIfInstValid (instName);	
+			state = checkIfInstValid (instName, instrumentsList);	
 			if (state) {setRandom(instName, rand)}
 		break;
 		case 'setBPM':
@@ -228,7 +283,7 @@ export function transport (cmd, instName, instArray, patternIn, rand, vol, bpm, 
 			uploadToServer(instName);
 		break;
 		case 'initInst':
-			state = checkIfInstValid (instName);
+			state = checkIfInstValid (instName, instrumentsList);
 			if (state) {initInstrument(instName, name, num);}
 		break;
 	}

@@ -59,12 +59,46 @@ semantics.addOperation('eval', {
         Helper functions: instToArray, handleRand, handlePattern
     */
 
+
+    SequenceDirect_seqPatternDirect: (inst, pat, rand) => {
+        let instArray = instToArray(inst);
+        let random = handleRand(rand.eval());
+        let pattern = handlePattern(pat.eval());
+        let command = ["play"];
+        // console.log("semantic command: ", command);
+        // console.log("semantic command array?: ", Array.isArray(command));
+        // if (command.length == 0) (command = ['play']);
+        
+        //printer(debug, context, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
+        printer(debug, context, "Sequence_seqPattern", `
+        return [
+            "transport", "sequenceStart", 
+            ["command", ${command}], 
+            ["instArray", ${instArray}], 
+            ["pattern", ${pattern}], 
+            ["rand", ${random}]
+        ]`
+        );
+        
+        return [
+            "transport", "sequenceStart", 
+            ["command", command], 
+            ["instArray", instArray], 
+            ["pattern", pattern], 
+            ["rand", random]
+        ];
+    },
+    
+
     /* SEQUENCE HANDLING */
     Sequence_seqPattern: (key, inst, pat, rand) => {
         let instArray = instToArray(inst);
         let random = handleRand(rand.eval());
         let pattern = handlePattern(pat.eval());
         let command = key.eval();
+        // console.log("semantic command: ", command);
+        // console.log("semantic command array?: ", Array.isArray(command));
+        // if (command.length == 0) (command = ['play']);
         
         //printer(debug, context, "Sequence_seqPattern", `process pattern in Control: "${pat.sourceString}" calc: "${pat.eval()}" handle: "${pattern}"`);
         printer(debug, context, "Sequence_seqPattern", `
@@ -86,6 +120,7 @@ semantics.addOperation('eval', {
         ];
     },
 
+    
 
 
 
@@ -387,6 +422,7 @@ semantics.addOperation('eval', {
     Command_playSeqPlus: function (cmd) {
         return ["play"];
     },
+    
     /*
     Command_playSeqSolo: function (cmd) {
         return ["", ""];

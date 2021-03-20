@@ -4,49 +4,52 @@ import { instruments, debugTone, debug, context } from './main-tone';
 import { renderInstruments } from "../html/renderInstruments";
 
 
-export function stopInstrument(instName) {
-	printer(debug, context, "stopInstrument", `for ${instName}`);
+export function stopInstrument(_instruments, _instName) {
 	// store all new items (before calling part)
-	if (instruments[instName] != null) {
-		instruments[instName].sequence.stop();
-		instruments[instName].isPlaying = false;
+	if (_instruments[_instName] != null) {
+		_instruments[_instName].sequence.stop();
+		_instruments[_instName].isPlaying = false;
 		// instruments[instName].synth.dispose();
 	};
-	renderInstruments();
 }
 ;
-export function stopAllInstruments() {
+export function stopAllInstruments(_instruments) {
 	printer(debug, context, "stopAllInstruments", ``);
 	
-	Object.keys(instruments).forEach((instName) => {
-		instruments[instName].sequence.stop();
-		instruments[instName].isPlaying = false;
-		// instruments[instName].synth.dispose();
+	Object.keys(_instruments).forEach((instName) => {
+		_instruments[instName].sequence.stop();
+		_instruments[instName].isPlaying = false;
 	});
+	// don't stop Tone - it doesn't work properly:
 	// if (Tone.Transport.state!='stopped') {
 	// 	Tone.Transport.stop();
 	// };
-	renderInstruments();
 }
 ;
-export function playAllInstruments() {
-	printer(debug, context, "playAllInstruments", ``);
-	//Tone.Transport.start();
-	let now = Tone.now();
-	let n = Tone.Transport.nextSubdivision('1n');
-	// parseFloat("1.555").toFixed(2);
-	// n = n.toFixed(0);
-	
-	Object.keys(instruments).forEach((instName) => {
-		if (instruments[instName].isPlaying == true) {
-			stopInstrument(instName);
+
+export function playInstrument (_instruments,_instName) {
+	// if sampler, than short timeout()
+	if (_instruments[_instName].type == 'Sampler'){
+		setTimeout(function(){
+			_instruments[_instName].sequence.start(0);
+			_instruments[_instName].isPlaying = true;		
+		}, 80);
+	} else {
+		_instruments[_instName].sequence.start(0);
+		_instruments[_instName].isPlaying = true;		
+	};
+};
+
+export function playAllInstruments(_instruments) {
+	Object.keys(_instruments).forEach((instName) => {
+		if (_instruments[instName].isPlaying == true) {
+			_instruments[instName].sequence.stop();
+			_instruments[instName].isPlaying = false;
 		};
-		// if (instruments[instName].isPlaying==false){
-		instruments[instName].sequence.start().at(0);
-		instruments[instName].isPlaying = true;
+		_instruments[instName].sequence.start().at(0);
+		_instruments[instName].isPlaying = true;
 		// };
 	});
-	renderInstruments();
 }
 ;
 export function adaptPattern (patAdapt) {
@@ -61,15 +64,13 @@ export function adaptPattern (patAdapt) {
 
 
 
-export function playInstrument (_instruments,_instName) {
-	// if sampler, than short timeout()
-	if (_instruments[_instName].type == 'Sampler'){
-		setTimeout(function(){
-			_instruments[_instName].sequence.start(0);
-			_instruments[_instName].isPlaying = true;		
-		}, 80);
-	} else {
-		_instruments[_instName].sequence.start(0);
-		_instruments[_instName].isPlaying = true;		
-	};
+
+
+
+export const assignNewPattern = (_instruments, _instName, _patternIn, _rand) => {
+	// store new params in Instrument collection
+	_instruments[_instName].rand = _rand;
+	_instruments[_instName].pattern = _patternIn;
 };
+
+

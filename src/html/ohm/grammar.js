@@ -14,13 +14,16 @@ adding a command needs cmd and destiation function
 
 const grammarText = `
 livecode {
-    Exp =  Sequence | Controls | General
+    Exp =   Sequence | Controls | General | SequenceDirect
 
     /*
       TRANSPORT SEQUENCE & CONTROLS
     */
 
+    SequenceDirect = InstrumentList Pattern? PatternRandom? --seqPatternDirect
+
     Sequence = Command InstrumentList? Pattern? PatternRandom? --seqPattern
+    
 
     Command =
         | "play"            --playSeq

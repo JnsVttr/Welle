@@ -3,6 +3,12 @@ import Tone from 'tone';
 
 export function createSequence(_instruments, _instName, _patternIn) {
 	let synth = _instruments[_instName].synth;
+
+    // if there is already a sequence
+    if (_instruments[_instName].sequence != null) {
+		_instruments[_instName].sequence.stop();
+		_instruments[_instName].sequence.dispose();
+	}
 	
     // init new sequence
     let sequence = new Tone.Sequence(function (time, note) {
