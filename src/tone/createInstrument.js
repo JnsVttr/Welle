@@ -14,7 +14,7 @@ export function createInstrument(_instruments, _instrumentsList,
 
     // params taken from instrumentsList
     let instType    = _instrumentsList[_instName].type;
-    let defaultVol  = _instrumentsList[_instName].vol * _instrumentsList[_instName].gain;;
+    let defaultVol  = _instrumentsList[_instName].vol * _instrumentsList[_instName].gain;
     let url         = _instrumentsList[_instName].url;
     let note        = _instrumentsList[_instName].baseNote;
     let transpose   = _instrumentsList[_instName].transpose;

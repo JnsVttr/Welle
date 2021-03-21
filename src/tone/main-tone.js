@@ -52,6 +52,7 @@ export let device = checkDevice(); // check device, ios is not allowd to load me
 // tone variables
 export var instruments = {};
 export var parts = {};
+export let partsList = [];
 export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
 export let thisBPM = 165;
@@ -167,10 +168,12 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 					break;
 				case "assignNewPattern":
 					// assign new pattern & play instrument
-					printer(debug, context, "playInstrument", `assign new pattern & play instrument`);
+					printer(debug, context, `playInstrument - assign new pattern & play instrument to this sequence: `, instruments[instName].sequence);
 					patternIn = adaptPattern(patternIn);
 					// assign new pattern in instruments{}
 					assignNewPattern(instruments, instName, patternIn, rand);
+					// stop old sequence
+					instruments[instName].sequence.stop();
 					// create new sequence
 					instruments[instName].sequence = createSequence(instruments, instName, patternIn);
 					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
@@ -230,7 +233,7 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			break;
 		case 'stopAll':
 			printer(debug, context, "stop tone: ", Tone.Transport.state)
-			stopAllInstruments(instruments);
+			stopAllInstruments(instruments, quant);
 			// render to html page
 			renderInstruments(instruments);
 			break;
@@ -301,7 +304,12 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			// save part
 			parts[name] = savePart(name, instruments, BPMvalue);
 			printer(debug, context, `saveParts: ${name}, content: `, parts);
-			// renderParts();
+			
+			// render Parts
+			let nameDisplay = `: ${name} &nbsp;&nbsp;&nbsp; `;
+			printer(debug, context, "nameDisplay: ", nameDisplay)
+			partsList.push(nameDisplay);
+			renderOutputLine(partsList, 'parts:', 100);
 			break;
 
 
@@ -311,7 +319,7 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			// if the part exists
 			if (parts[name] != undefined) {
 				// stop all current instruments
-				stopAllInstruments(instruments);
+				stopAllInstruments(instruments, quant);
 				// empty the instruments
 				instruments = {};
 				// now for each instrument saved in the part, take essential values:
@@ -340,8 +348,12 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			playAllInstruments(instruments, quant);
 			break;
 		case 'clearPart':
+			// empty the variable
 			parts = {};
+			partsList = [];
 			// renderParts();
+			renderOutputLine(partsList, 'parts:', 100);
+			
 			break;
 		
 		
@@ -429,51 +441,10 @@ export function deleteElement(elements) {
 
 
 
-export function stopAllPartInstruments(newPart) {
-	printer(debug, context, "stopAllPartInstruments", "")
-
-	Object.keys(instruments).forEach((instName) => {
-		// check if instrument doesn't exists in new part:
-		if (savedParts[newPart].instruments[instName] == undefined) {
-			instruments[instName].sequence.stop(0);
-			instruments[instName].isPlaying = false;
-		};
-	});
-};
-
-export function playPartInstrument(instName, patternIn, rand, isPlaying, url) {
-	printer(debug, context, "playPartInstrument", "")
-
-	updateInstrument(instName, patternIn, rand, url);
-	updateSequence(instName, patternIn);
-	if (isPlaying == true) {
-		playSequence(instName);
-	};
-};
 
 
 
-export function clearParts() {
-	printer(debug, context, "clearParts", "")
-	savedParts = {};
-	renderParts();
-};
 
-export function renderParts() {
-	printer(debug, context, "renderParts", "")
-	let partNames = [];
-	Object.keys(savedParts).forEach(key => {
-		// console.log("render saveParts[keys]: " + savedParts[key].name);
-		// if key = instrument, not BPM:
-		if (savedParts[key].name != undefined) {
-			let name = ': ' + savedParts[key].name + '&nbsp;&nbsp;&nbsp; ';
-			partNames.push(name);
-		};
-
-	});
-
-	renderOutputLine(partNames, 'parts:', 100);
-};
 
 
 function handlePresetsInTone(action, data) {

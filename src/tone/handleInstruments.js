@@ -21,9 +21,12 @@ export function muteInstrument(_instruments, _instName) {
 	// instruments[instName].synth.dispose();
 	
 }; 
-export function stopAllInstruments(_instruments) {
+export function stopAllInstruments(_instruments, _quant) {
+	let time = _quant();
+	time = time - 0.1;
+
 	Object.keys(_instruments).forEach((instName) => {
-		_instruments[instName].sequence.stop();
+		_instruments[instName].sequence.stop(time);
 		_instruments[instName].isPlaying = false;
 	});
 	// don't stop Tone - it doesn't work properly:
@@ -35,13 +38,13 @@ export function stopAllInstruments(_instruments) {
 
 export function playInstrument (_instruments,_instName, _quant) {
 	let time = _quant();
-	time = 0;
+	//time = 0;
 
 	Object.keys(_instruments).forEach((name) => {
 		// if the instrument found
 		if (_instName == name) {
 			if (_instruments[_instName].sequence.state == 'stopped') {  
-				_instruments[_instName].sequence.start();
+				_instruments[_instName].sequence.start(time).at(0); // play at start position
 				_instruments[_instName].isPlaying = true;
 			};
 			if (_instruments[_instName].sequence.state == 'started') {  
@@ -62,23 +65,28 @@ export function unmuteInstrument (_instruments,_instName) {
 	});
 };
 
+
+
+
+
 export function playAllInstruments(_instruments, _quant) {
 	let time = _quant();
 
 	// first stop all
 	Object.keys(_instruments).forEach((instName) => {
 		if (_instruments[instName].sequence.state == 'started') {
-			_instruments[instName].sequence.stop();	
+			_instruments[instName].sequence.stop();		
 		};
 	});
-	// then start all together in sync
+	// start all together at pattern position 0
 	Object.keys(_instruments).forEach((instName) => {
 		if (_instruments[instName].sequence.state == 'started') {
 			_instruments[instName].sequence.mute = false;
 			_instruments[instName].isPlaying = true;
 		};
 		if (_instruments[instName].sequence.state == 'stopped') {
-			_instruments[instName].sequence.start(time);
+			_instruments[instName].sequence.mute = false;
+			_instruments[instName].sequence.start(time).at(0);   // start at position 0
 			_instruments[instName].isPlaying = true;
 		};
 	});
@@ -107,6 +115,8 @@ export const quant = () => {
 		quant = Tone.Time(now).quantize(factor);
 		console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
 	}
+	// console.log(`now: ${now} - play at ${now + 0.2}`)
+
 	return quant;
 }
 
