@@ -285,7 +285,7 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 
 		
 		
-			// the parts is a seperate topic
+		// the parts is a seperate topic
 		case 'savePart':
 			let BPMvalue = Tone.Transport.bpm.value;
 			parts[name] = savePart(name, instruments, BPMvalue);
