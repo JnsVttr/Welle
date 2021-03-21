@@ -109,7 +109,15 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 	let state = false;
 	// compare incoming commands with those, that should be excluded from checking incomning 
 	// instruments or parts
-	let excludeCheckList = ['stopAll', 'playAll', 'setBPM', 'muteOn', 'muteOff', 'savePart'];
+	let excludeCheckList = [
+		'stopAll', 
+		'playAll', 
+		'setBPM', 
+		'muteOn', 
+		'muteOff', 
+		'savePart',
+		'setPart',
+	];
 	let excludeMatch = false;
 	for (let i=0; i<excludeCheckList.length; i++){
 		if (cmd == excludeCheckList[i]){
@@ -288,15 +296,52 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 		// the parts is a seperate topic
 		case 'savePart':
 			let BPMvalue = Tone.Transport.bpm.value;
+			// if part exists, then delete
+			if (parts[name] != undefined) { parts[name] = {};  }
+			// save part
 			parts[name] = savePart(name, instruments, BPMvalue);
 			printer(debug, context, `saveParts: ${name}, content: `, parts);
 			// renderParts();
 			break;
+
+
 		case 'setPart':
-			setPart(name);
+			printer(debug, context, "setPart name: ", name)
+			
+			// if the part exists
+			if (parts[name] != undefined) {
+				// stop all current instruments
+				stopAllInstruments(instruments);
+				// empty the instruments
+				instruments = {};
+				// now for each instrument saved in the part, take essential values:
+				Object.keys(parts[name].instruments).forEach(key => {
+					let instName 	= parts[name].instruments[key].name;
+					let pattern 	= parts[name].instruments[key].pattern;
+					let rand 		= parts[name].instruments[key].rand;
+					let vol 		= parts[name].instruments[key].vol;
+					let isPlaying	= parts[name].instruments[key].isPlaying;
+					
+					// create instrument
+					instruments[instName] = createInstrument(instruments, instrumentsList, instName, pattern, rand, masterOut);
+					printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
+					// create sequence
+					instruments[instName].sequence = createSequence(instruments, instName, pattern);
+					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
+					// start Tone ??
+					startTransport();
+					// set volume
+					setVolume(instrumentsList, instruments, instName, vol); 
+					printer(debug, context, `Tone: setVolume vol to: `, vol);
+				});
+				Tone.Transport.bpm.value = parts[name].bpm;
+			};
+			// play all new created instruments
+			playAllInstruments(instruments, quant);
 			break;
 		case 'clearPart':
-			clearParts();
+			parts = {};
+			// renderParts();
 			break;
 		
 		

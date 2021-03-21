@@ -37,16 +37,18 @@ export function playInstrument (_instruments,_instName, _quant) {
 	let time = _quant();
 	time = 0;
 
-	Object.keys(_instruments).forEach((_instName) => {
-		console.log(`playInstrument, seq state: ${_instruments[_instName].sequence.state}`)
-		if (_instruments[_instName].sequence.state == 'stopped') {  
-			_instruments[_instName].sequence.start();
-			_instruments[_instName].isPlaying = true;
-		};
-		if (_instruments[_instName].sequence.state == 'started') {  
-			_instruments[_instName].sequence.mute = false;
-			_instruments[_instName].isPlaying = true;
-		};
+	Object.keys(_instruments).forEach((name) => {
+		// if the instrument found
+		if (_instName == name) {
+			if (_instruments[_instName].sequence.state == 'stopped') {  
+				_instruments[_instName].sequence.start();
+				_instruments[_instName].isPlaying = true;
+			};
+			if (_instruments[_instName].sequence.state == 'started') {  
+				_instruments[_instName].sequence.mute = false;
+				_instruments[_instName].isPlaying = true;
+			};
+		}
 	});
 };
 
