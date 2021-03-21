@@ -170,10 +170,10 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 		consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'down', "textarea");
 		playAlerts('return', alertMuteState);
 	};
-	if (e.code=='Digit1') {
-		requestServerFiles ("samples");
-		printer(debug, context, "request Server Files", `Index: socket send "requestServerFiles", 'samples'.. `)
-	}
+	// if (e.code=='Digit1') {
+	// 	requestServerFiles ("samples");
+	// 	printer(debug, context, "request Server Files", `Index: socket send "requestServerFiles", 'samples'.. `)
+	// }
 });
 
 

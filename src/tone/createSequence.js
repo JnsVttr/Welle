@@ -4,7 +4,7 @@ import Tone from 'tone';
 // CREATE SEQUENCE
 // ===================================================================
 
-export function createSequence(_instruments, _instName, _patternIn, playInstrument) {
+export function createSequence(_instruments, _instName, _patternIn) {
 	let synth = _instruments[_instName].synth;
 
     // if there is already a sequence

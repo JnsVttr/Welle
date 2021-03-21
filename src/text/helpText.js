@@ -183,7 +183,7 @@ help.session = [
 
 
 help.error = [
-    ['no such instrument']
+    ['no such instrument or part']
 ];
 
 export { help }
