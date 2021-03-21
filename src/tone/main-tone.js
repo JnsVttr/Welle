@@ -51,7 +51,7 @@ export let device = checkDevice(); // check device, ios is not allowd to load me
 
 // tone variables
 export var instruments = {};
-export var savedParts = {};
+export var parts = {};
 export let masterOut = new Tone.Gain(0.9);   // master output
 masterOut.toMaster();  // assign master
 export let thisBPM = 165;
@@ -71,11 +71,24 @@ printer(debug, context, "printer", "value");
 */
 
 
+
+
+
+
+
+
+
+
+
+
+
 // main handling of sound commands
-// 
+// =====================================
 export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
 
-	// if (debugTone) {console.log('Tone: transport: INCOMING transport (' , cmd , instName , instArray , patternIn , rand , vol , bpm , name , num , ')' );};
+	
+	// print incoming messages
+	// =====================================
 	printer(debug, context, "transport", `incoming transport: 
 				cmd: \t\t ${cmd} 
 				instName: \t ${instName} 
@@ -88,11 +101,15 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 				num: \t\t ${num}
 	`);
 
+
+
+
 	// check if instrument valid: state
+	// =====================================
 	let state = false;
 	// compare incoming commands with those, that should be excluded from checking incomning 
 	// instruments or parts
-	let excludeCheckList = ['stopAll', 'playAll', 'setBPM', 'muteOn', 'muteOff'];
+	let excludeCheckList = ['stopAll', 'playAll', 'setBPM', 'muteOn', 'muteOff', 'savePart'];
 	let excludeMatch = false;
 	for (let i=0; i<excludeCheckList.length; i++){
 		if (cmd == excludeCheckList[i]){
@@ -109,7 +126,8 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 	}
 
 
-
+	// assign and execute commands for incoming transport
+	// =================================================
 	switch (cmd) {
 		case 'not valid':
 			let errorMessage = help.error[0];
@@ -265,22 +283,30 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			muteAll(false);
 			break;
 
-		// the parts is a seperate topic
+		
+		
+			// the parts is a seperate topic
 		case 'savePart':
-			printer(debug, context, "savePart", `${name}`);
 			let BPMvalue = Tone.Transport.bpm.value;
-			savePart(name, BPMvalue);
-			renderParts();
+			parts[name] = savePart(name, instruments, BPMvalue);
+			printer(debug, context, `saveParts: ${name}, content: `, parts);
+			// renderParts();
 			break;
 		case 'setPart':
 			setPart(name);
 			break;
-		case 'deleteElement':
-			deleteElement(instArray);
-			break;
 		case 'clearPart':
 			clearParts();
 			break;
+		
+		
+		
+		
+		
+		case 'deleteElement':
+			deleteElement(instArray);
+			break;
+		
 		case 'reset':
 			resetAction();
 			break;
