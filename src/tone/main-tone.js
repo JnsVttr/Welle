@@ -18,7 +18,7 @@ import Tone from 'tone';
 import { instrumentsList } from '/index';
 import { checkDevice } from '/helper/checkDevice';
 import { printer } from '/helper/printer';
-import { checkIfInstValid } from './checkIfInstValid';
+import { checkIfInstValid, checkIfPart } from './checkIfInstValid';
 
 import {
 	stopInstrument, muteInstrument, unmuteInstrument, stopAllInstruments, 
@@ -133,9 +133,21 @@ export function transport(inputContent) {
 	// if incoming cmd should not be excluded, than test if instrument or part is valid
 	if (excludeMatch==false) {
 		let state = checkIfInstValid(instName, instrumentsList);
-		printer(debug, context, "checkIfInstValid", `check valid for this inst: ${instName} or part: state: ${state}`);
+		printer(debug, context, "checkIfInstValid", `check valid for this inst: ${instName}: ${state}`);
 		// if instrument is not valid, than execute error 
-		if (!state) cmd = 'not valid';
+		if (state==false) {
+			// if input not an instrument, check if it is a part
+			let isPart = checkIfPart(instName, parts);
+			printer(debug, context, "checkIfInstValid", `check valid for this part: ${instName}: ${isPart}`);
+			if (isPart) {
+				cmd = 'setPart';
+				name = instName;
+			} else {
+				cmd = 'not valid';
+			}
+		}
+		
+		
 	}
 
 

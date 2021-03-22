@@ -21,7 +21,7 @@ import { printer } from '/helper/printer';
 // variables
 let livecode = ohm.grammar(grammarText);  // taken from grammar.js
 let semantics = livecode.createSemantics();
-let debug = true;
+let debug = false;
 let context = "semantics";
 
 // printer(debug, context, topic, element, value)
@@ -131,11 +131,11 @@ semantics.addOperation('eval', {
             ["savePart", name],
         ];
     },
-    General_setPart: function (_, name) {
+    General_saveCondition: function (_, name) {
         name = name.sourceString;
         return [
-            "general", "setPart",
-            ["setPart", name],
+            "general", "saveCondition",
+            ["saveCondition", name],
         ];
     },
     General_deleteElement: function (_, name) {

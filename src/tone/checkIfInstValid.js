@@ -16,3 +16,17 @@ export function checkIfInstValid(_instName, _instrumentsList) {
 		
 }
 ;
+
+
+export const checkIfPart = (_instName, _parts) => {
+	// check, if instrument is valid
+	let here = false;
+	
+	Object.keys(_parts).forEach((entry) => {
+		if (entry == _instName) {
+			here = true;
+		};
+	});
+	if (here) {return true}
+	else { return false}
+}

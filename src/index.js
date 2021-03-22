@@ -51,6 +51,10 @@ export let consoleLength = 20; // how many lines are displayed
 let checkMuteSound = document.getElementById("checkMuteSound");
 let checkMuteAlerts = document.getElementById("checkMuteAlerts");
 let consoleDivID = 'console';
+let actionContent = {
+	'printToConsole': {},
+	'parser': {},
+};
 
 // handle direct sound alerts
 createAlerts(alerts);
@@ -107,11 +111,7 @@ checkMuteAlerts.onclick = function () {
 
 document.getElementById("textarea").addEventListener("keydown", (e) => {
 	
-	// variable for returns from pareser and tone to be rendered to page
-	let actionContent = {
-		'printToConsole': {},
-		'parser': {},
-	};
+	
 
 	// printer(debug, context, "key input", e.code);
 	if (e.code=='Enter') {
@@ -169,11 +169,17 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 
 
 
+
+
+
+
+
+
 // SOCKET HANDLING
+// ======================
 
 // initial request for samples on server
 requestServerFiles ("samples");
-
 
 // receive files via socket, assign them to global variables
 socket.on("filesOnServer", function(folder, samples, what) {

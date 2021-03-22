@@ -37,9 +37,9 @@ livecode {
     General = 
         | "store preset" alnum+ 	--storePreset
         | "reload preset" alnum+ 	--reloadPreset
-        | "save" alnum+         	--savePart
+        | "save" alnum+         	--saveCondition
         | "delete" InstrumentList 	--deleteElement
-        | ":" alnum+            	--setPart
+        | ":" alnum+            	--savePart
         | "mute on"             	--muteOn
         | "mute off"            	--muteOff
         | "record start"        	--recordStart

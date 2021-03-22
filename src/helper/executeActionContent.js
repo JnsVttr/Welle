@@ -36,11 +36,11 @@ export const executeActionContent = (_actionContent, _consoleArray, _instruments
 		break;
 		case 'render parts': renderParts(_parts);
 		break;
-		case 'render BPM': renderBPM(Tone.Transport.bpm.value);
+		case 'render bpm': renderBPM(Tone.Transport.bpm.value);
 		break;
-		case 'render MuteOn': playAlerts('return', alertMuteState);
+		case 'render muteOn': playAlerts('return', alertMuteState);
 		break;
-		case 'render MuteOff': playAlerts('return', alertMuteState);
+		case 'render muteOff': playAlerts('return', alertMuteState);
 		break;
 	}
 	
