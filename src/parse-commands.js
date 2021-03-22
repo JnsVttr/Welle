@@ -15,10 +15,9 @@ updates html, server, etc.
 
 // libraries
 import { transport }  from '/tone/main-tone' 
-import { help }  from '/text/helpText';
 import { printer } from '/helper/printer';
 
-
+// local variables
 let debug = true;
 let context = "parser";
 
@@ -28,7 +27,7 @@ let context = "parser";
 // function to interpret input and send to TONE via transport or to html etc.
 const parseInput = (input) => {
 
-    printer(debug, context, "incoming content from index/semantic: ", inputContent);
+    printer(debug, context, "incoming content from index/semantic: ", input);
 
     // variable for transport return
     let parserReturnData = {
@@ -160,6 +159,7 @@ const parseInput = (input) => {
     
     // patternCopyFunc() - copy pattern to multiple instruments and play them
     if (inputContent.desc=="patternCopy"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
     };
 
@@ -168,6 +168,7 @@ const parseInput = (input) => {
         for (let i=0;i<inputContent.instArray.length;i++){
             let singleInst = inputContent.instArray[i];
             inputContent.inst = singleInst;
+            inputContent.cmd = inputContent.desc;
             parserReturnData.toneReturn = transport(inputContent);
         };
     };
@@ -177,36 +178,43 @@ const parseInput = (input) => {
         for (let i=0;i<inputContent.instArray.length;i++){
             let singleInst = inputContent.instArray[i];
             inputContent.inst = singleInst;
+            inputContent.cmd = inputContent.desc;
             parserReturnData.toneReturn = transport(inputContent);
         };
     };
 
     // ctrlBpmFunc() - set BPM 
     if (inputContent.desc=="setBPM"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
     };
 
     // mute On
     if (inputContent.desc=="muteOn"){
+        inputContent.cmd = inputContent.desc;
         printer(debug, context, "muteOn", "mute audio")
         parserReturnData.toneReturn = transport(inputContent);
     };
     // mute Off
     if (inputContent.desc=="muteOff"){
+        inputContent.cmd = inputContent.desc;
         printer(debug, context, "muteOff", "unmute audio")
         parserReturnData.toneReturn = transport(inputContent);
     };
     // save part
     if (inputContent.desc=="savePart"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
         // playAlerts('bottom', alertState);
     };
     // set part
     if (inputContent.desc=="setPart"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
     };
     // delete element
     if (inputContent.desc=="deleteElement"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
     };
     // clear part
@@ -217,6 +225,7 @@ const parseInput = (input) => {
 
     // initInstrument
     if (inputContent.desc=="initInst"){
+        inputContent.cmd = inputContent.desc;
         parserReturnData.toneReturn = transport(inputContent);
     };
 
@@ -249,14 +258,17 @@ const parseInput = (input) => {
     // record start
     if (inputContent.desc=="recordStart"){
         // parserReturnData.toneReturn = transport('recordStart');
+        if (device != 'ios') { audioRecord(true) };
     };
     // record stop
     if (inputContent.desc=="recordStop"){
         // parserReturnData.toneReturn = transport('recordStop');
+        if (device != 'ios') { audioRecord(false) };
     };
     // upload Files
     if (inputContent.desc=="uploadFiles"){
         var file = inst;
+        uploadToServer(instName);
         // parserReturnData.toneReturn = transport('uploadFiles', file);
     };
     // restart server
@@ -302,23 +314,23 @@ const parseInput = (input) => {
 
     // ctrlHelpFunc  
     if (inputContent.desc=="helpText"){
-        helpText; // this is the destination
-        help; // this is the help container
-        if (help[helpText] != undefined) {
-            if (helpText=='examples') { 
-                // render with links
-                let links = true;
-                // renderHtmlHelp(help[helpText],'help-container', 100, links);
-                // playAlerts('bottom', alertState);   
-            } else {
-                // render without links
-                // renderHtmlHelp(help[helpText],'help-container', 100);
-                // playAlerts('bottom', alertState);   
-            };
+        // helpText; // this is the destination
+        // help; // this is the help container
+        // if (help[helpText] != undefined) {
+        //     if (helpText=='examples') { 
+        //         // render with links
+        //         let links = true;
+        //         // renderHtmlHelp(help[helpText],'help-container', 100, links);
+        //         // playAlerts('bottom', alertState);   
+        //     } else {
+        //         // render without links
+        //         // renderHtmlHelp(help[helpText],'help-container', 100);
+        //         // playAlerts('bottom', alertState);   
+        //     };
             
-        } else {
-            // playAlerts('error', alertState);
-        };
+        // } else {
+        //     // playAlerts('error', alertState);
+        // };
     };
 
     

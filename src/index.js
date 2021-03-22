@@ -26,6 +26,7 @@ import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
+import { executeActionContent } from './helper/executeActionContent';
 
 
 
@@ -41,9 +42,6 @@ export let serverSamples = "";
 export let sampleURL = {};
 export let instrumentsList = "";
 
-let activeInstruments = {};
-let activeParts = {};
-
 // input & console varibles
 export let consolePointer = 0; // for arrow functions
 export let consoleArray = [];   // arrays to store page console etc. output
@@ -52,6 +50,7 @@ export let consoleLength = 20; // how many lines are displayed
 // html variables
 let checkMuteSound = document.getElementById("checkMuteSound");
 let checkMuteAlerts = document.getElementById("checkMuteAlerts");
+let consoleDivID = 'console';
 
 // handle direct sound alerts
 createAlerts(alerts);
@@ -122,54 +121,37 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 		// get input string
 		let string = document.getElementById("textarea").value;
 		string = string.toLowerCase();
-		let validState = false;
+		// message for server
 		let message = { string: string, user: 'local' };
 
 		// send string to validate in enterfunction(), grammar
 		let result = enterFunction(string, instrumentsList);
-		// printer(debug, context, "result: ", result)
-
-		
 
 		// handle returns from enterfunction()
 		if (result.valid == true) { 
 			// send to server via sockets
 			socket.emit('clientEvent', message);
-			// if return is valid:
-			validState = true;
-			consolePointer += 1;
-			// show text in console
-			consoleArray.push({ message: `${result.string}` });
-			renderHtml(consoleArray, 'console', consoleLength);
-			
-			actionContent.printToConsole.valid = true;
-			actionContent.printToConsole.content = consoleArray;
-
 			// send results to parser for Tone
 			actionContent.parser = parseInput(result.result);
-			
-
 		} else {
-			// if return is not valid:
-			validState = false; 
-			consolePointer += 1;
-			let string = "";
 			// prepend a '!' to the string
 			if (result.string != '!') { string = `! ${result.string}`; } 
-				else { string = `${result.string}`; };
-
-			// show text in console
-			consoleArray.push({ message: string });
-			renderHtml(consoleArray, 'console', consoleLength);
-			actionContent.printToConsole.valid = false;
-			actionContent.printToConsole.content = consoleArray;
-			
-			// renderTextToConsole(validState, user, string, 'local');
-			// nothing to parse
+			else { string = `${result.string}`; };
 		};
+
+		// add to consolePointer for arrows
+		consolePointer += 1;
+		// add text to console array
+		consoleArray.push({ message: `${result.string}` });
+		// send to renderer
+		actionContent.printToConsole.valid = result.valid;
+		actionContent.printToConsole.content = consoleArray;
+		actionContent.printToConsole.length = consoleLength;
+		actionContent.printToConsole.id = consoleDivID;
 		
 		// printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
 		printer(debug, context, "actionContent: ", actionContent)
+		executeActionContent(actionContent);
 		// after processing, clear the input field
 		clearTextfield();
 	};
@@ -191,12 +173,6 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 	// 	printer(debug, context, "request Server Files", `Index: socket send "requestServerFiles", 'samples'.. `)
 	// }
 });
-
-
-
-
-
-
 
 
 

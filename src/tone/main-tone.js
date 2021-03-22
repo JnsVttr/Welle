@@ -86,6 +86,14 @@ printer(debug, context, "printer", "value");
 // main handling of sound commands
 // =====================================
 export function transport(inputContent) {
+	
+	
+	// print incoming messages
+	// =====================================
+	printer(debug, context, "transport - incoming transport: ", inputContent);
+
+
+	// extract input to variables
 	let cmd = inputContent.cmd,
 		instName = inputContent.inst,
 		instArray = inputContent.instArray,
@@ -100,15 +108,13 @@ export function transport(inputContent) {
 		patternIn[0] = null;
 	};
 	// variable to return page/socket/system related info
-	let toneReturnData = {'return from transport': ['1', '2', '3', 'test'] };
+	let toneReturnData = {
+		'html': "",
+		'error': "",	
+	};
 	
-	// print incoming messages
-	// =====================================
-	printer(debug, context, "transport - incoming transport: ", inputContent);
-	printer(debug, context, "transport - incoming transport to var: ", `e.g. instName ${instName} or cmd: ${cmd}`);
-
-
-
+	
+	
 
 	// check if instrument valid: state
 	// =====================================
@@ -144,11 +150,12 @@ export function transport(inputContent) {
 	// =================================================
 	switch (cmd) {
 		case 'not valid':
-			let errorMessage = help.error[0];
-			printer(debug, context, 'checkIfInstValid', `error message "${errorMessage}"`);
-			consoleArray.push({ message: `${instName} - ${errorMessage}` });
-			renderHtml(consoleArray, 'console', consoleLength);
-			playAlerts('error', alertMuteState);
+			printer(debug, context, 'checkIfInstValid', `error - not valid!!`);
+			toneReturnData.error = "not valid";
+			// let errorMessage = help.error[0];
+			// consoleArray.push({ message: `${instName} - ${errorMessage}` });
+			// renderHtml(consoleArray, 'console', consoleLength);
+			// playAlerts('error', alertMuteState);
 			break;
 		case 'play':
 			let action = interpretInput(instruments, instName, patternIn)
@@ -169,6 +176,7 @@ export function transport(inputContent) {
 					unmuteInstrument(instruments, instName);
 					printer(debug, context, `unmute instrument`, `Tone & instrument started`);
 					// render to html page
+					toneReturnData.html = "render instruments";
 					renderInstruments(instruments);
 					break;
 				case "assignNewPattern":
@@ -188,6 +196,7 @@ export function transport(inputContent) {
 					playInstrument(instruments, instName, quant);
 					printer(debug, context, `start playing`, `Tone & instrument started`);
 					// render to html page
+					toneReturnData.html = "render instruments";
 					renderInstruments(instruments);
 					break;
 				case "createNewInstrumentPatternEmpty":
@@ -207,6 +216,7 @@ export function transport(inputContent) {
 					playInstrument(instruments, instName, quant);
 					printer(debug, context, `start playing`, `Tone & instrument started`);
 					// render to html
+					toneReturnData.html = "render instruments";
 					renderInstruments(instruments);
 					printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
 					break;
@@ -226,6 +236,7 @@ export function transport(inputContent) {
 					playInstrument(instruments, instName, quant);
 					printer(debug, context, `start playing`, `Tone & instrument started`);
 					// render to html
+					toneReturnData.html = "render instruments";
 					renderInstruments(instruments);
 					printer(debug, context, `start playing`, `instrument rendered to html instrument lists`);
 					break;
@@ -234,18 +245,21 @@ export function transport(inputContent) {
 		case 'stop':
 			muteInstrument(instruments, instName);
 			printer(debug, context, "muteInstrument", `for ${instName}`);
+			toneReturnData.html = "render instruments";
 			renderInstruments(instruments);
 			break;
 		case 'stopAll':
 			printer(debug, context, "stop tone: ", Tone.Transport.state)
 			stopAllInstruments(instruments, quant);
 			// render to html page
+			toneReturnData.html = "render instruments";
 			renderInstruments(instruments);
 			break;
 		case 'playAll':
 			playAllInstruments(instruments, quant);
 			printer(debug, context, "playAllInstruments", instruments);
 			// render to html page
+			toneReturnData.html = "render instruments";
 			renderInstruments(instruments);
 			break;
 		case 'patternCopy':
@@ -362,28 +376,9 @@ export function transport(inputContent) {
 			break;
 		
 		
-		
-		
-		
-		case 'deleteElement':
-			deleteElement(instArray);
-			break;
-		
-		case 'reset':
-			resetAction();
-			break;
-		case 'recordStart':
-			if (device != 'ios') { audioRecord(true) };
-			break;
-		case 'recordStop':
-			if (device != 'ios') { audioRecord(false) };
-			break;
-		case 'uploadFiles':
-			uploadToServer(instName);
-			break;
 		case 'initInst':
-			state = checkIfInstValid(instName, instrumentsList);
-			if (state) { initInstrument(instName, name, num); }
+			// state = checkIfInstValid(instName, instrumentsList);
+			// if (state) { initInstrument(instName, name, num); }
 			break;
 	};
 

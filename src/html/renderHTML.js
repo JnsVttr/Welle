@@ -31,6 +31,30 @@ export const renderHtml = (content, chooseDiv, limit) => {
 };
 
 
+export const renderToConsole = (content, divID, lengthLimit) => {
+    // render text to console div
+    let div = document.getElementById(divID);
+    let html='';
+    // get length of entire content and limit content if more 
+    let entireContentLength = content.length;
+    let contentPointer = 0;
+    // set pointer to most recent entries
+    if (entireContentLength > lengthLimit) contentPointer = entireContentLength - lengthLimit; 
+
+    // create output text and html:
+    for (let i=contentPointer; i < entireContentLength; i++) {
+        if (content[i].user) {
+            html+='<p id="consoleLine"><b>' + content[i].user + ': &nbsp;&nbsp;</b>' + content[i].message + '</p>';
+        } else {
+            html+='<p id="consoleLine">' + content[i].message + '</p>';
+        };
+    };
+    // append text to div
+    document.getElementById(divID).innerHTML = '';
+    document.getElementById(divID).innerHTML+= html;
+};
+
+
 
 
 
