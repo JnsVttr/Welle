@@ -115,6 +115,8 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 
 	// printer(debug, context, "key input", e.code);
 	if (e.code=='Enter') {
+		printer(debug, context, "", "");
+		printer(debug, context, "", "");
 
 		playAlerts('return', alertMuteState);
 		consolePointer = -1; // pointer for arrwos
@@ -142,7 +144,7 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 		actionContent.printToConsole.length = consoleLength;
 		actionContent.printToConsole.id = consoleDivID;
 		
-		printer(debug, context, "actionContent: ", actionContent)
+		// printer(debug, context, "actionContent: ", actionContent)
 		// execute actionContent
 		consoleArray = executeActionContent(actionContent, consoleArray, instruments, parts);
 		// after processing, clear the input field

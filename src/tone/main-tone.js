@@ -18,15 +18,14 @@ import Tone from 'tone';
 import { instrumentsList } from '/index';
 import { checkDevice } from '/helper/checkDevice';
 import { printer } from '/helper/printer';
-import { checkIfInstValid, checkIfPart } from './checkIfInstValid';
 
+import { checkIfInstValid, checkIfPart } from './checkIfInstValid';
 import {
 	stopInstrument, muteInstrument, unmuteInstrument, stopAllInstruments, 
 	playAllInstruments, adaptPattern,
 	playInstrument, assignNewPattern, quant
 } from './handleInstruments';
 import { setVolume, setRandom, muteAll } from './handleParameters';
-
 import { savePart } from './savePart';
 import { interpretInput } from '/tone/interpretInput'
 import { startTransport } from './startTransport';
@@ -111,8 +110,7 @@ export function transport(inputContent) {
 
 	// check if instrument valid: state
 	// =====================================
-	let state = false;
-
+	
 	// compare incoming commands with those, that should be excluded from checking incomning instruments or parts
 	let excludeCheckList = [
 		'stopAll', 
@@ -120,8 +118,8 @@ export function transport(inputContent) {
 		'setBPM', 
 		'muteOn', 
 		'muteOff', 
+		'saveCondition',
 		'savePart',
-		'setPart',
 	];
 	let excludeMatch = false;
 	for (let i=0; i<excludeCheckList.length; i++){
@@ -133,12 +131,12 @@ export function transport(inputContent) {
 	// if incoming cmd should not be excluded, than test if instrument or part is valid
 	if (excludeMatch==false) {
 		let state = checkIfInstValid(instName, instrumentsList);
-		printer(debug, context, "checkIfInstValid", `check valid for this inst: ${instName}: ${state}`);
+		printer(debug, context, "checkIfInstValid", `check valid for inst "${instName}" - state: ${state}`);
 		// if instrument is not valid, than execute error 
 		if (state==false) {
 			// if input not an instrument, check if it is a part
 			let isPart = checkIfPart(instName, parts);
-			printer(debug, context, "checkIfInstValid", `check valid for this part: ${instName}: ${isPart}`);
+			printer(debug, context, "checkIfInstValid", `check valid for part "${instName}" - state: ${isPart}`);
 			if (isPart) {
 				cmd = 'setPart';
 				name = instName;

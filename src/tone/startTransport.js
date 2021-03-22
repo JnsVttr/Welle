@@ -13,7 +13,7 @@ export function startTransport() {
 		Tone.Transport.start();
 		return _now;
 	} else {
-		printer(debug, context, "startTransport", `Tone is playing`);
+		// printer(debug, context, "startTransport", `Tone is playing`);
 	};
 }
 ;

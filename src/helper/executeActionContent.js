@@ -16,9 +16,9 @@ export const executeActionContent = (_actionContent, _consoleArray, _instruments
 	let printToConsole = _actionContent.printToConsole;
 	let toneReturn = _actionContent.parser.toneReturn;
 
-	printer(debug, context, "executeActionContent printToConsole ", printToConsole);
-	printer(debug, context, "executeActionContent parserReturn ", parserReturn);
-	printer(debug, context, "executeActionContent toneReturn ", toneReturn);
+	// printer(debug, context, "executeActionContent printToConsole ", printToConsole);
+	// printer(debug, context, "executeActionContent parserReturn ", parserReturn);
+	// printer(debug, context, "executeActionContent toneReturn ", toneReturn);
 
 	// console:
 	_consoleArray.push({ message: `${printToConsole.string}` });

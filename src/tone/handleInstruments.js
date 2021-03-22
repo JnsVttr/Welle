@@ -9,7 +9,7 @@ export function stopInstrument(_instruments, _instName) {
 		// _instruments[_instName].sequence.stop();
 		_instruments[_instName].sequence.stop();
 		_instruments[_instName].isPlaying = false;
-		console.log(`stopInstrument, seq state: ${_instruments[_instName].sequence.state}`)
+		// console.log(`stopInstrument, seq state: ${_instruments[_instName].sequence.state}`)
 		// instruments[instName].synth.dispose();
 	};
 }
@@ -17,7 +17,7 @@ export function stopInstrument(_instruments, _instName) {
 export function muteInstrument(_instruments, _instName) {
 	_instruments[_instName].sequence.mute = true;
 	_instruments[_instName].isPlaying = false;
-	console.log(`muteInstrument, seq state: ${_instruments[_instName].sequence.state}`)
+	// console.log(`muteInstrument, seq state: ${_instruments[_instName].sequence.state}`)
 	// instruments[instName].synth.dispose();
 	
 }; 
@@ -57,7 +57,7 @@ export function playInstrument (_instruments,_instName, _quant) {
 
 export function unmuteInstrument (_instruments,_instName) {
 	Object.keys(_instruments).forEach((_instName) => {
-		console.log(`playInstrument, seq state: ${_instruments[_instName].sequence.state}`)
+		// console.log(`playInstrument, seq state: ${_instruments[_instName].sequence.state}`)
 		if (_instruments[_instName].sequence.state == 'started') {  
 			_instruments[_instName].sequence.mute = false;
 			_instruments[_instName].isPlaying = true;
@@ -108,12 +108,12 @@ export const quant = () => {
 	let factor = 1;
 	let now = Tone.TransportTime().valueOf();
 	let quant = Tone.Time(now).quantize(factor);
-	console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`)
+	// console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`)
 
 	if (quant < now){
 		now+=1;
 		quant = Tone.Time(now).quantize(factor);
-		console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
+		// console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
 	}
 	// console.log(`now: ${now} - play at ${now + 0.2}`)
 
