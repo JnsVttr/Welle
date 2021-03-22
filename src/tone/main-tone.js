@@ -110,7 +110,7 @@ export function transport(inputContent) {
 
 	// check if instrument valid: state
 	// =====================================
-	
+
 	// compare incoming commands with those, that should be excluded from checking incomning instruments or parts
 	let excludeCheckList = [
 		'stopAll', 
@@ -343,10 +343,14 @@ export function transport(inputContent) {
 					// start Tone ??
 					startTransport();
 					// set volume
-					setVolume(instrumentsList, instruments, instName, vol); 
+					setVolume(instrumentsList, instruments, instName, vol)
+					// setTimeout(, 100);
+					
 					printer(debug, context, `Tone: setVolume vol to: `, vol);
 				});
-				Tone.Transport.bpm.value = parts[name].bpm;
+				printer(debug, context, `Tone: set Tone BPM ${Tone.Transport.bpm.value} val to stored val: `, parts[name].bpm);
+				// setTimeout( () => {Tone.Transport.bpm.value = parts[name].bpm}, 200)
+				Tone.Transport.bpm.value = parts[name].bpm
 			};
 			// play all new created instruments
 			playAllInstruments(instruments, quant);

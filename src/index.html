@@ -1,111 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,900&display=swap" rel="stylesheet"> 
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,500,900&display=swap" rel="stylesheet">
 	<link rel="shortcut icon" href="/html/favicon/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/html/favicon/favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" type="text/css" href="/css/main.css">
-
+	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<title>WELLE</title>
-	<style type="text/css">
-		
-	</style>
-	<script>
-		function linkPrint (content) {
-			// console.log('hello link, content: ' + content);
-			document.getElementById("textarea").value = content;
-			document.getElementById("textarea").dispatchEvent(new KeyboardEvent('keydown',{'keyCode': 13}));
-		};
-	</script>
-	
 </head>
+
+
+
 <body>
-	<div>
-	    <h1 id="page-title">WELLE</h1>
-	    
+	<div class="w3-container w3-medium">
 
-	    <h2>controls</h2>
-	    <table style="width:100%">
-		  <caption></caption>
-		  <tr>
-		    <td style="width:20%">sound & alerts</td>
-		    <td>
-		    	 <input type="checkbox" id="checkMuteSound"> mute sound. &nbsp;&nbsp;
-		    	 <input type="checkbox" id="checkMuteAlerts"> mute alerts.  
-		    </td>
-		  </tr>
-		  <tr>
-		    <td>recorder</td>
-		    <td>
-		    	<!-- audio player only for internal processing, not shown -->
-		    	<div id="audioDiv" style="display: none;"> <audio  controls id="audioPlayer"></audio>  </div>
-		    	<button id="buttonPlay" style="display: none;">Play</button> 
-				<button id="buttonPause" style="display: none;">Pause</button> 
-				<button id="recordStatus" style="display: none;">record: </button>
+		<!-- main title ==============================  -->
+		<h1>WELLE</h1>
+
+
+
+		<!-- controls ==============================  -->
+		<h2 class="w3-large">controls</h2>
+
+		<div class="w3-container">	
+			<!-- <input type="button" class="w3-button w3-round-large w3-black" value="sound off">
+			<input type="button" class="w3-button w3-round-large w3-black" value="alerts off"> -->
+
+			<input class="w3-check" type="checkbox" checked="checked"><label> sound </label>
+			<input class="w3-check" type="checkbox"><label> alerts </label>
+			
+		  
+			<table>
+				<caption></caption>
 				
-		    </td>
-		  </tr>
-		  <tr>
-		    <td id="group">group</td>
-		    <td> <usr id="localUser"></usr> </td>
-		  </tr>
-		</table>
+				<tr>
+					<td>recorder</td>
+					<td>
+						<!-- audio player only for internal processing, not shown -->
+						<div id="audioDiv" style="display: none;"> <audio controls id="audioPlayer"></audio> </div>
+						<button id="buttonPlay" style="display: none;">Play</button>
+						<button id="buttonPause" style="display: none;">Pause</button>
+						<button id="recordStatus" style="display: none;">record: </button>
 
-	    <br>
-	    
+					</td>
+				</tr>
+				<tr>
+					<td id="group">group</td>
+					<td>
+						<usr id="localUser"></usr>
+					</td>
+				</tr>
+			</table>
+		</div>
 
-	   	<!-- not shown, form handles upload -->
+
+		<!-- not shown, form handles upload -->
 		<form id="form" style="display: none;">
-			<input type="file" id="file"/>
+			<input type="file" id="file" />
 			<input type="submit" id="uploader" value="Upload" />
 		</form>
-		
-		
-		<h2> bpm </h2>
-	    <p id="bpm" ></p>
-		
 
-		<h2> input & console</h2>
-	    <p id="console" ></p>
 
-	    <input 
-	    	id="textarea" 
-	    	type="text" 
-	    	autofocus 
-	    	size="50" 
-	    	autocomplete=off 
-	    	value=""
-	    	>
-	  
-	    <br>
-	    <br>
 
-	    <x id="instruments">
-	    	<table><caption>instruments:</caption><tr></tr></table>
-	    </x>
-	    <x id="parts">
-	    	<table><caption>parts:</caption><tr></tr></table>
-	    </x>
-	    
+		<!-- bpm ==============================  -->
+		<h2 class="w3-large"> bpm </h2>
+		<p id="bpm"></p>
 
-		<br>
-	    <br>
-	    <h2> help</h2>
+
+
+		<!-- console ==============================  -->
+		<h2 class="w3-large">console</h2>
+
+		<div class="w3-container w3-padding-16 w3-light-grey">
+			<p id="console"></p>
+
+			<!-- console input field ==============================  -->
+			<input id="textarea" type="text" autofocus size="50" autocomplete=off value="">
+		</div>
+
+
+
+
+		<div class="w3-container">
+			<!-- parts display ==============================  -->
+			<h2 class="w3-large">parts</h2>
+			<div id="parts">
+				no parts yet saved..
+			</div>
+
+			<!-- instruments display ==============================  -->
+			<h2 class="w3-large">instruments</h2>
+			<div id="instruments">
+				no instruments yet saved..
+			</div>
+		</div>
+
+
+
+		<!-- help display ==============================  -->
+		<!-- <h2> help</h2>
 	    <p id="help-overview"  ></p>
 	    <p id="help-container"  ></p>
 
 	    <p id="shortDesc"  ></p>
-	    <p id="info"  ></p>
+	    <p id="info"  ></p> -->
 	</div>
 
-	
 
-	<script type="text/javascript" src="./index.js"></script>  
-	
+
+	<script type="text/javascript" src="./index.js"></script>
+
 </body>
+
 </html>
-
-

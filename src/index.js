@@ -72,17 +72,17 @@ renderBPM(thisBPM);
 
 // interactive sound controls: muting sound / alerts
 // =================================================================
-document.getElementById("checkMuteAlerts").checked = alertMuteState;
+// document.getElementById("checkMuteAlerts").checked = alertMuteState;
 
-checkMuteAlerts.onclick = function () {
-	printer(debug, context, "onlick MuteAlerts", alertMuteState)
-	if (checkMuteAlerts.checked) {
-		alertMuteState = true;
-	} else {
-		playAlerts('return', alertMuteState);
-		alertMuteState = false;
-	};
-};
+// checkMuteAlerts.onclick = function () {
+// 	printer(debug, context, "onlick MuteAlerts", alertMuteState)
+// 	if (checkMuteAlerts.checked) {
+// 		alertMuteState = true;
+// 	} else {
+// 		playAlerts('return', alertMuteState);
+// 		alertMuteState = false;
+// 	};
+// };
 // checkMuteSound.onclick = function () {
 // 	if (checkMuteSound.checked) {
 // 		let val = 'mute on';
@@ -136,15 +136,18 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
 			actionContent.parser = parseInput(result.result);
+		} else {
+			printer(debug, context, "result.valid? : ", result.valid)
 		};
 		// add to consolePointer for arrows
 		consolePointer += 1;
 		// send to renderer
+		actionContent.printToConsole.valid = result.valid;
 		actionContent.printToConsole.string = result.string;
 		actionContent.printToConsole.length = consoleLength;
 		actionContent.printToConsole.id = consoleDivID;
 		
-		// printer(debug, context, "actionContent: ", actionContent)
+		printer(debug, context, "actionContent: ", actionContent)
 		// execute actionContent
 		consoleArray = executeActionContent(actionContent, consoleArray, instruments, parts);
 		// after processing, clear the input field

@@ -37,7 +37,7 @@ export const parseInput = (input) => {
 
     // declare object/ container for all possible semantic variables 
     let inputContent = {
-        type: '', desc: '', cmd: '', inst: '', instArray: '', patternParse: '', 
+        type: '', desc: '', cmd: '', inst: '', instArray: '', pattern: '', 
         rand: '', sel: '', vol: '', name: '', bpm: '', helpText: '', num:''
     }; 
 
@@ -103,6 +103,14 @@ export const parseInput = (input) => {
         };
     });
     
+
+    printer(debug, context, "fixing pattern: ", inputContent.pattern)
+    // change pattern to notes:
+    for (let i=0; i<inputContent.pattern.length; i++){
+        if (inputContent.pattern[i]=='-') inputContent.pattern[i] = null;
+        if (inputContent.pattern[i]=='#') inputContent.pattern[i] = 1;
+        printer(debug, context, "iterate pattern: ", inputContent.pattern)
+    }
     
 
 
