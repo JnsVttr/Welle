@@ -85,24 +85,27 @@ printer(debug, context, "printer", "value");
 
 // main handling of sound commands
 // =====================================
-export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
-
+export function transport(inputContent) {
+	let cmd = inputContent.cmd,
+		instName = inputContent.inst,
+		instArray = inputContent.instArray,
+		patternIn = inputContent.pattern,
+		rand = inputContent.rand,
+		vol = inputContent.vol,
+		bpm = inputContent.bpm,
+		num = inputContent.num;
+	
+	// add NULL to empty pattern, to be used later in main-tone transport
+	if (patternIn =='' && Array.isArray(patternIn)) {
+		patternIn[0] = null;
+	};
 	// variable to return page/socket/system related info
 	let toneReturnData = {'return from transport': ['1', '2', '3', 'test'] };
 	
 	// print incoming messages
 	// =====================================
-	printer(debug, context, "transport", `incoming transport: 
-				cmd: \t\t ${cmd} 
-				instName: \t ${instName} 
-				instArray: \t ${instArray} 
-				patternIn: \t ${patternIn} 
-				rand: \t\t ${rand}
-				vol: \t\t ${vol}
-				bpm: \t\t ${bpm}
-				name: \t\t ${name}
-				num: \t\t ${num}
-	`);
+	printer(debug, context, "transport - incoming transport: ", inputContent);
+	printer(debug, context, "transport - incoming transport to var: ", `e.g. instName ${instName} or cmd: ${cmd}`);
 
 
 
@@ -110,7 +113,7 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 	// check if instrument valid: state
 	// =====================================
 	let state = false;
-	
+
 	// compare incoming commands with those, that should be excluded from checking incomning instruments or parts
 	let excludeCheckList = [
 		'stopAll', 
@@ -149,7 +152,7 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			break;
 		case 'play':
 			let action = interpretInput(instruments, instName, patternIn)
-			printer(debug, context, 'play main', `interpret result: ${action}`);
+			printer(debug, context, 'main-tone play interpretInput', `interpret result: ${action}`);
 
 			// action
 			switch (action) {

@@ -15,12 +15,8 @@ updates html, server, etc.
 
 // libraries
 import { transport }  from '/tone/main-tone' 
-import { renderHtmlHelp }  from  '/html/renderHTML';
 import { help }  from '/text/helpText';
-import { setUser, showFiles, alertState, presetHandling }  from '/index' 
 import { printer } from '/helper/printer';
-import { restartServer } from '/socket/restartServer';
-import { playAlerts } from '/helper/playAlerts';
 
 
 let debug = true;
@@ -32,288 +28,300 @@ let context = "parser";
 // function to interpret input and send to TONE via transport or to html etc.
 const parseInput = (input) => {
 
+    printer(debug, context, "incoming content from index/semantic: ", inputContent);
+
     // variable for transport return
     let parserReturnData = {
         toneReturn: {},
         parserReturn: {},
     };
 
-    // declare containers for all possible semantic variables 
-    let type='', desc='', cmd='', inst='', instArray='', patternParse='', 
-        rand='', sel='', vol='', name='', bpm='', helpText='', num='';
+    // declare object/ container for all possible semantic variables 
+    let inputContent = {
+        type: '', desc: '', cmd: '', inst: '', instArray: '', patternParse: '', 
+        rand: '', sel: '', vol: '', name: '', bpm: '', helpText: '', num:''
+    }; 
 
-    // extract input from semantic.js parsing:
-    // type & desc mark the main purpose of the message
-    // details are encapsulated in sub arrays and are extracted below
-    type = input[0] || '';
-    desc = input[1] || '';
+    inputContent.type = input[0];
+    inputContent.desc = input[1];
 
-    // extract subarrays: if messages come ["name", value]
-    // assign values to previously created variables
+    
+    // extract subarrays: if messages come ["name", value], assign values to previously created variables
     Object.keys(input).forEach(key => {
 
         // only if key of input is an (sub) array
         if (Array.isArray(input[key])){
-            var desc = input[key][0];
-            var value = input[key][1];
-
+            // content to iterate
+            let desc = input[key][0];
+            let value = input[key][1];
+            
             switch (desc) {
-                case "command":
-                    cmd = value;
+                case 'command':
+                    inputContent.cmd = value.toString();
                 break;
                 case "pattern":
-                    patternParse = value;
+                    inputContent.pattern = value;
                 break;
                 case "instArray":
-                    instArray = value;
+                    inputContent.instArray = value;
                 break;
                 case "inst":
-                    inst = value;
+                    inputContent.inst = value;
                 break;
                 case "rand":
-                    rand = parseInt(value);
+                    inputContent.rand = parseInt(value);
                 break;
                 case "sel":
-                    sel = value;
+                    inputContent.sel = value;
                 break;
                 case "vol":
-                    vol = value;
+                    inputContent.vol = value;
                 break;
                 case "bpm":
-                    bpm = value;
+                    inputContent.bpm = value;
                 break;
                 case "savePart":
-                    name = value;
+                    inputContent.name = value;
                 break;
                 case "setPart":
-                    name = value;
+                    inputContent.name = value;
                 break;
                 case "deleteElement":
-                    instArray = value;
+                    inputContent.instArray = value;
                 break;
                 case "initInst":
-                    name = value;
+                    inputContent.name = value;
                 break;
                 case "help":
-                    helpText = value;
+                    inputContent.helpText = value;
                 break;
                 case "num":
-                    num = value;
+                    inputContent.num = value;
                 break;
             };
+
+            
         };
     });
-
-    printer(debug, context, "incoming", `
-            type: \t\t ${type}
-            desc: \t\t ${desc}
-            cmd: \t\t ${cmd}
-            inst: \t\t ${inst}
-            instArray: \t ${instArray}
-            pattern: \t ${patternParse}
-            rand: \t\t ${rand}
-            sel: \t\t ${sel}
-            vol: \t\t ${vol}
-            bpm: \t\t ${bpm}
-            name: \t\t ${name}
-            help: \t\t ${helpText}
-            num: \t\t ${num}
-    `);
-
+    
     
 
 
 
-
-    // tests:
-    if (patternParse =='' && Array.isArray(patternParse)) {patternParse[0] = null};
-    
 
     // ===================== Tone functions =============================================== //
 
     // assign input "Sequence" (play etc.)
-    if (desc=="sequenceStart"){
+    if (inputContent.desc=="sequenceStart"){
         // play instrument function
-        if (cmd=="play" && instArray.length>0) {
+        if (inputContent.cmd=="play" && inputContent.instArray.length>0) {
             // for every instrument send name, pattern and random statement 
-            for (let i=0;i<instArray.length;i++){
-                let singleInst = instArray[i];
+            for (let i=0;i<inputContent.instArray.length;i++){
+                let singleInst = inputContent.instArray[i];
+                // overwrite single inst in inputContent
+                inputContent.inst = singleInst;
                 //do what you need here
-                parserReturnData.toneReturn = transport('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);    
-                setTimeout(function(){    
-                }, (i+1)*30);
+                parserReturnData.toneReturn = transport(inputContent);    
             };
         // playAgainFunc() - if just "play" command without instruments
-        } else if (cmd=="play") {
-            transport('playAll');
+        } else if (inputContent.cmd=="play") {
+            inputContent.cmd="playAll";
+            parserReturnData.toneReturn = transport(inputContent);
         };
 
         // stopFunc() - for individual instruments
-        if (cmd=="stop" && instArray.length>0) {
-            for (let i=0;i<instArray.length;i++){
-                let singleInst= instArray[i];
-                transport('stop', singleInst);
+        if (inputContent.cmd=="stop" && inputContent.instArray.length>0) {
+            for (let i=0;i<inputContent.instArray.length;i++){
+                let singleInst= inputContent.instArray[i];
+                inputContent.inst = singleInst;
+                parserReturnData.toneReturn = transport(inputContent);
             };
         // stopAll() - for overall stop     
-        } else if (cmd=="stop"){
-            transport('stopAll')
+        } else if (inputContent.cmd=="stop"){
+            inputContent.cmd="stopAll";
+            parserReturnData.toneReturn = transport(inputContent)
         };
-        if (cmd[0]=="reset") {
-            transport('reset')
+        if (inputContent.cmd[0]=="reset") {
+            inputContent.cmd = 'reset';
+            parserReturnData.toneReturn = transport(inputContent)
         };
     };    
-    
 
     // CtrlAssFunc() - assign "Pattern" to instruments 
-    if (desc=="patternAssign"){
-        for (let i=0;i<instArray.length;i++){
-            let singleInst = instArray[i];
-            setTimeout(function(){
-                //do what you need here
-                transport('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
-            }, (i+1)*30);
+    if (inputContent.desc=="patternAssign"){
+        for (let i=0;i<inputContent.instArray.length;i++){
+            let singleInst = inputContent.instArray[i];
+            inputContent.inst = singleInst;
+            inputContent.cmd = "play";
+            //do what you need here
+            parserReturnData.toneReturn = transport(inputContent);
         };
     };
     
     // patternCopyFunc() - copy pattern to multiple instruments and play them
-    if (desc=="patternCopy"){
-        transport('patternCopy', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    if (inputContent.desc=="patternCopy"){
+        parserReturnData.toneReturn = transport(inputContent);
     };
 
     // setVolFunc
-    if (desc=="instVolume"){
-        for (let i=0;i<instArray.length;i++){
-            let singleInst = instArray[i];
-            transport('setVolume', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
+    if (inputContent.desc=="setVolume"){
+        for (let i=0;i<inputContent.instArray.length;i++){
+            let singleInst = inputContent.instArray[i];
+            inputContent.inst = singleInst;
+            parserReturnData.toneReturn = transport(inputContent);
         };
     };
 
     // ctrlRandFunc
-    if (desc=="instRand"){
-        for (let i=0;i<instArray.length;i++){
-            let singleInst = instArray[i];
-            transport('setRandom', singleInst, instArray, patternParse, rand, vol, bpm, name, num);
+    if (inputContent.desc=="setRandom"){
+        for (let i=0;i<inputContent.instArray.length;i++){
+            let singleInst = inputContent.instArray[i];
+            inputContent.inst = singleInst;
+            parserReturnData.toneReturn = transport(inputContent);
         };
     };
 
     // ctrlBpmFunc() - set BPM 
-    if (desc=="setBPM"){
-        transport('setBPM', inst, instArray, patternParse, rand, vol, bpm, name, num);
+    if (inputContent.desc=="setBPM"){
+        parserReturnData.toneReturn = transport(inputContent);
     };
 
-    // list stuff
-    if (desc=="list"){
-        let string = inst; // e.g. files
-        showFiles(string); // in index-safe
-    };
     // mute On
-    if (desc=="muteOn"){
+    if (inputContent.desc=="muteOn"){
         printer(debug, context, "muteOn", "mute audio")
-        transport('muteOn');
+        parserReturnData.toneReturn = transport(inputContent);
     };
     // mute Off
-    if (desc=="muteOff"){
+    if (inputContent.desc=="muteOff"){
         printer(debug, context, "muteOff", "unmute audio")
-        transport('muteOff');
+        parserReturnData.toneReturn = transport(inputContent);
     };
+    // save part
+    if (inputContent.desc=="savePart"){
+        parserReturnData.toneReturn = transport(inputContent);
+        // playAlerts('bottom', alertState);
+    };
+    // set part
+    if (inputContent.desc=="setPart"){
+        parserReturnData.toneReturn = transport(inputContent);
+    };
+    // delete element
+    if (inputContent.desc=="deleteElement"){
+        parserReturnData.toneReturn = transport(inputContent);
+    };
+    // clear part
+    if (inputContent.desc=="clear"){
+        inputContent.cmd = "clearPart";
+        parserReturnData.toneReturn = transport(inputContent);
+    };
+
+    // initInstrument
+    if (inputContent.desc=="initInst"){
+        parserReturnData.toneReturn = transport(inputContent);
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ===================== HTML, server, socket functions ===================== //
+
     // record start
-    if (desc=="recordStart"){
-        transport('recordStart');
+    if (inputContent.desc=="recordStart"){
+        // parserReturnData.toneReturn = transport('recordStart');
     };
     // record stop
-    if (desc=="recordStop"){
-        transport('recordStop');
+    if (inputContent.desc=="recordStop"){
+        // parserReturnData.toneReturn = transport('recordStop');
     };
     // upload Files
-    if (desc=="uploadFiles"){
+    if (inputContent.desc=="uploadFiles"){
         var file = inst;
-        transport('uploadFiles', file);
+        // parserReturnData.toneReturn = transport('uploadFiles', file);
     };
     // restart server
-    if (type=="restart server"){
+    if (inputContent.type=="restart server"){
         printer(debug, context, "restart server", "restart server")
-        restartServer(); // in socket/
+        // restartServer(); // in socket/
     };
     // join session    
-    if (type=="join"){
+    if (inputContent.type=="join"){
         let session = desc[1];
         let user = desc[0];
         printer(debug, context, "join", `join session "${session}" as user "${user}"`);
-        setUser(user, session); // in index-safe
+        // setUser(user, session); // in index-safe
     };
     // presets store
-    if (type=="helper"){
-        let action = desc;
+    if (inputContent.type=="helper"){
+        let action = inputContent.desc;
         let preset = inst;
         if (action=='store') {
             printer(debug, context, "preset store", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action); // in index-safe
+            // presetHandling(preset, action); // in index-safe
         };
         if (action=='reload') {
             printer(debug, context, "preset reload", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action);// in index-safe
+            // presetHandling(preset, action);// in index-safe
         };
     };
     // presets reload to all
-    if (type=="helper_toAll"){
-        let action = desc;
+    if (inputContent.type=="helper_toAll"){
+        let action = inputContent.desc;
         let preset = inst;
         if (action=='reload') {
             printer(debug, context, "preset reload to all", `${action} preset "${preset}" on server"`);
-            presetHandling(preset, action);// in index-safe
+            // presetHandling(preset, action);// in index-safe
         };
+    };
+    // list stuff
+    if (inputContent.desc=="list"){
+        let string = inst; // e.g. files
+        // showFiles(string); // in index-safe
     };
 
 
-
-
-
-
-
-
     // ctrlHelpFunc  
-    if (desc=="helpText"){
+    if (inputContent.desc=="helpText"){
         helpText; // this is the destination
         help; // this is the help container
         if (help[helpText] != undefined) {
             if (helpText=='examples') { 
                 // render with links
                 let links = true;
-                renderHtmlHelp(help[helpText],'help-container', 100, links);
-                playAlerts('bottom', alertState);   
+                // renderHtmlHelp(help[helpText],'help-container', 100, links);
+                // playAlerts('bottom', alertState);   
             } else {
                 // render without links
-                renderHtmlHelp(help[helpText],'help-container', 100);
-                playAlerts('bottom', alertState);   
+                // renderHtmlHelp(help[helpText],'help-container', 100);
+                // playAlerts('bottom', alertState);   
             };
             
         } else {
-            playAlerts('error', alertState);
+            // playAlerts('error', alertState);
         };
     };
 
-    // save part
-    if (desc=="savePart"){
-        transport('savePart', inst, instArray, patternParse, rand, vol, bpm, name, num);
-        playAlerts('bottom', alertState);
-    };
-    // set part
-    if (desc=="setPart"){
-        transport('setPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
-    };
-    // delete element
-    if (desc=="deleteElement"){
-        transport('deleteElement', inst, instArray, patternParse, rand, vol, bpm, name, num);
-    };
-    // clear part
-    if (desc=="clear"){
-        transport('clearPart', inst, instArray, patternParse, rand, vol, bpm, name, num);
-    };
-
-    // initInstrument
-    if (desc=="initInst"){
-        transport('initInst', inst, instArray, patternParse, rand, vol, bpm, name, num);
-    };
+    
     
 
     

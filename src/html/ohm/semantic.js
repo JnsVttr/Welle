@@ -255,13 +255,13 @@ semantics.addOperation('eval', {
     
         printer(debug, context, "Controls_setInstrumentVolume", `
         return [
-            "control", "instVolume",
+            "control", "setVolume",
             ["instArray", ${instArray}],
             ["vol", ${vol}],
         ];
         `);
         return [
-            "control", "instVolume",
+            "control", "setVolume",
             ["instArray", instArray],
             ["vol", vol],
         ];
@@ -274,13 +274,13 @@ semantics.addOperation('eval', {
         
         printer(debug, context, "Controls_assignRandom", `
         return [
-            "control", "instRand", 
+            "control", "setRandom", 
             ["instArray", ${instArray}], 
             ["rand", ${random}],
         ];
         `)
         return [
-            "control", "instRand", 
+            "control", "instsetRandomRand", 
             ["instArray", instArray], 
             ["rand", random],
         ];
