@@ -1,6 +1,8 @@
 # Welle - simplified Live Coding
 
-Welle is an interactive online music live-coding tool using simplified code for collaborative music-making. It aims to help visually-impaired and blind musicians to use the computer as music machine.
+*this project is currently work-in-progress..*
+
+Welle is an simplified web-based live-coding tool for visually impaired and blind musicians. It can be used for collaborative music-making. It aims to help visually-impaired and blind musicians to use the computer as music machine.
 
 
 Example Code:
@@ -21,7 +23,7 @@ rand drums
 ## Live Demo
 
 
-Please check Live Demo at: [https://tangible.uber.space](https://tangible.uber.space).
+Please check the Live Demo (old demo from 2019) at: [https://tangible.uber.space](https://tangible.uber.space).
 
 For help, commands, examples etc. (options displayed below input field), type :
 ```
