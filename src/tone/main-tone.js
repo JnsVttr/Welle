@@ -87,6 +87,8 @@ printer(debug, context, "printer", "value");
 // =====================================
 export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, name, num) {
 
+	// variable to return page/socket/system related info
+	let toneReturnData = {'return from transport': ['1', '2', '3', 'test'] };
 	
 	// print incoming messages
 	// =====================================
@@ -108,8 +110,8 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 	// check if instrument valid: state
 	// =====================================
 	let state = false;
-	// compare incoming commands with those, that should be excluded from checking incomning 
-	// instruments or parts
+	
+	// compare incoming commands with those, that should be excluded from checking incomning instruments or parts
 	let excludeCheckList = [
 		'stopAll', 
 		'playAll', 
@@ -380,7 +382,9 @@ export function transport(cmd, instName, instArray, patternIn, rand, vol, bpm, n
 			state = checkIfInstValid(instName, instrumentsList);
 			if (state) { initInstrument(instName, name, num); }
 			break;
-	}
+	};
+
+	return toneReturnData
 };
 
 

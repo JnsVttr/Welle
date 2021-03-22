@@ -29,17 +29,15 @@ let context = "parser";
 
 
 
-// function to interpret input and send to TONE via transport
-// or to htmlm etc.
+// function to interpret input and send to TONE via transport or to html etc.
 const parseInput = (input) => {
 
-    // printer(debug, context, "parser input", `
-    // input is an array?: ${Array.isArray(input)}
-    // input: ${input}
-    // input[0]: ${input[0]}
-    // input[1]: ${input[1]}
-    // `);
-    
+    // variable for transport return
+    let parserReturnData = {
+        toneReturn: {},
+        parserReturn: {},
+    };
+
     // declare containers for all possible semantic variables 
     let type='', desc='', cmd='', inst='', instArray='', patternParse='', 
         rand='', sel='', vol='', name='', bpm='', helpText='', num='';
@@ -140,9 +138,9 @@ const parseInput = (input) => {
             // for every instrument send name, pattern and random statement 
             for (let i=0;i<instArray.length;i++){
                 let singleInst = instArray[i];
-                setTimeout(function(){
-                    //do what you need here
-                    transport('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);    
+                //do what you need here
+                parserReturnData.toneReturn = transport('play', singleInst, instArray, patternParse, rand, vol, bpm, name, num);    
+                setTimeout(function(){    
                 }, (i+1)*30);
             };
         // playAgainFunc() - if just "play" command without instruments
@@ -319,14 +317,7 @@ const parseInput = (input) => {
     
 
     
-    // ctrlShowFunc
-    // ctrlListFunc
-    // ctrlSelFunc
-    // ctrlSetFunc
-    
-    // update & return valid input
-    // if type is empty, then nothing is there to parse, return false, else true
-    if (type == '') {return false} else {return true};
+    return parserReturnData
 };
 
 

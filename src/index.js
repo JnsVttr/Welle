@@ -41,6 +41,9 @@ export let serverSamples = "";
 export let sampleURL = {};
 export let instrumentsList = "";
 
+let activeInstruments = {};
+let activeParts = {};
+
 // input & console varibles
 export let consolePointer = 0; // for arrow functions
 export let consoleArray = [];   // arrays to store page console etc. output
@@ -103,6 +106,13 @@ checkMuteAlerts.onclick = function () {
 // ===============================
 
 document.getElementById("textarea").addEventListener("keydown", (e) => {
+	
+	// variable for returns from pareser and tone to be rendered to page
+	let actionContent = {
+		'printToConsole': {},
+		'parser': {},
+	};
+
 	// printer(debug, context, "key input", e.code);
 	if (e.code=='Enter') {
 
@@ -117,7 +127,7 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 
 		// send string to validate in enterfunction(), grammar
 		let result = enterFunction(string, instrumentsList);
-		printer(debug, context, "result: ", result)
+		// printer(debug, context, "result: ", result)
 
 		
 
@@ -132,8 +142,12 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			consoleArray.push({ message: `${result.string}` });
 			renderHtml(consoleArray, 'console', consoleLength);
 			
+			actionContent.printToConsole.valid = true;
+			actionContent.printToConsole.content = consoleArray;
+
 			// send results to parser for Tone
-			parseInput(result.result);
+			actionContent.parser = parseInput(result.result);
+			
 
 		} else {
 			// if return is not valid:
@@ -147,13 +161,15 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			// show text in console
 			consoleArray.push({ message: string });
 			renderHtml(consoleArray, 'console', consoleLength);
+			actionContent.printToConsole.valid = false;
+			actionContent.printToConsole.content = consoleArray;
 			
 			// renderTextToConsole(validState, user, string, 'local');
 			// nothing to parse
 		};
 		
 		// printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
-
+		printer(debug, context, "actionContent: ", actionContent)
 		// after processing, clear the input field
 		clearTextfield();
 	};
