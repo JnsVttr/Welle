@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost",
+    "start-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost ",
     "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
     "start-server": "nodemon server/app.js"
   },
