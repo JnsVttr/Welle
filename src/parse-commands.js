@@ -25,7 +25,7 @@ let context = "parser";
 
 
 // function to interpret input and send to TONE via transport or to html etc.
-const parseInput = (input) => {
+export const parseInput = (input) => {
 
     printer(debug, context, "incoming content from index/semantic: ", input);
 
@@ -223,12 +223,7 @@ const parseInput = (input) => {
         parserReturnData.toneReturn = transport(inputContent);
     };
 
-    // initInstrument
-    if (inputContent.desc=="initInst"){
-        inputContent.cmd = inputContent.desc;
-        parserReturnData.toneReturn = transport(inputContent);
-    };
-
+    
 
 
 
@@ -258,17 +253,17 @@ const parseInput = (input) => {
     // record start
     if (inputContent.desc=="recordStart"){
         // parserReturnData.toneReturn = transport('recordStart');
-        if (device != 'ios') { audioRecord(true) };
+        // if (device != 'ios') { audioRecord(true) };
     };
     // record stop
     if (inputContent.desc=="recordStop"){
         // parserReturnData.toneReturn = transport('recordStop');
-        if (device != 'ios') { audioRecord(false) };
+        // if (device != 'ios') { audioRecord(false) };
     };
     // upload Files
     if (inputContent.desc=="uploadFiles"){
-        var file = inst;
-        uploadToServer(instName);
+        // var file = inst;
+        // uploadToServer(instName);
         // parserReturnData.toneReturn = transport('uploadFiles', file);
     };
     // restart server
@@ -278,36 +273,36 @@ const parseInput = (input) => {
     };
     // join session    
     if (inputContent.type=="join"){
-        let session = desc[1];
-        let user = desc[0];
+        // let session = desc[1];
+        // let user = desc[0];
         printer(debug, context, "join", `join session "${session}" as user "${user}"`);
         // setUser(user, session); // in index-safe
     };
     // presets store
     if (inputContent.type=="helper"){
-        let action = inputContent.desc;
-        let preset = inst;
-        if (action=='store') {
-            printer(debug, context, "preset store", `${action} preset "${preset}" on server"`);
-            // presetHandling(preset, action); // in index-safe
-        };
-        if (action=='reload') {
-            printer(debug, context, "preset reload", `${action} preset "${preset}" on server"`);
-            // presetHandling(preset, action);// in index-safe
-        };
+        // let action = inputContent.desc;
+        // let preset = inst;
+        // if (action=='store') {
+        //     printer(debug, context, "preset store", `${action} preset "${preset}" on server"`);
+        //     // presetHandling(preset, action); // in index-safe
+        // };
+        // if (action=='reload') {
+        //     printer(debug, context, "preset reload", `${action} preset "${preset}" on server"`);
+        //     // presetHandling(preset, action);// in index-safe
+        // };
     };
     // presets reload to all
     if (inputContent.type=="helper_toAll"){
-        let action = inputContent.desc;
-        let preset = inst;
-        if (action=='reload') {
-            printer(debug, context, "preset reload to all", `${action} preset "${preset}" on server"`);
-            // presetHandling(preset, action);// in index-safe
-        };
+        // let action = inputContent.desc;
+        // let preset = inst;
+        // if (action=='reload') {
+        //     printer(debug, context, "preset reload to all", `${action} preset "${preset}" on server"`);
+        //     // presetHandling(preset, action);// in index-safe
+        // };
     };
     // list stuff
     if (inputContent.desc=="list"){
-        let string = inst; // e.g. files
+        // let string = inst; // e.g. files
         // showFiles(string); // in index-safe
     };
 
@@ -347,5 +342,4 @@ const parseInput = (input) => {
 
 
 
-export { parseInput }
 

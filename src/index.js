@@ -12,10 +12,10 @@ import io from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
 
 // files
-import { renderHtmlArrows, renderHtml, renderHtmlHelpMenu }  from  '/html/renderHTML';
+import { renderHtmlArrows, renderBPM }  from  '/html/renderHTML';
 import { parseInput }  from '/parse-commands';
 import { help }  from '/text/helpText';
-import { handlePresetsInTone } from '/tone/main-tone';
+import { instruments, parts, thisBPM } from '/tone/main-tone';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 import { printer } from '/helper/printer';
 import { alerts } from '/helper/alerts';
@@ -55,7 +55,8 @@ let consoleDivID = 'console';
 // handle direct sound alerts
 createAlerts(alerts);
 
-
+// initially show BPM
+renderBPM(thisBPM);
 
 
 
@@ -133,25 +134,17 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
 			actionContent.parser = parseInput(result.result);
-		} else {
-			// prepend a '!' to the string
-			if (result.string != '!') { string = `! ${result.string}`; } 
-			else { string = `${result.string}`; };
 		};
-
 		// add to consolePointer for arrows
 		consolePointer += 1;
-		// add text to console array
-		consoleArray.push({ message: `${result.string}` });
 		// send to renderer
-		actionContent.printToConsole.valid = result.valid;
-		actionContent.printToConsole.content = consoleArray;
+		actionContent.printToConsole.string = result.string;
 		actionContent.printToConsole.length = consoleLength;
 		actionContent.printToConsole.id = consoleDivID;
 		
-		// printer(debug, context, "enter return?", `return: ${enterFunction()}, pointer: ${consolePointer}`);
 		printer(debug, context, "actionContent: ", actionContent)
-		executeActionContent(actionContent);
+		// execute actionContent
+		consoleArray = executeActionContent(actionContent, consoleArray, instruments, parts);
 		// after processing, clear the input field
 		clearTextfield();
 	};
@@ -160,12 +153,12 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 	// arrow functions
 	if (e.code=='ArrowUp'){
 		// printer(debug, context, "text input", "arrow up pressed");
-	   	consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'up', "textarea");
+	   	consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'up');
 		playAlerts('return', alertMuteState);
 	};
 	if (e.code=='ArrowDown'){
 		// printer(debug, context, "text input", "arrow down pressed");
-		consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'down', "textarea");
+		consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'down');
 		playAlerts('return', alertMuteState);
 	};
 	// if (e.code=='Digit1') {
