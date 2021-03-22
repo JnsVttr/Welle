@@ -23,6 +23,7 @@ export function savePart(_name, _instruments, _BPMvalue) {
 		var vol 		= _instruments[key].vol;
 		var url 		= _instruments[key].url;
 		var transpose 	= _instruments[key].transpose;
+		var ticks 		= _instruments[key].ticks;
 		// console.log(name, pattern, rand);
 
 		// console.log("from savePart, vol: ", vol);
@@ -40,6 +41,7 @@ export function savePart(_name, _instruments, _BPMvalue) {
 				vol: vol,
 				url: url,
 				transpose: transpose,
+				ticks: ticks,
 			};
 		}
 	});

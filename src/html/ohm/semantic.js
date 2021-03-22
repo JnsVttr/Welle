@@ -21,7 +21,7 @@ import { printer } from '/helper/printer';
 // variables
 let livecode = ohm.grammar(grammarText);  // taken from grammar.js
 let semantics = livecode.createSemantics();
-let debug = false;
+let debug = true;
 let context = "semantics";
 
 // printer(debug, context, topic, element, value)

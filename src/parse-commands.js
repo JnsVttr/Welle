@@ -104,14 +104,22 @@ export const parseInput = (input) => {
     });
     
 
-    printer(debug, context, "fixing pattern: ", inputContent.pattern)
-    // change pattern to notes:
-    for (let i=0; i<inputContent.pattern.length; i++){
-        if (inputContent.pattern[i]=='-') inputContent.pattern[i] = null;
-        if (inputContent.pattern[i]=='#') inputContent.pattern[i] = 1;
-        printer(debug, context, "iterate pattern: ", inputContent.pattern)
-    }
-    
+    // // FIX ERROR with #  in pattern by joining to string..??
+    // printer(debug, context, `fixing pattern (pattern-length: ${inputContent.pattern.length}) BEFORE: `, inputContent.pattern)
+    // // change pattern to int:
+    // let tempPattern = inputContent.pattern.join(',');
+    // for (let i=0; i<inputContent.pattern.length; i++){
+    //     printer(debug, context, "single pattern item: ", inputContent.pattern[i])
+    //     // tempPattern.push(parseInt(inputContent.pattern[i]));
+        
+    //     // if (inputContent.pattern[i]=='-') inputContent.pattern[i] = null;
+    //     // if (inputContent.pattern[i]=='#') inputContent.pattern[i] = 1;
+    //     // printer(debug, context, "iterate pattern: ", inputContent.pattern)
+    // }
+    // printer(debug, context, "tempPattern: ", tempPattern);
+    // inputContent.pattern = tempPattern;
+    // // inputContent.pattern = [1, 2, 3];
+    // printer(debug, context, "fixing pattern AFTER: ", inputContent.pattern)
 
 
 

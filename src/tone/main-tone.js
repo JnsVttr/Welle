@@ -83,6 +83,12 @@ export function transport(inputContent) {
 	printer(debug, context, "transport - incoming transport: ", inputContent);
 
 
+	// inputContent.pattern = [1, 2, 3];
+	// inputContent.pattern = inputContent.pattern.replace('#','');
+	// inputContent.pattern = inputContent.pattern.split(",");
+	// printer(debug, context, "transport - incoming transport after string handling: ", inputContent.pattern);
+
+
 	// extract input to variables
 	let cmd = inputContent.cmd,
 		instName = inputContent.inst,
@@ -212,7 +218,7 @@ export function transport(inputContent) {
 					break;
 				case "createNewInstrumentPatternNonEmpty":
 					// create new instrument w/ pattern
-					printer(debug, context, "create new instrument", `create new instrument with pattern`);
+					printer(debug, context, "create new instrument - create new instrument with pattern", patternIn);
 					patternIn = adaptPattern(patternIn);
 					// create new instrument and store it in 'instruments'
 					instruments[instName] = createInstrument(instruments, instrumentsList, instName, patternIn, rand, masterOut);
@@ -339,18 +345,20 @@ export function transport(inputContent) {
 					printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
 					// create sequence
 					instruments[instName].sequence = createSequence(instruments, instName, pattern);
-					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
+					printer(debug, context, `create new sequence: ${instName} with this pattern: ${pattern}`, instruments[instName].sequence);
 					// start Tone ??
 					startTransport();
 					// set volume
-					setVolume(instrumentsList, instruments, instName, vol)
+					// setVolume(instrumentsList, instruments, instName, vol)
+					// printer(debug, context, `Tone: setVolume vol to: `, vol);
 					// setTimeout(, 100);
 					
-					printer(debug, context, `Tone: setVolume vol to: `, vol);
+					
 				});
-				printer(debug, context, `Tone: set Tone BPM ${Tone.Transport.bpm.value} val to stored val: `, parts[name].bpm);
+				
 				// setTimeout( () => {Tone.Transport.bpm.value = parts[name].bpm}, 200)
-				Tone.Transport.bpm.value = parts[name].bpm
+				// Tone.Transport.bpm.value = parts[name].bpm
+				// printer(debug, context, `Tone: set Tone BPM ${Tone.Transport.bpm.value} val to stored val: `, parts[name].bpm);
 			};
 			// play all new created instruments
 			playAllInstruments(instruments, quant);

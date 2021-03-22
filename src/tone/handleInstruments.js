@@ -26,7 +26,8 @@ export function stopAllInstruments(_instruments, _quant) {
 	time = time - 0.1;
 
 	Object.keys(_instruments).forEach((instName) => {
-		_instruments[instName].sequence.stop(time);
+		// _instruments[instName].sequence.stop(time);  // with quant
+		_instruments[instName].sequence.stop();  // without quant
 		_instruments[instName].isPlaying = false;
 	});
 	// don't stop Tone - it doesn't work properly:
@@ -86,7 +87,8 @@ export function playAllInstruments(_instruments, _quant) {
 		};
 		if (_instruments[instName].sequence.state == 'stopped') {
 			_instruments[instName].sequence.mute = false;
-			_instruments[instName].sequence.start(time).at(0);   // start at position 0
+			_instruments[instName].sequence.start(time).at(0);   // start at position 0 with quant
+			// _instruments[instName].sequence.start().at(0);   // start at position 0 without quant
 			_instruments[instName].isPlaying = true;
 		};
 	});
