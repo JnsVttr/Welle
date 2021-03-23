@@ -53,12 +53,12 @@ export function renderInstruments(_instruments) {
 		let roundedVol = Math.round(_instruments[inst].vol * 10) / 10;
 		// reverse pattern
 		let pattern = _instruments[inst].pattern;
-		for (let i=0; i<pattern.length; i++){
-			if (pattern[i]==null) pattern[i] = '-';
-			if (pattern[i]=='1') pattern[i] = '#'
-			if (pattern[i]>1) pattern[i] = `#${pattern[i]}`
-		}
-		pattern = pattern.join(' ');
+		// for (let i=0; i<pattern.length; i++){
+		// 	if (pattern[i]==null) pattern[i] = '-';
+		// 	if (pattern[i]=='1') pattern[i] = '#'
+		// 	if (pattern[i]>1) pattern[i] = `#${pattern[i]}`
+		// }
+		// pattern = pattern.join(' ');
 		// console.log("pattern", pattern);
 
 		html+= `<p>
