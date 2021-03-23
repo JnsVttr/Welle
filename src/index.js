@@ -198,16 +198,19 @@ socket.on("filesOnServer", function(folder, samples, what) {
 	instrumentsList = update_InstrumentsList(); // create list
 	Instrument.createList(sampleURL);
 
-	// test class here:
-	
-	
-	// console.log("Sound.style: ", Sound.soundStyle)
-	// Sound.soundStyle = 'rock';
-	// let party = new Sound("hard-style", 190);
-	// console.log("party style: ", party.style, "Sound.style: ", Sound.soundStyle)
-	
-	
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -244,18 +247,6 @@ socket.on("filesOnServer", function(folder, samples, what) {
 	
 	
 // }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
