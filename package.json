@@ -14,7 +14,7 @@
     "express": "^4.17.1",
     "index": "^0.4.0",
     "mp3-mediarecorder": "^3.4.4",
-    "nodemon": "^1.19.1",
+    "nodemon": "^2.0.7",
     "ohm-js": "^0.14.0",
     "parcel-bundler": "^1.12.5",
     "socket.io": "^2.4.1",
