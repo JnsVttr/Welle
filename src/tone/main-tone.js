@@ -82,6 +82,32 @@ export function transport(inputContent) {
 	// =====================================
 	printer(debug, context, "transport - incoming transport: ", inputContent);
 
+	// input string handling
+	let patternString = inputContent.string;
+	// split string for future use. check which char of pattern appears first ( # or ( )
+    let index1 = patternString.indexOf("#");
+    let index2 = patternString.indexOf("(");
+    // now check which char comes first and split input string there
+    let patternStringOnly = "";
+   
+	
+	if (inputContent.cmd=='patternCopy') {
+		patternStringOnly = instruments[inputContent.inst].string;
+		printer (debug, context, `patternCopy inst: ${instruments[inputContent.inst]}, pattern:  `, patternStringOnly);
+	} else {
+		if (index2 > 0 && index2 < index1){
+			patternStringOnly = patternString.substring(index2 - 1); 
+			printer (debug, context, `command index #: ${index1}, index (: ${index2}, pattern string only:`, patternStringOnly);
+		} else {
+			patternStringOnly = patternString.substring(index1 - 1); 
+			printer (debug, context, `command index #: ${index1}, index (: ${index2}, pattern string only:`, patternStringOnly);
+		}
+	}
+
+    
+	patternString = patternStringOnly;
+	inputContent.string = patternString;
+
 
 	// extract input to variables
 	let cmd = inputContent.cmd,
