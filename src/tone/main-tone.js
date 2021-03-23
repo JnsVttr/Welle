@@ -319,6 +319,7 @@ export function transport(inputContent) {
 
 		case 'setPart':
 			printer(debug, context, "setPart name: ", name)
+			printer(debug, context, "setPart parts: ", parts)
 			
 			// if the part exists
 			if (parts[name] != undefined) {
@@ -338,6 +339,7 @@ export function transport(inputContent) {
 					instruments[instName] = createInstrument(instruments, instrumentsList, instName, pattern, rand, masterOut);
 					printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
 					// create sequence
+					printer(debug, context, "setPart - create sequence with this pattern: ", pattern)
 					instruments[instName].sequence = createSequence(instruments, instName, pattern);
 					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
 					// start Tone ??
