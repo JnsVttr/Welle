@@ -200,13 +200,12 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 	// test class here:
 	
-	let party = new Sound("hard-style", 190);
-	Sound.defineStyle("hard");
-	party.playState;
-	party.playState = true;
-	party.playState;
-	party.speed = 122;
-	party.musicStyle;
+	
+	// console.log("Sound.style: ", Sound.soundStyle)
+	// Sound.soundStyle = 'rock';
+	// let party = new Sound("hard-style", 190);
+	// console.log("party style: ", party.style, "Sound.style: ", Sound.soundStyle)
+	
 	
 });
 
@@ -219,42 +218,32 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 
 
-class Sound {
-	constructor(name, bpm) {
-		this.name = name;
-		this.bpm = bpm;
-		this.isPlaying = false;
-		this.style = '';
-		console.log(`make a sound composition ${this.name} at this speed: ${this.bpm}, with this style: ${this.style}`)
+// class Sound {
+// 	static soundStyle = "techno";
+// 	constructor(name, bpm) {
+// 		this.name = name;
+// 		this.bpm = bpm;
+// 		this.isPlaying = false;
+// 		this.style = 'default';
+// 		console.log(`
+// 		name: ${this.name}, 
+// 		BPM:${this.bpm}, 
+// 		style: ${this.style}
+// 		Sound.style: ${Sound.soundStyle}`)
 		
-	}
-	static defineStyle(style) {
-		Sound.style = style;
-		console.log(`define style of sound: ${this.style}`)
-	}
-
-	get musicStyle () {
-		console.log(`a sound composition ${this.name} with this style: ${this.style}!`)
-	}
-	set playState(state) {
-		console.log("turn sound on")
-		this.isPlaying = state;
-		return this.isPlaying;
-	}
-
-	set speed(bpm) {
-		console.log("set bpm to", bpm)
-		this.bpm = bpm;
-		return this.bpm;
-	}
-
-	get playState() {
-		console.log("check if playing, return value: ", this.isPlaying)
-		return this.isPlaying;
-	}
+// 	}
+// 	// static get soundStyle() {
+// 	// 	// console.log(`log this: ${Sound.style}`);
+// 	// 	return Sound.soundStyle;
+// 	// }
+// 	// static set soundStyle(style) {
+// 	// 	this.style = style;
+// 	// 	Sound.soundStyle = style;
+// 	// }
 
 	
-}
+	
+// }
 
 
 
