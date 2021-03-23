@@ -19,7 +19,7 @@ import { instrumentsList } from '/index';
 import { checkDevice } from '/helper/checkDevice';
 import { printer } from '/helper/printer';
 
-import { checkIfInstValid, checkIfPart } from './checkIfInstValid';
+import { checkIfInstValid, checkIfPart, checkIfInstActive } from './checkIfInstValid';
 import {
 	stopInstrument, muteInstrument, unmuteInstrument, stopAllInstruments, 
 	playAllInstruments, adaptPattern,
@@ -133,11 +133,16 @@ export function transport(inputContent) {
 	if (excludeMatch==false) {
 		let state = checkIfInstValid(instName, instrumentsList);
 		printer(debug, context, "checkIfInstValid", `check valid for inst "${instName}" - state: ${state}`);
+		let active = checkIfInstActive(instName, instruments);
+		printer(debug, context, "checkIfInstActive", `check if inst "${instName}" is active - state: ${active}`);
+		if(active==false){ 
+			if (cmd!='play') cmd = 'not active'
+		}
 		// if instrument is not valid, than execute error 
 		if (state==false) {
 			// if input not an instrument, check if it is a part
 			let isPart = checkIfPart(instName, parts);
-			printer(debug, context, "checkIfInstValid", `check valid for part "${instName}" - state: ${isPart}`);
+			printer(debug, context, "checkIfPart", `check valid for part "${instName}" - state: ${isPart}`);
 			if (isPart) {
 				cmd = 'setPart';
 				name = instName;
@@ -156,6 +161,10 @@ export function transport(inputContent) {
 		case 'not valid':
 			printer(debug, context, 'checkIfInstValid', `error - not valid!!`);
 			toneReturnData.error = "not valid";
+			break;
+		case 'not active':
+			printer(debug, context, 'checkIfInstActive', `error - not valid!!`);
+			toneReturnData.error = "instrument not started";
 			break;
 		case 'play':
 			let action = interpretInput(instruments, instName, patternIn)
@@ -239,6 +248,7 @@ export function transport(inputContent) {
 		case 'stop':
 			muteInstrument(instruments, instName);
 			printer(debug, context, "muteInstrument", `for ${instName}`);
+			// render to html page
 			toneReturnData.html = "render instruments";
 			break;
 		case 'stopAll':
@@ -357,9 +367,10 @@ export function transport(inputContent) {
 					startTransport();
 					// set volume
 					setVolume(instrumentsList, instruments, instName, vol)
-					// setTimeout(, 100);
-					
 					printer(debug, context, `Tone: setVolume vol to: `, vol);
+
+					// render to html page
+					toneReturnData.html = "render instruments";
 				});
 				printer(debug, context, `Tone: set Tone BPM ${Tone.Transport.bpm.value} val to stored val: `, parts[name].bpm);
 				// setTimeout( () => {Tone.Transport.bpm.value = parts[name].bpm}, 200)

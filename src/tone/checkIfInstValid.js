@@ -30,3 +30,16 @@ export const checkIfPart = (_instName, _parts) => {
 	if (here) {return true}
 	else { return false}
 }
+
+export const checkIfInstActive = (_instName, _instruments) => {
+	// check, if instrument is valid
+	let here = false;
+	
+	Object.keys(_instruments).forEach((entry) => {
+		if (entry == _instName) {
+			here = true;
+		};
+	});
+	if (here) {return true}
+	else { return false}
+}
