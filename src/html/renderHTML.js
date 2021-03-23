@@ -67,7 +67,7 @@ export const renderHtmlArrows = (pointer, _consoleArray, dir) => {
 
 
 export const renderBPM = (_bpm) => {
-    document.getElementById("bpm").innerHTML = Math.floor(_bpm);
+    document.getElementById("input_bpm").value = Math.floor(_bpm);
 }
 
 
