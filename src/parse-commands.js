@@ -35,6 +35,21 @@ export const parseInput = (input, string) => {
         parserReturn: {},
     };
 
+    // split string for future use. check which char of pattern appears first ( # or ( )
+    let index1 = string.indexOf("#");
+    let index2 = string.indexOf("(");
+    // now check which char comes first and split input string there
+    let patternStringOnly = "";
+    if (index2 > 0 && index2 < index1){
+        patternStringOnly = string.substring(index2 - 1); 
+    } else {
+        patternStringOnly = string.substring(index1 - 1); 
+    }
+    printer (debug, context, `command index #: ${index1}, index (: ${index2}, pattern string only:`, patternStringOnly);
+    string = patternStringOnly;
+
+
+    
     // declare object/ container for all possible semantic variables 
     let inputContent = {
         type: '', desc: '', cmd: '', inst: '', instArray: '', pattern: '', 
