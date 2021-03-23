@@ -197,6 +197,17 @@ socket.on("filesOnServer", function(folder, samples, what) {
 	sampleURL = extractSamplePaths (serverSamples);
 	instrumentsList = update_InstrumentsList(); // create list
 	Instrument.createList(sampleURL);
+
+	// test class here:
+	
+	let party = new Sound("hard-style", 190);
+	Sound.defineStyle("hard");
+	party.playState;
+	party.playState = true;
+	party.playState;
+	party.speed = 122;
+	party.musicStyle;
+	
 });
 
 
@@ -208,7 +219,42 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 
 
+class Sound {
+	constructor(name, bpm) {
+		this.name = name;
+		this.bpm = bpm;
+		this.isPlaying = false;
+		this.style = '';
+		console.log(`make a sound composition ${this.name} at this speed: ${this.bpm}, with this style: ${this.style}`)
+		
+	}
+	static defineStyle(style) {
+		Sound.style = style;
+		console.log(`define style of sound: ${this.style}`)
+	}
 
+	get musicStyle () {
+		console.log(`a sound composition ${this.name} with this style: ${this.style}!`)
+	}
+	set playState(state) {
+		console.log("turn sound on")
+		this.isPlaying = state;
+		return this.isPlaying;
+	}
+
+	set speed(bpm) {
+		console.log("set bpm to", bpm)
+		this.bpm = bpm;
+		return this.bpm;
+	}
+
+	get playState() {
+		console.log("check if playing, return value: ", this.isPlaying)
+		return this.isPlaying;
+	}
+
+	
+}
 
 
 

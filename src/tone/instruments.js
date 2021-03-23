@@ -1,5 +1,9 @@
 import Tone from 'tone';
 
+
+/*
+tutorial
+*/
 // INSTRUMENT CLASS
 // ===================================================================
 
