@@ -27,6 +27,7 @@ import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
 import { executeActionContent } from './helper/executeActionContent';
+import { Instrument } from './tone/instruments';
 
 
 
@@ -65,7 +66,7 @@ renderBPM(thisBPM);
 
 
 
-
+//  INstrument loader class
 
 
 
@@ -194,7 +195,8 @@ socket.on("filesOnServer", function(folder, samples, what) {
 		folders: ${serverFolders} 
 		files: ${serverSamples}`);
 	sampleURL = extractSamplePaths (serverSamples);
-	instrumentsList = update_InstrumentsList(); 
+	instrumentsList = update_InstrumentsList(); // create list
+	Instrument.createList(sampleURL);
 });
 
 

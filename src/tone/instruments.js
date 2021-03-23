@@ -3,7 +3,15 @@ import Tone from 'tone';
 // INSTRUMENT CLASS
 // ===================================================================
 
+// 
+
 class Instrument {
+  // first list all attributes, e.g. baseNote
+  // avoid "null"
+  // synth = null;
+  // e.g. pass arguments: thisInst.volume
+  // constructor(name, type, variables) 
+  // multiple constructors are possibles
   constructor() {
     this.synth = null;
     this.synthType = null;
@@ -13,6 +21,16 @@ class Instrument {
     this.baseNote = 130;
     this.sampleURL;
     this.transpose = 2;
+  }
+  // static checkInstrument() --> Instrument.checkInstrument(putToDatabase)
+  // static initDatabase() Instrument.initDatabase() 
+  // static updateList() 
+  
+  static instrumentList = {};
+
+  static createList(list){
+      Instrument.instrumentList = list;
+      console.log("class Instrument list: ", list);
   }
 
 

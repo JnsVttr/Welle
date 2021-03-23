@@ -213,6 +213,8 @@ export function transport(inputContent) {
 					patternIn = adaptPattern(patternIn);
 					// assign new pattern in instruments{}
 					assignNewPattern(instruments, instName, patternIn, rand);
+					// instruments[instName].setPattern(patternIn);
+					// instruments[instName].setRand(rand);
 					// stop old sequence
 					instruments[instName].sequence.stop();
 					// store new string:
