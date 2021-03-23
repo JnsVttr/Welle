@@ -52,21 +52,22 @@ export function renderInstruments(_instruments) {
 		// round volume
 		let roundedVol = Math.round(_instruments[inst].vol * 10) / 10;
 		let string = _instruments[inst].string;
+		let stringLength = string.length + 10;
 		let name = _instruments[inst].name;
 		let isPlaying = _instruments[inst].isPlaying;
 
 		html+= "<p>";
 		if (isPlaying) {
-			html+=`<input id="check_${name}" class="w3-check" type="checkbox" checked="true"><label> ${name} </label>`;
+			html+=`<input id="check_${name}" class="w3-check" type="checkbox" checked="true"><label> <b>${name}</b> </label>`;
 		} else {
-			html+=`<input id="check_${name}" class="w3-check" type="checkbox"><label> ${name} </label>`;
+			html+=`<input id="check_${name}" class="w3-check" type="checkbox"><label> <b>${name}</b> </label>`;
 		}
 		
 		html+= `
 		vol: 
 		<input id="vol_${name}" type="text" style="max-width: 3rem" autofocus size="10" autocomplete=off value="${roundedVol}">
 		pattern: 
-		<input id="pattern_${name}" type="text" autofocus size="50" autocomplete=off value="${string}">
+		<input id="pattern_${name}" type="text" autofocus style="max-width: 55rem" size="${stringLength}" autocomplete=off value="${string}">
 		   
 		</p>`;
 		// console.log(`check play state instrument: isPLaying: ${isPlaying}. checked: ${checked}`)
