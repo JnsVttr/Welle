@@ -1,6 +1,6 @@
 
 import { checkIfInstValid } from '../tone/checkIfInstValid';
-import { livecode, semantics } from '/html/ohm/semantic';
+import { livecode, semantics } from '/html/ohm/semantic2021';
 
 export let enterFunction = (_string, _instrumentsList) => {
 	
