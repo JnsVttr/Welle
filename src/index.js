@@ -135,7 +135,7 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			// send to server via sockets
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
-			actionContent.parser = parseInput(result.result);
+			actionContent.parser = parseInput(result.result, string);
 		} else {
 			printer(debug, context, "result.valid? : ", result.valid)
 		};

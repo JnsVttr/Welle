@@ -25,9 +25,9 @@ let context = "parser";
 
 
 // function to interpret input and send to TONE via transport or to html etc.
-export const parseInput = (input) => {
+export const parseInput = (input, string) => {
 
-    printer(debug, context, "incoming content from index/semantic: ", input);
+    printer(debug, context, `incoming content from index/semantic, string: "${string}": `, input);
 
     // variable for transport return
     let parserReturnData = {
@@ -38,7 +38,8 @@ export const parseInput = (input) => {
     // declare object/ container for all possible semantic variables 
     let inputContent = {
         type: '', desc: '', cmd: '', inst: '', instArray: '', pattern: '', 
-        rand: '', sel: '', vol: '', name: '', bpm: '', helpText: '', num:''
+        rand: '', sel: '', vol: '', name: '', bpm: '', helpText: '', num:'',
+        string: string
     }; 
 
     inputContent.type = input[0];

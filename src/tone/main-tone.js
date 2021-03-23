@@ -92,7 +92,8 @@ export function transport(inputContent) {
 		vol = inputContent.vol,
 		bpm = inputContent.bpm,
 		num = inputContent.num,
-		name = inputContent.name;
+		name = inputContent.name,
+		inputString = inputContent.string;
 
 	
 	// add NULL to empty pattern, to be used later in main-tone transport
@@ -179,6 +180,8 @@ export function transport(inputContent) {
 					assignNewPattern(instruments, instName, patternIn, rand);
 					// stop old sequence
 					instruments[instName].sequence.stop();
+					// store new string:
+					instruments[instName].string = inputString;
 					// create new sequence
 					instruments[instName].sequence = createSequence(instruments, instName, patternIn);
 					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
@@ -216,6 +219,8 @@ export function transport(inputContent) {
 					patternIn = adaptPattern(patternIn);
 					// create new instrument and store it in 'instruments'
 					instruments[instName] = createInstrument(instruments, instrumentsList, instName, patternIn, rand, masterOut);
+					// store input string in instruments
+					instruments[instName].string = inputString;
 					printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
 					// create sequence
 					instruments[instName].sequence = createSequence(instruments, instName, patternIn);
@@ -256,6 +261,8 @@ export function transport(inputContent) {
 					// if instruments exists
 					if (instruments[singleInst] != null) {
 						let pattern = instruments[instName].pattern;
+						// store input string in instruments
+						instruments[singleInst].string = inputString;
 						instruments[singleInst].sequence = createSequence(instruments, singleInst, pattern);
 						// play instrument sequence
 						playInstrument(instruments, singleInst , quant);
@@ -266,6 +273,9 @@ export function transport(inputContent) {
 						// if instruments doesn't exist
 						let pattern = instruments[instName].pattern;
 						instruments[singleInst] = createInstrument(instruments, instrumentsList, singleInst, pattern, rand, masterOut);
+						// store input string in instruments
+						instruments[singleInst].string = inputString;
+						// create sequence
 						instruments[singleInst].sequence = createSequence(instruments, singleInst, pattern);
 						// play instrument sequence
 						playInstrument(instruments, singleInst, quant);
@@ -333,10 +343,13 @@ export function transport(inputContent) {
 					let rand 		= parts[name].instruments[key].rand;
 					let vol 		= parts[name].instruments[key].vol;
 					let isPlaying	= parts[name].instruments[key].isPlaying;
+					let string		= parts[name].instruments[key].string;
 					
 					// create instrument
 					instruments[instName] = createInstrument(instruments, instrumentsList, instName, pattern, rand, masterOut);
 					printer(debug, context, `create new instrument: "${instName}" created!`, instruments[instName]);
+					// store input string in instruments
+					instruments[instName].string = string;
 					// create sequence
 					instruments[instName].sequence = createSequence(instruments, instName, pattern);
 					printer(debug, context, `create new sequence: ${instName} with this pattern: ${patternIn}`, instruments[instName].sequence);
