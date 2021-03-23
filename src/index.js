@@ -72,17 +72,17 @@ renderBPM(thisBPM);
 
 // interactive sound controls: muting sound / alerts
 // =================================================================
-document.getElementById("checkMuteAlerts").checked = alertMuteState;
+// document.getElementById("checkMuteAlerts").checked = alertMuteState;
 
-checkMuteAlerts.onclick = function () {
-	printer(debug, context, "onlick MuteAlerts", alertMuteState)
-	if (checkMuteAlerts.checked) {
-		alertMuteState = true;
-	} else {
-		playAlerts('return', alertMuteState);
-		alertMuteState = false;
-	};
-};
+// checkMuteAlerts.onclick = function () {
+// 	printer(debug, context, "onlick MuteAlerts", alertMuteState)
+// 	if (checkMuteAlerts.checked) {
+// 		alertMuteState = true;
+// 	} else {
+// 		playAlerts('return', alertMuteState);
+// 		alertMuteState = false;
+// 	};
+// };
 // checkMuteSound.onclick = function () {
 // 	if (checkMuteSound.checked) {
 // 		let val = 'mute on';
