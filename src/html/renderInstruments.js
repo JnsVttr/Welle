@@ -51,20 +51,16 @@ export function renderInstruments(_instruments) {
 		};
 		// round volume
 		let roundedVol = Math.round(_instruments[inst].vol * 10) / 10;
-		// reverse pattern
-		let pattern = _instruments[inst].pattern;
-		// for (let i=0; i<pattern.length; i++){
-		// 	if (pattern[i]==null) pattern[i] = '-';
-		// 	if (pattern[i]=='1') pattern[i] = '#'
-		// 	if (pattern[i]>1) pattern[i] = `#${pattern[i]}`
-		// }
-		// pattern = pattern.join(' ');
-		// console.log("pattern", pattern);
+		let string = _instruments[inst].string;
+		let name = _instruments[inst].name;
+		
 
 		html+= `<p>
-		<input type="button" class="w3-button w3-round-large w3-border w3-medium" value="${_instruments[inst].name}"></input>
-		vol: <input class="w3-input" style="max-width:4rem; display: inline;" type="text" placeholder="${roundedVol}"></input>
-		pattern: <input class="w3-input" style="max-width:52rem; display: inline;" type="text" placeholder="${pattern}">
+		<input type="button" class="w3-button w3-round-large w3-border w3-medium" value="${name}"></input>
+		vol: 
+		<input id="vol_${name}" type="text" autofocus size="10" autocomplete=off value="${roundedVol}">
+		pattern: 
+		<input id="pattern_${name}" type="text" autofocus size="50" autocomplete=off value="${string}">
 		   
 		</p>`;
 
