@@ -1,27 +1,33 @@
-// files
+// library
 import Tone from 'tone';
-import { debug, context, alertMuteState } from '../index';
 
+// files
+import { printer } from '/helper/printer';
+import { debug, context, alertMuteState } from '../index';
 import { renderToConsole, renderBPM } from '/html/renderHTML';
 import { renderInstruments } from '/html/renderInstruments';
 import { renderParts } from '/html/renderParts';
-
-import { printer } from '/helper/printer';
 import { playAlerts } from '/helper/playAlerts';
 
 
 
 export const returnToActionExecute = (_actionContent, _consoleArray, _instruments, _parts) => {
+	// store returns in separate variables
 	let parserReturn = _actionContent.parser.parserReturn;
 	let printToConsole = _actionContent.printToConsole;
-	// console:
+
+
+	// check if console string is valid, then print to console:
 	if (printToConsole.valid == true){
+		// if valid, add string to console stringarray
 		_consoleArray.push({ message: `${printToConsole.string}` });
+		// render to html console
 		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
 	} else {
+		// if not valid, prepend a '!' to string, store in console string array
 		_consoleArray.push({ message: `! ${printToConsole.string}` });
+		// render to html console
 		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
-		playAlerts('error', alertMuteState);
 	}
 	
 	
@@ -31,7 +37,7 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 	// printer(debug, context, "executeActionContent toneReturn ", toneReturn);
 
 	
-
+	// handle returns from parser / tone
 	if (Object.keys(_actionContent.parser).length > 0) {
 		
 		let toneReturn = _actionContent.parser.toneReturn;
@@ -54,12 +60,8 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 			case 'render muteOff': playAlerts('return', alertMuteState);
 			break;
 		}
-	}
-	
-	
-	
-	
-	
+	};
 
+	// return the changed console string array to index.js
 	return _consoleArray;
 };

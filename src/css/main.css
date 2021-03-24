@@ -7,11 +7,11 @@ body {
     /* color: white; */
 }
 
-#textarea:focus, #input:focus{
+#mainInput:focus, #input:focus{
     background-color: #ffffff;
     border: 2px solid black;
 }
-#textarea {
+#mainInput {
     /* background: black; */
     /* color: white; */
     outline: none;

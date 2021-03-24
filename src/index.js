@@ -21,8 +21,6 @@ import { printer } from '/helper/printer';
 import { alerts } from '/helper/alerts';
 import { createAlerts } from '/helper/createAlerts';
 import { enterFunction } from '/helper/enterFunction';
-import { clearTextfield } from '/html/clearTextfield';
-import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
@@ -66,33 +64,6 @@ renderBPM(thisBPM);
 
 
 
-//  INstrument loader class
-
-
-
-
-// interactive sound controls: muting sound / alerts
-// =================================================================
-// document.getElementById("checkMuteAlerts").checked = alertMuteState;
-
-// checkMuteAlerts.onclick = function () {
-// 	printer(debug, context, "onlick MuteAlerts", alertMuteState)
-// 	if (checkMuteAlerts.checked) {
-// 		alertMuteState = true;
-// 	} else {
-// 		playAlerts('return', alertMuteState);
-// 		alertMuteState = false;
-// 	};
-// };
-// checkMuteSound.onclick = function () {
-// 	if (checkMuteSound.checked) {
-// 		let val = 'mute on';
-// 		organizeInput({string: val, user: user}); 
-// 	} else {
-// 		let val = 'mute off';
-// 		organizeInput({string: val, user: user}); 
-// 	};
-// };
 
 
 
@@ -104,62 +75,73 @@ renderBPM(thisBPM);
 
 
 
+// INPUT - manage text input & key interactions
+// ============================================
 
-
-
-// manage text input & arrow input
-// ===============================
-
-document.getElementById("textarea").addEventListener("keydown", (e) => {
+document.getElementById("mainInput").addEventListener("keydown", (e) => {
 	
-	
-
-	// printer(debug, context, "key input", e.code);
+	// if Enter in main input field
 	if (e.code=='Enter') {
 		// print empty spaces
 		console.log('');
 		console.log('');
 
-		playAlerts('return', alertMuteState);
-		consolePointer = -1; // pointer for arrwos
+		// POINTER - reset pointer for arrwos
+		consolePointer = -1; 
 
-		// get input string
-		let string = document.getElementById("textarea").value;
-		string = string.toLowerCase();
-		// message for server
+		// INPUT - get input string
+		let string = document.getElementById("mainInput").value.toLowerCase();
+	
+		// SERVER MESSAGE - create a message for server
 		let message = { string: string, user: 'local' };
 
-		// send string to validate in enterfunction(), grammar
+		// GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
 		let result = enterFunction(string, instrumentsList);
 
-		// handle returns from enterfunction()
+
+		// SOCKET + PARSER
+		// handle returns from enterfunction() for socket and parser
+		// html handling goes through returnToAction list and rendering
 		if (result.valid == true) { 
 			// send to server via sockets
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
 			console.log(result.result)
 			// returnToAction.parser = parseInput(result.result, string);
-
+			
+			// play success return alert
+			playAlerts('return', alertMuteState);
 		} else {
-			printer(debug, context, "result.valid? : ", result.valid)
+			// if text input not valid:
+			printer(debug, context, "result.valid? : ", result.valid);
+			// play error alert
+			playAlerts('error', alertMuteState);	
 		};
+
+		
 		// add to consolePointer for arrows
 		consolePointer += 1;
-		// send to renderer
+
+		// GRAMMAR RESULTS - save results to return action list renderer
 		returnToAction.printToConsole.valid = result.valid;
 		returnToAction.printToConsole.string = result.string;
 		returnToAction.printToConsole.length = consoleLength;
 		returnToAction.printToConsole.id = consoleDivID;
 		
-		printer(debug, context, "returnToAction: ", returnToAction)
-		// execute returnToAction
+		// print return list
+		printer(debug, context, "returnToAction list: ", returnToAction)
+
+		// EXECUTE RETURN ACTIONS - execute returnToAction list and return new consoleArray
 		consoleArray = returnToActionExecute(returnToAction, consoleArray, instruments, parts);
-		// after processing, clear the input field
-		clearTextfield();
+
+		// CLEAR - after processing, clear the input field
+		document.getElementById("mainInput").value = "";
 	};
 
 
-	// arrow functions
+
+
+	// KEY INTERACTIONS - arrow functions
 	if (e.code=='ArrowUp'){
 		// printer(debug, context, "text input", "arrow up pressed");
 	   	consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'up');
@@ -219,7 +201,19 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 
 
+export function changeConsoleTextToNonValid(
+	_renderHtml, _consoleArray, _consoleLength,
+	state, string) {
 
+	if (state == true) {
+		_consoleArray.push({ message: string });
+	};
+	if (state == false) {
+		if (string[0] != '!') { consoleArray.push({ message: `! ${string}` }); }
+		else { consoleArray.push({ message: `${string}` }); };
+	};
+}
+;
 
 
 
@@ -250,15 +244,6 @@ socket.on("filesOnServer", function(folder, samples, what) {
 	
 	
 // }
-
-
-
-
-
-
-
-
-
 
 
 

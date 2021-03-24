@@ -9,6 +9,7 @@ export const renderToConsole = (content, divID, lengthLimit) => {
     let html='';
     // get length of entire content and limit content if more 
     let entireContentLength = content.length;
+    // create a pointer
     let contentPointer = 0;
     // set pointer to most recent entries
     if (entireContentLength > lengthLimit) contentPointer = entireContentLength - lengthLimit; 
@@ -21,6 +22,7 @@ export const renderToConsole = (content, divID, lengthLimit) => {
             html+='<p id="consoleLine">' + content[i].message + '</p>';
         };
     };
+
     // append text to div
     document.getElementById(divID).innerHTML = '';
     document.getElementById(divID).innerHTML+= html;
@@ -42,8 +44,8 @@ export const renderHtmlArrows = (pointer, _consoleArray, dir) => {
                 // update pointer
                 if (pointer<length) {pointer = pointer+1};
                 // set HTML
-                document.getElementById("textarea").value = '';
-                document.getElementById("textarea").value = _consoleArray[(length-pointer)].message;
+                document.getElementById("mainInput").value = '';
+                document.getElementById("mainInput").value = _consoleArray[(length-pointer)].message;
             }
             break;
         case 'down':
@@ -51,11 +53,11 @@ export const renderHtmlArrows = (pointer, _consoleArray, dir) => {
                 // update pointer
                 pointer = pointer-1;
                 // set HTML
-                document.getElementById("textarea").value = '';
+                document.getElementById("mainInput").value = '';
                 if (pointer!=0) {
-                    document.getElementById("textarea").value = _consoleArray[(length-pointer)].message;
+                    document.getElementById("mainInput").value = _consoleArray[(length-pointer)].message;
                 } else {
-                    document.getElementById("textarea").value = '';
+                    document.getElementById("mainInput").value = '';
                 }
             };
             break;
