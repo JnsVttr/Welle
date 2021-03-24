@@ -20,7 +20,7 @@
     "socket.io": "^2.4.1",
     "socket.io-file": "^2.0.31",
     "socket.io-file-client": "^2.0.2",
-    "tone": "^13.8.34"
+    "tone": "^14.8.15"
   },
   "homepage": "https://github.com/JnsVttr/welle#readme",
   "description": ""

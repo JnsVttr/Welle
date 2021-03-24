@@ -13,7 +13,7 @@ import { playAlerts } from '/helper/playAlerts';
 
 export const returnToActionExecute = (_actionContent, _consoleArray, _instruments, _parts) => {
 	// store returns in separate variables
-	let parserReturn = _actionContent.parser.parserReturn;
+	// let parserReturn = _actionContent.parser.parserReturn;
 	let printToConsole = _actionContent.printToConsole;
 
 
@@ -38,29 +38,29 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 
 	
 	// handle returns from parser / tone
-	if (Object.keys(_actionContent.parser).length > 0) {
+	// if (Object.keys(_actionContent.parser).length > 0) {
 		
-		let toneReturn = _actionContent.parser.toneReturn;
-		if (toneReturn.error != ''){
-			// console:
-			let message = `${printToConsole.string} - ${toneReturn.error}`;
-			_consoleArray.push({ message: message });
-			renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
-			playAlerts('error', alertMuteState);
-		};
-		switch (toneReturn.html) {
-			case 'render instruments': renderInstruments(_instruments);
-			break;
-			case 'render parts': renderParts(_parts);
-			break;
-			case 'render bpm': renderBPM(Tone.Transport.bpm.value);
-			break;
-			case 'render muteOn': playAlerts('return', alertMuteState);
-			break;
-			case 'render muteOff': playAlerts('return', alertMuteState);
-			break;
-		}
-	};
+	// 	let toneReturn = _actionContent.parser.toneReturn;
+	// 	if (toneReturn.error != ''){
+	// 		// console:
+	// 		let message = `${printToConsole.string} - ${toneReturn.error}`;
+	// 		_consoleArray.push({ message: message });
+	// 		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+	// 		playAlerts('error', alertMuteState);
+	// 	};
+	// 	switch (toneReturn.html) {
+	// 		case 'render instruments': renderInstruments(_instruments);
+	// 		break;
+	// 		case 'render parts': renderParts(_parts);
+	// 		break;
+	// 		case 'render bpm': renderBPM(Tone.Transport.bpm.value);
+	// 		break;
+	// 		case 'render muteOn': playAlerts('return', alertMuteState);
+	// 		break;
+	// 		case 'render muteOff': playAlerts('return', alertMuteState);
+	// 		break;
+	// 	}
+	// };
 
 	// return the changed console string array to index.js
 	return _consoleArray;

@@ -10,12 +10,14 @@ https://github.com/harc/ohm
 // libraries
 import io from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
+import * as Tone from 'tone';
 
 // files
 import { renderHtmlArrows, renderBPM }  from  '/html/renderHTML';
-import { parseInput }  from '/parse-commands';
+// import { parseInput }  from '/parse-commands';
+import { parser }  from '/parser';
 import { help }  from '/text/helpText';
-import { instruments, parts, thisBPM } from '/tone/main-tone';
+// import { instruments, parts, thisBPM } from '/tone/main-tone';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 import { printer } from '/helper/printer';
 import { alerts } from '/helper/alerts';
@@ -25,7 +27,7 @@ import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
 import { returnToActionExecute } from './helper/returnToActionExecute';
-import { Instrument } from './tone/instruments';
+import { Instrument } from './tone/class_instrument';
 
 
 
@@ -39,7 +41,14 @@ export let alertMuteState = false;  // alerts muted or not?
 let serverFolders = "";
 export let serverSamples = "";
 export let sampleURL = {};
+// audio variables
+export let bpm = 120;
 export let instrumentsList = "";
+
+let defaultInstrument = new Instrument();
+defaultInstrument.defaultGain = 0;
+export let instruments = { default: defaultInstrument};
+export let parts = {};
 
 // input & console varibles
 export let consolePointer = 0; // for arrow functions
@@ -59,16 +68,26 @@ let returnToAction = {
 createAlerts(alerts);
 
 // initially show BPM
-renderBPM(thisBPM);
+renderBPM(bpm);
+
+// set static variables to class Instrument
+// Instrument.bpm = bpm;
+
+// connect audio to Tone master
+Instrument.masterGain.connect(Tone.getDestination());  // assign Instrument class masterOut to Tone master
+Tone.Transport.bpm.value = bpm;
 
 
 
 
 
 
-
-
-
+// const synth = new Tone.Synth().connect(Instrument.masterGain);
+// const seq = new Tone.Sequence((time, note) => {
+// 	synth.triggerAttackRelease(note, 0.1, time);
+// 	// subdivisions are given as subarrays
+// }, ["C4", ["E4", "D4", "E4"], "G4", ["A4", "G4"]]).start(0);
+// // Tone.Transport.start();
 
 
 
@@ -82,6 +101,10 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 	
 	// if Enter in main input field
 	if (e.code=='Enter') {
+		// first time start Tone if not running
+		// Tone.start();
+		
+		// console.log("TONE context started");
 		// print empty spaces
 		console.log('');
 		console.log('');
@@ -106,8 +129,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 			// send to server via sockets
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
-			console.log(result.result)
-			// returnToAction.parser = parseInput(result.result, string);
+			returnToAction.parser = parser(result.result);
 			
 			// play success return alert
 			playAlerts('return', alertMuteState);
@@ -129,7 +151,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 		returnToAction.printToConsole.id = consoleDivID;
 		
 		// print return list
-		printer(debug, context, "returnToAction list: ", returnToAction)
+		// printer(debug, context, "returnToAction list: ", returnToAction)
 
 		// EXECUTE RETURN ACTIONS - execute returnToAction list and return new consoleArray
 		consoleArray = returnToActionExecute(returnToAction, consoleArray, instruments, parts);
@@ -178,11 +200,11 @@ socket.on("filesOnServer", function(folder, samples, what) {
 	serverSamples = samples;
 	printer(debug, context, "filesOnServer - received", ` 
 		folders: ${serverFolders} 
-		files: ${serverSamples}`);
+		file paths: ${serverSamples}`);
 	sampleURL = extractSamplePaths (serverSamples);
-	instrumentsList = update_InstrumentsList(); // create list
-	Instrument.createList(sampleURL);
-
+	
+	// instrumentsList = update_InstrumentsList(); // create list
+	// Instrument.createList(sampleURL);
 });
 
 
@@ -194,26 +216,10 @@ socket.on("filesOnServer", function(folder, samples, what) {
 
 
 
+// ==================================================================
+// EOF - index.js
 
 
-
-
-
-
-
-export function changeConsoleTextToNonValid(
-	_renderHtml, _consoleArray, _consoleLength,
-	state, string) {
-
-	if (state == true) {
-		_consoleArray.push({ message: string });
-	};
-	if (state == false) {
-		if (string[0] != '!') { consoleArray.push({ message: `! ${string}` }); }
-		else { consoleArray.push({ message: `${string}` }); };
-	};
-}
-;
 
 
 

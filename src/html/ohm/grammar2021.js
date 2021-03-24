@@ -30,6 +30,7 @@ livecode {
 
 
     Commands =
+        | "?" PhraseList?            --questionEvent
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
         | ":" phrase           	    --savePartEvent

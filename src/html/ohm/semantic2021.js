@@ -21,10 +21,19 @@ let context = "semantics";
 // SEMANTICS FOR OHM.JS LANGUAGE:
 semantics.addOperation('eval', {
 
+    Commands_questionEvent: (_, phrases) => {
+        phrases = phrasesToArray(phrases);
+        let event = 'questionEvent';
+        // if (phrases.length>1) event = 'playMultiEvent'
+        return {
+            event: event,
+            phrases: phrases,
+        }
+    },
+
     Commands_playMultiEvent: (_, phrases) => {
         phrases = phrasesToArray(phrases);
-        let event = 'playEvent';
-        if (phrases.length>1) event = 'playMultiEvent'
+        let event = 'playMultiEvent';
         return {
             event: event,
             phrases: phrases,
@@ -183,7 +192,7 @@ semantics.addOperation('eval', {
     },
     Assignments_playListEvent: (phrases) => {
         phrases = phrasesToArray(phrases);
-        let event = 'playList'
+        let event = 'playMulti'
         return {
             event: event,
             phrases: phrases,
