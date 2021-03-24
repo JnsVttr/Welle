@@ -26,7 +26,7 @@ import { renderTextToConsole } from '/html/renderTextToConsole';
 import { playAlerts } from '/helper/playAlerts';
 import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
-import { executeActionContent } from './helper/executeActionContent';
+import { returnToActionExecute } from './helper/returnToActionExecute';
 import { Instrument } from './tone/instruments';
 
 
@@ -52,7 +52,7 @@ export let consoleLength = 20; // how many lines are displayed
 let checkMuteSound = document.getElementById("checkMuteSound");
 let checkMuteAlerts = document.getElementById("checkMuteAlerts");
 let consoleDivID = 'console';
-let actionContent = {
+let returnToAction = {
 	'printToConsole': {},
 	'parser': {},
 };
@@ -138,7 +138,7 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
 			console.log(result.result)
-			// actionContent.parser = parseInput(result.result, string);
+			// returnToAction.parser = parseInput(result.result, string);
 
 		} else {
 			printer(debug, context, "result.valid? : ", result.valid)
@@ -146,14 +146,14 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 		// add to consolePointer for arrows
 		consolePointer += 1;
 		// send to renderer
-		actionContent.printToConsole.valid = result.valid;
-		actionContent.printToConsole.string = result.string;
-		actionContent.printToConsole.length = consoleLength;
-		actionContent.printToConsole.id = consoleDivID;
+		returnToAction.printToConsole.valid = result.valid;
+		returnToAction.printToConsole.string = result.string;
+		returnToAction.printToConsole.length = consoleLength;
+		returnToAction.printToConsole.id = consoleDivID;
 		
-		printer(debug, context, "actionContent: ", actionContent)
-		// execute actionContent
-		consoleArray = executeActionContent(actionContent, consoleArray, instruments, parts);
+		printer(debug, context, "returnToAction: ", returnToAction)
+		// execute returnToAction
+		consoleArray = returnToActionExecute(returnToAction, consoleArray, instruments, parts);
 		// after processing, clear the input field
 		clearTextfield();
 	};

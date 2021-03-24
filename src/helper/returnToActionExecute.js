@@ -11,7 +11,7 @@ import { playAlerts } from '/helper/playAlerts';
 
 
 
-export const executeActionContent = (_actionContent, _consoleArray, _instruments, _parts) => {
+export const returnToActionExecute = (_actionContent, _consoleArray, _instruments, _parts) => {
 	let parserReturn = _actionContent.parser.parserReturn;
 	let printToConsole = _actionContent.printToConsole;
 	// console:
