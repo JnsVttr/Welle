@@ -1,0 +1,77 @@
+
+/* CSS for WELLE */
+
+body {
+    /* background: black; */
+    font-family: 'Roboto', sans-serif;
+    /* color: white; */
+}
+
+#mainInput:focus, #input:focus{
+    background-color: #ffffff;
+    border: 2px solid black;
+}
+#mainInput {
+    /* background: black; */
+    /* color: white; */
+    outline: none;
+    box-sizing: border-box;
+    border: 0px solid black;
+    border: 1px solid black;
+    
+    border-radius: 1px;
+    border-color: #bfbfbf;	
+    padding: 5px 2px;
+    /* font-size: 0.8em; */
+    width:100%;
+    word-wrap: break-word;
+}
+#console {
+    /* font-size: 0.9em; */
+    word-wrap: break-word;
+}
+#consoleLine {
+    /* color: white; */
+    /* font-size: 0.9em; */
+    margin-top: 0.02em;
+    margin-bottom: 0.02em;
+    width:97%;
+    text-indent: -0.8em;
+    margin-left: 0.8em;
+}
+
+
+input[type="checkbox"] {
+    /* filter: invert(100%) hue-rotate(18deg) brightness(1.7); */
+  }
+input[type="checkbox"]:checked  {
+    filter:  invert(100%) hue-rotate(202deg) brightness(1.5); 
+    /*  */
+}
+
+
+
+
+
+
+
+
+
+ /* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    
+}
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    
+}
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    
+}
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    
+} 
+
+/*# sourceMappingURL=/main.c52e0fe2.css.map */
