@@ -3891,375 +3891,75 @@ module.exports = function (opts) {
   }
 };
 
-},{"has-cors":"../node_modules/has-cors/index.js","./globalThis":"../node_modules/engine.io-client/lib/globalThis.browser.js"}],"../node_modules/engine.io-parser/lib/keys.js":[function(require,module,exports) {
+},{"has-cors":"../node_modules/has-cors/index.js","./globalThis":"../node_modules/engine.io-client/lib/globalThis.browser.js"}],"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/commons.js":[function(require,module,exports) {
+var PACKET_TYPES = Object.create(null); // no Map = no polyfill
 
-/**
- * Gets the keys for an object.
- *
- * @return {Array} keys
- * @api private
- */
-
-module.exports = Object.keys || function keys (obj){
-  var arr = [];
-  var has = Object.prototype.hasOwnProperty;
-
-  for (var i in obj) {
-    if (has.call(obj, i)) {
-      arr.push(i);
-    }
-  }
-  return arr;
+PACKET_TYPES["open"] = "0";
+PACKET_TYPES["close"] = "1";
+PACKET_TYPES["ping"] = "2";
+PACKET_TYPES["pong"] = "3";
+PACKET_TYPES["message"] = "4";
+PACKET_TYPES["upgrade"] = "5";
+PACKET_TYPES["noop"] = "6";
+var PACKET_TYPES_REVERSE = Object.create(null);
+Object.keys(PACKET_TYPES).forEach(function (key) {
+  PACKET_TYPES_REVERSE[PACKET_TYPES[key]] = key;
+});
+var ERROR_PACKET = {
+  type: "error",
+  data: "parser error"
 };
-
-},{}],"../node_modules/has-binary2/node_modules/isarray/index.js":[function(require,module,exports) {
-var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-
-},{}],"../node_modules/has-binary2/index.js":[function(require,module,exports) {
-var Buffer = require("buffer").Buffer;
-/* global Blob File */
-
-/*
- * Module requirements.
- */
-
-var isArray = require('isarray');
-
-var toString = Object.prototype.toString;
-var withNativeBlob = typeof Blob === 'function' ||
-                        typeof Blob !== 'undefined' && toString.call(Blob) === '[object BlobConstructor]';
-var withNativeFile = typeof File === 'function' ||
-                        typeof File !== 'undefined' && toString.call(File) === '[object FileConstructor]';
-
-/**
- * Module exports.
- */
-
-module.exports = hasBinary;
-
-/**
- * Checks for binary data.
- *
- * Supports Buffer, ArrayBuffer, Blob and File.
- *
- * @param {Object} anything
- * @api public
- */
-
-function hasBinary (obj) {
-  if (!obj || typeof obj !== 'object') {
-    return false;
-  }
-
-  if (isArray(obj)) {
-    for (var i = 0, l = obj.length; i < l; i++) {
-      if (hasBinary(obj[i])) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  if ((typeof Buffer === 'function' && Buffer.isBuffer && Buffer.isBuffer(obj)) ||
-    (typeof ArrayBuffer === 'function' && obj instanceof ArrayBuffer) ||
-    (withNativeBlob && obj instanceof Blob) ||
-    (withNativeFile && obj instanceof File)
-  ) {
-    return true;
-  }
-
-  // see: https://github.com/Automattic/has-binary/pull/4
-  if (obj.toJSON && typeof obj.toJSON === 'function' && arguments.length === 1) {
-    return hasBinary(obj.toJSON(), true);
-  }
-
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-},{"isarray":"../node_modules/has-binary2/node_modules/isarray/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/arraybuffer.slice/index.js":[function(require,module,exports) {
-/**
- * An abstraction for slicing an arraybuffer even when
- * ArrayBuffer.prototype.slice is not supported
- *
- * @api public
- */
-
-module.exports = function(arraybuffer, start, end) {
-  var bytes = arraybuffer.byteLength;
-  start = start || 0;
-  end = end || bytes;
-
-  if (arraybuffer.slice) { return arraybuffer.slice(start, end); }
-
-  if (start < 0) { start += bytes; }
-  if (end < 0) { end += bytes; }
-  if (end > bytes) { end = bytes; }
-
-  if (start >= bytes || start >= end || bytes === 0) {
-    return new ArrayBuffer(0);
-  }
-
-  var abv = new Uint8Array(arraybuffer);
-  var result = new Uint8Array(end - start);
-  for (var i = start, ii = 0; i < end; i++, ii++) {
-    result[ii] = abv[i];
-  }
-  return result.buffer;
-};
-
-},{}],"../node_modules/after/index.js":[function(require,module,exports) {
-module.exports = after
-
-function after(count, callback, err_cb) {
-    var bail = false
-    err_cb = err_cb || noop
-    proxy.count = count
-
-    return (count === 0) ? callback() : proxy
-
-    function proxy(err, result) {
-        if (proxy.count <= 0) {
-            throw new Error('after called too many times')
-        }
-        --proxy.count
-
-        // after first error, rest are passed to err_cb
-        if (err) {
-            bail = true
-            callback(err)
-            // future error callbacks will go to error handler
-            callback = err_cb
-        } else if (proxy.count === 0 && !bail) {
-            callback(null, result)
-        }
-    }
-}
-
-function noop() {}
-
-},{}],"../node_modules/engine.io-parser/lib/utf8.js":[function(require,module,exports) {
-/*! https://mths.be/utf8js v2.1.2 by @mathias */
-
-var stringFromCharCode = String.fromCharCode;
-
-// Taken from https://mths.be/punycode
-function ucs2decode(string) {
-	var output = [];
-	var counter = 0;
-	var length = string.length;
-	var value;
-	var extra;
-	while (counter < length) {
-		value = string.charCodeAt(counter++);
-		if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
-			// high surrogate, and there is a next character
-			extra = string.charCodeAt(counter++);
-			if ((extra & 0xFC00) == 0xDC00) { // low surrogate
-				output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
-			} else {
-				// unmatched surrogate; only append this code unit, in case the next
-				// code unit is the high surrogate of a surrogate pair
-				output.push(value);
-				counter--;
-			}
-		} else {
-			output.push(value);
-		}
-	}
-	return output;
-}
-
-// Taken from https://mths.be/punycode
-function ucs2encode(array) {
-	var length = array.length;
-	var index = -1;
-	var value;
-	var output = '';
-	while (++index < length) {
-		value = array[index];
-		if (value > 0xFFFF) {
-			value -= 0x10000;
-			output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
-			value = 0xDC00 | value & 0x3FF;
-		}
-		output += stringFromCharCode(value);
-	}
-	return output;
-}
-
-function checkScalarValue(codePoint, strict) {
-	if (codePoint >= 0xD800 && codePoint <= 0xDFFF) {
-		if (strict) {
-			throw Error(
-				'Lone surrogate U+' + codePoint.toString(16).toUpperCase() +
-				' is not a scalar value'
-			);
-		}
-		return false;
-	}
-	return true;
-}
-/*--------------------------------------------------------------------------*/
-
-function createByte(codePoint, shift) {
-	return stringFromCharCode(((codePoint >> shift) & 0x3F) | 0x80);
-}
-
-function encodeCodePoint(codePoint, strict) {
-	if ((codePoint & 0xFFFFFF80) == 0) { // 1-byte sequence
-		return stringFromCharCode(codePoint);
-	}
-	var symbol = '';
-	if ((codePoint & 0xFFFFF800) == 0) { // 2-byte sequence
-		symbol = stringFromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
-	}
-	else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
-		if (!checkScalarValue(codePoint, strict)) {
-			codePoint = 0xFFFD;
-		}
-		symbol = stringFromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
-		symbol += createByte(codePoint, 6);
-	}
-	else if ((codePoint & 0xFFE00000) == 0) { // 4-byte sequence
-		symbol = stringFromCharCode(((codePoint >> 18) & 0x07) | 0xF0);
-		symbol += createByte(codePoint, 12);
-		symbol += createByte(codePoint, 6);
-	}
-	symbol += stringFromCharCode((codePoint & 0x3F) | 0x80);
-	return symbol;
-}
-
-function utf8encode(string, opts) {
-	opts = opts || {};
-	var strict = false !== opts.strict;
-
-	var codePoints = ucs2decode(string);
-	var length = codePoints.length;
-	var index = -1;
-	var codePoint;
-	var byteString = '';
-	while (++index < length) {
-		codePoint = codePoints[index];
-		byteString += encodeCodePoint(codePoint, strict);
-	}
-	return byteString;
-}
-
-/*--------------------------------------------------------------------------*/
-
-function readContinuationByte() {
-	if (byteIndex >= byteCount) {
-		throw Error('Invalid byte index');
-	}
-
-	var continuationByte = byteArray[byteIndex] & 0xFF;
-	byteIndex++;
-
-	if ((continuationByte & 0xC0) == 0x80) {
-		return continuationByte & 0x3F;
-	}
-
-	// If we end up here, it’s not a continuation byte
-	throw Error('Invalid continuation byte');
-}
-
-function decodeSymbol(strict) {
-	var byte1;
-	var byte2;
-	var byte3;
-	var byte4;
-	var codePoint;
-
-	if (byteIndex > byteCount) {
-		throw Error('Invalid byte index');
-	}
-
-	if (byteIndex == byteCount) {
-		return false;
-	}
-
-	// Read first byte
-	byte1 = byteArray[byteIndex] & 0xFF;
-	byteIndex++;
-
-	// 1-byte sequence (no continuation bytes)
-	if ((byte1 & 0x80) == 0) {
-		return byte1;
-	}
-
-	// 2-byte sequence
-	if ((byte1 & 0xE0) == 0xC0) {
-		byte2 = readContinuationByte();
-		codePoint = ((byte1 & 0x1F) << 6) | byte2;
-		if (codePoint >= 0x80) {
-			return codePoint;
-		} else {
-			throw Error('Invalid continuation byte');
-		}
-	}
-
-	// 3-byte sequence (may include unpaired surrogates)
-	if ((byte1 & 0xF0) == 0xE0) {
-		byte2 = readContinuationByte();
-		byte3 = readContinuationByte();
-		codePoint = ((byte1 & 0x0F) << 12) | (byte2 << 6) | byte3;
-		if (codePoint >= 0x0800) {
-			return checkScalarValue(codePoint, strict) ? codePoint : 0xFFFD;
-		} else {
-			throw Error('Invalid continuation byte');
-		}
-	}
-
-	// 4-byte sequence
-	if ((byte1 & 0xF8) == 0xF0) {
-		byte2 = readContinuationByte();
-		byte3 = readContinuationByte();
-		byte4 = readContinuationByte();
-		codePoint = ((byte1 & 0x07) << 0x12) | (byte2 << 0x0C) |
-			(byte3 << 0x06) | byte4;
-		if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
-			return codePoint;
-		}
-	}
-
-	throw Error('Invalid UTF-8 detected');
-}
-
-var byteArray;
-var byteCount;
-var byteIndex;
-function utf8decode(byteString, opts) {
-	opts = opts || {};
-	var strict = false !== opts.strict;
-
-	byteArray = ucs2decode(byteString);
-	byteCount = byteArray.length;
-	byteIndex = 0;
-	var codePoints = [];
-	var tmp;
-	while ((tmp = decodeSymbol(strict)) !== false) {
-		codePoints.push(tmp);
-	}
-	return ucs2encode(codePoints);
-}
-
 module.exports = {
-	version: '2.1.2',
-	encode: utf8encode,
-	decode: utf8decode
+  PACKET_TYPES: PACKET_TYPES,
+  PACKET_TYPES_REVERSE: PACKET_TYPES_REVERSE,
+  ERROR_PACKET: ERROR_PACKET
+};
+},{}],"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/encodePacket.browser.js":[function(require,module,exports) {
+var _require = require("./commons"),
+    PACKET_TYPES = _require.PACKET_TYPES;
+
+var withNativeBlob = typeof Blob === "function" || typeof Blob !== "undefined" && Object.prototype.toString.call(Blob) === "[object BlobConstructor]";
+var withNativeArrayBuffer = typeof ArrayBuffer === "function"; // ArrayBuffer.isView method is not defined in IE10
+
+var isView = function isView(obj) {
+  return typeof ArrayBuffer.isView === "function" ? ArrayBuffer.isView(obj) : obj && obj.buffer instanceof ArrayBuffer;
 };
 
-},{}],"../node_modules/base64-arraybuffer/lib/base64-arraybuffer.js":[function(require,module,exports) {
+var encodePacket = function encodePacket(_ref, supportsBinary, callback) {
+  var type = _ref.type,
+      data = _ref.data;
+
+  if (withNativeBlob && data instanceof Blob) {
+    if (supportsBinary) {
+      return callback(data);
+    } else {
+      return encodeBlobAsBase64(data, callback);
+    }
+  } else if (withNativeArrayBuffer && (data instanceof ArrayBuffer || isView(data))) {
+    if (supportsBinary) {
+      return callback(data instanceof ArrayBuffer ? data : data.buffer);
+    } else {
+      return encodeBlobAsBase64(new Blob([data]), callback);
+    }
+  } // plain string
+
+
+  return callback(PACKET_TYPES[type] + (data || ""));
+};
+
+var encodeBlobAsBase64 = function encodeBlobAsBase64(data, callback) {
+  var fileReader = new FileReader();
+
+  fileReader.onload = function () {
+    var content = fileReader.result.split(",")[1];
+    callback("b" + content);
+  };
+
+  return fileReader.readAsDataURL(data);
+};
+
+module.exports = encodePacket;
+},{"./commons":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/commons.js"}],"../node_modules/base64-arraybuffer/lib/base64-arraybuffer.js":[function(require,module,exports) {
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -4326,716 +4026,122 @@ module.exports = {
     return arraybuffer;
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-},{}],"../node_modules/blob/index.js":[function(require,module,exports) {
-/**
- * Create a blob builder even when vendor prefixes exist
- */
+},{}],"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/decodePacket.browser.js":[function(require,module,exports) {
+var _require = require("./commons"),
+    PACKET_TYPES_REVERSE = _require.PACKET_TYPES_REVERSE,
+    ERROR_PACKET = _require.ERROR_PACKET;
 
-var BlobBuilder = typeof BlobBuilder !== 'undefined' ? BlobBuilder :
-  typeof WebKitBlobBuilder !== 'undefined' ? WebKitBlobBuilder :
-  typeof MSBlobBuilder !== 'undefined' ? MSBlobBuilder :
-  typeof MozBlobBuilder !== 'undefined' ? MozBlobBuilder : 
-  false;
+var withNativeArrayBuffer = typeof ArrayBuffer === "function";
+var base64decoder;
 
-/**
- * Check if Blob constructor is supported
- */
-
-var blobSupported = (function() {
-  try {
-    var a = new Blob(['hi']);
-    return a.size === 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if Blob constructor supports ArrayBufferViews
- * Fails in Safari 6, so we need to map to ArrayBuffers there.
- */
-
-var blobSupportsArrayBufferView = blobSupported && (function() {
-  try {
-    var b = new Blob([new Uint8Array([1,2])]);
-    return b.size === 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if BlobBuilder is supported
- */
-
-var blobBuilderSupported = BlobBuilder
-  && BlobBuilder.prototype.append
-  && BlobBuilder.prototype.getBlob;
-
-/**
- * Helper function that maps ArrayBufferViews to ArrayBuffers
- * Used by BlobBuilder constructor and old browsers that didn't
- * support it in the Blob constructor.
- */
-
-function mapArrayBufferViews(ary) {
-  return ary.map(function(chunk) {
-    if (chunk.buffer instanceof ArrayBuffer) {
-      var buf = chunk.buffer;
-
-      // if this is a subarray, make a copy so we only
-      // include the subarray region from the underlying buffer
-      if (chunk.byteLength !== buf.byteLength) {
-        var copy = new Uint8Array(chunk.byteLength);
-        copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-        buf = copy.buffer;
-      }
-
-      return buf;
-    }
-
-    return chunk;
-  });
+if (withNativeArrayBuffer) {
+  base64decoder = require("base64-arraybuffer");
 }
 
-function BlobBuilderConstructor(ary, options) {
-  options = options || {};
-
-  var bb = new BlobBuilder();
-  mapArrayBufferViews(ary).forEach(function(part) {
-    bb.append(part);
-  });
-
-  return (options.type) ? bb.getBlob(options.type) : bb.getBlob();
-};
-
-function BlobConstructor(ary, options) {
-  return new Blob(mapArrayBufferViews(ary), options || {});
-};
-
-if (typeof Blob !== 'undefined') {
-  BlobBuilderConstructor.prototype = Blob.prototype;
-  BlobConstructor.prototype = Blob.prototype;
-}
-
-module.exports = (function() {
-  if (blobSupported) {
-    return blobSupportsArrayBufferView ? Blob : BlobConstructor;
-  } else if (blobBuilderSupported) {
-    return BlobBuilderConstructor;
-  } else {
-    return undefined;
-  }
-})();
-
-},{}],"../node_modules/engine.io-parser/lib/browser.js":[function(require,module,exports) {
-/**
- * Module dependencies.
- */
-
-var keys = require('./keys');
-var hasBinary = require('has-binary2');
-var sliceBuffer = require('arraybuffer.slice');
-var after = require('after');
-var utf8 = require('./utf8');
-
-var base64encoder;
-if (typeof ArrayBuffer !== 'undefined') {
-  base64encoder = require('base64-arraybuffer');
-}
-
-/**
- * Check if we are running an android browser. That requires us to use
- * ArrayBuffer with polling transports...
- *
- * http://ghinda.net/jpeg-blob-ajax-android/
- */
-
-var isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-
-/**
- * Check if we are running in PhantomJS.
- * Uploading a Blob with PhantomJS does not work correctly, as reported here:
- * https://github.com/ariya/phantomjs/issues/11395
- * @type boolean
- */
-var isPhantomJS = typeof navigator !== 'undefined' && /PhantomJS/i.test(navigator.userAgent);
-
-/**
- * When true, avoids using Blobs to encode payloads.
- * @type boolean
- */
-var dontSendBlobs = isAndroid || isPhantomJS;
-
-/**
- * Current protocol version.
- */
-
-exports.protocol = 3;
-
-/**
- * Packet types.
- */
-
-var packets = exports.packets = {
-    open:     0    // non-ws
-  , close:    1    // non-ws
-  , ping:     2
-  , pong:     3
-  , message:  4
-  , upgrade:  5
-  , noop:     6
-};
-
-var packetslist = keys(packets);
-
-/**
- * Premade error packet.
- */
-
-var err = { type: 'error', data: 'parser error' };
-
-/**
- * Create a blob api even for blob builder when vendor prefixes exist
- */
-
-var Blob = require('blob');
-
-/**
- * Encodes a packet.
- *
- *     <packet type id> [ <data> ]
- *
- * Example:
- *
- *     5hello world
- *     3
- *     4
- *
- * Binary is encoded in an identical principle
- *
- * @api private
- */
-
-exports.encodePacket = function (packet, supportsBinary, utf8encode, callback) {
-  if (typeof supportsBinary === 'function') {
-    callback = supportsBinary;
-    supportsBinary = false;
-  }
-
-  if (typeof utf8encode === 'function') {
-    callback = utf8encode;
-    utf8encode = null;
-  }
-
-  var data = (packet.data === undefined)
-    ? undefined
-    : packet.data.buffer || packet.data;
-
-  if (typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) {
-    return encodeArrayBuffer(packet, supportsBinary, callback);
-  } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
-    return encodeBlob(packet, supportsBinary, callback);
-  }
-
-  // might be an object with { base64: true, data: dataAsBase64String }
-  if (data && data.base64) {
-    return encodeBase64Object(packet, callback);
-  }
-
-  // Sending data as a utf-8 string
-  var encoded = packets[packet.type];
-
-  // data fragment is optional
-  if (undefined !== packet.data) {
-    encoded += utf8encode ? utf8.encode(String(packet.data), { strict: false }) : String(packet.data);
-  }
-
-  return callback('' + encoded);
-
-};
-
-function encodeBase64Object(packet, callback) {
-  // packet data is an object { base64: true, data: dataAsBase64String }
-  var message = 'b' + exports.packets[packet.type] + packet.data.data;
-  return callback(message);
-}
-
-/**
- * Encode packet helpers for binary types
- */
-
-function encodeArrayBuffer(packet, supportsBinary, callback) {
-  if (!supportsBinary) {
-    return exports.encodeBase64Packet(packet, callback);
-  }
-
-  var data = packet.data;
-  var contentArray = new Uint8Array(data);
-  var resultBuffer = new Uint8Array(1 + data.byteLength);
-
-  resultBuffer[0] = packets[packet.type];
-  for (var i = 0; i < contentArray.length; i++) {
-    resultBuffer[i+1] = contentArray[i];
-  }
-
-  return callback(resultBuffer.buffer);
-}
-
-function encodeBlobAsArrayBuffer(packet, supportsBinary, callback) {
-  if (!supportsBinary) {
-    return exports.encodeBase64Packet(packet, callback);
-  }
-
-  var fr = new FileReader();
-  fr.onload = function() {
-    exports.encodePacket({ type: packet.type, data: fr.result }, supportsBinary, true, callback);
-  };
-  return fr.readAsArrayBuffer(packet.data);
-}
-
-function encodeBlob(packet, supportsBinary, callback) {
-  if (!supportsBinary) {
-    return exports.encodeBase64Packet(packet, callback);
-  }
-
-  if (dontSendBlobs) {
-    return encodeBlobAsArrayBuffer(packet, supportsBinary, callback);
-  }
-
-  var length = new Uint8Array(1);
-  length[0] = packets[packet.type];
-  var blob = new Blob([length.buffer, packet.data]);
-
-  return callback(blob);
-}
-
-/**
- * Encodes a packet with binary data in a base64 string
- *
- * @param {Object} packet, has `type` and `data`
- * @return {String} base64 encoded message
- */
-
-exports.encodeBase64Packet = function(packet, callback) {
-  var message = 'b' + exports.packets[packet.type];
-  if (typeof Blob !== 'undefined' && packet.data instanceof Blob) {
-    var fr = new FileReader();
-    fr.onload = function() {
-      var b64 = fr.result.split(',')[1];
-      callback(message + b64);
+var decodePacket = function decodePacket(encodedPacket, binaryType) {
+  if (typeof encodedPacket !== "string") {
+    return {
+      type: "message",
+      data: mapBinary(encodedPacket, binaryType)
     };
-    return fr.readAsDataURL(packet.data);
   }
 
-  var b64data;
-  try {
-    b64data = String.fromCharCode.apply(null, new Uint8Array(packet.data));
-  } catch (e) {
-    // iPhone Safari doesn't let you apply with typed arrays
-    var typed = new Uint8Array(packet.data);
-    var basic = new Array(typed.length);
-    for (var i = 0; i < typed.length; i++) {
-      basic[i] = typed[i];
-    }
-    b64data = String.fromCharCode.apply(null, basic);
-  }
-  message += btoa(b64data);
-  return callback(message);
-};
+  var type = encodedPacket.charAt(0);
 
-/**
- * Decodes a packet. Changes format to Blob if requested.
- *
- * @return {Object} with `type` and `data` (if any)
- * @api private
- */
-
-exports.decodePacket = function (data, binaryType, utf8decode) {
-  if (data === undefined) {
-    return err;
-  }
-  // String data
-  if (typeof data === 'string') {
-    if (data.charAt(0) === 'b') {
-      return exports.decodeBase64Packet(data.substr(1), binaryType);
-    }
-
-    if (utf8decode) {
-      data = tryDecode(data);
-      if (data === false) {
-        return err;
-      }
-    }
-    var type = data.charAt(0);
-
-    if (Number(type) != type || !packetslist[type]) {
-      return err;
-    }
-
-    if (data.length > 1) {
-      return { type: packetslist[type], data: data.substring(1) };
-    } else {
-      return { type: packetslist[type] };
-    }
+  if (type === "b") {
+    return {
+      type: "message",
+      data: decodeBase64Packet(encodedPacket.substring(1), binaryType)
+    };
   }
 
-  var asArray = new Uint8Array(data);
-  var type = asArray[0];
-  var rest = sliceBuffer(data, 1);
-  if (Blob && binaryType === 'blob') {
-    rest = new Blob([rest]);
-  }
-  return { type: packetslist[type], data: rest };
-};
+  var packetType = PACKET_TYPES_REVERSE[type];
 
-function tryDecode(data) {
-  try {
-    data = utf8.decode(data, { strict: false });
-  } catch (e) {
-    return false;
-  }
-  return data;
-}
-
-/**
- * Decodes a packet encoded in a base64 string
- *
- * @param {String} base64 encoded message
- * @return {Object} with `type` and `data` (if any)
- */
-
-exports.decodeBase64Packet = function(msg, binaryType) {
-  var type = packetslist[msg.charAt(0)];
-  if (!base64encoder) {
-    return { type: type, data: { base64: true, data: msg.substr(1) } };
+  if (!packetType) {
+    return ERROR_PACKET;
   }
 
-  var data = base64encoder.decode(msg.substr(1));
-
-  if (binaryType === 'blob' && Blob) {
-    data = new Blob([data]);
-  }
-
-  return { type: type, data: data };
-};
-
-/**
- * Encodes multiple messages (payload).
- *
- *     <length>:data
- *
- * Example:
- *
- *     11:hello world2:hi
- *
- * If any contents are binary, they will be encoded as base64 strings. Base64
- * encoded strings are marked with a b before the length specifier
- *
- * @param {Array} packets
- * @api private
- */
-
-exports.encodePayload = function (packets, supportsBinary, callback) {
-  if (typeof supportsBinary === 'function') {
-    callback = supportsBinary;
-    supportsBinary = null;
-  }
-
-  var isBinary = hasBinary(packets);
-
-  if (supportsBinary && isBinary) {
-    if (Blob && !dontSendBlobs) {
-      return exports.encodePayloadAsBlob(packets, callback);
-    }
-
-    return exports.encodePayloadAsArrayBuffer(packets, callback);
-  }
-
-  if (!packets.length) {
-    return callback('0:');
-  }
-
-  function setLengthHeader(message) {
-    return message.length + ':' + message;
-  }
-
-  function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, !isBinary ? false : supportsBinary, false, function(message) {
-      doneCallback(null, setLengthHeader(message));
-    });
-  }
-
-  map(packets, encodeOne, function(err, results) {
-    return callback(results.join(''));
-  });
-};
-
-/**
- * Async array map using after
- */
-
-function map(ary, each, done) {
-  var result = new Array(ary.length);
-  var next = after(ary.length, done);
-
-  var eachWithIndex = function(i, el, cb) {
-    each(el, function(error, msg) {
-      result[i] = msg;
-      cb(error, result);
-    });
+  return encodedPacket.length > 1 ? {
+    type: PACKET_TYPES_REVERSE[type],
+    data: encodedPacket.substring(1)
+  } : {
+    type: PACKET_TYPES_REVERSE[type]
   };
-
-  for (var i = 0; i < ary.length; i++) {
-    eachWithIndex(i, ary[i], next);
-  }
-}
-
-/*
- * Decodes data when a payload is maybe expected. Possible binary contents are
- * decoded from their base64 representation
- *
- * @param {String} data, callback method
- * @api public
- */
-
-exports.decodePayload = function (data, binaryType, callback) {
-  if (typeof data !== 'string') {
-    return exports.decodePayloadAsBinary(data, binaryType, callback);
-  }
-
-  if (typeof binaryType === 'function') {
-    callback = binaryType;
-    binaryType = null;
-  }
-
-  var packet;
-  if (data === '') {
-    // parser error - ignoring payload
-    return callback(err, 0, 1);
-  }
-
-  var length = '', n, msg;
-
-  for (var i = 0, l = data.length; i < l; i++) {
-    var chr = data.charAt(i);
-
-    if (chr !== ':') {
-      length += chr;
-      continue;
-    }
-
-    if (length === '' || (length != (n = Number(length)))) {
-      // parser error - ignoring payload
-      return callback(err, 0, 1);
-    }
-
-    msg = data.substr(i + 1, n);
-
-    if (length != msg.length) {
-      // parser error - ignoring payload
-      return callback(err, 0, 1);
-    }
-
-    if (msg.length) {
-      packet = exports.decodePacket(msg, binaryType, false);
-
-      if (err.type === packet.type && err.data === packet.data) {
-        // parser error in individual packet - ignoring payload
-        return callback(err, 0, 1);
-      }
-
-      var ret = callback(packet, i + n, l);
-      if (false === ret) return;
-    }
-
-    // advance cursor
-    i += n;
-    length = '';
-  }
-
-  if (length !== '') {
-    // parser error - ignoring payload
-    return callback(err, 0, 1);
-  }
-
 };
 
-/**
- * Encodes multiple messages (payload) as binary.
- *
- * <1 = binary, 0 = string><number from 0-9><number from 0-9>[...]<number
- * 255><data>
- *
- * Example:
- * 1 3 255 1 2 3, if the binary contents are interpreted as 8 bit integers
- *
- * @param {Array} packets
- * @return {ArrayBuffer} encoded payload
- * @api private
- */
-
-exports.encodePayloadAsArrayBuffer = function(packets, callback) {
-  if (!packets.length) {
-    return callback(new ArrayBuffer(0));
+var decodeBase64Packet = function decodeBase64Packet(data, binaryType) {
+  if (base64decoder) {
+    var decoded = base64decoder.decode(data);
+    return mapBinary(decoded, binaryType);
+  } else {
+    return {
+      base64: true,
+      data: data
+    }; // fallback for old browsers
   }
+};
 
-  function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, true, true, function(data) {
-      return doneCallback(null, data);
-    });
+var mapBinary = function mapBinary(data, binaryType) {
+  switch (binaryType) {
+    case "blob":
+      return data instanceof ArrayBuffer ? new Blob([data]) : data;
+
+    case "arraybuffer":
+    default:
+      return data;
+    // assuming the data is already an ArrayBuffer
   }
+};
 
-  map(packets, encodeOne, function(err, encodedPackets) {
-    var totalLength = encodedPackets.reduce(function(acc, p) {
-      var len;
-      if (typeof p === 'string'){
-        len = p.length;
-      } else {
-        len = p.byteLength;
-      }
-      return acc + len.toString().length + len + 2; // string/binary identifier + separator = 2
-    }, 0);
+module.exports = decodePacket;
+},{"./commons":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/commons.js","base64-arraybuffer":"../node_modules/base64-arraybuffer/lib/base64-arraybuffer.js"}],"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js":[function(require,module,exports) {
+var encodePacket = require("./encodePacket");
 
-    var resultArray = new Uint8Array(totalLength);
+var decodePacket = require("./decodePacket");
 
-    var bufferIndex = 0;
-    encodedPackets.forEach(function(p) {
-      var isString = typeof p === 'string';
-      var ab = p;
-      if (isString) {
-        var view = new Uint8Array(p.length);
-        for (var i = 0; i < p.length; i++) {
-          view[i] = p.charCodeAt(i);
-        }
-        ab = view.buffer;
-      }
+var SEPARATOR = String.fromCharCode(30); // see https://en.wikipedia.org/wiki/Delimiter#ASCII_delimited_text
 
-      if (isString) { // not true binary
-        resultArray[bufferIndex++] = 0;
-      } else { // true binary
-        resultArray[bufferIndex++] = 1;
-      }
+var encodePayload = function encodePayload(packets, callback) {
+  // some packets may be added to the array while encoding, so the initial length must be saved
+  var length = packets.length;
+  var encodedPackets = new Array(length);
+  var count = 0;
+  packets.forEach(function (packet, i) {
+    // force base64 encoding for binary packets
+    encodePacket(packet, false, function (encodedPacket) {
+      encodedPackets[i] = encodedPacket;
 
-      var lenStr = ab.byteLength.toString();
-      for (var i = 0; i < lenStr.length; i++) {
-        resultArray[bufferIndex++] = parseInt(lenStr[i]);
-      }
-      resultArray[bufferIndex++] = 255;
-
-      var view = new Uint8Array(ab);
-      for (var i = 0; i < view.length; i++) {
-        resultArray[bufferIndex++] = view[i];
+      if (++count === length) {
+        callback(encodedPackets.join(SEPARATOR));
       }
     });
-
-    return callback(resultArray.buffer);
   });
 };
 
-/**
- * Encode as Blob
- */
+var decodePayload = function decodePayload(encodedPayload, binaryType) {
+  var encodedPackets = encodedPayload.split(SEPARATOR);
+  var packets = [];
 
-exports.encodePayloadAsBlob = function(packets, callback) {
-  function encodeOne(packet, doneCallback) {
-    exports.encodePacket(packet, true, true, function(encoded) {
-      var binaryIdentifier = new Uint8Array(1);
-      binaryIdentifier[0] = 1;
-      if (typeof encoded === 'string') {
-        var view = new Uint8Array(encoded.length);
-        for (var i = 0; i < encoded.length; i++) {
-          view[i] = encoded.charCodeAt(i);
-        }
-        encoded = view.buffer;
-        binaryIdentifier[0] = 0;
-      }
+  for (var i = 0; i < encodedPackets.length; i++) {
+    var decodedPacket = decodePacket(encodedPackets[i], binaryType);
+    packets.push(decodedPacket);
 
-      var len = (encoded instanceof ArrayBuffer)
-        ? encoded.byteLength
-        : encoded.size;
-
-      var lenStr = len.toString();
-      var lengthAry = new Uint8Array(lenStr.length + 1);
-      for (var i = 0; i < lenStr.length; i++) {
-        lengthAry[i] = parseInt(lenStr[i]);
-      }
-      lengthAry[lenStr.length] = 255;
-
-      if (Blob) {
-        var blob = new Blob([binaryIdentifier.buffer, lengthAry.buffer, encoded]);
-        doneCallback(null, blob);
-      }
-    });
+    if (decodedPacket.type === "error") {
+      break;
+    }
   }
 
-  map(packets, encodeOne, function(err, results) {
-    return callback(new Blob(results));
-  });
+  return packets;
 };
 
-/*
- * Decodes data when a payload is maybe expected. Strings are decoded by
- * interpreting each byte as a key code for entries marked to start with 0. See
- * description of encodePayloadAsBinary
- *
- * @param {ArrayBuffer} data, callback method
- * @api public
- */
-
-exports.decodePayloadAsBinary = function (data, binaryType, callback) {
-  if (typeof binaryType === 'function') {
-    callback = binaryType;
-    binaryType = null;
-  }
-
-  var bufferTail = data;
-  var buffers = [];
-
-  while (bufferTail.byteLength > 0) {
-    var tailArray = new Uint8Array(bufferTail);
-    var isString = tailArray[0] === 0;
-    var msgLength = '';
-
-    for (var i = 1; ; i++) {
-      if (tailArray[i] === 255) break;
-
-      // 310 = char length of Number.MAX_VALUE
-      if (msgLength.length > 310) {
-        return callback(err, 0, 1);
-      }
-
-      msgLength += tailArray[i];
-    }
-
-    bufferTail = sliceBuffer(bufferTail, 2 + msgLength.length);
-    msgLength = parseInt(msgLength);
-
-    var msg = sliceBuffer(bufferTail, 0, msgLength);
-    if (isString) {
-      try {
-        msg = String.fromCharCode.apply(null, new Uint8Array(msg));
-      } catch (e) {
-        // iPhone Safari doesn't let you apply to typed arrays
-        var typed = new Uint8Array(msg);
-        msg = '';
-        for (var i = 0; i < typed.length; i++) {
-          msg += String.fromCharCode(typed[i]);
-        }
-      }
-    }
-
-    buffers.push(msg);
-    bufferTail = sliceBuffer(bufferTail, msgLength);
-  }
-
-  var total = buffers.length;
-  buffers.forEach(function(buffer, i) {
-    callback(exports.decodePacket(buffer, binaryType, true), i, total);
-  });
+module.exports = {
+  protocol: 4,
+  encodePacket: encodePacket,
+  encodePayload: encodePayload,
+  decodePacket: decodePacket,
+  decodePayload: decodePayload
 };
-
-},{"./keys":"../node_modules/engine.io-parser/lib/keys.js","has-binary2":"../node_modules/has-binary2/index.js","arraybuffer.slice":"../node_modules/arraybuffer.slice/index.js","after":"../node_modules/after/index.js","./utf8":"../node_modules/engine.io-parser/lib/utf8.js","base64-arraybuffer":"../node_modules/base64-arraybuffer/lib/base64-arraybuffer.js","blob":"../node_modules/blob/index.js"}],"../node_modules/engine.io-client/lib/transport.js":[function(require,module,exports) {
+},{"./encodePacket":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/encodePacket.browser.js","./decodePacket":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/decodePacket.browser.js"}],"../node_modules/engine.io-client/lib/transport.js":[function(require,module,exports) {
 /**
  * Module dependencies.
  */
@@ -5198,7 +4304,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"engine.io-parser":"../node_modules/engine.io-parser/lib/browser.js","component-emitter":"../node_modules/component-emitter/index.js"}],"../node_modules/parseqs/index.js":[function(require,module,exports) {
+},{"engine.io-parser":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js","component-emitter":"../node_modules/component-emitter/index.js"}],"../node_modules/parseqs/index.js":[function(require,module,exports) {
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -6107,7 +5213,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":"../node_modules/engine.io-client/lib/transport.js","parseqs":"../node_modules/parseqs/index.js","engine.io-parser":"../node_modules/engine.io-parser/lib/browser.js","component-inherit":"../node_modules/component-inherit/index.js","yeast":"../node_modules/yeast/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","xmlhttprequest-ssl":"../node_modules/engine.io-client/lib/xmlhttprequest.js"}],"../node_modules/engine.io-client/lib/transports/polling-xhr.js":[function(require,module,exports) {
+},{"../transport":"../node_modules/engine.io-client/lib/transport.js","parseqs":"../node_modules/parseqs/index.js","engine.io-parser":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js","component-inherit":"../node_modules/component-inherit/index.js","yeast":"../node_modules/yeast/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","xmlhttprequest-ssl":"../node_modules/engine.io-client/lib/xmlhttprequest.js"}],"../node_modules/engine.io-client/lib/transports/polling-xhr.js":[function(require,module,exports) {
 /* global attachEvent */
 
 /**
@@ -7063,7 +6169,7 @@ WS.prototype.check = function () {
   return !!WebSocketImpl && !('__initialize' in WebSocketImpl && this.name === WS.prototype.name);
 };
 
-},{"../transport":"../node_modules/engine.io-client/lib/transport.js","engine.io-parser":"../node_modules/engine.io-parser/lib/browser.js","parseqs":"../node_modules/parseqs/index.js","component-inherit":"../node_modules/component-inherit/index.js","yeast":"../node_modules/yeast/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","ws":"../node_modules/parcel-bundler/src/builtins/_empty.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/engine.io-client/lib/transports/index.js":[function(require,module,exports) {
+},{"../transport":"../node_modules/engine.io-client/lib/transport.js","engine.io-parser":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js","parseqs":"../node_modules/parseqs/index.js","component-inherit":"../node_modules/component-inherit/index.js","yeast":"../node_modules/yeast/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","ws":"../node_modules/parcel-bundler/src/builtins/_empty.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/engine.io-client/lib/transports/index.js":[function(require,module,exports) {
 /**
  * Module dependencies
  */
@@ -7879,7 +6985,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./transports/index":"../node_modules/engine.io-client/lib/transports/index.js","component-emitter":"../node_modules/component-emitter/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","indexof":"../node_modules/indexof/index.js","engine.io-parser":"../node_modules/engine.io-parser/lib/browser.js","parseuri":"../node_modules/parseuri/index.js","parseqs":"../node_modules/parseqs/index.js","./transport":"../node_modules/engine.io-client/lib/transport.js"}],"../node_modules/engine.io-client/lib/index.js":[function(require,module,exports) {
+},{"./transports/index":"../node_modules/engine.io-client/lib/transports/index.js","component-emitter":"../node_modules/component-emitter/index.js","debug":"../node_modules/engine.io-client/node_modules/debug/src/browser.js","indexof":"../node_modules/indexof/index.js","engine.io-parser":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js","parseuri":"../node_modules/parseuri/index.js","parseqs":"../node_modules/parseqs/index.js","./transport":"../node_modules/engine.io-client/lib/transport.js"}],"../node_modules/engine.io-client/lib/index.js":[function(require,module,exports) {
 
 module.exports = require('./socket');
 
@@ -7891,7 +6997,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":"../node_modules/engine.io-client/lib/socket.js","engine.io-parser":"../node_modules/engine.io-parser/lib/browser.js"}],"../node_modules/to-array/index.js":[function(require,module,exports) {
+},{"./socket":"../node_modules/engine.io-client/lib/socket.js","engine.io-parser":"../node_modules/engine.io-client/node_modules/engine.io-parser/lib/index.js"}],"../node_modules/to-array/index.js":[function(require,module,exports) {
 module.exports = toArray
 
 function toArray(list, index) {
@@ -7957,7 +7063,81 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],"../node_modules/socket.io-client/lib/socket.js":[function(require,module,exports) {
+},{}],"../node_modules/has-binary2/node_modules/isarray/index.js":[function(require,module,exports) {
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
+},{}],"../node_modules/has-binary2/index.js":[function(require,module,exports) {
+var Buffer = require("buffer").Buffer;
+/* global Blob File */
+
+/*
+ * Module requirements.
+ */
+
+var isArray = require('isarray');
+
+var toString = Object.prototype.toString;
+var withNativeBlob = typeof Blob === 'function' ||
+                        typeof Blob !== 'undefined' && toString.call(Blob) === '[object BlobConstructor]';
+var withNativeFile = typeof File === 'function' ||
+                        typeof File !== 'undefined' && toString.call(File) === '[object FileConstructor]';
+
+/**
+ * Module exports.
+ */
+
+module.exports = hasBinary;
+
+/**
+ * Checks for binary data.
+ *
+ * Supports Buffer, ArrayBuffer, Blob and File.
+ *
+ * @param {Object} anything
+ * @api public
+ */
+
+function hasBinary (obj) {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  if (isArray(obj)) {
+    for (var i = 0, l = obj.length; i < l; i++) {
+      if (hasBinary(obj[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if ((typeof Buffer === 'function' && Buffer.isBuffer && Buffer.isBuffer(obj)) ||
+    (typeof ArrayBuffer === 'function' && obj instanceof ArrayBuffer) ||
+    (withNativeBlob && obj instanceof Blob) ||
+    (withNativeFile && obj instanceof File)
+  ) {
+    return true;
+  }
+
+  // see: https://github.com/Automattic/has-binary/pull/4
+  if (obj.toJSON && typeof obj.toJSON === 'function' && arguments.length === 1) {
+    return hasBinary(obj.toJSON(), true);
+  }
+
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+},{"isarray":"../node_modules/has-binary2/node_modules/isarray/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/socket.io-client/lib/socket.js":[function(require,module,exports) {
 
 /**
  * Module dependencies.
@@ -70856,7 +70036,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54990" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57517" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
