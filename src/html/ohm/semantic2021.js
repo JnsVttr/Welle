@@ -1,16 +1,6 @@
 
-// WELLE - input grammar //
+// WELLE - grammar and semantic
 // =============================================================
-
-/*
-https://github.com/harc/ohm
-use the online tester 
-
-naming relates to grammar functions:
-Sequence_seqPattern = topic Sequence, subFunction seqPattern
-
-all returns are send to parseInput file
-*/
 
 
 // libraries
@@ -22,25 +12,128 @@ import { printer } from '/helper/printer';
 let livecode = ohm.grammar(grammarText);  // taken from grammar.js
 let semantics = livecode.createSemantics();
 let debug = true;
-let context = "semantics2021";
-
-// printer(debug, context, topic, element, value)
-// let printer = (debug, element, value) => {
-//     if (debug==true) {
-//         console.log(`Semantics \t - ${element} >> ${value}`);
-//     };
-// }
+let context = "semantics";
 
 // printer(debug, context, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
 
 
 
-
-
-// ========================  Grammar & Semantic ====================== //
-
 // SEMANTICS FOR OHM.JS LANGUAGE:
 semantics.addOperation('eval', {
+
+    Commands_playMultiEvent: (_, phrases) => {
+        phrases = phrasesToArray(phrases);
+        let event = 'playEvent';
+        if (phrases.length>1) event = 'playMultiEvent'
+        return {
+            event: event,
+            phrases: phrases,
+        }
+    },
+    Commands_stopMultiEvent: (_, phrases) => {
+        phrases = phrasesToArray(phrases);
+        let event = 'stopEvent';
+        if (phrases.length>1) event = 'stopMultiEvent'
+        return {
+            event: event,
+            phrases: phrases,
+        }
+    },
+    Commands_savePartEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'savePartEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_deletEvent: (_, phrases) => {
+        phrases = phrasesToArray(phrases);
+        let event = 'deleteEvent';
+        if (phrases.length>1) event = 'deleteMultiEvent'
+        return {
+            event: event,
+            phrases: phrases,
+        }
+    },
+    Commands_saveEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'saveEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_joinEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'joinEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_restartEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'restartEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_storeEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'storeEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_loadEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'loadEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_uploadEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = 'uploadEvent';
+        return {
+            event: event,
+            phrase: phrase,
+        }
+    },
+    Commands_muteEvent: (_) => {
+        let event = 'muteAllEvent';
+        return {
+            event: event,
+        }
+    },
+    Commands_unmuteEvent: (_) => {
+        let event = 'unmuteAllEvent';
+        return {
+            event: event,
+        }
+    },
+    Commands_playAllEvent: (_) => {
+        let event = 'playAllEvent';
+        return {
+            event: event,
+        }
+    },
+    Commands_stopAllEvent: (_) => {
+        let event = 'stopAllEvent';
+        return {
+            event: event,
+        }
+    },
+    Commands_deleteAllEvent: (_) => {
+        let event = 'deleteAllEvent';
+        return {
+            event: event,
+        }
+    },
    
     Assignments_copyPattern: (source, _, phrases) => {
         source = source.sourceString;
@@ -107,9 +200,9 @@ semantics.addOperation('eval', {
     // HELPER
     // ======================================
     
-    Pattern: function(patternIn) {
+    Pattern: function(pattern) {
         // here the incoming pattern gets evaluated
-        var pattern = patternIn.asIteration().eval();
+        pattern = pattern.asIteration().eval();
         // console.log('new at Pattern all incoming: ', pattern)
         var newPattern = [];
         for (let i=0;i<pattern.length;i++) {
@@ -125,8 +218,8 @@ semantics.addOperation('eval', {
         //console.log('new at Pattern all: ', newPattern)
         return newPattern;
     },
-    NestedEvents: function (b1,pat,b2,int) {
-        var pattern = pat.asIteration().eval();
+    NestedEvents: function (_, pattern, __, int) {
+        pattern = pattern.asIteration().eval();
         var newPattern = [];
         int = int.eval();
         if (int.length!=0){
@@ -143,26 +236,26 @@ semantics.addOperation('eval', {
         return newPattern;
     },
 
-    Events: function(a){
-        return a.eval();
+    Events: function(event){
+        return event.eval();
     },
-    Events_soundNote: function (a, b) {
-        if (b.sourceString!='') {
-            return parseInt(b.sourceString);
+    Events_soundNote: function (_, note) {
+        if (note.sourceString!='') {
+            return parseInt(note.sourceString);
         } else {
             return 1;
         }
     },
-    Events_soundPause: function (a) {
+    Events_soundPause: function (_) {
         return 0;
     },
-    floatPos: function(a) {
-        var val = parseFloat(a.sourceString);
-        return val;
+    floatPos: function(float) {
+        float = parseFloat(float.sourceString);
+        return float;
     },
-    intPos: function(a) {
-        var val = parseInt(a.sourceString);
-        return val;
+    intPos: function(int) {
+        int = parseInt(int.sourceString);
+        return int;
     },
 });
 
@@ -180,38 +273,22 @@ semantics.addOperation('eval', {
 // ============================================================================= //
 
 // Helper function for semantics.addOperation
-function phrasesToArray (b) {
+function phrasesToArray (phrases) {
     // convert multiple instruments from String to Array
-    var list = b.sourceString;
-    var newArray = [];
-    if (list==""){
-        newArray = [];
+    phrases = phrases.sourceString;
+    let phrasesArray = [];
+    if (phrases==""){
+        phrasesArray = [];
     } else {
-        list = list.split(' ');
-        for (var i=0;i<list.length;i++){
-            if (list[i]!=''){
-                newArray.push(list[i]);
+        phrases = phrases.split(' ');
+        for (var i=0;i<phrases.length;i++){
+            if (phrases[i]!=''){
+                phrasesArray.push(phrases[i]);
             };
         };
     };
-    return newArray;
+    return phrasesArray;
 };
-
-function handleRand(rand){
-    if (rand==""){rand=0};
-    return rand;
-};
-
-function handlePattern(pat){
-    var pattern = pat;
-    if (pattern.length==0){pattern=[]} else {pattern = pattern[0];};
-    return pattern;
-};
-
-
-
-
-
 
 
 export { livecode, semantics } 

@@ -1,5 +1,5 @@
 
-// WELLE - input grammar //
+// WELLE - grammar
 // =============================================================
 
 /*
@@ -32,14 +32,14 @@ livecode {
     Commands =
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
-        | ":" PhraseList           	--savePartEvent
+        | ":" phrase           	    --savePartEvent
         | "/" PhraseList		    --deletEvent
-        | "save" alnum+         	--saveEvent
-        | "join" alnum+ 		    --joinEvent
-        | "restart" alnum+      	--restartEvent
-        | "store" alnum+ 		    --storeEvent
-        | "load" alnum+			    --loadEvent
-        | "upload" alnum+ 		    --uploadEvent
+        | "save" phrase         	--saveEvent
+        | "join" phrase 			--joinEvent
+        | "restart" phrase      	--restartEvent
+        | "store" phrase 			--storeEvent
+        | "load" phrase				--loadEvent
+        | "upload" phrase 			--uploadEvent
         | "mute"             		--muteEvent
         | "unmute"             		--unmuteEvent
         | ">"               		--playAllEvent

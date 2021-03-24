@@ -116,8 +116,9 @@ document.getElementById("textarea").addEventListener("keydown", (e) => {
 
 	// printer(debug, context, "key input", e.code);
 	if (e.code=='Enter') {
-		printer(debug, context, "", "");
-		printer(debug, context, "", "");
+		// print empty spaces
+		console.log('');
+		console.log('');
 
 		playAlerts('return', alertMuteState);
 		consolePointer = -1; // pointer for arrwos
