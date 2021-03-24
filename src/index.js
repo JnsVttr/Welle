@@ -45,9 +45,10 @@ export let sampleURL = {};
 export let bpm = 120;
 export let instrumentsList = "";
 
-let defaultInstrument = new Instrument();
-defaultInstrument.defaultGain = 0;
-export let instruments = { default: defaultInstrument};
+// let defaultInstrument = new Instrument();
+// defaultInstrument.defaultGain = 0;
+// export let instruments = { default: defaultInstrument};
+export let instruments = {};
 export let parts = {};
 
 // input & console varibles

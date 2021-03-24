@@ -62,18 +62,18 @@ export const parser = (input) => {
             break;
         case 'playAllEvent':
             Object.keys(instruments).forEach(instrument => {
-                instrument.start()
+                instruments[instrument].restart()
             });
             // Tone.Transport.start();
             break;
         case 'stopAllEvent':
             Object.keys(instruments).forEach(instrument => {
-                instrument.stop();
+                instruments[instrument].stop()
             });
         break;
         case 'questionEvent':
-            Object.keys(instruments).forEach(instrument => {
-                console.log(`is sequence playing for ${instrument}: ${instrument.playState()}`)
+            Object.keys(instruments).forEach(entry => {
+                console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)    //  ${instrument.playState()}
             });
         break;
     }

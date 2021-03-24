@@ -24,7 +24,7 @@ class Instrument {
         
         // create tone elements: synth -> gain -> masterOut
         // the synth creates the sound
-        this.isPlaying = false;
+        this._isPlaying = false;
         this.synth = new Tone[Instrument.typeDefault]();;
         this.gain = new Tone.Gain(Instrument.gainDefault);
         this.synth.connect(this.gain);
@@ -44,24 +44,37 @@ class Instrument {
     }
 
     start (){
+        if (this._isPlaying==false) {
+            this.sequence.start(this.#quant(), 0);
+            this._isPlaying = true;
+        }
+    }
+
+    restart (){
+        this.sequence.stop();
         this.sequence.start(this.#quant());
-        this.isPlaying = true;
+        this._isPlaying = true;
     }
     
     stop (){
-        this.sequence.stop();
-        this.isPlaying = false;
+        this.sequence.stop(this.#quant()-0.1); // stop just before next quant
+        this._isPlaying = false;
     }
 
-    playState (){
-        return this.isPlaying;
+
+    // GETTER & SETTER - only one value
+    get isPlaying (){
+        return this._isPlaying;
+    }
+    set isPlaying (state){
+        this._isPlaying = state;
     }
 
 
     getPattern () {
         return [this.pattern, this.midiPattern]
     }
-    
+
     setPattern (pattern) {
         this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
@@ -69,7 +82,7 @@ class Instrument {
         // this.sequence.dispose();
         this.sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');
         this.sequence.start(this.#quant());  // start sequence at calculated quant time 
-        this.isPlaying = true;
+        this._isPlaying = true;
     }
 
     // callback for sequence
@@ -106,14 +119,14 @@ class Instrument {
         let factor = 1;
         let now = Tone.TransportTime().valueOf();
         let quant = Tone.Time(now).quantize(factor);
-        console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`)
+        // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
     
         if (quant < now){
             now+=1;
             quant = Tone.Time(now).quantize(factor);
-            console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
+            // console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
         }
-        console.log(`now: ${now} - play at ${now + 0.2}`)
+        // console.log(`now: ${now} - play at ${now + 0.2}`)
         return quant;
     }
 
