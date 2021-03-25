@@ -27,7 +27,7 @@ import { alerts } from '/helper/alerts';
 import { createAlerts } from '/helper/createAlerts';
 import { enterFunction } from '/helper/enterFunction';
 import { playAlerts } from '/helper/playAlerts';
-import { requestServerFiles } from '/socket/requestServerFiles';
+// import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
 import { returnToActionExecute } from './helper/returnToActionExecute';
 import { Instrument } from './tone/class_instrument';
@@ -39,7 +39,7 @@ import { presets } from '/tone/presets'
 // ===================================
 export const debug = true;
 export const context = "index";
-export var socket = io.connect();   // socket var - server connect, also for exports
+let socket = io.connect();   // socket var - server connect, also for exports
 export let user = 'local';
 export let soundMuteState = true;
 export let alertMuteState = false;  // alerts muted or not?
@@ -122,7 +122,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 	if (e.code=='Enter') {
 		// first time start Tone if not running
 		// Tone.start();
-		
+		socket.emit('msg', 'Hello!');
 		// console.log("TONE context started");
 		// print empty spaces
 		console.log('');
@@ -217,8 +217,12 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // ======================
 
 // initial request for samples on server
+const requestServerFiles = (string) => {
+	printer(debug, context, "requestServerFiles", "request sample paths from server...")
+	socket.emit('requestServerFiles', string);
+}
 requestServerFiles ("samples");
-
+socket.emit('requestServerFiles', 'samples');
 // receive files via socket, assign them to global variables
 socket.on("filesOnServer", function(folder, samples, what) {
 	serverFolders = folder;
