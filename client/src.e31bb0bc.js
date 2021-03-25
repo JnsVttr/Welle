@@ -60298,6 +60298,10 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
+var _setVolume = new WeakMap();
+
+var _initSynth = new WeakMap();
+
 var _initSequence = new WeakMap();
 
 var _callbackSequence = new WeakMap();
@@ -60317,11 +60321,30 @@ var Instrument = /*#__PURE__*/function () {
   // default sample path, needs review
   // default synth type = Sampler
   // master output for Tone -> Speaker
+  // bpm
+  // list of possible instrument names
+  // settings for different instrument names
   // CONSTRUCTOR - executed with every new instance
-  function Instrument(_pattern) {
+  function Instrument(name, _pattern) {
     var _this = this;
 
     _classCallCheck(this, Instrument);
+
+    _setVolume.set(this, {
+      writable: true,
+      value: function value(gain) {
+        _this._gain.gain.rampTo(_this._volume, 0.1);
+
+        console.log("this._gain.gain: ".concat(_this._gain.gain, ", this._volume: ").concat(_this._volume));
+      }
+    });
+
+    _initSynth.set(this, {
+      writable: true,
+      value: function value() {
+        _this._synth = new Tone[_this._type](_this._settings);
+      }
+    });
 
     _initSequence.set(this, {
       writable: true,
@@ -60333,10 +60356,13 @@ var Instrument = /*#__PURE__*/function () {
     _callbackSequence.set(this, {
       writable: true,
       value: function value(time, note) {
-        _this.synth.triggerAttackRelease(note, '16n', '@16n'); // console.log("sequence note: ", note);
+        // console.log("note: ", note);
+        _this._triggerFunction(_this._synth, note); // this._synth.triggerAttackRelease(note, '16n', '8n');
+        // this._synth.triggerAttackRelease("C1", '16n', '@16n');
+        // console.log("sequence note: ", note);
 
 
-        _this.ticks++;
+        _this._ticks++;
       }
     });
 
@@ -60346,19 +60372,23 @@ var Instrument = /*#__PURE__*/function () {
         var _midiPattern = [];
 
         for (var i = 0; i < pattern.length; i++) {
-          var note = pattern[i]; // console.log("changed note", note);
+          var note = pattern[i]; // if note is a rest, push as 'null', else calculate midi notes
 
-          note = note + _this.baseNote; // console.log("changed note+baseNote", note);
-          // transpose note
+          if (note == null) _midiPattern.push(note);else {
+            // console.log("changed note", note);
+            note = note + _this._baseNote; // console.log("changed note+baseNote", note);
+            // transpose note
 
-          if (_this.transpose < 0) note -= _this.transpose;
-          if (_this.transpose > 0) note += _this.transpose; // console.log("transpose", this.transpose);
-          // console.log("note after transpose: ", note);
-          // set notes from pattern note
+            if (_this._transpose < 0) note -= _this._transpose;
+            if (_this._transpose > 0) note += _this._transpose; // console.log("transpose", this._transpose);
+            // console.log("note after transpose: ", note);
+            // set notes from pattern note
 
-          note = Tone.Frequency(note, "midi").toNote(); // console.log("changed note+baseNote to Freq", note);
+            note = Tone.Frequency(note, "midi").toNote(); // console.log("changed note+baseNote to Freq", note);
 
-          _midiPattern.push(note);
+            _midiPattern.push(note);
+          }
+          ;
         }
 
         return _midiPattern;
@@ -60396,32 +60426,45 @@ var Instrument = /*#__PURE__*/function () {
     });
 
     // define properties every new Instrument will have
-    // this.synthType = Instrument.typeDefault;       
+    // this._synthType = Instrument.typeDefault;       
     // this.samplePath = Instrument.samplePathDefault;
     // create tone elements: synth -> gain -> masterOut
     // the synth creates the sound
+    this._name = name;
     this._isPlaying = false;
-    this.synth = new Tone[Instrument.typeDefault]();
-    ;
-    this.gain = new Tone.Gain(Instrument.gainDefault);
-    this.synth.connect(this.gain);
-    this.gain.connect(Instrument.masterGain); // connect this synth to master Gain node
-
-    this.ticks = 0;
-    this.transpose = Instrument.transposeDefault;
-    this.baseNote = Instrument.baseNoteDefault;
+    this._synth = undefined;
+    this._sequence = undefined;
+    this._ticks = 0;
     this.measure = '8n';
+    this._preset = Instrument.presets[this._name];
+    console.log('preset', this._preset);
+    this._settings = this._preset.settings; // set synth settings from Instrument default settings(type)
+
+    this._transpose = this._preset.transpose;
+    this._baseNote = this._preset.baseNote;
+    this._type = this._preset.synthType;
+    this._triggerFunction = this._preset.triggerFunction;
+    this._volume = this._preset.gain * this._preset.volume;
     this.pattern = Instrument.patternDefault;
     if (_pattern != undefined) this.pattern = _pattern;
     this.midiPattern = _classPrivateFieldGet(this, _translatePatternToMidi).call(this, this.pattern); // placeholder for pattern translation
-    // create sequence 
-    // the sequence calls the synth at time+note defined by the pattern
+    // create Synth
 
-    this._sequence = undefined; // init sequence;
+    _classPrivateFieldGet(this, _initSynth).call(this); // create sequence 
+    // the sequence calls the synth at time+note defined by the pattern
+    // init sequence;
+
 
     _classPrivateFieldGet(this, _initSequence).call(this);
 
-    console.log("this._sequence.state: ", this._sequence.state);
+    this._gain = new Tone.Gain(Instrument.gainDefault);
+
+    this._synth.connect(this._gain);
+
+    this._gain.connect(Instrument.masterGain); // connect this synth to master Gain node
+
+
+    _classPrivateFieldGet(this, _setVolume).call(this);
   }
 
   _createClass(Instrument, [{
@@ -60487,12 +60530,12 @@ var Instrument = /*#__PURE__*/function () {
 
       this.start();
       this._isPlaying = true;
-    } // init a sequence
+    } // set volume
 
   }], [{
     key: "getGainDefault",
     value: function getGainDefault() {
-      return this.gainDefault;
+      return this._gainDefault;
     }
   }]);
 
@@ -60501,7 +60544,7 @@ var Instrument = /*#__PURE__*/function () {
 
 exports.Instrument = Instrument;
 
-_defineProperty(Instrument, "baseNoteDefault", 32);
+_defineProperty(Instrument, "baseNoteDefault", 16);
 
 _defineProperty(Instrument, "transposeDefault", 2);
 
@@ -60511,9 +60554,15 @@ _defineProperty(Instrument, "typeDefault", 'MembraneSynth');
 
 _defineProperty(Instrument, "gainDefault", 0.6);
 
-_defineProperty(Instrument, "patternDefault", [0, 1, 2, -3, 4]);
+_defineProperty(Instrument, "patternDefault", [0, 1, null, -3, 4]);
 
 _defineProperty(Instrument, "masterGain", new Tone.Gain(0.9));
+
+_defineProperty(Instrument, "bpm", 120);
+
+_defineProperty(Instrument, "list", []);
+
+_defineProperty(Instrument, "presets", {});
 
 ;
 },{"tone":"../node_modules/tone/build/esm/index.js"}],"parser.js":[function(require,module,exports) {
@@ -60558,7 +60607,7 @@ var parser = function parser(input) {
 
       for (var i = 0; i < input.phrases.length; i++) {
         var name = input.phrases[i];
-        _index.instruments[name] = new _class_instrument.Instrument();
+        _index.instruments[name] = new _class_instrument.Instrument(name);
 
         _index.instruments[name].start();
       }
@@ -60591,7 +60640,7 @@ var parser = function parser(input) {
           _index.instruments[_name2].setPattern(input.pattern);
         } else {
           (0, _printer.printer)(debug, context, "assignPatternOne, create inst ".concat(_name2, " + pattern ").concat(input.pattern), _name2);
-          _index.instruments[_name2] = new _class_instrument.Instrument(input.pattern);
+          _index.instruments[_name2] = new _class_instrument.Instrument(_name2, input.pattern);
 
           _index.instruments[_name2].start();
         }
@@ -60629,7 +60678,10 @@ var parser = function parser(input) {
       });
       break;
   }
-};
+
+  ; // EO_Switch
+}; // EO parser
+
 
 exports.parser = parser;
 },{"tone":"../node_modules/tone/build/esm/index.js","/helper/printer":"helper/printer.js","/tone/class_instrument":"tone/class_instrument.js","/index":"index.js"}],"text/helpText.js":[function(require,module,exports) {
@@ -69436,7 +69488,7 @@ semantics.addOperation('eval', {
     }
   },
   Events_soundPause: function Events_soundPause(_) {
-    return 0;
+    return null;
   },
   floatPos: function floatPos(float) {
     float = parseFloat(float.sourceString);
@@ -69748,7 +69800,7 @@ var returnToActionExecute = function returnToActionExecute(_actionContent, _cons
   var printToConsole = _actionContent.printToConsole;
   console.log("printToConsole: ", printToConsole);
 
-  if (printToConsole.length > 0) {
+  if (printToConsole != undefined) {
     // check if console string is valid, then print to console:
     if (printToConsole.valid == true) {
       // if valid, add string to console stringarray
@@ -69800,7 +69852,222 @@ var returnToActionExecute = function returnToActionExecute(_actionContent, _cons
 };
 
 exports.returnToActionExecute = returnToActionExecute;
-},{"tone":"../node_modules/tone/build/esm/index.js","/helper/printer":"helper/printer.js","../index":"index.js","/html/renderHTML":"html/renderHTML.js","/html/renderInstruments":"html/renderInstruments.js","/html/renderParts":"html/renderParts.js","/helper/playAlerts":"helper/playAlerts.js"}],"index.js":[function(require,module,exports) {
+},{"tone":"../node_modules/tone/build/esm/index.js","/helper/printer":"helper/printer.js","../index":"index.js","/html/renderHTML":"html/renderHTML.js","/html/renderInstruments":"html/renderInstruments.js","/html/renderParts":"html/renderParts.js","/helper/playAlerts":"helper/playAlerts.js"}],"tone/presets.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.presets = void 0;
+var presets = {
+  'drum': {
+    synthType: 'MembraneSynth',
+    gain: 1,
+    volume: 0.6,
+    baseNote: 16,
+    transpose: 0,
+    triggerFunction: function triggerFunction(_synth, _note) {
+      _synth.triggerAttackRelease(_note, '16n', '@16n');
+    },
+    settings: {
+      detune: 0.3,
+      pitchDecay: 0.05,
+      octaves: 13,
+      oscillator: {
+        type: 'square'
+      },
+      envelope: {
+        attack: 0.001,
+        decay: 0.4,
+        sustain: 0.01,
+        release: 1.4,
+        attackCurve: 'exponential'
+      }
+    }
+  },
+  'bass': {
+    synthType: 'MonoSynth',
+    gain: 1,
+    volume: 0.6,
+    baseNote: 32,
+    transpose: 0,
+    triggerFunction: function triggerFunction(_synth, _note) {
+      _synth.triggerAttackRelease(_note, '16n', '@16n');
+    },
+    settings: {
+      frequency: 'C4',
+      detune: 0,
+      oscillator: {
+        type: 'square'
+      },
+      filter: {
+        Q: 6,
+        type: 'lowpass',
+        rolloff: -24
+      },
+      envelope: {
+        attack: 0.005,
+        decay: 0.1,
+        sustain: 0.9,
+        release: 1
+      },
+      filterEnvelope: {
+        attack: 0.06,
+        decay: 0.1,
+        sustain: 0.2,
+        release: 0.3,
+        baseFrequency: 200,
+        octaves: 7,
+        exponent: 2
+      }
+    }
+  },
+  DuoSynth: {
+    vibratoAmount: 0.5,
+    vibratoRate: 5,
+    harmonicity: 1.5,
+    voice0: {
+      volume: -10,
+      portamento: 0,
+      oscillator: {
+        type: 'sine'
+      },
+      filterEnvelope: {
+        attack: 0.01,
+        decay: 0,
+        sustain: 1,
+        release: 0.5
+      },
+      envelope: {
+        attack: 0.01,
+        decay: 0,
+        sustain: 1,
+        release: 0.5
+      }
+    },
+    voice1: {
+      volume: -10,
+      portamento: 0,
+      oscillator: {
+        type: 'sine'
+      },
+      filterEnvelope: {
+        attack: 0.01,
+        decay: 0,
+        sustain: 1,
+        release: 0.5
+      },
+      envelope: {
+        attack: 0.01,
+        decay: 0,
+        sustain: 1,
+        release: 0.5
+      }
+    }
+  },
+  Sampler: {
+    'C3': '../'
+  },
+  NoiseSynth: {
+    noise: {
+      type: 'white'
+    },
+    envelope: {
+      attack: 0.005,
+      decay: 0.1,
+      sustain: 0
+    }
+  },
+  Synth: {
+    oscillator: {
+      type: "triangle"
+    },
+    envelope: {
+      attack: 0.01,
+      decay: 0.1,
+      sustain: 0.3,
+      release: 1
+    }
+  },
+  MembraneSynth: {
+    pitchDecay: 0.05,
+    octaves: 10,
+    oscillator: {
+      type: 'sine'
+    },
+    envelope: {
+      attack: 0.001,
+      decay: 0.4,
+      sustain: 0.01,
+      release: 1.4,
+      attackCurve: 'exponential'
+    }
+  },
+  MetalSynth: {
+    frequency: 200,
+    envelope: {
+      attack: 0.001,
+      decay: 0.4,
+      release: 0.2
+    },
+    harmonicity: 5.1,
+    modulationIndex: 12,
+    resonance: 4000,
+    octaves: 1.5
+  },
+  PluckSynth: {
+    attackNoise: 1,
+    dampening: 4000,
+    resonance: 0.6
+  },
+  FMSynth: {
+    harmonicity: 2,
+    modulationIndex: 10,
+    detune: 0.2,
+    oscillator: {
+      type: "square64"
+    },
+    envelope: {
+      attack: 0.01,
+      decay: 0.1,
+      sustain: 0.1,
+      release: 0.1
+    },
+    modulation: {
+      type: "square64"
+    },
+    modulationEnvelope: {
+      attack: 0.1,
+      decay: 0.5,
+      sustain: 0.1,
+      release: 0.2
+    }
+  },
+  AMSynth: {
+    harmonicity: 3,
+    detune: 1,
+    oscillator: {
+      type: "square32"
+    },
+    envelope: {
+      attack: 0.1,
+      decay: 0.1,
+      sustain: 0.1,
+      release: 0.3
+    },
+    modulation: {
+      type: "square"
+    },
+    modulationEnvelope: {
+      attack: 0.1,
+      decay: 0.01,
+      sustain: 0.1,
+      release: 0.2
+    }
+  }
+};
+exports.presets = presets;
+},{}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69840,6 +70107,8 @@ var _returnToActionExecute = require("./helper/returnToActionExecute");
 
 var _class_instrument = require("./tone/class_instrument");
 
+var _presets = require("/tone/presets");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -69856,10 +70125,11 @@ HALLO STEFAN
 
 */
 // libraries
+// ===================================
 // files
-// import { parseInput }  from '/parse-commands';
-// import { instruments, parts, thisBPM } from '/tone/main-tone';
+// ===================================
 // global variables
+// ===================================
 var debug = true;
 exports.debug = debug;
 var context = "index";
@@ -69880,20 +70150,21 @@ var serverFolders = "";
 var serverSamples = "";
 exports.serverSamples = serverSamples;
 var sampleURL = {}; // audio variables
+// ===================================
 
 exports.sampleURL = sampleURL;
 var bpm = 120;
 exports.bpm = bpm;
-var instrumentsList = ""; // let defaultInstrument = new Instrument();
-// defaultInstrument.defaultGain = 0;
-// export let instruments = { default: defaultInstrument};
-
+var instrumentsList = "";
 exports.instrumentsList = instrumentsList;
 var instruments = {};
 exports.instruments = instruments;
-var parts = {}; // input & console varibles
+var parts = {}; // list of instruments corresponds to folders on server! first check folders ?
 
 exports.parts = parts;
+var listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; // input & console varibles
+// ===================================
+
 var consolePointer = 0; // for arrow functions
 
 exports.consolePointer = consolePointer;
@@ -69902,21 +70173,22 @@ var consoleArray = []; // arrays to store page console etc. output
 exports.consoleArray = consoleArray;
 var consoleLength = 20; // how many lines are displayed
 // html variables
+// ===================================
 
 exports.consoleLength = consoleLength;
 var checkMuteSound = document.getElementById("checkMuteSound");
 var checkMuteAlerts = document.getElementById("checkMuteAlerts");
-var consoleDivID = 'console';
-var returnToAction = {
-  'printToConsole': {},
-  'parser': {}
-}; // handle direct sound alerts
+var consoleDivID = 'console'; // actions
+// ===================================
+// handle direct sound alerts
 
 (0, _createAlerts.createAlerts)(_alerts.alerts); // initially show BPM
 
 (0, _renderHTML.renderBPM)(bpm); // set static variables to class Instrument
-// Instrument.bpm = bpm;
-// connect audio to Tone master
+
+_class_instrument.Instrument.bpm = bpm;
+_class_instrument.Instrument.list = listOfAvailableInstruments;
+_class_instrument.Instrument.presets = _presets.presets; // connect audio to Tone master
 
 _class_instrument.Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
 
@@ -69931,7 +70203,12 @@ Tone.Transport.bpm.value = bpm; // const synth = new Tone.Synth().connect(Instru
 // ============================================
 
 document.getElementById("mainInput").addEventListener("keydown", function (e) {
-  // if Enter in main input field
+  // set variable for returns from grammar, parser, tone
+  var returnToAction = {
+    printToConsole: {},
+    parser: {}
+  }; // if Enter in main input field
+
   if (e.code == 'Enter') {
     // first time start Tone if not running
     // Tone.start();
@@ -69954,7 +70231,9 @@ document.getElementById("mainInput").addEventListener("keydown", function (e) {
     // handle returns from enterfunction() for socket and parser
     // html handling goes through returnToAction list and rendering
 
-    if (result == null) (0, _playAlerts.playAlerts)('error', alertMuteState);else if (result.valid == true) {
+    if (result == null) {
+      (0, _playAlerts.playAlerts)('error', alertMuteState);
+    } else if (result.valid == true) {
       // send to server via sockets
       socket.emit('clientEvent', message); // send results to parser for Tone
 
@@ -69974,6 +70253,7 @@ document.getElementById("mainInput").addEventListener("keydown", function (e) {
 
       (0, _playAlerts.playAlerts)('error', alertMuteState);
     }
+
     ; // print return list
     // printer(debug, context, "returnToAction list: ", returnToAction)
     // EXECUTE RETURN ACTIONS - execute returnToAction list and return new consoleArray
@@ -70062,7 +70342,7 @@ also a tester here:
 https://css-tricks.com/snippets/javascript/javascript-keycodes/
 
 */
-},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","tone":"../node_modules/tone/build/esm/index.js","/html/renderHTML":"html/renderHTML.js","/parser":"parser.js","/text/helpText":"text/helpText.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","/helper/alerts":"helper/alerts.js","/helper/createAlerts":"helper/createAlerts.js","/helper/enterFunction":"helper/enterFunction.js","/helper/playAlerts":"helper/playAlerts.js","/socket/requestServerFiles":"socket/requestServerFiles.js","./helper/extractSamplePaths":"helper/extractSamplePaths.js","./helper/returnToActionExecute":"helper/returnToActionExecute.js","./tone/class_instrument":"tone/class_instrument.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"socket.io-client":"../node_modules/socket.io-client/lib/index.js","socket.io-file-client":"../node_modules/socket.io-file-client/socket.io-file-client.js","tone":"../node_modules/tone/build/esm/index.js","/html/renderHTML":"html/renderHTML.js","/parser":"parser.js","/text/helpText":"text/helpText.js","/tone/update_InstrumentsList":"tone/update_InstrumentsList.js","/helper/printer":"helper/printer.js","/helper/alerts":"helper/alerts.js","/helper/createAlerts":"helper/createAlerts.js","/helper/enterFunction":"helper/enterFunction.js","/helper/playAlerts":"helper/playAlerts.js","/socket/requestServerFiles":"socket/requestServerFiles.js","./helper/extractSamplePaths":"helper/extractSamplePaths.js","./helper/returnToActionExecute":"helper/returnToActionExecute.js","./tone/class_instrument":"tone/class_instrument.js","/tone/presets":"tone/presets.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

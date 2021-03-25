@@ -16,7 +16,7 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 	// let parserReturn = _actionContent.parser.parserReturn;
 	let printToConsole = _actionContent.printToConsole;
 	console.log("printToConsole: ", printToConsole)
-	if (printToConsole.length > 0 ){
+	if (printToConsole != undefined ){
 		// check if console string is valid, then print to console:
 		if (printToConsole.valid == true){
 			// if valid, add string to console stringarray

@@ -256,7 +256,7 @@ semantics.addOperation('eval', {
         }
     },
     Events_soundPause: function (_) {
-        return 0;
+        return null;
     },
     floatPos: function(float) {
         float = parseFloat(float.sourceString);

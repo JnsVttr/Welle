@@ -32,12 +32,14 @@ export const parser = (input) => {
             printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             for (let i=0; i<input.phrases.length;i++){
                 let name = input.phrases[i];
-                instruments[name] = new Instrument();
+                instruments[name] = new Instrument(name);
                 instruments[name].start();
             };
             console.log("instruments object ", instruments);
             Tone.Transport.start();
             break;
+        
+        
         case 'playMultiEvent':
             printer(debug, context, "playMultiEvent, instrument: ", input.phrases);
             for (let i=0; i<input.phrases.length;i++){
@@ -46,6 +48,8 @@ export const parser = (input) => {
             };
             Tone.Transport.start();
             break;
+        
+        
         case 'assignPatternOne':
             for (let i=0; i<input.phrases.length;i++){
                 let name = input.phrases[i];
@@ -54,13 +58,14 @@ export const parser = (input) => {
                     instruments[name].setPattern(input.pattern);
                 } else {
                     printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
-                    instruments[name] = new Instrument(input.pattern);
+                    instruments[name] = new Instrument(name, input.pattern);
                     instruments[name].start();
                 }
             };
             if (Tone.Transport.state == 'stopped') Tone.Transport.start();
-
-            break;
+        break;
+        
+        
         case 'playAllEvent':
             Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
             Tone.Transport.stop(0);
@@ -68,21 +73,23 @@ export const parser = (input) => {
             Object.keys(instruments).forEach(instrument => { instruments[instrument].restart() });
             console.log('Tone.Transport: ', Tone.Transport);
             console.log('Tone.Transport.state: ', Tone.Transport.state);
+        break;
 
 
-            break;
         case 'stopAllEvent':
             Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
             Tone.Transport.stop();
             console.log('Tone.Transport: ', Tone.Transport)
             console.log('Tone.Transport.state: ', Tone.Transport.state);
-            
-
         break;
+
         case 'questionEvent':
             Object.keys(instruments).forEach(entry => {
                 console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)
             });
         break;
-    }
-}
+    }; // EO_Switch
+
+
+
+}; // EO parser

@@ -4,46 +4,67 @@ import * as Tone from 'tone';
 // ===================================================================
 
 class Instrument {
+
     // STATIC DEFAULTS - set default properties 
     // can be accessed (get/set) from outside as:  ClassName.property
     // from inside the class. in 'static' scope as this.property, else as ClassName.property
-    static baseNoteDefault = 32;                    // midi notes from lowest 0 upwards
+    static baseNoteDefault = 16;                    // midi notes from lowest 0 upwards
     static transposeDefault = 2;                    // default transpose
     static samplePathDefault = '../data/defaultSample'; // default sample path, needs review
     static typeDefault = 'MembraneSynth';           // default synth type = Sampler
     static gainDefault = 0.6;
-    static patternDefault = [0, 1, 2, -3, 4];
-    static masterGain = new Tone.Gain(0.9);          // master output for Tone -> Speaker
+    static patternDefault = [0, 1,  null, -3, 4];
+    static masterGain = new Tone.Gain(0.9);         // master output for Tone -> Speaker
+    static bpm = 120;                               // bpm
+    static list = [];                               // list of possible instrument names
+    static presets = {};                           // settings for different instrument names
+
+
 
     // CONSTRUCTOR - executed with every new instance
-    constructor(pattern) {
+    constructor(name, pattern) {
 
         // define properties every new Instrument will have
-        // this.synthType = Instrument.typeDefault;       
+        // this._synthType = Instrument.typeDefault;       
         // this.samplePath = Instrument.samplePathDefault;
         
         // create tone elements: synth -> gain -> masterOut
         // the synth creates the sound
+        this._name = name;
         this._isPlaying = false;
-        this.synth = new Tone[Instrument.typeDefault]();;
-        this.gain = new Tone.Gain(Instrument.gainDefault);
-        this.synth.connect(this.gain);
-        this.gain.connect(Instrument.masterGain);   // connect this synth to master Gain node
-        
-        this.ticks = 0;
-        this.transpose = Instrument.transposeDefault;
-        this.baseNote = Instrument.baseNoteDefault;
+        this._synth = undefined;
+        this._sequence = undefined;
+        this._ticks = 0;
         this.measure = '8n';
+        
+        
+        
+        this._preset = Instrument.presets[this._name];
+        console.log('preset', this._preset);
+        this._settings = this._preset.settings;   // set synth settings from Instrument default settings(type)
+        this._transpose = this._preset.transpose;
+        this._baseNote = this._preset.baseNote;
+        this._type = this._preset.synthType;
+        this._triggerFunction = this._preset.triggerFunction;
+        this._volume = this._preset.gain * this._preset.volume;
+
+        
+
         this.pattern = Instrument.patternDefault;
         if (pattern != undefined) this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern); // placeholder for pattern translation
-
+        
+        // create Synth
+        this.#initSynth();
         // create sequence 
         // the sequence calls the synth at time+note defined by the pattern
-        this._sequence = undefined;
         // init sequence;
         this.#initSequence();
-        console.log("this._sequence.state: ", this._sequence.state)
+        this._gain = new Tone.Gain(Instrument.gainDefault);
+        this._synth.connect(this._gain);
+        this._gain.connect(Instrument.masterGain);   // connect this synth to master Gain node
+        this.#setVolume();
+
     }
 
     start (){
@@ -100,15 +121,30 @@ class Instrument {
 
 
 
+
+
+    // set volume
+    #setVolume = (gain) => {
+        this._gain.gain.rampTo(this._volume, 0.1);
+        console.log(`this._gain.gain: ${this._gain.gain}, this._volume: ${this._volume}`);
+    }
+    // init synth
+    #initSynth = () => {
+        this._synth = new Tone[this._type](this._settings);
+    }
+
     // init a sequence
     #initSequence = () => {
         this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');   // '8n' == speed, eight bars/second
     }
     // callback for sequence
     #callbackSequence = (time, note) => {
-        this.synth.triggerAttackRelease(note, '16n', '@16n');
+        // console.log("note: ", note);
+        this._triggerFunction(this._synth, note);
+        // this._synth.triggerAttackRelease(note, '16n', '8n');
+        // this._synth.triggerAttackRelease("C1", '16n', '@16n');
         // console.log("sequence note: ", note);
-        this.ticks++;
+        this._ticks++;
     }
 
     // translate pattern [0, 1, 2, -4] to midi pattern ['C1', 'A2']. based on basenote/ transpose
@@ -116,20 +152,25 @@ class Instrument {
         let _midiPattern = [];
         for (let i=0; i< pattern.length; i++) {
             let note = pattern[i];
-            // console.log("changed note", note);
-            note = note + this.baseNote;
-            // console.log("changed note+baseNote", note);
-            // transpose note
-            if (this.transpose<0) note-=this.transpose;
-            if (this.transpose>0) note+=this.transpose;
-            // console.log("transpose", this.transpose);
-            // console.log("note after transpose: ", note);
-            // set notes from pattern note
-            note = Tone.Frequency(note, "midi").toNote();
-            // console.log("changed note+baseNote to Freq", note);
-            _midiPattern.push(note);
+            // if note is a rest, push as 'null', else calculate midi notes
+            if (note == null) _midiPattern.push(note);
+            else {
+                // console.log("changed note", note);
+                note = note + this._baseNote;
+                // console.log("changed note+baseNote", note);
+                // transpose note
+                if (this._transpose<0) note-=this._transpose;
+                if (this._transpose>0) note+=this._transpose;
+                // console.log("transpose", this._transpose);
+                // console.log("note after transpose: ", note);
+                // set notes from pattern note
+                note = Tone.Frequency(note, "midi").toNote();
+                // console.log("changed note+baseNote to Freq", note);
+                _midiPattern.push(note);
+            };
+            
         }
-        return _midiPattern
+        return _midiPattern;
     }
 
     // get quant
@@ -161,7 +202,7 @@ class Instrument {
     }
 
     static getGainDefault () {
-        return this.gainDefault;
+        return this._gainDefault;
     }
 };
 

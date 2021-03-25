@@ -10,16 +10,16 @@ HALLO STEFAN
 
 
 // libraries
+// ===================================
 import io from 'socket.io-client';
 import SocketIOFileClient from 'socket.io-file-client';
 import * as Tone from 'tone';
 
 // files
+// ===================================
 import { renderHtmlArrows, renderBPM }  from  '/html/renderHTML';
-// import { parseInput }  from '/parse-commands';
 import { parser }  from '/parser';
 import { help }  from '/text/helpText';
-// import { instruments, parts, thisBPM } from '/tone/main-tone';
 import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 import { printer } from '/helper/printer';
 import { alerts } from '/helper/alerts';
@@ -30,10 +30,12 @@ import { requestServerFiles } from '/socket/requestServerFiles';
 import { extractSamplePaths } from './helper/extractSamplePaths';
 import { returnToActionExecute } from './helper/returnToActionExecute';
 import { Instrument } from './tone/class_instrument';
+import { presets } from '/tone/presets'
 
 
 
 // global variables
+// ===================================
 export const debug = true;
 export const context = "index";
 export var socket = io.connect();   // socket var - server connect, also for exports
@@ -43,39 +45,43 @@ export let alertMuteState = false;  // alerts muted or not?
 let serverFolders = "";
 export let serverSamples = "";
 export let sampleURL = {};
+
+
 // audio variables
+// ===================================
 export let bpm = 120;
 export let instrumentsList = "";
-
-// let defaultInstrument = new Instrument();
-// defaultInstrument.defaultGain = 0;
-// export let instruments = { default: defaultInstrument};
 export let instruments = {};
 export let parts = {};
+// list of instruments corresponds to folders on server! first check folders ?
+let listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; 
+
+
+
 
 // input & console varibles
+// ===================================
 export let consolePointer = 0; // for arrow functions
 export let consoleArray = [];   // arrays to store page console etc. output
 export let consoleLength = 20; // how many lines are displayed
 
 // html variables
+// ===================================
 let checkMuteSound = document.getElementById("checkMuteSound");
 let checkMuteAlerts = document.getElementById("checkMuteAlerts");
 let consoleDivID = 'console';
-let returnToAction = {
-	'printToConsole': {},
-	'parser': {},
-};
 
+
+// actions
+// ===================================
 // handle direct sound alerts
 createAlerts(alerts);
-
 // initially show BPM
 renderBPM(bpm);
-
 // set static variables to class Instrument
-// Instrument.bpm = bpm;
-
+Instrument.bpm = bpm;
+Instrument.list = listOfAvailableInstruments;
+Instrument.presets = presets;
 // connect audio to Tone master
 Instrument.masterGain.connect(Tone.getDestination());  // assign Instrument class masterOut to Tone master
 Tone.Transport.bpm.value = bpm;
@@ -101,6 +107,9 @@ Tone.Transport.bpm.value = bpm;
 // ============================================
 
 document.getElementById("mainInput").addEventListener("keydown", (e) => {
+	
+	// set variable for returns from grammar, parser, tone
+	let returnToAction = { printToConsole: {}, parser: {} };
 	
 	// if Enter in main input field
 	if (e.code=='Enter') {
@@ -129,7 +138,9 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 		// SOCKET + PARSER
 		// handle returns from enterfunction() for socket and parser
 		// html handling goes through returnToAction list and rendering
-		if (result == null ) playAlerts('error', alertMuteState);
+		if (result == null ) {
+			playAlerts('error', alertMuteState);
+		}
 		else if (result.valid == true) { 
 			// send to server via sockets
 			socket.emit('clientEvent', message);
