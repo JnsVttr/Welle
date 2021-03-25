@@ -17,12 +17,12 @@ class Instrument {
     static masterGain = new Tone.Gain(0.9);         // master output for Tone -> Speaker
     static bpm = 120;                               // bpm
     static list = [];                               // list of possible instrument names
-    static presets = {};                           // settings for different instrument names
-
+    static presets = {};                            // settings for different instrument names
+    static bufferDefault = undefined;               // placeholder default buffer
 
 
     // CONSTRUCTOR - executed with every new instance
-    constructor(name, pattern) {
+    constructor(name, pattern, rawPattern) {
 
         // define properties every new Instrument will have
         // this._synthType = Instrument.typeDefault;       
@@ -36,8 +36,7 @@ class Instrument {
         this._sequence = undefined;
         this._ticks = 0;
         this.measure = '8n';
-        
-        
+        this._rawPattern = rawPattern  || '# #1 - #-3 #4';
         
         this._preset = Instrument.presets[this._name];
         console.log('preset', this._preset);
@@ -47,11 +46,10 @@ class Instrument {
         this._type = this._preset.synthType;
         this._triggerFunction = this._preset.triggerFunction;
         this._volume = this._preset.gain * this._preset.volume;
+        this._sampleUrl = this._preset.settings.C3;
+        this._settings.C3 = Instrument.bufferDefault;
 
-        
-
-        this.pattern = Instrument.patternDefault;
-        if (pattern != undefined) this.pattern = pattern;
+        this.pattern = pattern || Instrument.patternDefault;
         this.midiPattern = this.#translatePatternToMidi(this.pattern); // placeholder for pattern translation
         
         // create Synth
@@ -68,8 +66,6 @@ class Instrument {
     }
 
     start (){
-        if (this._sequence) {
-        };
         this._sequence.start(this.#quant(), 0);
         this._isPlaying = true;
     }
@@ -110,10 +106,11 @@ class Instrument {
         return [this.pattern, this.midiPattern]
     }
 
-    setPattern (pattern) {
+    setPattern (pattern, rawPattern) {
+        this._rawPattern = rawPattern  || '';
         this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
-        
+        this._sequence.stop();
         this.#initSequence();
         this.start();
         this._isPlaying = true;
@@ -123,16 +120,19 @@ class Instrument {
 
 
 
+
+
+    // init synth
+    #initSynth = () => {
+        this._synth = new Tone[this._type](this._settings);
+        if (this._type == 'Sampler') this._synth.buffer = this._buffer; 
+    }
     // set volume
     #setVolume = (gain) => {
         this._gain.gain.rampTo(this._volume, 0.1);
         console.log(`this._gain.gain: ${this._gain.gain}, this._volume: ${this._volume}`);
     }
-    // init synth
-    #initSynth = () => {
-        this._synth = new Tone[this._type](this._settings);
-    }
-
+    
     // init a sequence
     #initSequence = () => {
         this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');   // '8n' == speed, eight bars/second

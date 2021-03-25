@@ -60298,9 +60298,9 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
-var _setVolume = new WeakMap();
-
 var _initSynth = new WeakMap();
+
+var _setVolume = new WeakMap();
 
 var _initSequence = new WeakMap();
 
@@ -60324,11 +60324,20 @@ var Instrument = /*#__PURE__*/function () {
   // bpm
   // list of possible instrument names
   // settings for different instrument names
+  // placeholder default buffer
   // CONSTRUCTOR - executed with every new instance
-  function Instrument(name, _pattern) {
+  function Instrument(name, _pattern, rawPattern) {
     var _this = this;
 
     _classCallCheck(this, Instrument);
+
+    _initSynth.set(this, {
+      writable: true,
+      value: function value() {
+        _this._synth = new Tone[_this._type](_this._settings);
+        if (_this._type == 'Sampler') _this._synth.buffer = _this._buffer;
+      }
+    });
 
     _setVolume.set(this, {
       writable: true,
@@ -60336,13 +60345,6 @@ var Instrument = /*#__PURE__*/function () {
         _this._gain.gain.rampTo(_this._volume, 0.1);
 
         console.log("this._gain.gain: ".concat(_this._gain.gain, ", this._volume: ").concat(_this._volume));
-      }
-    });
-
-    _initSynth.set(this, {
-      writable: true,
-      value: function value() {
-        _this._synth = new Tone[_this._type](_this._settings);
       }
     });
 
@@ -60436,6 +60438,7 @@ var Instrument = /*#__PURE__*/function () {
     this._sequence = undefined;
     this._ticks = 0;
     this.measure = '8n';
+    this._rawPattern = rawPattern || '# #1 - #-3 #4';
     this._preset = Instrument.presets[this._name];
     console.log('preset', this._preset);
     this._settings = this._preset.settings; // set synth settings from Instrument default settings(type)
@@ -60445,8 +60448,9 @@ var Instrument = /*#__PURE__*/function () {
     this._type = this._preset.synthType;
     this._triggerFunction = this._preset.triggerFunction;
     this._volume = this._preset.gain * this._preset.volume;
-    this.pattern = Instrument.patternDefault;
-    if (_pattern != undefined) this.pattern = _pattern;
+    this._sampleUrl = this._preset.settings.C3;
+    this._settings.C3 = Instrument.bufferDefault;
+    this.pattern = _pattern || Instrument.patternDefault;
     this.midiPattern = _classPrivateFieldGet(this, _translatePatternToMidi).call(this, this.pattern); // placeholder for pattern translation
     // create Synth
 
@@ -60470,10 +60474,6 @@ var Instrument = /*#__PURE__*/function () {
   _createClass(Instrument, [{
     key: "start",
     value: function start() {
-      if (this._sequence) {}
-
-      ;
-
       this._sequence.start(_classPrivateFieldGet(this, _quant).call(this), 0);
 
       this._isPlaying = true;
@@ -60522,15 +60522,18 @@ var Instrument = /*#__PURE__*/function () {
     }
   }, {
     key: "setPattern",
-    value: function setPattern(pattern) {
+    value: function setPattern(pattern, rawPattern) {
+      this._rawPattern = rawPattern || '';
       this.pattern = pattern;
       this.midiPattern = _classPrivateFieldGet(this, _translatePatternToMidi).call(this, this.pattern);
+
+      this._sequence.stop();
 
       _classPrivateFieldGet(this, _initSequence).call(this);
 
       this.start();
       this._isPlaying = true;
-    } // set volume
+    } // init synth
 
   }], [{
     key: "getGainDefault",
@@ -60563,6 +60566,8 @@ _defineProperty(Instrument, "bpm", 120);
 _defineProperty(Instrument, "list", []);
 
 _defineProperty(Instrument, "presets", {});
+
+_defineProperty(Instrument, "bufferDefault", undefined);
 
 ;
 },{"tone":"../node_modules/tone/build/esm/index.js"}],"parser.js":[function(require,module,exports) {
@@ -60637,10 +60642,10 @@ var parser = function parser(input) {
         if (_index.instruments[_name2]) {
           (0, _printer.printer)(debug, context, "assignPatternOne - ".concat(input.pattern, " to instrument:"), input.phrases);
 
-          _index.instruments[_name2].setPattern(input.pattern);
+          _index.instruments[_name2].setPattern(input.pattern, input.patternString);
         } else {
           (0, _printer.printer)(debug, context, "assignPatternOne, create inst ".concat(_name2, " + pattern ").concat(input.pattern), _name2);
-          _index.instruments[_name2] = new _class_instrument.Instrument(_name2, input.pattern);
+          _index.instruments[_name2] = new _class_instrument.Instrument(_name2, input.pattern, input.patternString);
 
           _index.instruments[_name2].start();
         }
@@ -69922,6 +69927,21 @@ var presets = {
       }
     }
   },
+  'kick': {
+    // Sampler, settings.C3 = this.sampleURL;
+    synthType: 'Sampler',
+    gain: 1,
+    volume: 0.6,
+    baseNote: 44,
+    transpose: 0,
+    triggerFunction: function triggerFunction(_synth, _note) {
+      _synth.triggerAttackRelease(_note, '16n', '@16n');
+    },
+    settings: {
+      'C3': './audio/hit/hit.mp3' // sample URL
+
+    }
+  },
   DuoSynth: {
     vibratoAmount: 0.5,
     vibratoRate: 5,
@@ -70121,7 +70141,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /*
 https://github.com/harc/ohm
 
-HALLO STEFAN
+JS shorthand tipps: https://www.sitepoint.com/shorthand-javascript-techniques/
+
 
 */
 // libraries
@@ -70162,7 +70183,10 @@ exports.instruments = instruments;
 var parts = {}; // list of instruments corresponds to folders on server! first check folders ?
 
 exports.parts = parts;
-var listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; // input & console varibles
+var listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key'];
+var bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", function () {
+  console.log("loaded");
+}); // input & console varibles
 // ===================================
 
 var consolePointer = 0; // for arrow functions
@@ -70188,7 +70212,8 @@ var consoleDivID = 'console'; // actions
 
 _class_instrument.Instrument.bpm = bpm;
 _class_instrument.Instrument.list = listOfAvailableInstruments;
-_class_instrument.Instrument.presets = _presets.presets; // connect audio to Tone master
+_class_instrument.Instrument.presets = _presets.presets;
+_class_instrument.Instrument.bufferDefault = bufferDefault; // connect audio to Tone master
 
 _class_instrument.Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
 

@@ -4,7 +4,8 @@
 /*
 https://github.com/harc/ohm
 
-HALLO STEFAN
+JS shorthand tipps: https://www.sitepoint.com/shorthand-javascript-techniques/
+
 
 */
 
@@ -56,6 +57,9 @@ export let parts = {};
 // list of instruments corresponds to folders on server! first check folders ?
 let listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; 
 
+const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {
+	console.log("loaded");
+});
 
 
 
@@ -82,6 +86,7 @@ renderBPM(bpm);
 Instrument.bpm = bpm;
 Instrument.list = listOfAvailableInstruments;
 Instrument.presets = presets;
+Instrument.bufferDefault = bufferDefault;
 // connect audio to Tone master
 Instrument.masterGain.connect(Tone.getDestination());  // assign Instrument class masterOut to Tone master
 Tone.Transport.bpm.value = bpm;

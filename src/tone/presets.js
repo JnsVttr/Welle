@@ -59,6 +59,17 @@ export let presets = {
 			}
 		},
 	},
+	'kick': {    // Sampler, settings.C3 = this.sampleURL;
+		synthType: 'Sampler',
+		gain: 1,
+		volume: 0.6,
+		baseNote: 44,
+		transpose: 0,
+		triggerFunction: (_synth, _note) => { _synth.triggerAttackRelease(_note, '16n', '@16n')},
+		settings: {
+			'C3': './audio/hit/hit.mp3',   // sample URL
+		},
+	},
 	DuoSynth: {
 		vibratoAmount: 0.5,
 		vibratoRate: 5,

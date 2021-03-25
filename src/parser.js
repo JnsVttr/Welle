@@ -55,10 +55,10 @@ export const parser = (input) => {
                 let name = input.phrases[i];
                 if (instruments[name]) {
                     printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
-                    instruments[name].setPattern(input.pattern);
+                    instruments[name].setPattern(input.pattern, input.patternString);
                 } else {
                     printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
-                    instruments[name] = new Instrument(name, input.pattern);
+                    instruments[name] = new Instrument(name, input.pattern, input.patternString);
                     instruments[name].start();
                 }
             };
