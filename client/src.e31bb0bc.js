@@ -70183,7 +70183,8 @@ exports.instruments = instruments;
 var parts = {}; // list of instruments corresponds to folders on server! first check folders ?
 
 exports.parts = parts;
-var listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key'];
+var listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; // Tone Audio Buffers - also as a list..
+
 var bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", function () {
   console.log("loaded");
 }); // input & console varibles
@@ -70196,10 +70197,15 @@ var consoleArray = []; // arrays to store page console etc. output
 
 exports.consoleArray = consoleArray;
 var consoleLength = 20; // how many lines are displayed
-// html variables
-// ===================================
 
 exports.consoleLength = consoleLength;
+
+window.onload = function () {
+  document.getElementById("mainInput").focus();
+}; // html variables
+// ===================================
+
+
 var checkMuteSound = document.getElementById("checkMuteSound");
 var checkMuteAlerts = document.getElementById("checkMuteAlerts");
 var consoleDivID = 'console'; // actions

@@ -57,6 +57,7 @@ export let parts = {};
 // list of instruments corresponds to folders on server! first check folders ?
 let listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; 
 
+// Tone Audio Buffers - also as a list..
 const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {
 	console.log("loaded");
 });
@@ -68,6 +69,7 @@ const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {
 export let consolePointer = 0; // for arrow functions
 export let consoleArray = [];   // arrays to store page console etc. output
 export let consoleLength = 20; // how many lines are displayed
+window.onload = function() { document.getElementById("mainInput").focus(); }
 
 // html variables
 // ===================================
