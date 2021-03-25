@@ -60298,6 +60298,8 @@ function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!priva
 
 function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
+var _initSequence = new WeakMap();
+
 var _callbackSequence = new WeakMap();
 
 var _translatePatternToMidi = new WeakMap();
@@ -60320,6 +60322,13 @@ var Instrument = /*#__PURE__*/function () {
     var _this = this;
 
     _classCallCheck(this, Instrument);
+
+    _initSequence.set(this, {
+      writable: true,
+      value: function value() {
+        _this._sequence = new Tone.Sequence(_classPrivateFieldGet(_this, _callbackSequence), _this.midiPattern, '8n'); // '8n' == speed, eight bars/second
+      }
+    });
 
     _callbackSequence.set(this, {
       writable: true,
@@ -60359,18 +60368,30 @@ var Instrument = /*#__PURE__*/function () {
     _quant.set(this, {
       writable: true,
       value: function value() {
-        // sync to actual time
-        var factor = 1;
-        var now = Tone.TransportTime().valueOf();
-        var quant = Tone.Time(now).quantize(factor); // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
+        // get time
+        var now = Tone.TransportTime().valueOf(); // set quantize factor
 
-        if (quant < now) {
-          now += 1;
-          quant = Tone.Time(now).quantize(factor); // console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
-        } // console.log(`now: ${now} - play at ${now + 0.2}`)
+        var factor = 1; // get quant time
 
+        var quant = Tone.Time(now).quantize(factor);
+        var playTime = quant;
+        console.log("now: ".concat(now, ". quant factor: ").concat(factor, ". quant: ").concat(quant)); // if transport starts, set quant to 0
 
-        return quant;
+        if (now == 0) {
+          playTime = 0;
+        } else if (now >= 0 && now <= 0.01) {
+          playTime = 0.01;
+        } else if (quant < now) {
+          playTime = now + 0.5;
+          playTime = Tone.Time(playTime).quantize(factor);
+          console.log("quant < now. new calc: ", "now: ".concat(now, ", playTime: ").concat(playTime, ". quant factor: ").concat(factor, ". quant: ").concat(quant));
+        }
+
+        console.log("now: ".concat(now, " - play at: ").concat(playTime)); // safety: if below 0 than playTime is zero
+
+        if (playTime < 0) playTime = 0; // return quant playTime
+
+        return playTime;
       }
     });
 
@@ -60396,30 +60417,44 @@ var Instrument = /*#__PURE__*/function () {
     // create sequence 
     // the sequence calls the synth at time+note defined by the pattern
 
-    this.sequence = new Tone.Sequence(_classPrivateFieldGet(this, _callbackSequence), this.midiPattern, '8n'); // '8n' == speed, eight bars/second
+    this._sequence = undefined; // init sequence;
+
+    _classPrivateFieldGet(this, _initSequence).call(this);
+
+    console.log("this._sequence.state: ", this._sequence.state);
   }
 
   _createClass(Instrument, [{
     key: "start",
     value: function start() {
-      if (this._isPlaying == false) {
-        this.sequence.start(_classPrivateFieldGet(this, _quant).call(this), 0);
-        this._isPlaying = true;
-      }
+      if (this._sequence) {}
+
+      ;
+
+      this._sequence.start(_classPrivateFieldGet(this, _quant).call(this), 0);
+
+      this._isPlaying = true;
     }
   }, {
     key: "restart",
     value: function restart() {
-      this.sequence.stop();
-      this.sequence.start(_classPrivateFieldGet(this, _quant).call(this));
+      // this._sequence.stop();
+      // this._sequence.clear();
+      _classPrivateFieldGet(this, _initSequence).call(this);
+
+      this.start();
       this._isPlaying = true;
     }
   }, {
     key: "stop",
-    value: function stop() {
-      this.sequence.stop(_classPrivateFieldGet(this, _quant).call(this) - 0.1); // stop just before next quant
+    value: function stop(quant) {
+      console.log("stop() quant: ", quant);
+      if (quant == undefined) this._sequence.stop(); // stop just before next quant
+
+      if (quant != undefined) this._sequence.stop(quant); // stop just before next quant
 
       this._isPlaying = false;
+      console.log("this._sequence.state: ", this._sequence.state);
     } // GETTER & SETTER - only one value
 
   }, {
@@ -60431,6 +60466,13 @@ var Instrument = /*#__PURE__*/function () {
       this._isPlaying = state;
     }
   }, {
+    key: "sequence",
+    get: function get() {
+      return this._sequence;
+    },
+    set: function set(dummy) {//
+    }
+  }, {
     key: "getPattern",
     value: function getPattern() {
       return [this.pattern, this.midiPattern];
@@ -60440,13 +60482,12 @@ var Instrument = /*#__PURE__*/function () {
     value: function setPattern(pattern) {
       this.pattern = pattern;
       this.midiPattern = _classPrivateFieldGet(this, _translatePatternToMidi).call(this, this.pattern);
-      this.sequence.stop(); // this.sequence.dispose();
 
-      this.sequence = new Tone.Sequence(_classPrivateFieldGet(this, _callbackSequence), this.midiPattern, '8n');
-      this.sequence.start(_classPrivateFieldGet(this, _quant).call(this)); // start sequence at calculated quant time 
+      _classPrivateFieldGet(this, _initSequence).call(this);
 
+      this.start();
       this._isPlaying = true;
-    } // callback for sequence
+    } // init a sequence
 
   }], [{
     key: "getGainDefault",
@@ -60541,41 +60582,50 @@ var parser = function parser(input) {
       break;
 
     case 'assignPatternOne':
-      (0, _printer.printer)(debug, context, "assignPatternOne, instruments: ", input.phrases);
-      (0, _printer.printer)(debug, context, "assignPatternOne, pattern: ", input.pattern);
-
       for (var _i2 = 0; _i2 < input.phrases.length; _i2++) {
         var _name2 = input.phrases[_i2];
 
-        if (_index.instruments[_name2] != undefined) {
-          (0, _printer.printer)(debug, context, "assignPatternOne, pattern to inst: ", _name2);
+        if (_index.instruments[_name2]) {
+          (0, _printer.printer)(debug, context, "assignPatternOne - ".concat(input.pattern, " to instrument:"), input.phrases);
 
           _index.instruments[_name2].setPattern(input.pattern);
+        } else {
+          (0, _printer.printer)(debug, context, "assignPatternOne, create inst ".concat(_name2, " + pattern ").concat(input.pattern), _name2);
+          _index.instruments[_name2] = new _class_instrument.Instrument(input.pattern);
 
-          console.log("instruments[name].getPattern()", _index.instruments[_name2].getPattern());
+          _index.instruments[_name2].start();
         }
       }
 
       ;
-      Tone.Transport.start();
+      if (Tone.Transport.state == 'stopped') Tone.Transport.start();
       break;
 
     case 'playAllEvent':
       Object.keys(_index.instruments).forEach(function (instrument) {
+        _index.instruments[instrument].stop(0);
+      });
+      Tone.Transport.stop(0);
+      Tone.Transport.start();
+      Object.keys(_index.instruments).forEach(function (instrument) {
         _index.instruments[instrument].restart();
-      }); // Tone.Transport.start();
-
+      });
+      console.log('Tone.Transport: ', Tone.Transport);
+      console.log('Tone.Transport.state: ', Tone.Transport.state);
       break;
 
     case 'stopAllEvent':
       Object.keys(_index.instruments).forEach(function (instrument) {
-        _index.instruments[instrument].stop();
+        _index.instruments[instrument].stop(0);
       });
+      Tone.Transport.stop();
+      console.log('Tone.Transport: ', Tone.Transport);
+      console.log('Tone.Transport.state: ', Tone.Transport.state);
       break;
 
     case 'questionEvent':
       Object.keys(_index.instruments).forEach(function (entry) {
-        console.log("is sequence playing for ".concat(entry, ":"), _index.instruments[entry].isPlaying); //  ${instrument.playState()}
+        console.log("is sequence playing for ".concat(entry, ":"), _index.instruments[entry].isPlaying);
       });
       break;
   }
@@ -69695,24 +69745,28 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var returnToActionExecute = function returnToActionExecute(_actionContent, _consoleArray, _instruments, _parts) {
   // store returns in separate variables
   // let parserReturn = _actionContent.parser.parserReturn;
-  var printToConsole = _actionContent.printToConsole; // check if console string is valid, then print to console:
+  var printToConsole = _actionContent.printToConsole;
+  console.log("printToConsole: ", printToConsole);
 
-  if (printToConsole.valid == true) {
-    // if valid, add string to console stringarray
-    _consoleArray.push({
-      message: "".concat(printToConsole.string)
-    }); // render to html console
-
-
-    (0, _renderHTML.renderToConsole)(_consoleArray, printToConsole.id, printToConsole.consoleLength);
-  } else {
-    // if not valid, prepend a '!' to string, store in console string array
-    _consoleArray.push({
-      message: "! ".concat(printToConsole.string)
-    }); // render to html console
+  if (printToConsole.length > 0) {
+    // check if console string is valid, then print to console:
+    if (printToConsole.valid == true) {
+      // if valid, add string to console stringarray
+      _consoleArray.push({
+        message: "".concat(printToConsole.string)
+      }); // render to html console
 
 
-    (0, _renderHTML.renderToConsole)(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+      (0, _renderHTML.renderToConsole)(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+    } else {
+      // if not valid, prepend a '!' to string, store in console string array
+      _consoleArray.push({
+        message: "! ".concat(printToConsole.string)
+      }); // render to html console
+
+
+      (0, _renderHTML.renderToConsole)(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+    }
   } // printer(debug, context, "executeActionContent printToConsole ", printToConsole);
   // printer(debug, context, "executeActionContent parserReturn ", parserReturn);
   // printer(debug, context, "executeActionContent toneReturn ", toneReturn);
@@ -69895,15 +69949,23 @@ document.getElementById("mainInput").addEventListener("keydown", function (e) {
       user: 'local'
     }; // GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
 
-    var result = (0, _enterFunction.enterFunction)(string, instrumentsList); // SOCKET + PARSER
+    var result = null;
+    if (string != '') result = (0, _enterFunction.enterFunction)(string, instrumentsList); // SOCKET + PARSER
     // handle returns from enterfunction() for socket and parser
     // html handling goes through returnToAction list and rendering
 
-    if (result.valid == true) {
+    if (result == null) (0, _playAlerts.playAlerts)('error', alertMuteState);else if (result.valid == true) {
       // send to server via sockets
       socket.emit('clientEvent', message); // send results to parser for Tone
 
-      returnToAction.parser = (0, _parser.parser)(result.result); // play success return alert
+      returnToAction.parser = (0, _parser.parser)(result.result); // add to consolePointer for arrows
+
+      exports.consolePointer = consolePointer = consolePointer + 1; // GRAMMAR RESULTS - save results to return action list renderer
+
+      returnToAction.printToConsole.valid = result.valid;
+      returnToAction.printToConsole.string = result.string;
+      returnToAction.printToConsole.length = consoleLength;
+      returnToAction.printToConsole.id = consoleDivID; // play success return alert
 
       (0, _playAlerts.playAlerts)('return', alertMuteState);
     } else {
@@ -69912,15 +69974,7 @@ document.getElementById("mainInput").addEventListener("keydown", function (e) {
 
       (0, _playAlerts.playAlerts)('error', alertMuteState);
     }
-
-    ; // add to consolePointer for arrows
-
-    exports.consolePointer = consolePointer = consolePointer + 1; // GRAMMAR RESULTS - save results to return action list renderer
-
-    returnToAction.printToConsole.valid = result.valid;
-    returnToAction.printToConsole.string = result.string;
-    returnToAction.printToConsole.length = consoleLength;
-    returnToAction.printToConsole.id = consoleDivID; // print return list
+    ; // print return list
     // printer(debug, context, "returnToAction list: ", returnToAction)
     // EXECUTE RETURN ACTIONS - execute returnToAction list and return new consoleArray
 
@@ -70036,7 +70090,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57517" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50276" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -47,33 +47,41 @@ export const parser = (input) => {
             Tone.Transport.start();
             break;
         case 'assignPatternOne':
-            printer(debug, context, "assignPatternOne, instruments: ", input.phrases);
-            printer(debug, context, "assignPatternOne, pattern: ", input.pattern);
             for (let i=0; i<input.phrases.length;i++){
                 let name = input.phrases[i];
-                if (instruments[name]!=undefined) {
-                    printer(debug, context, "assignPatternOne, pattern to inst: ", name);
+                if (instruments[name]) {
+                    printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
                     instruments[name].setPattern(input.pattern);
-                    console.log("instruments[name].getPattern()", instruments[name].getPattern())
+                } else {
+                    printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
+                    instruments[name] = new Instrument(input.pattern);
+                    instruments[name].start();
                 }
-                
             };
-            Tone.Transport.start();
+            if (Tone.Transport.state == 'stopped') Tone.Transport.start();
+
             break;
         case 'playAllEvent':
-            Object.keys(instruments).forEach(instrument => {
-                instruments[instrument].restart()
-            });
-            // Tone.Transport.start();
+            Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
+            Tone.Transport.stop(0);
+            Tone.Transport.start();
+            Object.keys(instruments).forEach(instrument => { instruments[instrument].restart() });
+            console.log('Tone.Transport: ', Tone.Transport);
+            console.log('Tone.Transport.state: ', Tone.Transport.state);
+
+
             break;
         case 'stopAllEvent':
-            Object.keys(instruments).forEach(instrument => {
-                instruments[instrument].stop()
-            });
+            Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
+            Tone.Transport.stop();
+            console.log('Tone.Transport: ', Tone.Transport)
+            console.log('Tone.Transport.state: ', Tone.Transport.state);
+            
+
         break;
         case 'questionEvent':
             Object.keys(instruments).forEach(entry => {
-                console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)    //  ${instrument.playState()}
+                console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)
             });
         break;
     }

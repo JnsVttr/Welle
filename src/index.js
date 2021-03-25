@@ -122,17 +122,28 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 		let message = { string: string, user: 'local' };
 
 		// GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
-		let result = enterFunction(string, instrumentsList);
-
+		let result = null;
+		if (string!='') result = enterFunction(string, instrumentsList);
+		
 
 		// SOCKET + PARSER
 		// handle returns from enterfunction() for socket and parser
 		// html handling goes through returnToAction list and rendering
-		if (result.valid == true) { 
+		if (result == null ) playAlerts('error', alertMuteState);
+		else if (result.valid == true) { 
 			// send to server via sockets
 			socket.emit('clientEvent', message);
 			// send results to parser for Tone
 			returnToAction.parser = parser(result.result);
+			 
+			// add to consolePointer for arrows
+			consolePointer += 1;
+
+			// GRAMMAR RESULTS - save results to return action list renderer
+			returnToAction.printToConsole.valid = result.valid;
+			returnToAction.printToConsole.string = result.string;
+			returnToAction.printToConsole.length = consoleLength;
+			returnToAction.printToConsole.id = consoleDivID;
 			
 			// play success return alert
 			playAlerts('return', alertMuteState);
@@ -144,14 +155,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 		};
 
 		
-		// add to consolePointer for arrows
-		consolePointer += 1;
-
-		// GRAMMAR RESULTS - save results to return action list renderer
-		returnToAction.printToConsole.valid = result.valid;
-		returnToAction.printToConsole.string = result.string;
-		returnToAction.printToConsole.length = consoleLength;
-		returnToAction.printToConsole.id = consoleDivID;
+		
 		
 		// print return list
 		// printer(debug, context, "returnToAction list: ", returnToAction)

@@ -15,20 +15,22 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 	// store returns in separate variables
 	// let parserReturn = _actionContent.parser.parserReturn;
 	let printToConsole = _actionContent.printToConsole;
-
-
-	// check if console string is valid, then print to console:
-	if (printToConsole.valid == true){
-		// if valid, add string to console stringarray
-		_consoleArray.push({ message: `${printToConsole.string}` });
-		// render to html console
-		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
-	} else {
-		// if not valid, prepend a '!' to string, store in console string array
-		_consoleArray.push({ message: `! ${printToConsole.string}` });
-		// render to html console
-		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+	console.log("printToConsole: ", printToConsole)
+	if (printToConsole.length > 0 ){
+		// check if console string is valid, then print to console:
+		if (printToConsole.valid == true){
+			// if valid, add string to console stringarray
+			_consoleArray.push({ message: `${printToConsole.string}` });
+			// render to html console
+			renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+		} else {
+			// if not valid, prepend a '!' to string, store in console string array
+			_consoleArray.push({ message: `! ${printToConsole.string}` });
+			// render to html console
+			renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+		}
 	}
+	
 	
 	
 

@@ -40,25 +40,33 @@ class Instrument {
 
         // create sequence 
         // the sequence calls the synth at time+note defined by the pattern
-        this.sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');   // '8n' == speed, eight bars/second
+        this._sequence = undefined;
+        // init sequence;
+        this.#initSequence();
+        console.log("this._sequence.state: ", this._sequence.state)
     }
 
     start (){
-        if (this._isPlaying==false) {
-            this.sequence.start(this.#quant(), 0);
-            this._isPlaying = true;
-        }
+        if (this._sequence) {
+        };
+        this._sequence.start(this.#quant(), 0);
+        this._isPlaying = true;
     }
 
     restart (){
-        this.sequence.stop();
-        this.sequence.start(this.#quant());
+        // this._sequence.stop();
+        // this._sequence.clear();
+        this.#initSequence();
+        this.start();
         this._isPlaying = true;
     }
     
-    stop (){
-        this.sequence.stop(this.#quant()-0.1); // stop just before next quant
+    stop (quant){
+        console.log("stop() quant: ", quant);
+        if (quant==undefined) this._sequence.stop(); // stop just before next quant
+        if (quant!=undefined) this._sequence.stop(quant); // stop just before next quant
         this._isPlaying = false;
+        console.log("this._sequence.state: ", this._sequence.state);
     }
 
 
@@ -69,6 +77,12 @@ class Instrument {
     set isPlaying (state){
         this._isPlaying = state;
     }
+    get sequence (){
+        return this._sequence
+    }
+    set sequence (dummy){
+        //
+    }
 
 
     getPattern () {
@@ -78,13 +92,18 @@ class Instrument {
     setPattern (pattern) {
         this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
-        this.sequence.stop();
-        // this.sequence.dispose();
-        this.sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');
-        this.sequence.start(this.#quant());  // start sequence at calculated quant time 
+        
+        this.#initSequence();
+        this.start();
         this._isPlaying = true;
     }
 
+
+
+    // init a sequence
+    #initSequence = () => {
+        this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, '8n');   // '8n' == speed, eight bars/second
+    }
     // callback for sequence
     #callbackSequence = (time, note) => {
         this.synth.triggerAttackRelease(note, '16n', '@16n');
@@ -115,19 +134,30 @@ class Instrument {
 
     // get quant
     #quant = () => {
-        // sync to actual time
-        let factor = 1;
+        // get time
         let now = Tone.TransportTime().valueOf();
+        // set quantize factor
+        let factor = 1;
+        // get quant time
         let quant = Tone.Time(now).quantize(factor);
-        // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
-    
-        if (quant < now){
-            now+=1;
-            quant = Tone.Time(now).quantize(factor);
-            // console.log("quant < now. new calc: ", `now: ${now}. quant factor: ${factor}. quant: ${quant}`)
+        let playTime = quant;
+
+        console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
+        
+        // if transport starts, set quant to 0
+        if (now == 0) { playTime = 0}
+        else if (now >= 0 && now <= 0.01) { playTime = 0.01}
+        else if (quant < now){
+            playTime= now + 0.5;
+            playTime = Tone.Time(playTime).quantize(factor);
+            console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
         }
-        // console.log(`now: ${now} - play at ${now + 0.2}`)
-        return quant;
+        console.log(`now: ${now} - play at: ${playTime}`)
+        
+        // safety: if below 0 than playTime is zero
+        if (playTime<0) playTime=0
+        // return quant playTime
+        return playTime;
     }
 
     static getGainDefault () {
