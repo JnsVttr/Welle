@@ -13,6 +13,7 @@ import fs from 'fs';
 // files
 // ===================
 import { printer } from './printer.js';
+import { readFiles } from './files.js'
 
 
 
@@ -39,6 +40,10 @@ const hostname = 'localhost';
 const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(moduleURL.pathname);
 const clientDir = path.join(__dirname, pageSource);
+const audioPath = path.join(__dirname, audioSource);
+const historyURL = path.join(__dirname, historySource);
+const presetsURL = path.join(__dirname, presetsSource);
+let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
 
 
 // logs + variables
@@ -46,6 +51,14 @@ const clientDir = path.join(__dirname, pageSource);
 // console.log("__dirname: ", __dirname);
 // console.log("clientDir: ", clientDir);
 let debug = true;
+let baseUrl = '';
+// check, if server is local or on tangible.uber.space
+if (path.join(__dirname) != '/var/www/virtual/tangible/html/server')  
+	baseUrl = 'http://localhost:3000/';
+if (path.join(__dirname) == '/var/www/virtual/tangible/html/server')  
+	baseUrl = 'https://tangible.uber.space/';
+			
+
 
 
 
@@ -54,22 +67,34 @@ let debug = true;
 app.use(express.static(clientDir));
 app.use('/audio', express.static(path.join(__dirname, audioSource)));
 app.use('/alert', express.static(path.join(__dirname, alertSource)));
-app.get('/', function (req, res) { res.sendFile('index.html');  });
+app.get('/', function (req, res) { res.sendFile('index.html'); });
+
+
+// Samples & Folders - handle audio files
+// =========================================
+// scan at server start
+let audioFiles = {};
+audioFiles = readFiles(audioPath, baseUrl);
+// printer(debug, 'audioFiles check:', `getting files: `, audioFiles);
 
 
 
 
-// socket connection
+
+
+// SOCKETS connection: io.sockets
 // ================================
 io.on("connection", (socket) => {
 	console.log("");
 	console.log("");
 	console.log("socket connects to client");
+
+	// AUDIO FILES
 	socket.on('requestServerFiles', function (string) {
 		printer(debug, "requestServerFiles", `client requests files on:`, string);
-		io.sockets.emit('message', 'wait a bit, all is coming');
+		// read & print files 'samples'
+		if (string == 'samples') io.sockets.emit('audioFiles', audioFiles);	
 	});
-
 });
 
 

@@ -59,7 +59,7 @@ let listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'nois
 
 // Tone Audio Buffers - also as a list..
 const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {
-	console.log("loaded");
+	console.log("buffer loaded");
 });
 
 
@@ -219,14 +219,15 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
 // SOCKET HANDLING
 // ======================
-
+// SOCKET on initial connection
 socket.on('connect', function (data) {
 	console.log('Connected!');
 	socket.emit('message', {message:"Hello!"});
 	socket.emit('requestServerFiles', 'samples');
 });
-socket.on('message', function (data) {
-	console.log('incoming message: ', data);
+// SOCKET on receiving audioFile Paths
+socket.on('audioFiles', function (data) {
+	console.log('incoming server files: ', data);
 });
 
 
