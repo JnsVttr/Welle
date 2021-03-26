@@ -8,10 +8,10 @@ export function renderInstruments(_instruments) {
 	
 	// iterate through instruments collection
 	Object.keys(_instruments).forEach(inst => {
-		console.log("_instruments).forEach(inst): ", _instruments[inst])
-		console.log(`details: name=${_instruments[inst].name()}, volume=${_instruments[inst].volume()}
-		rawPattern=${_instruments[inst].rawPattern()}, isPlaying=${_instruments[inst].isPlaying}
-		`)
+		// console.log("_instruments).forEach(inst): ", _instruments[inst])
+		// console.log(`details: name=${_instruments[inst].name()}, volume=${_instruments[inst].volume()}
+		// rawPattern=${_instruments[inst].rawPattern()}, isPlaying=${_instruments[inst].isPlaying}
+		// `)
 		let name 		= _instruments[inst].name(),
 			volume 		= _instruments[inst].volume(),
 			pattern 	= _instruments[inst].rawPattern(),

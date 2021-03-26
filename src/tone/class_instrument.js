@@ -112,8 +112,8 @@ class Instrument {
     }
 
     restart (){
-        // this._sequence.stop();
-        // this._sequence.clear();
+        this._sequence.stop();
+        this._sequence.clear();
         this.#initSequence();
         this.start();
         this._isPlaying = true;

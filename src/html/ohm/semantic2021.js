@@ -160,8 +160,8 @@ semantics.addOperation('eval', {
         let patternString = pattern.sourceString;
         phrases = phrasesToArray(phrases);
         pattern = pattern.eval();
-        let event = 'assignPatternOne';
-        if (phrases.length>1) event = 'assignPatternMulti'        
+        let event = 'assignPattern';
+        if (phrases.length>1) event = 'assignPattern'
         return {
             event: event,
             phrases: phrases,

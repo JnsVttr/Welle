@@ -47,6 +47,7 @@ export const handleReturns = (_returns, _instruments, _parts) => {
 	// CLEAR - after processing, clear the input field
 	document.getElementById("mainInput").value = "";
 	
+	// RENDER - with al little timeout, so that instruments can update
 	setTimeout(() => {
 		renderInstruments(_instruments);
 		renderParts(_parts);
