@@ -95,6 +95,11 @@ io.on("connection", (socket) => {
 	console.log("");
 	console.log("socket connects to client");
 
+	// HELLO MESSAGE
+	socket.on('message', (string) => {
+		printer(debug, "socket.on", "message", string)
+	});
+
 	// TONE PRESETS
 	socket.on('requestTonePresets', () => {
 		// printer(debug, "JSON", 'paths', tonePresetsJSON)

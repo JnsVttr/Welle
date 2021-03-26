@@ -21,14 +21,11 @@ import * as Tone from 'tone';
 import { renderHtmlArrows, renderBPM }  from  '/html/renderHTML';
 import { parser }  from '/parser';
 import { help }  from '/text/helpText';
-import { update_InstrumentsList } from '/tone/update_InstrumentsList'
 import { printer } from '/helper/printer';
 import { alerts } from '/helper/alerts';
 import { createAlerts } from '/helper/createAlerts';
 import { enterFunction } from '/helper/enterFunction';
 import { playAlerts } from '/helper/playAlerts';
-// import { requestServerFiles } from '/socket/requestServerFiles';
-import { extractSamplePaths } from './helper/extractSamplePaths';
 import { returnToActionExecute } from './helper/returnToActionExecute';
 import { Instrument } from './tone/class_instrument';
 
@@ -42,9 +39,8 @@ let socket = io.connect();   // socket var - server connect, also for exports
 export let user = 'local';
 export let soundMuteState = true;
 export let alertMuteState = false;  // alerts muted or not?
-let serverFolders = "";
-export let serverSamples = "";
-export let sampleURL = {};
+
+
 
 
 // audio variables
@@ -120,7 +116,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 	if (e.code=='Enter') {
 		// first time start Tone if not running
 		// Tone.start();
-		socket.emit('msg', 'Hello!');
+		
 		// console.log("TONE context started");
 		// print empty spaces
 		console.log('');
@@ -131,6 +127,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
 		// INPUT - get input string
 		let string = document.getElementById("mainInput").value.toLowerCase();
+		socket.emit('message', `enter: "${string}"`);
 	
 		// SERVER MESSAGE - create a message for server
 		let message = { string: string, user: 'local' };
@@ -218,7 +215,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // SOCKET on initial connection
 socket.on('connect', function (data) {
 	console.log('Connected!');
-	socket.emit('message', {message:"Hello!"});
+	socket.emit('message', {message:"Hello from client!"});
 	socket.emit('requestSampleFiles');
 	socket.emit('requestTonePresets');
 });

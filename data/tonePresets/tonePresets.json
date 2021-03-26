@@ -28,7 +28,7 @@
 	 },
 	 "bass":{
 		"synthType":"MonoSynth",
-		"gain":1,
+		"gain":0.5,
 		"volume":0.6,
 		"baseNote":32,
 		"transpose":0,
@@ -68,7 +68,7 @@
 		"synthType":"Sampler",
 		"gain":1,
 		"volume":0.6,
-		"baseNote":32,
+		"baseNote":36,
 		"transpose":0,
 		"triggerFunction": {
 			"arguments": "_synth, _note",

@@ -33,7 +33,6 @@ export const parser = (input) => {
             for (let i=0; i<input.phrases.length;i++){
                 let name = input.phrases[i];
                 instruments[name] = new Instrument(name);
-                // instruments[name].start();
             };
             console.log("instruments object ", instruments);
             Tone.Transport.start();
@@ -59,7 +58,6 @@ export const parser = (input) => {
                 } else {
                     printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
                     instruments[name] = new Instrument(name, input.pattern, input.patternString);
-                    // instruments[name].start();
                 }
             };
             if (Tone.Transport.state == 'stopped') Tone.Transport.start();
