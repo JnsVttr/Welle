@@ -86,12 +86,12 @@ httpServer.listen(port,hostname,()=>{
 
 
 // // variables paths, data etc.
-// const audioPath = path.join(__dirname, audioSource);
-// const historyURL = path.join(__dirname, historySource);
-// const presetsURL = path.join(__dirname, presetsSource);
-// let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
-// let debug = true;
-// let context = "app.js";
+const audioPath = path.join(__dirname, audioSource);
+const historyURL = path.join(__dirname, historySource);
+const presetsURL = path.join(__dirname, presetsSource);
+let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
+let debug = true;
+let context = "app.js";
 
 // // allow, indicate app access to folder structure
 // app.use(express.static(path.join(__dirname, pageSource)));
