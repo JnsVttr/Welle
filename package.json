@@ -2,6 +2,7 @@
   "name": "welle",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost ",
     "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
@@ -17,7 +18,7 @@
     "nodemon": "^1.19.4",
     "ohm-js": "^0.14.0",
     "parcel-bundler": "^1.12.5",
-    "socket.io": "^2.4.1",
+    "socket.io": "^4.0.0",
     "socket.io-client": "^4.0.0",
     "socket.io-file": "^2.0.31",
     "socket.io-file-client": "^2.0.2",

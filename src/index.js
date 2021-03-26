@@ -98,6 +98,8 @@ Tone.Transport.bpm.value = bpm;
 
 
 
+
+
 // const synth = new Tone.Synth().connect(Instrument.masterGain);
 // const seq = new Tone.Sequence((time, note) => {
 // 	synth.triggerAttackRelease(note, 0.1, time);
@@ -216,25 +218,35 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // SOCKET HANDLING
 // ======================
 
-// initial request for samples on server
-const requestServerFiles = (string) => {
-	printer(debug, context, "requestServerFiles", "request sample paths from server...")
-	socket.emit('requestServerFiles', string);
-}
-requestServerFiles ("samples");
-socket.emit('requestServerFiles', 'samples');
-// receive files via socket, assign them to global variables
-socket.on("filesOnServer", function(folder, samples, what) {
-	serverFolders = folder;
-	serverSamples = samples;
-	printer(debug, context, "filesOnServer - received", ` 
-		folders: ${serverFolders} 
-		file paths: ${serverSamples}`);
-	sampleURL = extractSamplePaths (serverSamples);
-	
-	// instrumentsList = update_InstrumentsList(); // create list
-	// Instrument.createList(sampleURL);
+socket.on('connect', function (data) {
+	console.log('Connected!');
+	socket.emit('message', {message:"Hello!"});
+	socket.emit('requestServerFiles', 'samples');
 });
+socket.on('message', function (data) {
+	console.log('incoming message: ', data);
+});
+
+
+// initial request for samples on server
+// const requestServerFiles = (string) => {
+// 	printer(debug, context, "requestServerFiles", "request sample paths from server...")
+// 	socket.emit('requestServerFiles', string);
+// }
+// requestServerFiles ("samples");
+// socket.emit('requestServerFiles', 'samples');
+// // receive files via socket, assign them to global variables
+// socket.on("filesOnServer", function(folder, samples, what) {
+// 	serverFolders = folder;
+// 	serverSamples = samples;
+// 	printer(debug, context, "filesOnServer - received", ` 
+// 		folders: ${serverFolders} 
+// 		file paths: ${serverSamples}`);
+// 	sampleURL = extractSamplePaths (serverSamples);
+	
+// 	// instrumentsList = update_InstrumentsList(); // create list
+// 	// Instrument.createList(sampleURL);
+// });
 
 
 

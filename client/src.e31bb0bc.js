@@ -70153,23 +70153,35 @@ document.getElementById("mainInput").addEventListener("keydown", function (e) {
   // }
 }); // SOCKET HANDLING
 // ======================
-// initial request for samples on server
 
-var requestServerFiles = function requestServerFiles(string) {
-  (0, _printer.printer)(debug, context, "requestServerFiles", "request sample paths from server...");
-  socket.emit('requestServerFiles', string);
-};
-
-requestServerFiles("samples");
-socket.emit('requestServerFiles', 'samples'); // receive files via socket, assign them to global variables
-
-socket.on("filesOnServer", function (folder, samples, what) {
-  serverFolders = folder;
-  exports.serverSamples = serverSamples = samples;
-  (0, _printer.printer)(debug, context, "filesOnServer - received", " \n\t\tfolders: ".concat(serverFolders, " \n\t\tfile paths: ").concat(serverSamples));
-  exports.sampleURL = sampleURL = (0, _extractSamplePaths.extractSamplePaths)(serverSamples); // instrumentsList = update_InstrumentsList(); // create list
-  // Instrument.createList(sampleURL);
-}); // ==================================================================
+socket.on('connect', function (data) {
+  console.log('Connected!');
+  socket.emit('message', {
+    message: "Hello!"
+  });
+  socket.emit('requestServerFiles', 'samples');
+});
+socket.on('message', function (data) {
+  console.log('incoming message: ', data);
+}); // initial request for samples on server
+// const requestServerFiles = (string) => {
+// 	printer(debug, context, "requestServerFiles", "request sample paths from server...")
+// 	socket.emit('requestServerFiles', string);
+// }
+// requestServerFiles ("samples");
+// socket.emit('requestServerFiles', 'samples');
+// // receive files via socket, assign them to global variables
+// socket.on("filesOnServer", function(folder, samples, what) {
+// 	serverFolders = folder;
+// 	serverSamples = samples;
+// 	printer(debug, context, "filesOnServer - received", ` 
+// 		folders: ${serverFolders} 
+// 		file paths: ${serverSamples}`);
+// 	sampleURL = extractSamplePaths (serverSamples);
+// 	// instrumentsList = update_InstrumentsList(); // create list
+// 	// Instrument.createList(sampleURL);
+// });
+// ==================================================================
 // EOF - index.js
 // class Sound {
 // 	static soundStyle = "techno";
@@ -70244,7 +70256,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "localhost" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55517" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54343" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

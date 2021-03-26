@@ -87,6 +87,7 @@ export const parser = (input) => {
             Object.keys(instruments).forEach(entry => {
                 console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)
             });
+            
         break;
     }; // EO_Switch
 
