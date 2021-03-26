@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 
-export const readFiles = (_audioPath, _baseUrl) => {
+export const readFiles = (_audioPath, _baseUrl, _audioPathRel) => {
     // console.log('_audioPath: ', _audioPath);
 
     // variables folders
@@ -12,11 +12,11 @@ export const readFiles = (_audioPath, _baseUrl) => {
 	// FOLDERS - get file content of _audioPath
 	entry = fs.readdirSync(_audioPath, (err) => { if (err) return console.log(err)  });
     // check for each folder entry in the audioPath
-	entry.forEach( (file) => {
+	entry.forEach( (folder) => {
         // check if entry is folder. first check for extension
-		var ext = path.parse(file).ext;
+		var ext = path.parse(folder).ext;
 		// if file is folder
-		if (ext == '' && file[0] != '.') _audioFiles[file] = {}
+		if (ext == '' && folder[0] != '.') _audioFiles[folder] = []
 	});
     
 
@@ -31,7 +31,8 @@ export const readFiles = (_audioPath, _baseUrl) => {
         for (let i in entries) {
             // console.log("entries[i]", entries[i])
             if (!entries[i].startsWith(".")) {
-                _audioFiles[folder][entries[i]] = path.join(_baseUrl, entries[i]); 
+                // _audioFiles[folder][entries[i]] = path.join(_baseUrl, entries[i]); 
+                _audioFiles[folder].push([entries[i], path.join(`${_audioPathRel}/${folder}`, entries[i])]) ; 
             };
         };
     };

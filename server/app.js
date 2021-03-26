@@ -29,27 +29,28 @@ const io = new Server(httpServer);
 
 // local resources 
 // ===================
-const pageSource = '../client/';
-const audioSource = '../data/audio';
-const alertSource = '../data/alert';
+const pageSource 	= '../client/';
+const audioSource 	= '../data/audio';
+const alertSource 	= '../data/alert';
 const historySource = '../data/history';
 const presetsSource = '../data/presets';
+const tonePresets 	= '../data/tonePresets/tonePresets.json'; 
 // const hostname = '127.0.0.1';
 const hostname = 'localhost';
 // get paths and set __dirname (not there in es6)
-const moduleURL = new URL(import.meta.url);
-const __dirname = path.dirname(moduleURL.pathname);
-const clientDir = path.join(__dirname, pageSource);
-const audioPath = path.join(__dirname, audioSource);
-const historyURL = path.join(__dirname, historySource);
-const presetsURL = path.join(__dirname, presetsSource);
+const moduleURL 		= new URL(import.meta.url);
+const __dirname 		= path.dirname(moduleURL.pathname);
+const clientDir 		= path.join(__dirname, pageSource);
+const audioPathRel 		= 'audio';
+const audioPath 		= path.join(__dirname, audioSource);
+const tonePresetsPath 	= path.join(__dirname, tonePresets);
+const historyURL 		= path.join(__dirname, historySource);
+const presetsURL 		= path.join(__dirname, presetsSource);
 let restartServerScript = '. /home/tangible/bin/restart_app.sh ';
 
 
-// logs + variables
+// variables
 // ===================
-// console.log("__dirname: ", __dirname);
-// console.log("clientDir: ", clientDir);
 let debug = true;
 let baseUrl = '';
 // check, if server is local or on tangible.uber.space
@@ -57,7 +58,7 @@ if (path.join(__dirname) != '/var/www/virtual/tangible/html/server')
 	baseUrl = 'http://localhost:3000/';
 if (path.join(__dirname) == '/var/www/virtual/tangible/html/server')  
 	baseUrl = 'https://tangible.uber.space/';
-			
+let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, 'utf8'));	
 
 
 
@@ -72,28 +73,42 @@ app.get('/', function (req, res) { res.sendFile('index.html'); });
 
 // Samples & Folders - handle audio files
 // =========================================
-// scan at server start
 let audioFiles = {};
-audioFiles = readFiles(audioPath, baseUrl);
-// printer(debug, 'audioFiles check:', `getting files: `, audioFiles);
+// audioFiles = readFiles(audioPath, baseUrl, audioPathRel);
 
 
 
 
 
 
-// SOCKETS connection: io.sockets
-// ================================
+
+
+
+
+
+
+// ======================================================================
+// SOCKETS connection: io.sockets.emit, socket.on
+// ======================================================================
+
 io.on("connection", (socket) => {
-	console.log("");
 	console.log("");
 	console.log("socket connects to client");
 
+	// TONE PRESETS
+	socket.on('requestTonePresets', () => {
+		// printer(debug, "JSON", 'paths', tonePresetsJSON)
+		tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, 'utf8'));	
+		io.sockets.emit("tonePresets", tonePresetsJSON);
+	});
+
+
 	// AUDIO FILES
-	socket.on('requestServerFiles', function (string) {
-		printer(debug, "requestServerFiles", `client requests files on:`, string);
+	socket.on('requestSampleFiles', () => {
+		printer(debug, "requestSampleFiles", `client requests sample files`);
 		// read & print files 'samples'
-		if (string == 'samples') io.sockets.emit('audioFiles', audioFiles);	
+		audioFiles = readFiles(audioPath, baseUrl, audioPathRel);
+		io.sockets.emit('audioFiles', audioFiles);	
 	});
 });
 
@@ -102,7 +117,9 @@ io.on("connection", (socket) => {
 // start server
 // ================================
 httpServer.listen(port, hostname, () => {
-	console.log(`Serving running at http://${hostname}:${port}/`);
+	console.log("");
+	console.log(`Serving running at http://${hostname}:${port}`);
+	console.log("");
 });
 
 

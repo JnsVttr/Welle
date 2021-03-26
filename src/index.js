@@ -5,7 +5,7 @@
 https://github.com/harc/ohm
 
 JS shorthand tipps: https://www.sitepoint.com/shorthand-javascript-techniques/
-
+JSON online parser: https://jsonformatter.curiousconcept.com/
 
 */
 
@@ -31,7 +31,6 @@ import { playAlerts } from '/helper/playAlerts';
 import { extractSamplePaths } from './helper/extractSamplePaths';
 import { returnToActionExecute } from './helper/returnToActionExecute';
 import { Instrument } from './tone/class_instrument';
-import { presets } from '/tone/presets'
 
 
 
@@ -51,16 +50,15 @@ export let sampleURL = {};
 // audio variables
 // ===================================
 export let bpm = 120;
-export let instrumentsList = "";
 export let instruments = {};
 export let parts = {};
-// list of instruments corresponds to folders on server! first check folders ?
-let listOfAvailableInstruments = ['bass', 'drum', 'kick', 'string', 'pad', 'noise', 'mix', 'ambient', 'key']; 
-
-// Tone Audio Buffers - also as a list..
-const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {
-	console.log("buffer loaded");
-});
+// list contains synths in presets and sample folders on server as instruments
+// coming by sockets
+let listOfInstruments = [];  
+let listOfSamplers = [];  
+let listOfAllAvailableInstruments = [];
+// Tone Audio Buffer
+const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {});
 
 
 
@@ -86,8 +84,6 @@ createAlerts(alerts);
 renderBPM(bpm);
 // set static variables to class Instrument
 Instrument.bpm = bpm;
-Instrument.list = listOfAvailableInstruments;
-Instrument.presets = presets;
 Instrument.bufferDefault = bufferDefault;
 // connect audio to Tone master
 Instrument.masterGain.connect(Tone.getDestination());  // assign Instrument class masterOut to Tone master
@@ -141,7 +137,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
 		// GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
 		let result = null;
-		if (string!='') result = enterFunction(string, instrumentsList);
+		if (string!='') result = enterFunction(string, listOfAllAvailableInstruments);
 		
 
 		// SOCKET + PARSER
@@ -223,13 +219,34 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 socket.on('connect', function (data) {
 	console.log('Connected!');
 	socket.emit('message', {message:"Hello!"});
-	socket.emit('requestServerFiles', 'samples');
+	socket.emit('requestSampleFiles');
+	socket.emit('requestTonePresets');
 });
 // SOCKET on receiving audioFile Paths
-socket.on('audioFiles', function (data) {
-	console.log('incoming server files: ', data);
+socket.on('audioFiles', (files) => {
+	console.log('incoming server files: ', files);
+	Instrument.files = files;
+	for (let file in files) {
+		console.log("sampleFolder: ", file); 
+		listOfSamplers.push(file);
+		listOfAllAvailableInstruments.push(file);
+	};	
+	console.log("listOfSamplers", listOfSamplers);
+	console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
+	Instrument.listSamplers = listOfSamplers;
 });
-
+// SOCKET receive tonePresets
+socket.on('tonePresets', (presets) => {
+	Instrument.presets = presets;
+	// console.log('incoming presets: ', presets);
+	for (let preset in presets) {
+		listOfInstruments.push(preset);
+		listOfAllAvailableInstruments.push(preset);
+	};
+	console.log("listOfInstruments", listOfInstruments);
+	console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
+	Instrument.list = listOfInstruments;
+});
 
 
 
