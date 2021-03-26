@@ -14,7 +14,8 @@ import * as Tone from 'tone';
 // files
 import { printer } from '/helper/printer';
 import { Instrument } from '/tone/class_instrument'
-import { instruments, parts, thisBPM } from '/index' 
+import { instruments, listOfAllAvailableInstruments, 
+    parts, thisBPM } from '/index' 
 
 // local variables
 let debug = true;
@@ -25,14 +26,16 @@ let context = "parser";
 
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
-    printer(debug, context, "input: ", input)
+    printer(debug, context, "input: ", input);
+    let returnMessage = '';
 
     switch(input.event) {
         case 'playMulti':
             printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             for (let i=0; i<input.phrases.length;i++){
                 let name = input.phrases[i];
-                instruments[name] = new Instrument(name);
+                if (listOfAllAvailableInstruments.includes(name)) instruments[name] = new Instrument(name);
+                else returnMessage = 'noSuchInstrument';
             };
             console.log("instruments object ", instruments);
             Tone.Transport.start();
@@ -56,9 +59,11 @@ export const parser = (input) => {
                     printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
                     instruments[name].setPattern(input.pattern, input.patternString);
                 } else {
-                    printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
-                    instruments[name] = new Instrument(name, input.pattern, input.patternString);
-                }
+                    if (listOfAllAvailableInstruments.includes(name)) {
+                        printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
+                        instruments[name] = new Instrument(name, input.pattern, input.patternString);
+                    } else returnMessage = 'noSuchInstrument';
+                };
             };
             if (Tone.Transport.state == 'stopped') Tone.Transport.start();
         break;
@@ -90,5 +95,5 @@ export const parser = (input) => {
     }; // EO_Switch
 
 
-
+    return returnMessage;
 }; // EO parser

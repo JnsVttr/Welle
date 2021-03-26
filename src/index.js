@@ -26,7 +26,7 @@ import { alerts } from '/helper/alerts';
 import { createAlerts } from '/helper/createAlerts';
 import { enterFunction } from '/helper/enterFunction';
 import { playAlerts } from '/helper/playAlerts';
-import { returnToActionExecute } from './helper/returnToActionExecute';
+import { handleReturns } from './helper/handleReturns';
 import { Instrument } from './tone/class_instrument';
 
 
@@ -52,7 +52,7 @@ export let parts = {};
 // coming by sockets
 let listOfInstruments = [];  
 let listOfSamplers = [];  
-let listOfAllAvailableInstruments = [];
+export let listOfAllAvailableInstruments = [];
 // Tone Audio Buffer
 const bufferDefault = new Tone.ToneAudioBuffer("/audio/kick/animal.mp3", () => {});
 
@@ -64,6 +64,7 @@ export let consolePointer = 0; // for arrow functions
 export let consoleArray = [];   // arrays to store page console etc. output
 export let consoleLength = 20; // how many lines are displayed
 window.onload = function() { document.getElementById("mainInput").focus(); }
+let returns = {};
 
 // html variables
 // ===================================
@@ -92,14 +93,6 @@ Tone.Transport.bpm.value = bpm;
 
 
 
-// const synth = new Tone.Synth().connect(Instrument.masterGain);
-// const seq = new Tone.Sequence((time, note) => {
-// 	synth.triggerAttackRelease(note, 0.1, time);
-// 	// subdivisions are given as subarrays
-// }, ["C4", ["E4", "D4", "E4"], "G4", ["A4", "G4"]]).start(0);
-// // Tone.Transport.start();
-
-
 
 
 
@@ -109,81 +102,49 @@ Tone.Transport.bpm.value = bpm;
 
 document.getElementById("mainInput").addEventListener("keydown", (e) => {
 	
-	// set variable for returns from grammar, parser, tone
-	let returnToAction = { printToConsole: {}, parser: {} };
 	
-	// if Enter in main input field
+	// ENTER - in main input field
+	// ===========================
 	if (e.code=='Enter') {
-		// first time start Tone if not running
-		// Tone.start();
-		
-		// console.log("TONE context started");
-		// print empty spaces
-		console.log('');
-		console.log('');
+		// set variable for returns from grammar, parser, tone
+		returns = { 
+			input: '', 
+			semantic: {}, 
+			parser: '' ,
+			console: {
+				array: consoleArray,
+				div: consoleDivID,
+				length: consoleLength,
+			},
+		};
 
+		// print empty spaces for debugging
+		if (debug) console.log("");console.log("");
 		// POINTER - reset pointer for arrwos
 		consolePointer = -1; 
 
 		// INPUT - get input string
-		let string = document.getElementById("mainInput").value.toLowerCase();
-		socket.emit('message', `enter: "${string}"`);
+		returns.input = document.getElementById("mainInput").value.toLowerCase();
+		socket.emit('message', `enter: "${returns.input}"`);
 	
-		// SERVER MESSAGE - create a message for server
-		let message = { string: string, user: 'local' };
-
 		// GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
-		let result = null;
-		if (string!='') result = enterFunction(string, listOfAllAvailableInstruments);
+		returns.semantic = enterFunction(returns.input, listOfAllAvailableInstruments);
 		
-
-		// SOCKET + PARSER
-		// handle returns from enterfunction() for socket and parser
-		// html handling goes through returnToAction list and rendering
-		if (result == null ) {
-			playAlerts('error', alertMuteState);
-		}
-		else if (result.valid == true) { 
-			// send to server via sockets
-			socket.emit('clientEvent', message);
+		// PARSER
+		if (returns.semantic.valid) { 
 			// send results to parser for Tone
-			returnToAction.parser = parser(result.result);
-			 
+			returns.parser = parser(returns.semantic.result);
 			// add to consolePointer for arrows
 			consolePointer += 1;
-
-			// GRAMMAR RESULTS - save results to return action list renderer
-			returnToAction.printToConsole.valid = result.valid;
-			returnToAction.printToConsole.string = result.string;
-			returnToAction.printToConsole.length = consoleLength;
-			returnToAction.printToConsole.id = consoleDivID;
-			
-			// play success return alert
-			playAlerts('return', alertMuteState);
-		} else {
-			// if text input not valid:
-			printer(debug, context, "result.valid? : ", result.valid);
-			// play error alert
-			playAlerts('error', alertMuteState);	
 		};
-
 		
-		
-		
-		// print return list
-		// printer(debug, context, "returnToAction list: ", returnToAction)
-
-		// EXECUTE RETURN ACTIONS - execute returnToAction list and return new consoleArray
-		consoleArray = returnToActionExecute(returnToAction, consoleArray, instruments, parts);
-
-		// CLEAR - after processing, clear the input field
-		document.getElementById("mainInput").value = "";
+		// PROCESS - handle all returns
+		consoleArray = handleReturns(returns, instruments, parts);
 	};
 
 
-
-
 	// KEY INTERACTIONS - arrow functions
+	// ======================================
 	if (e.code=='ArrowUp'){
 		// printer(debug, context, "text input", "arrow up pressed");
 	   	consolePointer = renderHtmlArrows(consolePointer, consoleArray, 'up');

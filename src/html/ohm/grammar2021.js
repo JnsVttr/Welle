@@ -4,6 +4,7 @@
 
 /*
 https://github.com/harc/ohm
+https://ohmlang.github.io/editor/
 use the online tester 
 
 save grammar as const var. will be used at semantics.js
@@ -47,6 +48,7 @@ livecode {
         | "."               		--stopAllEvent
         | "/"               		--deleteAllEvent
         
+        
                 
 
     Assignments =
@@ -55,6 +57,8 @@ livecode {
         | "bpm" intPos floatPos?        --setBPM
         | PhraseList floatPos 		    --setVolume
         | PhraseList			        --playListEvent
+        | ""                            --emptyEvent
+        
         
         
         

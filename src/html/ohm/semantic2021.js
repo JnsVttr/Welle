@@ -143,6 +143,7 @@ semantics.addOperation('eval', {
             event: event,
         }
     },
+    
    
     Assignments_copyPattern: (source, _, phrases) => {
         source = source.sourceString;
@@ -196,6 +197,12 @@ semantics.addOperation('eval', {
         return {
             event: event,
             phrases: phrases,
+        }
+    },
+    Assignments_emptyEvent: (_) => {
+        let event = 'emptyEvent';
+        return {
+            event: event,
         }
     },
 

@@ -21,7 +21,8 @@ class Instrument {
     static masterGain = new Tone.Gain(0.98);        // master output for Tone -> Speaker
     static bpm = 120;                               // bpm
     static list = [];                               // list of possible instrument names
-    static listSamplers = []                        // list of all sample folders
+    static listSamplers = [];                       // list of all sample folders
+    static listAll = [];                            // list of all
     static presets = {};                            // settings for different instrument names
     static bufferDefault = undefined;               // placeholder default buffer
     static files = {};                              // all sample files + URLs  on server
@@ -54,14 +55,14 @@ class Instrument {
         }
         // else check if new name = a sample folder
         else if (Instrument.listSamplers.includes(this._name)) {
-            console.log("detected sampler")
+            // console.log("detected sampler");
             // apply settings for sampler to instrument
             this._preset = Instrument.presets['sampler'];
             this._settings = this._preset.settings;   
             // get the URL for the sample:
             for (let entry in Instrument.files) {
                 if (entry == this._name) {
-                    console.log('entry found', Instrument.files[entry][0][1]);
+                    // console.log('entry found', Instrument.files[entry][0][1]);
                     this._sampleUrl = Instrument.files[entry][this._fileIndex][1]; 
                     // assign buffer to setting before buffer is actually loaded
                     this._settings.C3 = this._buffer;
@@ -119,11 +120,11 @@ class Instrument {
     }
     
     stop (quant){
-        console.log("stop() quant: ", quant);
+        // console.log("stop() quant: ", quant);
         if (quant==undefined) this._sequence.stop(); // stop just before next quant
         if (quant!=undefined) this._sequence.stop(quant); // stop just before next quant
         this._isPlaying = false;
-        console.log("this._sequence.state: ", this._sequence.state);
+        // console.log("this._sequence.state: ", this._sequence.state);
     }
 
     setPattern (pattern, rawPattern) {
@@ -152,6 +153,15 @@ class Instrument {
     set sequence (dummy){
         //
     }
+    name () {
+        return this._name;
+    }
+    volume () {
+        return this._volume;
+    }
+    rawPattern () {
+        return this._rawPattern;
+    }
 
 
     
@@ -166,6 +176,7 @@ class Instrument {
         // create sequence - the sequence calls the synth at time+note defined by the pattern
         this.#initSequence();
         this.start();
+        this._isPlaying = true;
     }
     #createSampler () {
         this._settings.C3 = this._buffer;
@@ -175,6 +186,7 @@ class Instrument {
         // create sequence - the sequence calls the synth at time+note defined by the pattern
         this.#initSequence();
         this.start();
+        this._isPlaying = true;
     }
     // init synth
     #initSynth = () => {
@@ -183,7 +195,7 @@ class Instrument {
     // set volume
     #setVolume = (gain) => {
         this._gain.gain.rampTo(this._volume, 0.1);
-        console.log(`this._gain.gain: ${this._gain.gain}, this._volume: ${this._volume}`);
+        // console.log(`this._gain.gain: ${this._gain.gain}, this._volume: ${this._volume}`);
     }
     
     // init a sequence
@@ -232,7 +244,7 @@ class Instrument {
         let quant = Tone.Time(now).quantize(factor);
         let playTime = quant;
 
-        console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
+        // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
         
         // if transport starts, set quant to 0
         if (now == 0) { playTime = 0}
@@ -240,9 +252,9 @@ class Instrument {
         else if (quant < now){
             playTime= now + 0.5;
             playTime = Tone.Time(playTime).quantize(factor);
-            console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+            // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
         }
-        console.log(`now: ${now} - play at: ${playTime}`)
+        // console.log(`now: ${now} - play at: ${playTime}`)
         
         // safety: if below 0 than playTime is zero
         if (playTime<0) playTime=0

@@ -11,28 +11,48 @@ import { playAlerts } from '/helper/playAlerts';
 
 
 
-export const returnToActionExecute = (_actionContent, _consoleArray, _instruments, _parts) => {
+export const handleReturns = (_returns, _instruments, _parts) => {
+	printer(debug, context, "returns in handleReturns: ", _returns);
+
 	// store returns in separate variables
-	// let parserReturn = _actionContent.parser.parserReturn;
-	let printToConsole = _actionContent.printToConsole;
-	console.log("printToConsole: ", printToConsole)
-	if (printToConsole != undefined ){
-		// check if console string is valid, then print to console:
-		if (printToConsole.valid == true){
-			// if valid, add string to console stringarray
-			_consoleArray.push({ message: `${printToConsole.string}` });
-			// render to html console
-			renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+	let consoleArray 	= _returns.console.array;
+	let parserReturn 	= _returns.parser;
+	let consoleDivID 	= _returns.console.div;
+	let consoleLength 	= _returns.console.length;
+	let inputString 	= _returns.semantic.string;
+	
+
+
+	
+	// check if console string is valid, then print to console:
+	if (_returns.semantic.valid){
+		if (parserReturn == 'noSuchInstrument'){
+			consoleArray.push({ message: `!! choose valid instrument, not >${inputString}<` });
+			playAlerts('error', alertMuteState);	
 		} else {
-			// if not valid, prepend a '!' to string, store in console string array
-			_consoleArray.push({ message: `! ${printToConsole.string}` });
-			// render to html console
-			renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
+			consoleArray.push({ message: `${inputString}` });
+			playAlerts('return', alertMuteState);	
 		}
-	}
+		// render to html console
+		renderToConsole(consoleArray, consoleDivID, consoleLength);
+		
+	} else {
+		// if not valid, prepend a '!' to string, store in console string array
+		consoleArray.push({ message: `!! not valid >${inputString}<` });
+		playAlerts('error', alertMuteState);	
+		// render to html console
+		renderToConsole(consoleArray, consoleDivID, consoleLength);		
+	};
+
+	// CLEAR - after processing, clear the input field
+	document.getElementById("mainInput").value = "";
 	
+	setTimeout(() => {
+		renderInstruments(_instruments);
+		renderParts(_parts);
+	  }, 100);
 	
-	
+	// renderBPM(Tone.Transport.bpm.value);
 
 	// printer(debug, context, "executeActionContent printToConsole ", printToConsole);
 	// printer(debug, context, "executeActionContent parserReturn ", parserReturn);
@@ -65,5 +85,5 @@ export const returnToActionExecute = (_actionContent, _consoleArray, _instrument
 	// };
 
 	// return the changed console string array to index.js
-	return _consoleArray;
+	return consoleArray;
 };
