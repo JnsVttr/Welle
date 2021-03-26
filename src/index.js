@@ -215,6 +215,8 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
 
 
+
+
 // SOCKET HANDLING
 // ======================
 
@@ -226,6 +228,27 @@ socket.on('connect', function (data) {
 socket.on('message', function (data) {
 	console.log('incoming message: ', data);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // initial request for samples on server
