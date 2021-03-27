@@ -80,7 +80,7 @@ class Instrument {
         this._gain = new Tone.Gain(Instrument.gainDefault);
         // connect this synth to master Gain node
         this._gain.connect(Instrument.masterGain);
-        this.#setVolume(this._volume);
+        this.setVolume(this._volume);
 
         // STARTING
         // =============
@@ -133,7 +133,8 @@ class Instrument {
     setVolume(volume) {
         if (volume > 1) volume = 1;
         this._volume = volume;
-        this.#setVolume(this._volume);
+        this._gain.gain.rampTo(this._volume, 0.1);
+        // console.log(`this._gain.gain: ${this._gain}, this._volume: ${this._volume}`);
     }
 
     // GETTER & SETTER - only one value each
@@ -192,12 +193,6 @@ class Instrument {
     // init synth
     #initSynth = () => {
         this._synth = new Tone[this._type](this._settings);
-    };
-
-    // set volume
-    #setVolume = (volume) => {
-        this._gain.gain.rampTo(volume, 0.1);
-        // console.log(`this._gain.gain: ${this._gain}, this._volume: ${this._volume}`);
     };
 
     // init a sequence

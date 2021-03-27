@@ -28,7 +28,8 @@ semantics.addOperation("eval", {
 
     Commands_playMultiEvent: (_, phrases) => {
         phrases = phrasesToArray(phrases);
-        let event = "playMultiEvent";
+        // is the same event like plainStartEvent, just with > at the beginning
+        let event = "plainStartEvent";
         return {
             event: event,
             phrases: phrases,

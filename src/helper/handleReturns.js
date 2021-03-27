@@ -23,7 +23,12 @@ export const handleReturns = (_returns, _instruments, _parts) => {
     if (_returns.semantic.valid) {
         if (parserReturn.cmd == "noSuchInstrument") {
             consoleArray.push({
-                message: `!! choose valid instrument, not >${parserReturn.string}<`,
+                message: `!! choose valid instrument, not "${parserReturn.string}"`,
+            });
+            playAlerts("error", alertMuteState);
+        } else if (parserReturn.cmd == "partNameReserved") {
+            consoleArray.push({
+                message: `!! part name "${parserReturn.string}" reserved as instrument`,
             });
             playAlerts("error", alertMuteState);
         } else {
@@ -34,7 +39,7 @@ export const handleReturns = (_returns, _instruments, _parts) => {
         renderToConsole(consoleArray, consoleDivID, consoleLength);
     } else {
         // if not valid, prepend a '!' to string, store in console string array
-        consoleArray.push({ message: `!! not valid >${inputString}<` });
+        consoleArray.push({ message: `!! not valid "${inputString}"` });
         playAlerts("error", alertMuteState);
         // render to html console
         renderToConsole(consoleArray, consoleDivID, consoleLength);

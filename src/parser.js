@@ -36,32 +36,24 @@ export const parser = (input) => {
         case "plainStartEvent":
             // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             // for all phrases
-            for (let i = 0; i < input.phrases.length; i++) {
+            for (let i in input.phrases) {
                 let name = input.phrases[i];
                 // if they are valid instruments
                 if (listOfAllAvailableInstruments.includes(name)) {
                     // printer(debug, context, "check instruments", instruments[name])
                     // if they exist already, just start
-                    if (instruments[name]) instruments[name].start();
+                    if (instruments[name]) instruments[name].restart();
                     // else make new
                     else instruments[name] = new Instrument(name);
                     // push name of running inst for rendering
                     returnMessage.instruments.push(name);
                 } else {
                     returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.string = name;
                     returnMessage.noInstrument.push(name);
                 }
             }
             // console.log("instruments object ", instruments);
-            if (Tone.Transport.state != "started") Tone.Transport.start();
-            break;
-
-        case "playMultiEvent":
-            // printer(debug, context, "playMultiEvent, instrument: ", input.phrases);
-            for (let i = 0; i < input.phrases.length; i++) {
-                let name = input.phrases[i];
-                instruments[name].start();
-            }
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 
@@ -215,6 +207,21 @@ export const parser = (input) => {
             break;
 
         case "savePartEvent":
+            let part = input.phrase;
+            console.log(`save part: "${part}"`);
+            // check if name is reserved as instrument
+            if (listOfAllAvailableInstruments.includes(part)) {
+                returnMessage.cmd = "partNameReserved";
+                returnMessage.string = part;
+            } else {
+                // if name free, save it in parts, including current instruments, bpm
+                parts[part] = {
+                    instruments: instruments,
+                    bpm: Tone.Transport.bpm.value,
+                    listOfAllAvailableInstruments: listOfAllAvailableInstruments,
+                };
+                console.log(`part ${part} saved in parts`, parts);
+            }
             break;
 
         case "setBPM":
