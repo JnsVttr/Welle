@@ -3,11 +3,12 @@ import Tone from "tone";
 
 // files
 import { printer } from "/helper/printer";
-import { debug, context, alertMuteState } from "../index";
+import { debug, context, socket } from "../index";
 import { renderToConsole, renderBPM } from "/html/renderHTML";
 import { renderInstruments } from "/html/renderInstruments";
 import { renderParts } from "/html/renderParts";
-import { playAlerts } from "/helper/playAlerts";
+import { playAlerts } from "/helper/alerts";
+import { Socket } from "socket.io-client";
 
 export const handleReturns = (_returns, _instruments, _parts) => {
     printer(debug, context, "returns in handleReturns: ", _returns);
@@ -21,31 +22,41 @@ export const handleReturns = (_returns, _instruments, _parts) => {
 
     // check if console string is valid, then print to console:
     if (_returns.semantic.valid) {
-        if (parserReturn.cmd == "noSuchInstrument") {
-            consoleArray.push({
-                message: `!! choose valid instrument, not "${parserReturn.string}"`,
-            });
-            playAlerts("error", alertMuteState);
-        } else if (parserReturn.cmd == "partNameReserved") {
-            consoleArray.push({
-                message: `!! part name "${parserReturn.string}" reserved as instrument`,
-            });
-            playAlerts("error", alertMuteState);
-        } else if (parserReturn.cmd == "instrumentNotPlaying") {
-            consoleArray.push({
-                message: `!! instrument "${parserReturn.string}" was not started`,
-            });
-            playAlerts("error", alertMuteState);
-        } else {
-            consoleArray.push({ message: `${inputString}` });
-            playAlerts("return", alertMuteState);
+        switch (parserReturn.cmd) {
+            case "":
+                consoleArray.push({ message: `${inputString}` });
+                playAlerts("return");
+                break;
+
+            case "noSuchInstrument":
+                consoleArray.push({ message: `${inputString}` });
+                for (let i in parserReturn.noInstrument) {
+                    consoleArray.push({
+                        message: `! no "${parserReturn.noInstrument[i]}" in list. choose valid instrument or part.`,
+                    });
+                }
+                playAlerts("error");
+                break;
+
+            case "partNameReserved":
+                consoleArray.push({
+                    message: `! name "${parserReturn.string}" can't be used as part name, reserved as instrument`,
+                });
+                playAlerts("error");
+                break;
+
+            case "emptyInput":
+                socket.emit("message", "hello from handleReturns: empty input");
+                playAlerts("error");
+                break;
         }
+
         // render to html console
         renderToConsole(consoleArray, consoleDivID, consoleLength);
     } else {
         // if not valid, prepend a '!' to string, store in console string array
-        consoleArray.push({ message: `!! not valid "${inputString}"` });
-        playAlerts("error", alertMuteState);
+        consoleArray.push({ message: `! input not valid: ${inputString}` });
+        playAlerts("error");
         // render to html console
         renderToConsole(consoleArray, consoleDivID, consoleLength);
     }
@@ -74,7 +85,7 @@ export const handleReturns = (_returns, _instruments, _parts) => {
     // 		let message = `${printToConsole.string} - ${toneReturn.error}`;
     // 		_consoleArray.push({ message: message });
     // 		renderToConsole(_consoleArray, printToConsole.id, printToConsole.consoleLength);
-    // 		playAlerts('error', alertMuteState);
+    // 		playAlerts('error');
     // 	};
     // 	switch (toneReturn.html) {
     // 		case 'render instruments': renderInstruments(_instruments);
@@ -83,9 +94,9 @@ export const handleReturns = (_returns, _instruments, _parts) => {
     // 		break;
     // 		case 'render bpm': renderBPM(Tone.Transport.bpm.value);
     // 		break;
-    // 		case 'render muteOn': playAlerts('return', alertMuteState);
+    // 		case 'render muteOn': playAlerts('return');
     // 		break;
-    // 		case 'render muteOff': playAlerts('return', alertMuteState);
+    // 		case 'render muteOff': playAlerts('return');
     // 		break;
     // 	}
     // };

@@ -47,7 +47,10 @@ export const parser = (input) => {
                     // stop & clear all instruments
                     instruments[instrument].clear();
                     // delete instruments entries
-                    console.log(`${instrument} - delete ${instruments[instrument]} in `, instruments);
+                    console.log(
+                        `${instrument} - delete ${instruments[instrument]} in `,
+                        instruments
+                    );
                     delete instruments[instrument];
                 }
                 console.log(`instruments`, instruments);
@@ -56,8 +59,13 @@ export const parser = (input) => {
                 for (let instrument in parts[partName].instruments) {
                     console.log(`recall instruments`, instrument);
                     instruments[instrument] = parts[partName].instruments[instrument].instrument;
-                    if (parts[partName].instruments[instrument].isPlaying) instruments[instrument].restart();
+                    if (parts[partName].instruments[instrument].isPlaying)
+                        instruments[instrument].restart();
                 }
+                // set part BPM
+                Tone.Transport.bpm.value = parts[partName].bpm;
+                // start Tone
+                Tone.Transport.start();
             } else {
                 // handle input
                 for (let i in input.phrases) {
@@ -97,7 +105,11 @@ export const parser = (input) => {
                 } else {
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
-                        instruments[name] = new Instrument(name, input.pattern, input.patternString);
+                        instruments[name] = new Instrument(
+                            name,
+                            input.pattern,
+                            input.patternString
+                        );
                         // if a volume is specified, set volume
                         if (inputVolume) instruments[name].setVolume(inputVolume);
                         console.log(`start & setvolume ${volume} for instrument: ${name}`);
@@ -152,7 +164,11 @@ export const parser = (input) => {
                         } else {
                             console.log("instrument doesn't exist: ", instrument);
                             // create instrument with source pattern
-                            instruments[instrument] = new Instrument(instrument, pattern, rawPattern);
+                            instruments[instrument] = new Instrument(
+                                instrument,
+                                pattern,
+                                rawPattern
+                            );
                         }
                     } else {
                         // instrument is not valid
@@ -210,7 +226,8 @@ export const parser = (input) => {
                 if (instruments[instrument].isPlaying) stillInstrumentsPlaying = true;
             }
             // if last playing instrument stopped && Tone still playing, than stop Tone
-            if (Tone.Transport.state != "stopped" && !stillInstrumentsPlaying) Tone.Transport.stop();
+            if (Tone.Transport.state != "stopped" && !stillInstrumentsPlaying)
+                Tone.Transport.stop();
             console.log("Tone.state: ", Tone.Transport.state);
             break;
 
@@ -273,12 +290,49 @@ export const parser = (input) => {
             break;
 
         case "setBPM":
+            let bpm = input.bpm;
+            let factor = input.factor;
+            // if no factor, than just set bpm
+            if (!factor) Tone.Transport.bpm.value = bpm;
+            // if time factor, ramp to bpm
+            else Tone.Transport.bpm.rampTo(bpm, factor);
+            // send to return to set HTML
+            returnMessage.cmd = "setBPM";
             break;
 
         case "deleteEvent":
+            // handle input
+            for (let i in input.phrases) {
+                let name = input.phrases[i];
+                // if input is a part
+                if (parts[name]) delete parts[name];
+                // if they are valid instruments
+                else if (listOfAllAvailableInstruments.includes(name)) {
+                    // if they exist already, stop and delete
+                    if (instruments[name]) {
+                        instruments[name].clear();
+                        delete instruments[name];
+                    }
+                } else {
+                    returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.string = name;
+                    returnMessage.noInstrument.push(name);
+                }
+            }
             break;
 
         case "deleteAllEvent":
+            // clear & delete every instrument
+            for (let instrument in instruments) {
+                instruments[instrument].clear();
+                delete instruments[instrument];
+            }
+            // delete all parts
+            for (let part in parts) {
+                delete parts[part];
+            }
+            // stop Tone
+            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
             break;
 
         case "saveEvent":
@@ -306,6 +360,7 @@ export const parser = (input) => {
             break;
 
         case "emptyEvent":
+            returnMessage.cmd = "emptyInput";
             break;
     } // EO_Switch
 

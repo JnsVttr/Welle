@@ -2,11 +2,8 @@
 // =============================================================
 
 /*
-https://github.com/harc/ohm
-
 JS shorthand tipps: https://www.sitepoint.com/shorthand-javascript-techniques/
 JSON online parser: https://jsonformatter.curiousconcept.com/
-
 */
 
 // libraries
@@ -21,10 +18,8 @@ import { renderHtmlArrows, renderBPM } from "/html/renderHTML";
 import { parser } from "/parser";
 import { help } from "/text/helpText";
 import { printer } from "/helper/printer";
-import { alerts } from "/helper/alerts";
-import { createAlerts } from "/helper/createAlerts";
+import { createAlerts, playAlerts } from "/helper/alerts";
 import { enterFunction } from "/helper/enterFunction";
-import { playAlerts } from "/helper/playAlerts";
 import { handleReturns } from "./helper/handleReturns";
 import { Instrument } from "./tone/class_instrument";
 
@@ -32,8 +27,9 @@ import { Instrument } from "./tone/class_instrument";
 // ===================================
 export const debug = true;
 export const context = "index";
-let socket = io.connect(); // socket var - server connect, also for exports
+export let socket = io.connect(); // socket var - server connect, also for exports
 export let user = "local";
+export let alerts = {};
 export let soundMuteState = true;
 export let alertMuteState = false; // alerts muted or not?
 
@@ -68,8 +64,6 @@ let consoleDivID = "console";
 
 // actions
 // ===================================
-// handle direct sound alerts
-createAlerts(alerts);
 // initially show BPM
 renderBPM(bpm);
 // set static variables to class Instrument
@@ -134,12 +128,12 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     if (e.code == "ArrowUp") {
         // printer(debug, context, "text input", "arrow up pressed");
         consolePointer = renderHtmlArrows(consolePointer, consoleArray, "up");
-        playAlerts("return", alertMuteState);
+        playAlerts("return");
     }
     if (e.code == "ArrowDown") {
         // printer(debug, context, "text input", "arrow down pressed");
         consolePointer = renderHtmlArrows(consolePointer, consoleArray, "down");
-        playAlerts("return", alertMuteState);
+        playAlerts("return");
     }
     // if (e.code=='Digit1') {
     // 	requestServerFiles ("samples");
@@ -158,19 +152,20 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 socket.on("connect", function (data) {
     console.log("Connected!");
     socket.emit("message", { message: "Hello from client!" });
+    socket.emit("requestAlerts");
     socket.emit("requestSampleFiles");
     socket.emit("requestTonePresets");
 });
 // SOCKET on receiving audioFile Paths
 socket.on("audioFiles", (files) => {
-    console.log("incoming server files: ", files);
+    // console.log("incoming server files: ", files);
     Instrument.files = files;
     for (let file in files) {
-        console.log("sampleFolder: ", file);
+        console.log(": ", file);
         listOfSamplers.push(file);
         listOfAllAvailableInstruments.push(file);
     }
-    console.log("listOfSamplers", listOfSamplers);
+    // console.log("listOfSamplers", listOfSamplers);
     console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
     Instrument.listSamplers = listOfSamplers;
 });
@@ -185,6 +180,12 @@ socket.on("tonePresets", (presets) => {
     console.log("listOfInstruments", listOfInstruments);
     console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
     Instrument.list = listOfInstruments;
+});
+
+// SOCKET receive alerts - createAlerts(alerts);
+socket.on("alerts", (alertFiles) => {
+    if (debug) for (let i in alertFiles) console.log("alerts: ", alertFiles[i]);
+    alerts = createAlerts(alerts, alertFiles);
 });
 
 //

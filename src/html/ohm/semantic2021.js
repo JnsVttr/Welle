@@ -171,7 +171,6 @@ semantics.addOperation("eval", {
         bpm = bpm.sourceString;
         factor = factor.sourceString;
         let event = "setBPM";
-        if (factor != "") event = "setExtraBPM";
         return {
             event: event,
             bpm: bpm,

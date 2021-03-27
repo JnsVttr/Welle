@@ -76,7 +76,10 @@ class Instrument {
         // transform to MIDI pattern. maybe not even neccessary..
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
         // make a trigger function based on preset values
-        this._triggerFunction = new Function(this._preset.triggerFunction.arguments, this._preset.triggerFunction.body);
+        this._triggerFunction = new Function(
+            this._preset.triggerFunction.arguments,
+            this._preset.triggerFunction.body
+        );
         this._gain = new Tone.Gain(Instrument.gainDefault);
         // connect this synth to master Gain node
         this._gain.connect(Instrument.masterGain);
@@ -121,7 +124,7 @@ class Instrument {
     }
 
     clear() {
-        this._sequence.stop();
+        if (this._isPlaying) this._sequence.stop();
         this._sequence.clear();
         this._isPlaying = false;
     }
@@ -130,7 +133,7 @@ class Instrument {
         this._rawPattern = rawPattern || "";
         this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
-        this._sequence.stop();
+        if (this._isPlaying) this._sequence.stop();
         this.#initSequence();
         this.start();
         this._isPlaying = true;
