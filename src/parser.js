@@ -325,7 +325,7 @@ export const parser = (input) => {
         case "setBPM":
             let bpm = input.bpm;
             if (bpm > 140) bpm = 140;
-            if (bpm > 10) bpm = 10;
+            if (bpm < 10) bpm = 10;
             let factor = input.factor;
             // if no factor, than just set bpm
             if (!factor) Tone.Transport.bpm.value = bpm;
