@@ -85,6 +85,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // ENTER - in main input field
     // ===========================
     if (e.code == "Enter") {
+        // if (Tone.Transport.state != "started") Tone.Transport.start();
         // set variable for returns from grammar, parser, tone
         returns = {
             input: "",

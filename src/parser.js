@@ -32,11 +32,12 @@ export const parser = (input) => {
         patternString: input.patternString,
     };
 
+    let random;
+
     switch (input.event) {
         case "plainStartEvent":
             // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
-            // for all phrases
-
+            random = input.random;
             // first check, if input is a part
             let partName = input.phrases[0];
             // if input is a part
@@ -74,9 +75,14 @@ export const parser = (input) => {
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, "check instruments", instruments[name])
                         // if they exist already, just start
-                        if (instruments[name]) instruments[name].restart();
-                        // else make new
-                        else instruments[name] = new Instrument(name);
+                        if (instruments[name]) {
+                            instruments[name].restart();
+                            if (random) instruments[name].random = random;
+                        } else {
+                            // else make new
+                            instruments[name] = new Instrument(name);
+                            if (random) instruments[name].random = random;
+                        }
                         // push name of running inst for rendering
                         returnMessage.instruments.push(name);
                     } else {
@@ -86,39 +92,48 @@ export const parser = (input) => {
                     }
                 }
             }
-
-            // console.log("instruments object ", instruments);
+            console.log("Instruments: ", instruments);
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 
         case "assignPattern":
             let inputVolume = input.volume[0];
+            random = input.random;
             console.log("volume", inputVolume);
             for (let i in input.phrases) {
                 let name = input.phrases[i];
                 if (instruments[name]) {
                     // printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
                     instruments[name].setPattern(input.pattern, input.patternString);
-                    console.log(`setvolume ${volume} for instrument: ${name}`);
+
+                    // if random value, set Instrument
+                    if (random) instruments[name].random = random;
+
                     // if a volume is specified, set volume
                     if (inputVolume) instruments[name].setVolume(inputVolume);
+                    console.log(`setvolume ${volume} for instrument: ${name}`);
                 } else {
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
                         instruments[name] = new Instrument(
                             name,
                             input.pattern,
-                            input.patternString
+                            input.patternString,
+                            random
                         );
                         // if a volume is specified, set volume
-                        if (inputVolume) instruments[name].setVolume(inputVolume);
-                        console.log(`start & setvolume ${volume} for instrument: ${name}`);
+                        if (inputVolume) {
+                            instruments[name].setVolume(inputVolume);
+                            console.log(`start & setvolume ${volume} for instrument: ${name}`);
+                        }
                     } else {
                         returnMessage.cmd = "noSuchInstrument";
                         returnMessage.string = name;
                     }
                 }
             }
+
+            console.log("Instruments: ", instruments);
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 

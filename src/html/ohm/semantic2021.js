@@ -151,8 +151,10 @@ semantics.addOperation("eval", {
         };
     },
 
-    Assignments_assignPattern: (phrases, volume, pattern) => {
+    Assignments_assignPattern: (phrases, volume, pattern, random) => {
         volume = volume.eval();
+        random = random.sourceString.replace("%", ""); // '%2'
+        random = parseInt(random);
         let patternString = pattern.sourceString;
         phrases = phrasesToArray(phrases);
         pattern = pattern.eval();
@@ -164,6 +166,7 @@ semantics.addOperation("eval", {
             pattern: pattern,
             patternString: patternString,
             volume: volume,
+            random: random,
         };
     },
 
@@ -187,12 +190,15 @@ semantics.addOperation("eval", {
             volume: volume,
         };
     },
-    Assignments_plainStartEvent: (phrases) => {
+    Assignments_plainStartEvent: (phrases, random) => {
+        random = random.sourceString.replace("%", ""); // '%2'
+        random = parseInt(random);
         phrases = phrasesToArray(phrases);
         let event = "plainStartEvent";
         return {
             event: event,
             phrases: phrases,
+            random: random,
         };
     },
     Assignments_emptyEvent: (_) => {

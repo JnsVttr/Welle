@@ -26,7 +26,7 @@ class Instrument {
 
     // CONSTRUCTOR - executed with every new instance
     // ================================================
-    constructor(name, pattern, rawPattern) {
+    constructor(name, pattern, rawPattern, random) {
         // define properties every new Instrument will have
         // this._synthType = Instrument.typeDefault;
         // create tone elements: synth -> gain -> masterOut
@@ -38,6 +38,7 @@ class Instrument {
         this._sequence = undefined;
         this._ticks = 0;
         this.measure = "8n";
+        if (random) this._rand = random || 0;
         this._rawPattern = rawPattern || "#";
         this._preset = {};
         this._fileIndex = 0;
@@ -160,6 +161,12 @@ class Instrument {
     set sequence(dummy) {
         //
     }
+    get random() {
+        return this._rand;
+    }
+    set random(random) {
+        this._rand = random;
+    }
     getPattern() {
         return this.pattern;
     }
@@ -212,7 +219,33 @@ class Instrument {
     #callbackSequence = (time, note) => {
         this._triggerFunction(this._synth, note);
         this._ticks++;
+        if (this._rand > 0) {
+            if (this._ticks % (this.midiPattern.length * this._rand) == 0) {
+                this.#createRandomPattern();
+            }
+        }
     };
+
+    #createRandomPattern() {
+        // console.log("new sequence cylce (seq * rand)");
+        // console.log("this._sequence: ", this._sequence.events[0]);
+        let length = this.pattern.length;
+        let pattern = [];
+        for (let i = 0; i < length; i++) {
+            // console.log("this._sequence.events[i]", this._sequence.events[i]);
+            pattern.push(this._sequence.events[i]);
+            // console.log("pattern: ", pattern);
+        }
+        for (var i = length - 1; i >= 0; i--) {
+            let randomIndex = Math.floor(Math.random() * (i + 1));
+            let itemAtIndex = pattern[randomIndex];
+            pattern[randomIndex] = pattern[i];
+            pattern[i] = itemAtIndex;
+        }
+        // console.log("pattern randomized: ", pattern);
+        this._sequence.set({ events: pattern });
+        this.midiPattern = pattern;
+    }
 
     // translate pattern [0, 1, 2, -4] to midi pattern ['C1', 'A2']. based on basenote/ transpose
     #translatePatternToMidi = (pattern) => {
