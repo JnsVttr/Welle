@@ -45,6 +45,11 @@ export const handleReturns = (_returns, _instruments, _parts) => {
                 playAlerts("error");
                 break;
 
+            case "setBPM":
+                consoleArray.push({ message: `${inputString}` });
+                playAlerts("return");
+                break;
+
             case "emptyInput":
                 socket.emit("message", "hello from handleReturns: empty input");
                 playAlerts("error");
