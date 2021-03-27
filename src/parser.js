@@ -26,8 +26,8 @@ export const parser = (input) => {
         string: "",
         instruments: [],
         parts: [],
-        noInstrument: "",
-        noPart: "",
+        noInstrument: [],
+        noPart: [],
         phrases: input.phrases,
         patternString: input.patternString,
     };
@@ -49,7 +49,7 @@ export const parser = (input) => {
                     returnMessage.instruments.push(name);
                 } else {
                     returnMessage.cmd = "noSuchInstrument";
-                    returnMessage.noInstruments.push(name);
+                    returnMessage.noInstrument.push(name);
                 }
             }
             // console.log("instruments object ", instruments);
@@ -85,6 +85,53 @@ export const parser = (input) => {
             break;
 
         case "copyPattern":
+            let source = input.source;
+            let destinantions = input.phrases;
+            let pattern = "";
+            let rawPattern = "";
+
+            // check if source is valid. if exists, else create
+            if (listOfAllAvailableInstruments.includes(source)) {
+                console.log("source instrument valid: ", source);
+                // if instrument exists
+                if (instruments[source]) {
+                    console.log("source instrument exists: ", source);
+                    instruments[source].restart();
+                } else {
+                    console.log("source instrument doesn't exist: ", source);
+                    instruments[source] = new Instrument(source);
+                }
+                // extract pattern
+                pattern = instruments[source].getPattern();
+                rawPattern = instruments[source].getRawPattern();
+                console.log(`extract pattern: ${pattern} and rawPattern: ${rawPattern}`);
+            } else {
+                returnMessage.cmd = "noSuchInstrument";
+                returnMessage.noInstrument.push(source);
+            }
+            if (instruments[source]) {
+                for (let i in destinantions) {
+                    let instrument = destinantions[i];
+                    // check if instrument is valid. if exists, else create
+                    if (listOfAllAvailableInstruments.includes(instrument)) {
+                        console.log("instrument valid: ", instrument);
+                        // if instrument exists
+                        if (instruments[instrument]) {
+                            console.log("source instrument exists: ", instrument);
+                            instruments[instrument].setPattern(pattern, rawPattern);
+                        } else {
+                            console.log("instrument doesn't exist: ", instrument);
+                            instruments[instrument] = new Instrument(instrument, pattern, rawPattern);
+                        }
+                    } else {
+                        returnMessage.cmd = "noSuchInstrument";
+                        returnMessage.noInstrument.push(instrument);
+                    }
+                }
+            }
+
+            // console.log("instruments object ", instruments);
+            if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 
         case "playAllEvent":

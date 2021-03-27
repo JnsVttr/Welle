@@ -144,6 +144,12 @@ class Instrument {
     set sequence(dummy) {
         //
     }
+    getPattern() {
+        return this.pattern;
+    }
+    getRawPattern() {
+        return this._rawPattern;
+    }
     name() {
         return this._name;
     }
