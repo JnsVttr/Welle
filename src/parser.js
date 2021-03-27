@@ -109,7 +109,10 @@ export const parser = (input) => {
                 returnMessage.cmd = "noSuchInstrument";
                 returnMessage.noInstrument.push(source);
             }
+
+            // if source is valid and exists as an instrument, than:
             if (instruments[source]) {
+                // for all destinations
                 for (let i in destinantions) {
                     let instrument = destinantions[i];
                     // check if instrument is valid. if exists, else create
@@ -118,12 +121,15 @@ export const parser = (input) => {
                         // if instrument exists
                         if (instruments[instrument]) {
                             console.log("source instrument exists: ", instrument);
+                            // set pattern
                             instruments[instrument].setPattern(pattern, rawPattern);
                         } else {
                             console.log("instrument doesn't exist: ", instrument);
+                            // create instrument with source pattern
                             instruments[instrument] = new Instrument(instrument, pattern, rawPattern);
                         }
                     } else {
+                        // instrument is not valid
                         returnMessage.cmd = "noSuchInstrument";
                         returnMessage.noInstrument.push(instrument);
                     }
@@ -135,23 +141,18 @@ export const parser = (input) => {
             break;
 
         case "playAllEvent":
-            // if Tone still running, then restart all instruments
-            if (Tone.Transport.state == "started") {
-                Object.keys(instruments).forEach((instrument) => {
-                    instruments[instrument].restart();
-                });
-            }
-            if (Tone.Transport.state != "started") {
-                Tone.Transport.start();
-                Object.keys(instruments).forEach((instrument) => {
-                    instruments[instrument].restart();
-                });
-            }
+            // if Tone is not started, start it
+            if (Tone.Transport.state != "started") Tone.Transport.start();
+            // restart all instruments in sync
+            Object.keys(instruments).forEach((instrument) => {
+                instruments[instrument].restart();
+            });
+
             break;
 
         case "stopAllEvent":
             Object.keys(instruments).forEach((instrument) => {
-                instruments[instrument].stop(0);
+                instruments[instrument].stop();
             });
             if (Tone.Transport.state != "stopped") Tone.Transport.stop();
             break;
@@ -194,13 +195,29 @@ export const parser = (input) => {
 
             break;
 
+        case "setVolume":
+            let volume = input.volume;
+            // for all phrases
+            for (let i in input.phrases) {
+                let instrument = input.phrases[i];
+                // if they are valid instruments
+                if (listOfAllAvailableInstruments.includes(instrument)) {
+                    // if they exist already, set volume
+                    if (instruments[instrument]) {
+                        console.log(`setvolume ${volume} for instrument: ${instrument}`);
+                        instruments[instrument].setVolume(volume);
+                    }
+                } else {
+                    returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.noInstrument.push(instrument);
+                }
+            }
+            break;
+
         case "savePartEvent":
             break;
 
         case "setBPM":
-            break;
-
-        case "setVolume":
             break;
 
         case "deleteEvent":
