@@ -1,4 +1,3 @@
-
 // WELLE - grammar
 // =============================================================
 
@@ -11,7 +10,6 @@ save grammar as const var. will be used at semantics.js
 grammar reads from top to bottom
 adding a command needs cmd and destiation function
 */
-
 
 const grammarText = `
 livecode {
@@ -31,7 +29,7 @@ livecode {
 
 
     Commands =
-        | "?" PhraseList?            --questionEvent
+        | "?" PhraseList?           --questionEvent
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
         | ":" phrase           	    --savePartEvent
@@ -56,7 +54,7 @@ livecode {
         | PhraseList Pattern 		    --assignPattern
         | "bpm" intPos floatPos?        --setBPM
         | PhraseList floatPos 		    --setVolume
-        | PhraseList			        --playListEvent
+        | PhraseList			        --plainStartEvent
         | ""                            --emptyEvent
         
         
@@ -100,6 +98,5 @@ livecode {
 }
 
 `;
-
 
 export default grammarText;

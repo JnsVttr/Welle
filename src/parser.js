@@ -1,4 +1,3 @@
-
 // WELLE - parser
 // =============================================================
 
@@ -7,33 +6,37 @@ manage semantics returns
 delegate input to tone, sockets, html
 */
 
-
 // libraries
-import * as Tone from 'tone';
+import * as Tone from "tone";
 
 // files
-import { printer } from '/helper/printer';
-import { Instrument } from '/tone/class_instrument'
-import { instruments, listOfAllAvailableInstruments, 
-    parts, thisBPM } from '/index' 
+import { printer } from "/helper/printer";
+import { Instrument } from "/tone/class_instrument";
+import { instruments, listOfAllAvailableInstruments, parts, thisBPM } from "/index";
 
 // local variables
 let debug = true;
 let context = "parser";
 
-
-
-
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
     printer(debug, context, "input: ", input);
-    let returnMessage = '';
+    let returnMessage = {
+        cmd: "",
+        string: "",
+        instruments: [],
+        parts: [],
+        noInstrument: "",
+        noPart: "",
+        phrases: input.phrases,
+        patternString: input.patternString,
+    };
 
-    switch(input.event) {
-        case 'playMulti':
+    switch (input.event) {
+        case "plainStartEvent":
             // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             // for all phrases
-            for (let i=0; i<input.phrases.length;i++){
+            for (let i = 0; i < input.phrases.length; i++) {
                 let name = input.phrases[i];
                 // if they are valid instruments
                 if (listOfAllAvailableInstruments.includes(name)) {
@@ -42,26 +45,28 @@ export const parser = (input) => {
                     if (instruments[name]) instruments[name].start();
                     // else make new
                     else instruments[name] = new Instrument(name);
+                    // push name of running inst for rendering
+                    returnMessage.instruments.push(name);
+                } else {
+                    returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.noInstruments.push(name);
                 }
-                else returnMessage = 'noSuchInstrument';
-            };
+            }
             // console.log("instruments object ", instruments);
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
-        
-        
-        case 'playMultiEvent':
+
+        case "playMultiEvent":
             // printer(debug, context, "playMultiEvent, instrument: ", input.phrases);
-            for (let i=0; i<input.phrases.length;i++){
+            for (let i = 0; i < input.phrases.length; i++) {
                 let name = input.phrases[i];
                 instruments[name].start();
-            };
+            }
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
-        
-        
-        case 'assignPattern':
-            for (let i=0; i<input.phrases.length;i++){
+
+        case "assignPattern":
+            for (let i = 0; i < input.phrases.length; i++) {
                 let name = input.phrases[i];
                 if (instruments[name]) {
                     // printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
@@ -70,47 +75,120 @@ export const parser = (input) => {
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
                         instruments[name] = new Instrument(name, input.pattern, input.patternString);
-                    } else returnMessage = 'noSuchInstrument';
-                };
-            };
+                    } else {
+                        returnMessage.cmd = "noSuchInstrument";
+                        returnMessage.string = name;
+                    }
+                }
+            }
             if (Tone.Transport.state != "started") Tone.Transport.start();
-        break;
-        
-        
-        case 'playAllEvent':
-            // console.log('tone state', Tone.Transport.state)
+            break;
+
+        case "copyPattern":
+            break;
+
+        case "playAllEvent":
             // if Tone still running, then restart all instruments
-            if (Tone.Transport.state == 'started'){
-                Object.keys(instruments).forEach(instrument => { instruments[instrument].restart() });
-            };
-            if (Tone.Transport.state != 'started'){
+            if (Tone.Transport.state == "started") {
+                Object.keys(instruments).forEach((instrument) => {
+                    instruments[instrument].restart();
+                });
+            }
+            if (Tone.Transport.state != "started") {
                 Tone.Transport.start();
-                Object.keys(instruments).forEach(instrument => { instruments[instrument].start() });
-            };
-            // Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
-            // Tone.Transport.stop(0);
-            
-            // Object.keys(instruments).forEach(instrument => { instruments[instrument].restart() });
-            // console.log('Tone.Transport: ', Tone.Transport);
-            // console.log('Tone.Transport.state: ', Tone.Transport.state);
-        break;
+                Object.keys(instruments).forEach((instrument) => {
+                    instruments[instrument].restart();
+                });
+            }
+            break;
 
-
-        case 'stopAllEvent':
-            Object.keys(instruments).forEach(instrument => { instruments[instrument].stop(0) });
-            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-            // console.log('Tone.Transport: ', Tone.Transport)
-            // console.log('Tone.Transport.state: ', Tone.Transport.state);
-        break;
-
-        case 'questionEvent':
-            Object.keys(instruments).forEach(entry => {
-                console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying)
+        case "stopAllEvent":
+            Object.keys(instruments).forEach((instrument) => {
+                instruments[instrument].stop(0);
             });
-            
-        break;
-    }; // EO_Switch
+            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+            break;
 
+        case "stopEvent":
+            for (let i in input.phrases) {
+                let instrument = input.phrases[i];
+                console.log("stop phrases: ", instrument);
+                // if instrument is a valid instrument
+                if (listOfAllAvailableInstruments.includes(instrument)) {
+                    console.log("instrument valid: ", instrument);
+                    // if instrument exists
+                    if (instruments[instrument]) {
+                        console.log("instrument exists: ", instrument);
+                        // stop instrument
+                        instruments[instrument].stop();
+                    } else {
+                        console.log("instrument doesn't exist: ", instrument);
+                    }
+                } else {
+                    returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.string = instrument;
+                }
+            }
+            // check if other instruments are still playing. if not, stop Tone
+            let stillInstrumentsPlaying = false;
+            for (let instrument in instruments) {
+                console.log(instruments[instrument]);
+                if (instruments[instrument].isPlaying) stillInstrumentsPlaying = true;
+            }
+            // if last playing instrument stopped && Tone still playing, than stop Tone
+            if (Tone.Transport.state != "stopped" && !stillInstrumentsPlaying) Tone.Transport.stop();
+            console.log("Tone.state: ", Tone.Transport.state);
+            break;
+
+        case "questionEvent":
+            Object.keys(instruments).forEach((entry) => {
+                console.log(`is sequence playing for ${entry}:`, instruments[entry].isPlaying);
+            });
+
+            break;
+
+        case "savePartEvent":
+            break;
+
+        case "setBPM":
+            break;
+
+        case "setVolume":
+            break;
+
+        case "deleteEvent":
+            break;
+
+        case "deleteAllEvent":
+            break;
+
+        case "saveEvent":
+            break;
+
+        case "joinEvent":
+            break;
+
+        case "restartEvent":
+            break;
+
+        case "storeEvent":
+            break;
+
+        case "loadEvent":
+            break;
+
+        case "uploadEvent":
+            break;
+
+        case "muteAllEvent":
+            break;
+
+        case "unmuteAllEvent":
+            break;
+
+        case "emptyEvent":
+            break;
+    } // EO_Switch
 
     return returnMessage;
 }; // EO parser
