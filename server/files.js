@@ -47,23 +47,19 @@ export const readFiles = (_audioPath, _baseUrl, _audioPathRel) => {
 };
 
 export const readAlerts = (_alertsPath, _baseUrl, _serverPath) => {
-    // console.log('_audioPath: ', _audioPath);
-
-    // variables folders
     let alerts = {};
     let entry = "";
 
     // ALERTS - get files from folders, save URL according to baseUrl
-    // create an URL
-    // let url = path.join(_alertsPath, folder);
-    // read entries in the folders
+
+    // read entries in alerts folder
     let entries = fs.readdirSync(_alertsPath, (err) => {
         if (err) return console.log("Unable to scan directory: " + err);
     });
 
+    // handle alerts
     for (let i in entries) {
         if (!entries[i].startsWith(".")) {
-            console.log("  -> alerts: ", entries[i]);
             // grab file name
             let name = entries[i].split(".")[0];
             // push name, file, path to array

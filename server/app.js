@@ -91,7 +91,7 @@ io.on("connection", (socket) => {
 
     // TONE PRESETS
     socket.on("requestTonePresets", () => {
-        // printer(debug, "JSON", 'paths', tonePresetsJSON)
+        printer(debug, "requestTonePresets", "client requests", "tone presets JSON");
         tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
         io.sockets.emit("tonePresets", tonePresetsJSON);
     });
@@ -109,6 +109,7 @@ io.on("connection", (socket) => {
         printer(debug, "requestAlerts", `client requests: `, "alerts");
         // read & print files 'samples'
         alerts = readAlerts(alertsPath, baseUrl, "alerts");
+        for (let entry in alerts) console.log("  ->  ", entry);
         // console.log("alerts: ", alerts);
         io.sockets.emit("alerts", alerts);
     });

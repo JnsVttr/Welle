@@ -150,7 +150,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // ======================
 // SOCKET on initial connection
 socket.on("connect", function (data) {
-    console.log("Connected!");
+    console.log("Socket Connected!");
     socket.emit("message", { message: "Hello from client!" });
     socket.emit("requestAlerts");
     socket.emit("requestSampleFiles");
@@ -165,8 +165,8 @@ socket.on("audioFiles", (files) => {
         listOfSamplers.push(file);
         listOfAllAvailableInstruments.push(file);
     }
-    // console.log("listOfSamplers", listOfSamplers);
-    console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
+    console.log("listOfSamplers", listOfSamplers);
+    // console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
     Instrument.listSamplers = listOfSamplers;
 });
 // SOCKET receive tonePresets
