@@ -64,6 +64,7 @@ let consoleDivID = "console";
 
 // actions
 // ===================================
+
 // initially show BPM
 renderBPM(bpm);
 // set static variables to class Instrument
@@ -72,7 +73,7 @@ Instrument.bufferDefault = bufferDefault;
 // connect audio to Tone master
 Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
 Tone.Transport.bpm.value = bpm;
-
+Tone.context.lookAhead = 0.2;
 //
 //
 //
@@ -118,7 +119,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
             returns.parser = parser(returns.semantic.result);
             // add to consolePointer for arrows
             consolePointer += 1;
-        }
+        } else consolePointer += 1;
 
         // PROCESS - handle all returns
         consoleArray = handleReturns(returns, instruments, parts);

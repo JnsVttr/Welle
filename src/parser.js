@@ -32,17 +32,18 @@ export const parser = (input) => {
         patternString: input.patternString,
     };
 
-    let random;
+    let random, name, volume;
 
     switch (input.event) {
         case "plainStartEvent":
             // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             random = input.random;
             // first check, if input is a part
-            let partName = input.phrases[0];
+            name = input.phrases[0];
             // if input is a part
-            if (parts[partName]) {
-                console.log(`${partName} is a part: `, parts[partName]);
+            if (parts[name]) {
+                console.log(`${name} is a part: `, parts[name]);
+
                 // handle instruments: stop, clear, delete
                 for (let instrument in instruments) {
                     // stop & clear all instruments
@@ -56,21 +57,27 @@ export const parser = (input) => {
                 }
                 console.log(`instruments`, instruments);
 
+                // Tone.Transport.cancel();
+                // Tone.Transport.clear();
+                // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+                // set part BPM
+                // Tone.Transport.bpm.value = parts[name].bpm;
+
                 // recall and restart instruments from part
-                for (let instrument in parts[partName].instruments) {
+                for (let instrument in parts[name].instruments) {
                     console.log(`recall instruments`, instrument);
-                    instruments[instrument] = parts[partName].instruments[instrument].instrument;
-                    if (parts[partName].instruments[instrument].isPlaying)
+                    instruments[instrument] = parts[name].instruments[instrument].instrument;
+                    if (parts[name].instruments[instrument].isPlaying)
                         instruments[instrument].restart();
                 }
-                // set part BPM
-                Tone.Transport.bpm.value = parts[partName].bpm;
+
                 // start Tone
-                Tone.Transport.start();
+                if (Tone.Transport.state != "started") Tone.Transport.start();
+                Tone.Transport.bpm.value = parts[name].bpm;
             } else {
                 // handle input
                 for (let i in input.phrases) {
-                    let name = input.phrases[i];
+                    name = input.phrases[i];
                     // if they are valid instruments
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, "check instruments", instruments[name])
@@ -99,23 +106,24 @@ export const parser = (input) => {
             break;
 
         case "assignPattern":
-            let inputVolume = input.volume[0];
+            volume = input.volume[0];
             random = input.random;
-            console.log("volume", inputVolume);
+            console.log("volume", volume);
             for (let i in input.phrases) {
-                let name = input.phrases[i];
-                if (instruments[name]) {
-                    // printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
-                    instruments[name].setPattern(input.pattern, input.patternString);
+                name = input.phrases[i];
+                console.log("name", name);
+                if (listOfAllAvailableInstruments.includes(name)) {
+                    if (instruments[name]) {
+                        // printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
+                        instruments[name].setPattern(input.pattern, input.patternString);
 
-                    // if random value, set Instrument
-                    if (random != null) instruments[name].random = random;
+                        // if random value, set Instrument
+                        if (random != null) instruments[name].random = random;
 
-                    // if a volume is specified, set volume
-                    if (inputVolume) instruments[name].setVolume(inputVolume);
-                    console.log(`setvolume ${volume} for instrument: ${name}`);
-                } else {
-                    if (listOfAllAvailableInstruments.includes(name)) {
+                        // if a volume is specified, set volume
+                        if (volume) instruments[name].setVolume(volume);
+                        console.log(`setvolume ${volume} for instrument: ${name}`);
+                    } else {
                         // printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
                         instruments[name] = new Instrument(
                             name,
@@ -124,14 +132,16 @@ export const parser = (input) => {
                             random
                         );
                         // if a volume is specified, set volume
-                        if (inputVolume) {
-                            instruments[name].setVolume(inputVolume);
+                        if (volume) {
+                            instruments[name].setVolume(volume);
                             console.log(`start & setvolume ${volume} for instrument: ${name}`);
                         }
-                    } else {
-                        returnMessage.cmd = "noSuchInstrument";
-                        returnMessage.string = name;
                     }
+                } else {
+                    // console.log("no such name", name);
+                    returnMessage.cmd = "noSuchInstrument";
+                    returnMessage.string = name;
+                    returnMessage.noInstrument.push(name);
                 }
             }
 
@@ -234,6 +244,7 @@ export const parser = (input) => {
                 } else {
                     returnMessage.cmd = "noSuchInstrument";
                     returnMessage.string = instrument;
+                    returnMessage.noInstrument.push(instrument);
                 }
             }
             // check if other instruments are still playing. if not, stop Tone
@@ -256,7 +267,7 @@ export const parser = (input) => {
             break;
 
         case "setVolume":
-            let volume = input.volume;
+            volume = input.volume;
             // for all phrases
             for (let i in input.phrases) {
                 let instrument = input.phrases[i];
@@ -320,7 +331,7 @@ export const parser = (input) => {
         case "deleteEvent":
             // handle input
             for (let i in input.phrases) {
-                let name = input.phrases[i];
+                name = input.phrases[i];
                 // if input is a part
                 if (parts[name]) delete parts[name];
                 // if they are valid instruments
