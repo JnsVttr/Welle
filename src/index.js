@@ -118,6 +118,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
         // PARSER
         if (returns.semantic.valid) {
+            // check if string is part, replace everything and send playAll to parser ??? here ??
             // send results to parser for Tone
             returns.parser = parser(returns.semantic.result);
             // add to consolePointer for arrows

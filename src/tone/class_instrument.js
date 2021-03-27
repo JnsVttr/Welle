@@ -120,6 +120,12 @@ class Instrument {
         // console.log("this._sequence.state: ", this._sequence.state);
     }
 
+    clear() {
+        this._sequence.stop();
+        this._sequence.clear();
+        this._isPlaying = false;
+    }
+
     setPattern(pattern, rawPattern) {
         this._rawPattern = rawPattern || "";
         this.pattern = pattern;

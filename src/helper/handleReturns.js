@@ -31,6 +31,11 @@ export const handleReturns = (_returns, _instruments, _parts) => {
                 message: `!! part name "${parserReturn.string}" reserved as instrument`,
             });
             playAlerts("error", alertMuteState);
+        } else if (parserReturn.cmd == "instrumentNotPlaying") {
+            consoleArray.push({
+                message: `!! instrument "${parserReturn.string}" was not started`,
+            });
+            playAlerts("error", alertMuteState);
         } else {
             consoleArray.push({ message: `${inputString}` });
             playAlerts("return", alertMuteState);

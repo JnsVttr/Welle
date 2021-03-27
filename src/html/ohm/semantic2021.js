@@ -151,7 +151,8 @@ semantics.addOperation("eval", {
         };
     },
 
-    Assignments_assignPattern: (phrases, pattern) => {
+    Assignments_assignPattern: (phrases, volume, pattern) => {
+        volume = volume.eval();
         let patternString = pattern.sourceString;
         phrases = phrasesToArray(phrases);
         pattern = pattern.eval();
@@ -162,6 +163,7 @@ semantics.addOperation("eval", {
             phrases: phrases,
             pattern: pattern,
             patternString: patternString,
+            volume: volume,
         };
     },
 

@@ -36,37 +36,71 @@ export const parser = (input) => {
         case "plainStartEvent":
             // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
             // for all phrases
-            for (let i in input.phrases) {
-                let name = input.phrases[i];
-                // if they are valid instruments
-                if (listOfAllAvailableInstruments.includes(name)) {
-                    // printer(debug, context, "check instruments", instruments[name])
-                    // if they exist already, just start
-                    if (instruments[name]) instruments[name].restart();
-                    // else make new
-                    else instruments[name] = new Instrument(name);
-                    // push name of running inst for rendering
-                    returnMessage.instruments.push(name);
-                } else {
-                    returnMessage.cmd = "noSuchInstrument";
-                    returnMessage.string = name;
-                    returnMessage.noInstrument.push(name);
+
+            // first check, if input is a part
+            let partName = input.phrases[0];
+            // if input is a part
+            if (parts[partName]) {
+                console.log(`${partName} is a part: `, parts[partName]);
+                // handle instruments: stop, clear, delete
+                for (let instrument in instruments) {
+                    // stop & clear all instruments
+                    instruments[instrument].clear();
+                    // delete instruments entries
+                    console.log(`${instrument} - delete ${instruments[instrument]} in `, instruments);
+                    delete instruments[instrument];
+                }
+                console.log(`instruments`, instruments);
+
+                // recall and restart instruments from part
+                for (let instrument in parts[partName].instruments) {
+                    console.log(`recall instruments`, instrument);
+                    instruments[instrument] = parts[partName].instruments[instrument].instrument;
+                    if (parts[partName].instruments[instrument].isPlaying) instruments[instrument].restart();
+                }
+            } else {
+                // handle input
+                for (let i in input.phrases) {
+                    let name = input.phrases[i];
+                    // if they are valid instruments
+                    if (listOfAllAvailableInstruments.includes(name)) {
+                        // printer(debug, context, "check instruments", instruments[name])
+                        // if they exist already, just start
+                        if (instruments[name]) instruments[name].restart();
+                        // else make new
+                        else instruments[name] = new Instrument(name);
+                        // push name of running inst for rendering
+                        returnMessage.instruments.push(name);
+                    } else {
+                        returnMessage.cmd = "noSuchInstrument";
+                        returnMessage.string = name;
+                        returnMessage.noInstrument.push(name);
+                    }
                 }
             }
+
             // console.log("instruments object ", instruments);
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 
         case "assignPattern":
-            for (let i = 0; i < input.phrases.length; i++) {
+            let inputVolume = input.volume[0];
+            console.log("volume", inputVolume);
+            for (let i in input.phrases) {
                 let name = input.phrases[i];
                 if (instruments[name]) {
                     // printer(debug, context, `assignPatternOne - ${input.pattern} to instrument:`, input.phrases);
                     instruments[name].setPattern(input.pattern, input.patternString);
+                    console.log(`setvolume ${volume} for instrument: ${name}`);
+                    // if a volume is specified, set volume
+                    if (inputVolume) instruments[name].setVolume(inputVolume);
                 } else {
                     if (listOfAllAvailableInstruments.includes(name)) {
                         // printer(debug, context, `assignPatternOne, create inst ${name} + pattern ${input.pattern}`, name);
                         instruments[name] = new Instrument(name, input.pattern, input.patternString);
+                        // if a volume is specified, set volume
+                        if (inputVolume) instruments[name].setVolume(inputVolume);
+                        console.log(`start & setvolume ${volume} for instrument: ${name}`);
                     } else {
                         returnMessage.cmd = "noSuchInstrument";
                         returnMessage.string = name;
@@ -198,6 +232,13 @@ export const parser = (input) => {
                     if (instruments[instrument]) {
                         console.log(`setvolume ${volume} for instrument: ${instrument}`);
                         instruments[instrument].setVolume(volume);
+                        // if instrument doesn't exist, create one and set volume
+                    } else {
+                        instruments[instrument] = new Instrument(instrument);
+                        instruments[instrument].setVolume(volume);
+                        console.log(`start & setvolume ${volume} for instrument: ${instrument}`);
+                        // if last playing instrument stopped && Tone still playing, than stop Tone
+                        if (Tone.Transport.state != "started") Tone.Transport.start();
                     }
                 } else {
                     returnMessage.cmd = "noSuchInstrument";
@@ -216,11 +257,18 @@ export const parser = (input) => {
             } else {
                 // if name free, save it in parts, including current instruments, bpm
                 parts[part] = {
-                    instruments: instruments,
+                    instruments: {},
                     bpm: Tone.Transport.bpm.value,
                     listOfAllAvailableInstruments: listOfAllAvailableInstruments,
                 };
-                console.log(`part ${part} saved in parts`, parts);
+                console.log(`store instruments `, instruments);
+                for (let instrument in instruments) {
+                    parts[part].instruments[instrument] = {
+                        isPlaying: instruments[instrument].isPlaying,
+                        instrument: instruments[instrument],
+                    };
+                }
+                console.log(`part ${part} saved in parts`, parts[part]);
             }
             break;
 
