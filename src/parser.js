@@ -211,7 +211,12 @@ export const parser = (input) => {
 
         case "playAllEvent":
             // if Tone is not started, start it
+            // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+            // Tone.Transport.cancel();
+            // Tone.Transport.clear();
+            // set time out for stability
             if (Tone.Transport.state != "started") Tone.Transport.start();
+
             // restart all instruments in sync
             Object.keys(instruments).forEach((instrument) => {
                 instruments[instrument].restart();
@@ -319,6 +324,8 @@ export const parser = (input) => {
 
         case "setBPM":
             let bpm = input.bpm;
+            if (bpm > 140) bpm = 140;
+            if (bpm > 10) bpm = 10;
             let factor = input.factor;
             // if no factor, than just set bpm
             if (!factor) Tone.Transport.bpm.value = bpm;

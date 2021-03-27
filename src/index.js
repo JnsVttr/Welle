@@ -11,6 +11,7 @@ JSON online parser: https://jsonformatter.curiousconcept.com/
 import io from "socket.io-client";
 import SocketIOFileClient from "socket.io-file-client";
 import * as Tone from "tone";
+import "regenerator-runtime/runtime";
 
 // files
 // ===================================
@@ -64,7 +65,7 @@ let consoleDivID = "console";
 
 // actions
 // ===================================
-
+let toneStarted = false;
 // initially show BPM
 renderBPM(bpm);
 // set static variables to class Instrument
@@ -73,6 +74,7 @@ Instrument.bufferDefault = bufferDefault;
 // connect audio to Tone master
 Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
 Tone.Transport.bpm.value = bpm;
+// extremly relevant to stability of Tone playback
 Tone.context.lookAhead = 0.2;
 //
 //
@@ -82,7 +84,14 @@ Tone.context.lookAhead = 0.2;
 // INPUT - manage text input & key interactions
 // ============================================
 
-document.getElementById("mainInput").addEventListener("keydown", (e) => {
+document.getElementById("mainInput").addEventListener("keydown", async (e) => {
+    // START TONE on keydown
+    if (toneStarted == false) {
+        await Tone.start();
+        toneStarted = true;
+        console.log("started Tone");
+    }
+
     // ENTER - in main input field
     // ===========================
     if (e.code == "Enter") {
@@ -123,6 +132,8 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
         // PROCESS - handle all returns
         consoleArray = handleReturns(returns, instruments, parts);
+        // FOCUS - focus back on textfield
+        document.getElementById("mainInput").focus();
     }
 
     // KEY INTERACTIONS - arrow functions

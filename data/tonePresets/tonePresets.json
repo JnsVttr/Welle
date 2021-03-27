@@ -67,7 +67,7 @@
         "synthType": "Sampler",
         "gain": 1,
         "volume": 0.6,
-        "baseNote": 36,
+        "baseNote": 48,
         "transpose": 0,
         "triggerFunction": {
             "arguments": "_synth, _note",

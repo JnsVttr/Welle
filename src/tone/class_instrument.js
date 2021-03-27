@@ -15,7 +15,7 @@ class Instrument {
     static typeDefault = "MembraneSynth"; // default synth type = Sampler
     static gainDefault = 0.6;
     static patternDefault = [0]; // default = one hit
-    static masterGain = new Tone.Gain(0.98); // master output for Tone -> Speaker
+    static masterGain = new Tone.Gain(0.8); // master output for Tone -> Speaker
     static bpm = 120; // bpm
     static list = []; // list of possible instrument names
     static listSamplers = []; // list of all sample folders
@@ -113,6 +113,7 @@ class Instrument {
     restart() {
         if (this._isPlaying) this._sequence.stop();
         this._sequence.clear();
+
         this.#initSequence();
         this.start();
         this._isPlaying = true;
@@ -215,7 +216,7 @@ class Instrument {
 
     // init a sequence
     #initSequence = () => {
-        this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, "8n"); // '8n' == speed, eight bars/second
+        this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, "16n"); // '8n' == speed, eight bars/second
     };
     // callback for sequence
     #callbackSequence = (time, note) => {
