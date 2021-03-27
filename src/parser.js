@@ -77,11 +77,13 @@ export const parser = (input) => {
                         // if they exist already, just start
                         if (instruments[name]) {
                             instruments[name].restart();
-                            if (random) instruments[name].random = random;
+                            // if random value, set Instrument
+                            if (random != null) instruments[name].random = random;
                         } else {
                             // else make new
                             instruments[name] = new Instrument(name);
-                            if (random) instruments[name].random = random;
+                            // if random value, set Instrument
+                            if (random != null) instruments[name].random = random;
                         }
                         // push name of running inst for rendering
                         returnMessage.instruments.push(name);
@@ -107,7 +109,7 @@ export const parser = (input) => {
                     instruments[name].setPattern(input.pattern, input.patternString);
 
                     // if random value, set Instrument
-                    if (random) instruments[name].random = random;
+                    if (random != null) instruments[name].random = random;
 
                     // if a volume is specified, set volume
                     if (inputVolume) instruments[name].setVolume(inputVolume);

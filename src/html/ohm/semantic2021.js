@@ -153,8 +153,12 @@ semantics.addOperation("eval", {
 
     Assignments_assignPattern: (phrases, volume, pattern, random) => {
         volume = volume.eval();
-        random = random.sourceString.replace("%", ""); // '%2'
-        random = parseInt(random);
+        // console.log("semantics - assignPattern, randomSourceString: ", random.sourceString);
+        if (random.sourceString == "") random = null;
+        else {
+            random = random.sourceString.replace("%", ""); // '%2'
+            random = parseInt(random);
+        }
         let patternString = pattern.sourceString;
         phrases = phrasesToArray(phrases);
         pattern = pattern.eval();
@@ -191,8 +195,11 @@ semantics.addOperation("eval", {
         };
     },
     Assignments_plainStartEvent: (phrases, random) => {
-        random = random.sourceString.replace("%", ""); // '%2'
-        random = parseInt(random);
+        if (random.sourceString == "") random = null;
+        else {
+            random = random.sourceString.replace("%", ""); // '%2'
+            random = parseInt(random);
+        }
         phrases = phrasesToArray(phrases);
         let event = "plainStartEvent";
         return {

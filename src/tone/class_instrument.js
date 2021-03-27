@@ -38,7 +38,9 @@ class Instrument {
         this._sequence = undefined;
         this._ticks = 0;
         this.measure = "8n";
-        if (random) this._rand = random || 0;
+        this._rand = 0;
+        if (random) this._rand = random;
+
         this._rawPattern = rawPattern || "#";
         this._preset = {};
         this._fileIndex = 0;
@@ -221,6 +223,7 @@ class Instrument {
         this._ticks++;
         if (this._rand > 0) {
             if (this._ticks % (this.midiPattern.length * this._rand) == 0) {
+                // console.log("rand: ", this._rand);
                 this.#createRandomPattern();
             }
         }
