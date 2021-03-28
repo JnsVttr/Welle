@@ -43,6 +43,7 @@ export const parser = (input) => {
 
             // IF PART
             // ===========
+
             // if input is a part
             if (parts[name]) {
                 console.log(`${name} is a part: `, parts[name]);
@@ -59,9 +60,19 @@ export const parser = (input) => {
                     }
                 }
 
-                // CLEAR TONE
+                // TONE - handle tone. is best to restart tone
+                // cancel all future jobs, clear Tone transport, stop it & start it in quant time
                 Tone.Transport.cancel();
                 Tone.Transport.clear();
+                if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+                console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+                setTimeout(() => {
+                    if (Tone.Transport.state != "started") Tone.Transport.start();
+                }, toneQuant());
+
+                // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+                // set time out for stability
+                // if (Tone.Transport.state != "started") Tone.Transport.start();
 
                 // CHECK & RESTART
                 for (let instrument in parts[name].instrumentCollection) {
@@ -85,12 +96,13 @@ export const parser = (input) => {
                         console.log(`play part ${name}: instrument ${instrument} is gone.`);
                     }
                 }
-
-                // NO - get errors with BPM change
-                // Tone.Transport.bpm.value = parts[name].bpm;
-
+                // CLEAR TONE
+                // Tone.Transport.cancel();
+                // Tone.Transport.clear();
                 // start Tone
                 if (Tone.Transport.state != "started") Tone.Transport.start();
+                // BPM change
+                Tone.Transport.bpm.rampTo(parts[name].bpm, 0.1);
             } else {
                 // IF INSTRUMENT
                 // ===========
@@ -229,12 +241,14 @@ export const parser = (input) => {
             break;
 
         case "playAllEvent":
-            // if Tone is not started, start it
-            // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-            // Tone.Transport.cancel();
-            // Tone.Transport.clear();
-            // set time out for stability
-            if (Tone.Transport.state != "started") Tone.Transport.start();
+            // handle Tone: clear/ cancel/ stop. Play in quant time
+            Tone.Transport.cancel();
+            Tone.Transport.clear();
+            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+            console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+            setTimeout(() => {
+                if (Tone.Transport.state != "started") Tone.Transport.start();
+            }, toneQuant());
 
             // restart all instruments in sync
             Object.keys(instruments).forEach((instrument) => {
@@ -328,6 +342,7 @@ export const parser = (input) => {
                 // init new part
                 parts[part] = {
                     instrumentCollection: {},
+                    bpm: Tone.Transport.bpm.value,
                 };
                 console.log(`store instruments `, instruments);
                 // store instruments and their playState in the part
@@ -343,13 +358,26 @@ export const parser = (input) => {
 
         case "setBPM":
             let bpm = input.bpm;
-            if (bpm > 140) bpm = 140;
+            if (bpm > 190) bpm = 190;
             if (bpm < 10) bpm = 10;
             let factor = input.factor;
+
+            // BPM breaks the sequence. maybe try to restart sequence
+            // Tone.Transport.clear();
+            // Tone.Transport.cancel();
+
             // if no factor, than just set bpm
-            if (!factor) Tone.Transport.bpm.value = bpm;
+            if (!factor) Tone.Transport.bpm.rampTo(bpm, 0.1);
             // if time factor, ramp to bpm
             else Tone.Transport.bpm.rampTo(bpm, factor);
+
+            // BPM breaks the sequence. maybe try to restart sequence
+            // for (let instrument in instruments) {
+            //     if (instruments[instrument].isPlaying) {
+            //         instruments[instrument].restart();
+            //     }
+            // }
+
             // send to return to set HTML
             returnMessage.cmd = "setBPM";
             break;
@@ -420,3 +448,34 @@ export const parser = (input) => {
 
     return returnMessage;
 }; // EO parser
+
+// QUANT get quant
+const toneQuant = () => {
+    // get time
+    let now = Tone.TransportTime().valueOf();
+    // let now = Tone.now();
+    // set quantize factor
+    let factor = 1;
+    // get quant time
+    let quant = Tone.Time(now).quantize(factor);
+    let playTime = quant;
+
+    // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
+
+    // if transport starts, set quant to 0
+    if (now == 0) {
+        playTime = 0;
+    } else if (now >= 0 && now <= 0.01) {
+        playTime = 0.01;
+    } else if (quant < now) {
+        playTime = now + 0.5;
+        playTime = Tone.Time(playTime).quantize(factor);
+        // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+    }
+    // console.log(`now: ${now} - play at: ${playTime}`)
+
+    // safety: if below 0 than playTime is zero
+    if (playTime < 0) playTime = 0;
+    // return quant playTime
+    return playTime;
+};

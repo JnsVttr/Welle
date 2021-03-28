@@ -112,7 +112,8 @@ class Instrument {
     }
 
     restart() {
-        if (this._isPlaying) this._sequence.stop();
+        // console.log("Tone.now()", Tone.now());
+        if (this._isPlaying) this._sequence.stop(Tone.now());
         this._sequence.clear();
         this._ticks = 0;
         this.#initSequence();
@@ -224,7 +225,7 @@ class Instrument {
     };
     // callback for sequence
     #callbackSequence = (time, note) => {
-        this._triggerFunction(this._synth, note);
+        this._triggerFunction(this._synth, note, time);
         this._ticks++;
         if (this._rand > 0) {
             if (this._ticks % (this.midiPattern.length * this._rand) == 0) {

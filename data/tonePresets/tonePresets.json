@@ -70,7 +70,7 @@
         "baseNote": 48,
         "transpose": 0,
         "triggerFunction": {
-            "arguments": "_synth, _note",
+            "arguments": "_synth, _note, _time",
             "body": "_synth.triggerAttack(_note, '@16n')"
         },
         "settings": {
