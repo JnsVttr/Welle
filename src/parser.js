@@ -64,15 +64,14 @@ export const parser = (input) => {
                 // cancel all future jobs, clear Tone transport, stop it & start it in quant time
                 Tone.Transport.cancel();
                 Tone.Transport.clear();
+                // stop if started
                 if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-                console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+
+                // console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+                // set timeout for restart in sync (more or less)
                 setTimeout(() => {
                     if (Tone.Transport.state != "started") Tone.Transport.start();
                 }, toneQuant());
-
-                // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-                // set time out for stability
-                // if (Tone.Transport.state != "started") Tone.Transport.start();
 
                 // CHECK & RESTART
                 for (let instrument in parts[name].instrumentCollection) {
@@ -96,14 +95,10 @@ export const parser = (input) => {
                         console.log(`play part ${name}: instrument ${instrument} is gone.`);
                     }
                 }
-                // CLEAR TONE
-                // Tone.Transport.cancel();
-                // Tone.Transport.clear();
-                // start Tone
-                if (Tone.Transport.state != "started") Tone.Transport.start();
                 // BPM change
                 Tone.Transport.bpm.rampTo(parts[name].bpm, 0.1);
             } else {
+                //
                 // IF INSTRUMENT
                 // ===========
                 // handle input
