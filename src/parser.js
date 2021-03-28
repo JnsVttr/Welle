@@ -40,41 +40,60 @@ export const parser = (input) => {
             random = input.random;
             // first check, if input is a part
             name = input.phrases[0];
+
+            // IF PART
+            // ===========
             // if input is a part
             if (parts[name]) {
                 console.log(`${name} is a part: `, parts[name]);
 
-                // handle instruments: stop, clear, delete
+                // STOP - stop all instruments that are not saved in part
                 for (let instrument in instruments) {
-                    // stop & clear all instruments
-                    instruments[instrument].clear();
-                    // delete instruments entries
-                    console.log(
-                        `${instrument} - delete ${instruments[instrument]} in `,
-                        instruments
-                    );
-                    delete instruments[instrument];
+                    // if the instrument is not saved in the part
+                    if (!parts[name].instrumentCollection[instrument]) {
+                        // stop the instrument
+                        instruments[instrument].stop();
+                        console.log(
+                            `stop ${instrument}, because it is not saved in part '${name}'`
+                        );
+                    }
                 }
-                console.log(`instruments`, instruments);
 
-                // Tone.Transport.cancel();
-                // Tone.Transport.clear();
-                // if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-                // set part BPM
+                // CLEAR TONE
+                Tone.Transport.cancel();
+                Tone.Transport.clear();
+
+                // CHECK & RESTART
+                for (let instrument in parts[name].instrumentCollection) {
+                    console.log(`check & restart process for instrument ${instrument}`);
+                    // check if saved part instrument exists in instruments
+                    if (instruments[instrument]) {
+                        console.log(`instrument ${instrument} exists in 'instruments'`);
+                        // restart instrument, if it is playing in part
+                        if (parts[name].instrumentCollection[instrument].isPlaying) {
+                            console.log(
+                                `instrument ${instrument} is playing: `,
+                                instruments[instrument].isPlaying
+                            );
+                            // instruments[instrument].start();
+                            instruments[instrument].restart();
+                        } else {
+                            console.log(`stop instrument ${instrument}. `);
+                            instruments[instrument].stop();
+                        }
+                    } else {
+                        console.log(`play part ${name}: instrument ${instrument} is gone.`);
+                    }
+                }
+
+                // NO - get errors with BPM change
                 // Tone.Transport.bpm.value = parts[name].bpm;
-
-                // recall and restart instruments from part
-                for (let instrument in parts[name].instruments) {
-                    console.log(`recall instruments`, instrument);
-                    instruments[instrument] = parts[name].instruments[instrument].instrument;
-                    if (parts[name].instruments[instrument].isPlaying)
-                        instruments[instrument].restart();
-                }
 
                 // start Tone
                 if (Tone.Transport.state != "started") Tone.Transport.start();
-                Tone.Transport.bpm.value = parts[name].bpm;
             } else {
+                // IF INSTRUMENT
+                // ===========
                 // handle input
                 for (let i in input.phrases) {
                     name = input.phrases[i];
@@ -101,7 +120,7 @@ export const parser = (input) => {
                     }
                 }
             }
-            console.log("Instruments: ", instruments);
+            // console.log("Instruments: ", instruments);
             if (Tone.Transport.state != "started") Tone.Transport.start();
             break;
 
@@ -305,15 +324,15 @@ export const parser = (input) => {
                 returnMessage.cmd = "partNameReserved";
                 returnMessage.string = part;
             } else {
-                // if name free, save it in parts, including current instruments, bpm
+                // if name free, save it in parts, including current instruments
+                // init new part
                 parts[part] = {
-                    instruments: {},
-                    bpm: Tone.Transport.bpm.value,
-                    listOfAllAvailableInstruments: listOfAllAvailableInstruments,
+                    instrumentCollection: {},
                 };
                 console.log(`store instruments `, instruments);
+                // store instruments and their playState in the part
                 for (let instrument in instruments) {
-                    parts[part].instruments[instrument] = {
+                    parts[part].instrumentCollection[instrument] = {
                         isPlaying: instruments[instrument].isPlaying,
                         instrument: instruments[instrument],
                     };

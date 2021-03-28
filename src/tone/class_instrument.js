@@ -108,15 +108,15 @@ class Instrument {
     start() {
         this._sequence.start(this.#quant(), 0);
         this._isPlaying = true;
+        this._ticks = 0;
     }
 
     restart() {
         if (this._isPlaying) this._sequence.stop();
         this._sequence.clear();
-
+        this._ticks = 0;
         this.#initSequence();
         this.start();
-        this._isPlaying = true;
     }
 
     stop(quant) {
@@ -124,6 +124,7 @@ class Instrument {
         if (quant == undefined) this._sequence.stop(); // stop just before next quant
         if (quant != undefined) this._sequence.stop(quant); // stop just before next quant
         this._isPlaying = false;
+        this._ticks = 0;
         // console.log("this._sequence.state: ", this._sequence.state);
     }
 
@@ -131,6 +132,7 @@ class Instrument {
         if (this._isPlaying) this._sequence.stop();
         this._sequence.clear();
         this._isPlaying = false;
+        this._ticks = 0;
     }
 
     setPattern(pattern, rawPattern) {
@@ -138,6 +140,7 @@ class Instrument {
         this.pattern = pattern;
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
         if (this._isPlaying) this._sequence.stop();
+        this._ticks = 0;
         this.#initSequence();
         this.start();
         this._isPlaying = true;
@@ -216,6 +219,7 @@ class Instrument {
 
     // init a sequence
     #initSequence = () => {
+        this._ticks = 0;
         this._sequence = new Tone.Sequence(this.#callbackSequence, this.midiPattern, "16n"); // '8n' == speed, eight bars/second
     };
     // callback for sequence

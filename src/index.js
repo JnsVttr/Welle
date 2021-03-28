@@ -84,14 +84,16 @@ Tone.context.lookAhead = 0.2;
 // INPUT - manage text input & key interactions
 // ============================================
 
-document.getElementById("mainInput").addEventListener("keydown", async (e) => {
+document.getElementById("mainDiv").addEventListener("keydown", async (e) => {
     // START TONE on keydown
     if (toneStarted == false) {
         await Tone.start();
         toneStarted = true;
         console.log("started Tone");
     }
+});
 
+document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // ENTER - in main input field
     // ===========================
     if (e.code == "Enter") {
