@@ -1,8 +1,0 @@
-Wed Mar 17 2021 12:30:19 GMT+0100 (Mitteleuropäische Normalzeit)
- 
-drums #-#-
-.
-record start
-drums #-#
-record stop
-.

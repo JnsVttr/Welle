@@ -1,8 +1,0 @@
-Wed Aug 21 2019 18:02:07 GMT+0200 (GMT+02:00)
- 
-list all
-s_kick = kick[4]
-list kick
-s_kick = kick[4]
-s_kick = kick[3]
-s_kick = kick[2]

@@ -1,4 +1,0 @@
-Sun Aug 25 2019 13:53:22 GMT+0200 (GMT+02:00)
- 
- help commands 
- help instruments 

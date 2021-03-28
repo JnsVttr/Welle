@@ -1,5 +1,0 @@
-Wed Aug 21 2019 18:45:44 GMT+0200 (GMT+02:00)
- 
-s_kick = kick[4]
-s_kick #--
-s_kick #--##-
