@@ -303,7 +303,7 @@ class Instrument {
             playTime = Tone.Time(playTime).quantize(factor);
             // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
         }
-        // console.log(`now: ${now} - play at: ${playTime}`)
+        // console.log(`now: ${now} - play at: ${playTime}`);
 
         // safety: if below 0 than playTime is zero
         if (playTime < 0) playTime = 0;

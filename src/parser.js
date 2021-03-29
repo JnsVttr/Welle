@@ -48,53 +48,51 @@ export const parser = (input) => {
             if (parts[name]) {
                 console.log(`${name} is a part: `, parts[name]);
 
-                // STOP - stop all instruments that are not saved in part
+                // STOP - clear all instruments
                 for (let instrument in instruments) {
-                    // if the instrument is not saved in the part
-                    if (!parts[name].instrumentCollection[instrument]) {
-                        // stop the instrument
-                        instruments[instrument].stop();
-                        console.log(
-                            `stop ${instrument}, because it is not saved in part '${name}'`
-                        );
-                    }
+                    instruments[instrument].clear();
                 }
 
                 // TONE - handle tone. is best to restart tone
-                // cancel all future jobs, clear Tone transport, stop it & start it in quant time
-                Tone.Transport.cancel();
-                Tone.Transport.clear();
-                // stop if started
-                if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-
-                // console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+                // store quant time
+                let timeDiff = toneQuant() * 1000;
+                // console.log(`timeDiff for offset: ${timeDiff}`);
                 // set timeout for restart in sync (more or less)
                 setTimeout(() => {
-                    if (Tone.Transport.state != "started") Tone.Transport.start();
-                }, toneQuant());
+                    // cancel all future jobs, clear Tone transport, stop it & start it in quant time
+                    Tone.Transport.cancel();
+                    Tone.Transport.clear();
+                    // stop if started
+                    if (Tone.Transport.state != "stopped") Tone.Transport.stop();
 
-                // CHECK & RESTART
-                for (let instrument in parts[name].instrumentCollection) {
-                    console.log(`check & restart process for instrument ${instrument}`);
-                    // check if saved part instrument exists in instruments
-                    if (instruments[instrument]) {
-                        console.log(`instrument ${instrument} exists in 'instruments'`);
-                        // restart instrument, if it is playing in part
-                        if (parts[name].instrumentCollection[instrument].isPlaying) {
-                            console.log(
-                                `instrument ${instrument} is playing: `,
-                                instruments[instrument].isPlaying
-                            );
-                            // instruments[instrument].start();
-                            instruments[instrument].restart();
+                    // CHECK & RESTART
+                    for (let instrument in parts[name].instrumentCollection) {
+                        console.log(`check & restart process for instrument ${instrument}`);
+                        // check if saved part instrument exists in instruments
+                        if (instruments[instrument]) {
+                            console.log(`instrument ${instrument} exists in 'instruments'`);
+                            // restart instrument, if it is playing in part
+                            if (parts[name].instrumentCollection[instrument].isPlaying) {
+                                console.log(
+                                    `instrument ${instrument} is playing: `,
+                                    instruments[instrument].isPlaying
+                                );
+                                // instruments[instrument].start();
+                                instruments[instrument].restart();
+                            } else {
+                                // console.log(`stop instrument ${instrument}. `);
+                                // instruments[instrument].stop();
+                            }
                         } else {
-                            console.log(`stop instrument ${instrument}. `);
-                            instruments[instrument].stop();
+                            console.log(`play part ${name}: instrument ${instrument} is gone.`);
                         }
-                    } else {
-                        console.log(`play part ${name}: instrument ${instrument} is gone.`);
                     }
-                }
+
+                    // start
+                    if (Tone.Transport.state != "started") Tone.Transport.start();
+                    console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
+                }, timeDiff);
+
                 // BPM change
                 Tone.Transport.bpm.rampTo(parts[name].bpm, 0.1);
             } else {
@@ -236,20 +234,23 @@ export const parser = (input) => {
             break;
 
         case "playAllEvent":
-            // handle Tone: clear/ cancel/ stop. Play in quant time
-            Tone.Transport.cancel();
-            Tone.Transport.clear();
-            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-            console.log(`check timeout time for stop/ start of Tone. quant: ${toneQuant()}`);
+            // store quant time
+            let timeDiff = toneQuant() * 1000;
+            // set timeout for restart in sync (more or less)
             setTimeout(() => {
+                // cancel all future jobs, clear Tone transport, stop it & start it in quant time
+                Tone.Transport.cancel();
+                Tone.Transport.clear();
+                // stop if started
+                if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+
+                // restart all instruments in sync
+                Object.keys(instruments).forEach((instrument) => {
+                    instruments[instrument].restart();
+                });
+                // start
                 if (Tone.Transport.state != "started") Tone.Transport.start();
-            }, toneQuant());
-
-            // restart all instruments in sync
-            Object.keys(instruments).forEach((instrument) => {
-                instruments[instrument].restart();
-            });
-
+            }, timeDiff);
             break;
 
         case "stopAllEvent":
@@ -451,26 +452,48 @@ const toneQuant = () => {
     // let now = Tone.now();
     // set quantize factor
     let factor = 1;
+    let factorOffset = 0.5;
     // get quant time
     let quant = Tone.Time(now).quantize(factor);
     let playTime = quant;
 
+    console.log(`
+    time Tone.now(): ${now}.
+    quant Tone.now(): ${quant}
+    
+    `);
+
     // console.log(`now: ${now}. quant factor: ${factor}. quant: ${quant}`);
 
+    let timeDifference = 0;
     // if transport starts, set quant to 0
+    if (quant < now) {
+        playTime = now + factorOffset;
+        playTime = Tone.Time(playTime).quantize(factor);
+        timeDifference = playTime - now;
+        // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+    } else {
+        timeDifference = quant - now;
+    }
+
     if (now == 0) {
         playTime = 0;
+        timeDifference = 0;
     } else if (now >= 0 && now <= 0.01) {
         playTime = 0.01;
-    } else if (quant < now) {
-        playTime = now + 0.5;
-        playTime = Tone.Time(playTime).quantize(factor);
-        // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+        timeDifference = playTime;
     }
-    // console.log(`now: ${now} - play at: ${playTime}`)
 
     // safety: if below 0 than playTime is zero
     if (playTime < 0) playTime = 0;
+    if (timeDifference < 0) timeDifference = 0;
+
+    console.log(`
+    quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} - 
+    play at: ${playTime}
+    timeDifference playTime - now() : ${timeDifference}
+    `);
+
     // return quant playTime
-    return playTime;
+    return timeDifference;
 };
