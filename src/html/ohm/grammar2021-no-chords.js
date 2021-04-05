@@ -69,22 +69,14 @@ livecode {
     Pattern = NonemptyListOf<EventPattern, ""> 		--extractPattern
 
     EventPattern = 
-    	| Notes
-        | NotesChord
-        | EventsRepeats 
+        | Events 
+        | NestedEvents 
     
-    EventsRepeats = "(" NonemptyListOf<Event, ""> ")" intPos? 
+    NestedEvents = "(" NonemptyListOf<Events, ""> ")" intPos? 
     
-    Event = 
-    	| Notes
-        | NotesChord
-    
-    NotesChord = "[" NonemptyListOf<Notes, ""> "]" 
-   
-    Notes =
+    Events =
         | "#" int?	                --soundNote
         | "-"                       --soundPause
-
 
         
     /*

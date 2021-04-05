@@ -215,88 +215,55 @@ semantics.addOperation("eval", {
         };
     },
 
-    // PATTERN CREATION
+    // HELPER
     // ======================================
 
     Pattern: function (pattern) {
         // here the incoming pattern gets evaluated
         pattern = pattern.asIteration().eval();
-        console.log('Pattern: incoming: ', pattern);
-        var finalPattern = [];
-
-        for (let i in pattern) {
-            if (pattern[i].eventsRepeats) {
-                console.log(`pattern is eventsRepeats: ${pattern[i].eventsRepeats}`);
-                let subPattern = pattern[i].eventsRepeats;
-                for (let a in subPattern) {
-                    if (subPattern[a].notesChord) {
-                        console.log(`subPattern is notesChord: ${subPattern[a].notesChord}`);
-                        finalPattern.push(subPattern[a].notesChord);
-                    } else {
-                        console.log(`subPattern is note: ${subPattern[a]}`);
-                        finalPattern.push(subPattern[a]);
-                    };
-                };
-            } else if (pattern[i].notesChord) {
-                console.log(`pattern is notesChord: ${pattern[i].notesChord}`);
-                finalPattern.push(pattern[i].notesChord);
+        // console.log('new at Pattern all incoming: ', pattern)
+        var newPattern = [];
+        for (let i = 0; i < pattern.length; i++) {
+            if (Array.isArray(pattern[i])) {
+                for (let j = 0; j < pattern[i].length; j++) {
+                    newPattern.push(pattern[i][j]);
+                }
             } else {
-                console.log(`pattern is note: ${pattern[i]}`);
-                finalPattern.push(pattern[i]);
+                newPattern.push(pattern[i]);
             }
         }
-
-        console.log('Pattern: out finalPattern: ', finalPattern)
-        return finalPattern;
+        //console.log('new at Pattern all: ', newPattern)
+        return newPattern;
     },
-
-    EventsRepeats: function (_, pattern, __, int) {
+    NestedEvents: function (_, pattern, __, int) {
         pattern = pattern.asIteration().eval();
-        console.log(`EventsRepeats pattern: ${pattern}`)
-        var eventsRepeats = [];
+        var newPattern = [];
         int = int.eval();
         if (int.length != 0) {
             // if muliplier, then repeat to push each entry to newPattern
             for (let i = 0; i < int; i++) {
                 for (let j = 0; j < pattern.length; j++) {
-                    eventsRepeats.push(pattern[j]);
+                    newPattern.push(pattern[j]);
                 }
             }
         } else {
-            eventsRepeats = pattern;
+            newPattern = pattern;
         }
-        console.log('EventsRepeats: eventsRepeats * int: ', eventsRepeats);
-        return {eventsRepeats: eventsRepeats};
+        //console.log('NestedEvents, pattern + newPattern + int: ', pattern, newPattern, int);
+        return newPattern;
     },
 
-    
-
-    Event: function (event) {
-        // console.log(`Event: ${event.eval()}`)
+    Events: function (event) {
         return event.eval();
     },
-
-    NotesChord: function(_, chord, __) {
-        console.log(`NotesChord chord source: ${chord.sourceString}`);
-        chord = chord.asIteration().eval();
-        // console.log(`NotesChord chord asIteration eval: ${chord}`);
-        let notesChord = [];
-        for (let item in chord) {
-            // console.log(`chord item: chord[item] ${chord[item]}`)
-            notesChord.push(chord[item]);
-        };
-        console.log(`NotesChord: array: ${notesChord}`);
-        return {notesChord: notesChord};
-    },
-
-    Notes_soundNote: function (_, note) {
+    Events_soundNote: function (_, note) {
         if (note.sourceString != "") {
             return parseInt(note.sourceString);
         } else {
             return 1;
         }
     },
-    Notes_soundPause: function (_) {
+    Events_soundPause: function (_) {
         return null;
     },
     floatPos: function (float) {
