@@ -46,11 +46,9 @@ export const readFiles = (_audioPath, _baseUrl, _audioPathRel) => {
     return _audioFiles;
 };
 
+// ALERTS - get files from folders, save URL according to baseUrl
 export const readAlerts = (_alertsPath, _baseUrl, _serverPath) => {
     let alerts = {};
-    let entry = "";
-
-    // ALERTS - get files from folders, save URL according to baseUrl
 
     // read entries in alerts folder
     let entries = fs.readdirSync(_alertsPath, (err) => {
@@ -64,6 +62,7 @@ export const readAlerts = (_alertsPath, _baseUrl, _serverPath) => {
             let name = entries[i].split(".")[0];
             // push name, file, path to array
             alerts[name] = {
+                name: name,
                 file: entries[i],
                 path: path.join(_serverPath, entries[i]),
             };

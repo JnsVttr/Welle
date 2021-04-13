@@ -7,8 +7,8 @@ import { debug, context, socket } from "../index";
 import { renderToConsole, renderBPM } from "/html/renderHTML";
 import { renderInstruments } from "/html/renderInstruments";
 import { renderParts } from "/html/renderParts";
-import { playAlerts } from "/helper/alerts";
 import { Socket } from "socket.io-client";
+import { App } from "/index";
 
 export const handleReturns = (_returns, _instruments, _parts) => {
     printer(debug, context, "returns in handleReturns: ", _returns);
@@ -25,7 +25,7 @@ export const handleReturns = (_returns, _instruments, _parts) => {
         switch (parserReturn.cmd) {
             case "":
                 consoleArray.push({ message: `${inputString}` });
-                playAlerts("return");
+                App.playAlert("return");
                 break;
 
             case "noSuchInstrument":
@@ -35,24 +35,24 @@ export const handleReturns = (_returns, _instruments, _parts) => {
                         message: `! no "${parserReturn.noInstrument[i]}" in list. choose valid instrument or part.`,
                     });
                 }
-                playAlerts("error");
+                App.playAlert("error");
                 break;
 
             case "partNameReserved":
                 consoleArray.push({
                     message: `! name "${parserReturn.string}" can't be used as part name, reserved as instrument`,
                 });
-                playAlerts("error");
+                App.playAlert("error");
                 break;
 
             case "setBPM":
                 consoleArray.push({ message: `${inputString}` });
-                playAlerts("return");
+                App.playAlert("return");
                 break;
 
             case "emptyInput":
                 socket.emit("message", "hello from handleReturns: empty input");
-                playAlerts("error");
+                App.playAlert("error");
                 break;
         }
 
@@ -61,7 +61,7 @@ export const handleReturns = (_returns, _instruments, _parts) => {
     } else {
         // if not valid, prepend a '!' to string, store in console string array
         consoleArray.push({ message: `! input not valid: ${inputString}` });
-        playAlerts("error");
+        App.playAlert("error");
         // render to html console
         renderToConsole(consoleArray, consoleDivID, consoleLength);
     }

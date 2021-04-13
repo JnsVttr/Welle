@@ -11,7 +11,7 @@ import * as Tone from "tone";
 
 // files
 import { printer } from "/helper/printer";
-import { Instrument } from "/tone/class_instrument";
+import { Instrument } from "/instrument";
 import { instruments, listOfAllAvailableInstruments, parts, thisBPM } from "/index";
 
 // local variables

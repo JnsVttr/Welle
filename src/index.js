@@ -4,6 +4,9 @@
 /*
 JS shorthand tipps: https://www.sitepoint.com/shorthand-javascript-techniques/
 JSON online parser: https://jsonformatter.curiousconcept.com/
+
+tutorial: https://medium.com/@sitapati/avoiding-mutable-global-state-in-browser-js-89437eaebaac
+global var naming: GlobalVar
 */
 
 // libraries
@@ -11,7 +14,7 @@ JSON online parser: https://jsonformatter.curiousconcept.com/
 import io from "socket.io-client";
 import SocketIOFileClient from "socket.io-file-client";
 import * as Tone from "tone";
-import "regenerator-runtime/runtime";
+import "regenerator-runtime/runtime"; // for async functions with parcel bundler
 
 // files
 // ===================================
@@ -19,18 +22,20 @@ import { renderHtmlArrows, renderBPM } from "/html/renderHTML";
 import { parser } from "/parser";
 import { help } from "/text/helpText";
 import { printer } from "/helper/printer";
-import { createAlerts, playAlerts } from "/helper/alerts";
+
 import { enterFunction } from "/helper/enterFunction";
 import { handleReturns } from "./helper/handleReturns";
-import { Instrument } from "./tone/class_instrument";
+import { Instrument } from "/instrument";
+import { WelleApp } from "/app";
+
+// Tone & Music App
+// ===================================
+export const App = new WelleApp();
 
 // global variables
 // ===================================
-export const debug = true;
-export const context = "index";
-export let socket = io.connect(); // socket var - server connect, also for exports
-export let user = "local";
-export let alerts = {};
+export const Socket = io.connect(); // socket var - server connect, also for exports
+
 export let soundMuteState = true;
 export let alertMuteState = false; // alerts muted or not?
 
@@ -111,14 +116,14 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
         };
 
         // print empty spaces for debugging
-        if (debug) console.log("");
+        if (App.debug) console.log("");
         console.log("");
         // POINTER - reset pointer for arrwos
         consolePointer = -1;
 
         // INPUT - get input string
         returns.input = document.getElementById("mainInput").value.toLowerCase();
-        socket.emit("message", `enter: "${returns.input}"`);
+        Socket.emit("message", `enter: "${returns.input}"`);
 
         // GRAMMAR - send string to validate in enterfunction() using semantics.js &  grammar.js
         returns.semantic = enterFunction(returns.input, listOfAllAvailableInstruments);
@@ -143,12 +148,12 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     if (e.code == "ArrowUp") {
         // printer(debug, context, "text input", "arrow up pressed");
         consolePointer = renderHtmlArrows(consolePointer, consoleArray, "up");
-        playAlerts("return");
+        App.playAlert("return");
     }
     if (e.code == "ArrowDown") {
         // printer(debug, context, "text input", "arrow down pressed");
         consolePointer = renderHtmlArrows(consolePointer, consoleArray, "down");
-        playAlerts("return");
+        App.playAlert("return");
     }
     // if (e.code=='Digit1') {
     // 	requestServerFiles ("samples");
@@ -164,15 +169,15 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // SOCKET HANDLING
 // ======================
 // SOCKET on initial connection
-socket.on("connect", function (data) {
+Socket.on("connect", function (data) {
     console.log("Socket Connected!");
-    socket.emit("message", { message: "Hello from client!" });
-    socket.emit("requestAlerts");
-    socket.emit("requestSampleFiles");
-    socket.emit("requestTonePresets");
+    Socket.emit("message", { message: "Hello from client!" });
+    Socket.emit("requestAlerts");
+    Socket.emit("requestSampleFiles");
+    Socket.emit("requestTonePresets");
 });
 // SOCKET on receiving audioFile Paths
-socket.on("audioFiles", (files) => {
+Socket.on("audioFiles", (files) => {
     // console.log("incoming server files: ", files);
     Instrument.files = files;
     for (let file in files) {
@@ -185,7 +190,7 @@ socket.on("audioFiles", (files) => {
     Instrument.listSamplers = listOfSamplers;
 });
 // SOCKET receive tonePresets
-socket.on("tonePresets", (presets) => {
+Socket.on("tonePresets", (presets) => {
     Instrument.presets = presets;
     // console.log('incoming presets: ', presets);
     for (let preset in presets) {
@@ -198,9 +203,13 @@ socket.on("tonePresets", (presets) => {
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
-socket.on("alerts", (alertFiles) => {
-    if (debug) for (let i in alertFiles) console.log("alerts: ", alertFiles[i]);
-    alerts = createAlerts(alerts, alertFiles);
+Socket.on("alerts", (alertFiles) => {
+    if (App.debug) for (let i in alertFiles) console.log("incoming alerts: ", alertFiles[i]);
+    for (let i in alertFiles) App.addAlert(alertFiles[i]);
+    App.printAlerts();
+    // setTimeout(() => {
+    //     App.playAlert("error");
+    // }, 1000);
 });
 
 //
