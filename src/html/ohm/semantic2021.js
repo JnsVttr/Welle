@@ -4,15 +4,10 @@
 // libraries
 import grammarText from "/html/ohm/grammar2021";
 import ohm from "ohm-js";
-import { printer } from "/helper/printer";
 
 // variables
-let livecode = ohm.grammar(grammarText); // taken from grammar.js
-let semantics = livecode.createSemantics();
-let debug = true;
-let context = "semantics";
-
-// printer(debug, context, "consoletest", `debugSemantic: ${debugSemantic}/ debug: ${debug}`);
+const livecode = ohm.grammar(grammarText); // taken from grammar.js
+const semantics = livecode.createSemantics();
 
 // SEMANTICS FOR OHM.JS LANGUAGE:
 semantics.addOperation("eval", {
