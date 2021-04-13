@@ -30,19 +30,8 @@ class WelleApp {
     #listOfAllInstruments = [];
 
     constructor() {
-        if (this.debug)
-            console.log(`
-            Welle App created.
-            ==
-            debug state: ${this.debug}
-            user: ${this.#user}
-            alerts: ${JSON.stringify(this.#alerts)}
-            muteSound: ${this.#muteSound}
-            muteAlerts: ${this.#muteAlerts}
-
-            Tone:
-            bpm: ${this.#bpm}
-            `);
+        // print some info
+        this.printInfo();
         // set initial BPM and render to Page
         this.setBpm(this.#bpm);
         // connect audio to Tone master
@@ -191,6 +180,23 @@ class WelleApp {
     }
     playAlert(alertName) {
         if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
+    }
+
+    // print start info
+    printInfo() {
+        if (this.debug)
+            console.log(`
+            Welle App created.
+            ==
+            debug state: ${this.debug}
+            user: ${this.#user}
+            alerts: ${JSON.stringify(this.#alerts)}
+            muteSound: ${this.#muteSound}
+            muteAlerts: ${this.#muteAlerts}
+
+            Tone:
+            bpm: ${this.#bpm}
+        `);
     }
 }
 
