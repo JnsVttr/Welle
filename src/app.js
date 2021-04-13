@@ -146,14 +146,11 @@ class WelleApp {
         if (length > this.#consoleMaxLength) pointer = length - this.#consoleMaxLength;
         for (let i = pointer; i < length; i++) {
             if (this.#user == "local") {
-                html += '<p id="consoleLine">' + this.#consoleArray[i].message + "</p>";
+                html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
             } else {
-                html +=
-                    '<p id="consoleLine"><b>' +
-                    content[i].user +
-                    ": &nbsp;&nbsp;</b>" +
-                    content[i].message +
-                    "</p>";
+                html += `<p id="consoleLine"><b>${this.#user}: &nbsp;&nbsp;</b> ${
+                    this.#consoleArray[i].message
+                }</p>`;
             }
         }
         // render array to div
