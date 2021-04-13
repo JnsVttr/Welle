@@ -44,7 +44,7 @@ class WelleApp {
     handleMainInput(inputString) {
         if (this.debug) console.log("");
         // reset console pointer for arrow navigation
-        this.#consolePointer = -1;
+        this.#consolePointer = 0;
         // GRAMMAR - send string to validate using semantics & grammar
         const result = this.#inputValidation(inputString);
         console.log(`app handleMainInput Grammar result: ${JSON.stringify(result, null, 4)}`);
@@ -53,13 +53,20 @@ class WelleApp {
             // check if result matches instruments and parts
             // ...
             // return semantic to parser
-            parser(result.semantic);
-            this.#consoleArray.push({ message: `${inputString}` });
-            this.playAlert("return");
+            if (result.string != "") {
+                parser(result.semantic);
+                this.#consoleArray.push({ message: `${inputString}` });
+                this.playAlert("return");
+            } else {
+                this.playAlert("error");
+            }
         } else {
-            // if not valid, prepend a '!' to string, store in console string array
-            this.#consoleArray.push({ message: `! input not valid: ${inputString}` });
-            this.playAlert("error");
+            if (result.string.charAt(0) == "!") this.playAlert("error");
+            else {
+                // if not valid, prepend a '!' to string, store in console string array
+                this.#consoleArray.push({ message: `! input not valid: ${inputString}` });
+                this.playAlert("error");
+            }
         }
         // clear Input
         document.getElementById("mainInput").value = "";
@@ -87,11 +94,50 @@ class WelleApp {
     // ============================================
     arrowUp() {
         // increment pointer, render html
+        this.renderArrows("up");
         this.playAlert("return");
     }
     arrowDown() {
         // decrement pointer, render html
+        this.renderArrows("down");
         this.playAlert("return");
+    }
+    renderArrows(dir) {
+        const length = this.#consoleArray.length;
+        // console.log(`App render arrows on array length ${length} with dir '${dir}'.
+        // pointer: ${this.#consolePointer}
+        // pos length - pointer: ${parseInt(length - this.#consolePointer)}
+        // array: ${JSON.stringify(this.#consoleArray)}`);
+        switch (dir) {
+            case "up":
+                if (length > 0 && this.#consolePointer < length) {
+                    // set HTML
+                    document.getElementById("mainInput").value = "";
+                    document.getElementById("mainInput").value = this.#consoleArray[
+                        length - 1 - this.#consolePointer
+                    ].message;
+                    // update pointer
+                    if (this.#consolePointer < length) {
+                        this.#consolePointer += 1;
+                    }
+                }
+                break;
+            case "down":
+                if (this.#consolePointer > 0) {
+                    // update pointer
+                    this.#consolePointer -= 1;
+                    // set HTML
+                    document.getElementById("mainInput").value = "";
+                    if (this.#consolePointer != 0) {
+                        document.getElementById("mainInput").value = this.#consoleArray[
+                            length - this.#consolePointer
+                        ].message;
+                    } else {
+                        document.getElementById("mainInput").value = "";
+                    }
+                }
+                break;
+        }
     }
     renderConsole = () => {
         const length = this.#consoleArray.length;
