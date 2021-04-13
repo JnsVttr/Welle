@@ -1,5 +1,6 @@
 import * as Tone from "tone";
 import { livecode, semantics } from "/html/ohm/semantic2021";
+import { Instrument } from "/instrument";
 import { parser } from "/parser";
 
 // ============================================
@@ -7,6 +8,7 @@ import { parser } from "/parser";
 // ============================================
 
 class WelleApp {
+    // debug
     debug = true;
     // general
     #user = "local";
@@ -23,9 +25,9 @@ class WelleApp {
     // sound
     #instruments = {};
     #parts = {};
-    #instrumentsList = [];
-    #samplesList = [];
-    #allInstrumentsList = [];
+    #ListOfInstruments = [];
+    #listOfSamples = [];
+    #listOfAllInstruments = [];
 
     constructor() {
         if (this.debug)
@@ -43,6 +45,8 @@ class WelleApp {
             `);
         // set initial BPM and render to Page
         this.setBpm(this.#bpm);
+        // connect audio to Tone master
+        Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
     }
 
     // ============================================
@@ -130,7 +134,24 @@ class WelleApp {
     }
     setBpm(bpm) {
         this.#bpm = parseInt(bpm);
+        Tone.Transport.bpm.value = this.#bpm;
         document.getElementById("input_bpm").value = Math.floor(this.#bpm);
+    }
+    addSamples(sample) {
+        this.#listOfSamples.push(sample);
+        this.#listOfAllInstruments.push(sample);
+    }
+    addInstrument(preset) {
+        this.#ListOfInstruments.push(preset);
+        this.#listOfAllInstruments.push(preset);
+    }
+    printAllInstruments() {
+        if (this.debug) {
+            console.log(`App all instruments:
+            ${this.#listOfAllInstruments}`);
+            // for (let i in this.#listOfAllInstruments)
+            //     console.log(`: ${this.#listOfAllInstruments[i]}`);
+        }
     }
 
     // ============================================
@@ -144,7 +165,6 @@ class WelleApp {
 
             // extremly relevant to stability of Tone playback
             Tone.context.lookAhead = 0.2;
-            Tone.Transport.bpm.value = this.#bpm;
         }
     }
 
@@ -165,8 +185,8 @@ class WelleApp {
     printAlerts() {
         if (this.debug) {
             let allAlertNames = [];
-            for (let i in this.alerts) allAlertNames.push(this.#alerts[i].name);
-            console.log(`printAlerts - all App alerts: ${allAlertNames}`);
+            for (let i in this.#alerts) allAlertNames.push(this.#alerts[i].name);
+            console.log(`App stored alerts: ${allAlertNames}`);
         }
     }
     playAlert(alertName) {

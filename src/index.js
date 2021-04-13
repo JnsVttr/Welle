@@ -9,16 +9,12 @@ tutorial: https://medium.com/@sitapati/avoiding-mutable-global-state-in-browser-
 global var naming: GlobalVar
 */
 
-// libraries
+// libraries + class
 // ===================================
 import io from "socket.io-client";
 import SocketIOFileClient from "socket.io-file-client";
 import * as Tone from "tone";
 import "regenerator-runtime/runtime"; // for async functions with parcel bundler
-
-// files
-// ===================================
-import { Instrument } from "/instrument";
 import { WelleApp } from "/app";
 
 // global variables
@@ -26,34 +22,6 @@ import { WelleApp } from "/app";
 export const App = new WelleApp();
 export const Socket = io.connect(); // socket var - server connect, also for exports
 
-//
-//
-//
-//
-//
-//
-//
-//
-
-// audio variables
-// ===================================
-export let instruments = {};
-export let parts = {};
-// list contains synths in presets and sample folders on server as instruments
-// coming by sockets
-let listOfInstruments = [];
-let listOfSamplers = [];
-export let listOfAllAvailableInstruments = [];
-// connect audio to Tone master
-Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
-
-//
-//
-//
-//
-//
-//
-//
 //
 
 // ============================================
@@ -89,13 +57,6 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 });
 
 //
-//
-//
-//
-//
-//
-//
-//
 
 // ============================================
 // SOCKET HANDLING
@@ -112,29 +73,14 @@ Socket.on("connect", function (data) {
 
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (files) => {
-    // console.log("incoming server files: ", files);
-    Instrument.files = files;
-    for (let file in files) {
-        console.log(": ", file);
-        listOfSamplers.push(file);
-        listOfAllAvailableInstruments.push(file);
-    }
-    console.log("listOfSamplers", listOfSamplers);
-    // console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
-    Instrument.listSamplers = listOfSamplers;
+    for (let file in files) App.addSamples(file);
+    App.printAllInstruments();
 });
 
 // SOCKET receive tonePresets
 Socket.on("tonePresets", (presets) => {
-    Instrument.presets = presets;
-    // console.log('incoming presets: ', presets);
-    for (let preset in presets) {
-        listOfInstruments.push(preset);
-        listOfAllAvailableInstruments.push(preset);
-    }
-    console.log("listOfInstruments", listOfInstruments);
-    console.log("listOfAllAvailableInstruments", listOfAllAvailableInstruments);
-    Instrument.list = listOfInstruments;
+    for (let preset in presets) App.addInstrument(preset);
+    App.printAllInstruments();
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
