@@ -16,8 +16,10 @@ export const parser = (input) => {
 
     switch (input.event) {
         case "plainStartEvent":
-            App.plainStartInstruments({ instruments: input.phrases, random: input.random });
-
+            App.plainStartInstruments({
+                instruments: input.phrases,
+                random: input.random,
+            });
             break;
 
         case "assignPattern":
@@ -28,7 +30,6 @@ export const parser = (input) => {
                 volume: input.volume[0],
                 random: input.random,
             });
-
             break;
 
         case "copyPattern":
@@ -36,7 +37,6 @@ export const parser = (input) => {
                 source: [input.source],
                 destinations: input.phrases,
             });
-
             break;
 
         case "playAllEvent":
@@ -57,22 +57,18 @@ export const parser = (input) => {
 
         case "setVolume":
             App.setVolume({ instruments: input.phrases, volume: input.volume });
-
             break;
 
         case "savePartEvent":
             App.savePart(input.phrase);
-
             break;
 
         case "setBPM":
             App.setBpm({ bpm: input.bpm, factor: input.factor });
-
             break;
 
         case "deleteEvent":
             App.delete(input.phrases);
-
             break;
 
         case "deleteAllEvent":
