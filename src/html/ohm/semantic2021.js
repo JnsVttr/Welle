@@ -50,7 +50,6 @@ semantics.addOperation("eval", {
     Commands_deletEvent: (_, phrases) => {
         phrases = phrasesToArray(phrases);
         let event = "deleteEvent";
-        if (phrases.length > 1) event = "deleteMultiEvent";
         return {
             event: event,
             phrases: phrases,

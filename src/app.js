@@ -4,7 +4,7 @@ import { Instrument } from "/instrument";
 import { parser } from "/parser";
 
 // ============================================
-// APP
+// WELLE APP
 // ============================================
 
 class WelleApp {
@@ -30,14 +30,60 @@ class WelleApp {
     #listOfSamples = {};
     #listOfAllInstruments = {};
 
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
     constructor() {
         // print some info
         this.printInfo();
         // set initial BPM and render to Page
         this.setBpm({ bpm: this.#bpm });
-        // connect audio to Tone master
-        Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
+        // connect audio to Tone master - assign Instrument class masterOut to Tone master
+        Instrument.masterGain.connect(Tone.getDestination());
     }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // print start info
+    // ============================================
+    printInfo() {
+        if (this.debug)
+            console.log(`
+            Welle App created.
+            ==
+            debug state: ${this.debug}
+            user: ${this.#user}
+            alerts: ${JSON.stringify(this.#alerts)}
+            muteSound: ${this.#muteSound}
+            muteAlerts: ${this.#muteAlerts}
+
+            Tone:
+            bpm: ${this.#bpm}
+        `);
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // ============================================
     // handle main string input
@@ -78,6 +124,15 @@ class WelleApp {
             return { valid: false, string: inputString, semantic: null };
         }
     };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // ============================================
     // console
@@ -172,6 +227,15 @@ class WelleApp {
         document.getElementById(this.#consoleID).innerHTML += html;
     };
 
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
     // ============================================
     // general
     // ============================================
@@ -191,6 +255,15 @@ class WelleApp {
             // console.log(`Details: ${JSON.stringify(this.#listOfAllInstruments, null, 0)}`);
         }
     }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // ============================================
     // handle first Tone start on keydown
@@ -220,6 +293,15 @@ class WelleApp {
         }
     }
 
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
     // ============================================
     // hande Alerts
     // ============================================
@@ -245,24 +327,23 @@ class WelleApp {
         if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
     }
 
-    // ============================================
-    // print start info
-    // ============================================
-    printInfo() {
-        if (this.debug)
-            console.log(`
-            Welle App created.
-            ==
-            debug state: ${this.debug}
-            user: ${this.#user}
-            alerts: ${JSON.stringify(this.#alerts)}
-            muteSound: ${this.#muteSound}
-            muteAlerts: ${this.#muteAlerts}
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
-            Tone:
-            bpm: ${this.#bpm}
-        `);
-    }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // ============================================
     // Tone - plainStartInstruments
@@ -577,6 +658,69 @@ class WelleApp {
         if (this.debug) console.log(`create new inst ${message.name} as '${message.type}'`);
         this.#instruments[message.name] = new Instrument(message);
     }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // Tone - delete things
+    // ============================================
+
+    delete(names) {
+        console.log(`delete this: ${names}`);
+        names.map((toDelete) => {
+            if (this.#parts[toDelete]) {
+                delete this.#parts[toDelete];
+                console.log(`delete this part: ${toDelete}`);
+            }
+            if (this.#instruments[toDelete]) {
+                console.log(`delete this instrument: ${toDelete}`);
+                this.#instruments[toDelete].clear();
+                delete this.#instruments[toDelete];
+            }
+        });
+    }
+
+    deleteAll() {
+        console.log(`App delete all..`);
+        // clear & delete every instrument
+        for (let instrument in this.#instruments) {
+            console.log(`delete this instrument: ${instrument}`);
+            this.#instruments[instrument].clear();
+            delete this.#instruments[instrument];
+        }
+        // delete all parts
+        for (let part in this.#parts) {
+            console.log(`delete this part: ${part}`);
+            delete this.#parts[part];
+        }
+        // stop Tone
+        this.stopTransport();
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // ============================================
     // Tone - helper QUANT
