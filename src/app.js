@@ -18,6 +18,7 @@ class WelleApp {
     #toneStarted = false;
     #bpm = 120;
     // console
+    #consoleInput = "";
     #consoleArray = [];
     #consolePointer = 0;
     #consoleMaxLength = 20;
@@ -25,9 +26,9 @@ class WelleApp {
     // sound
     #instruments = {};
     #parts = {};
-    #ListOfInstruments = [];
-    #listOfSamples = [];
-    #listOfAllInstruments = [];
+    #ListOfInstruments = {};
+    #listOfSamples = {};
+    #listOfAllInstruments = {};
 
     constructor() {
         // print some info
@@ -45,35 +46,24 @@ class WelleApp {
         if (this.debug) console.log("");
         // reset console pointer for arrow navigation
         this.#consolePointer = 0;
+        this.#consoleInput = inputString;
         // GRAMMAR - send string to validate using semantics & grammar
         const result = this.#inputValidation(inputString);
-        console.log(`app handleMainInput Grammar result: ${JSON.stringify(result, null, 4)}`);
+        // console.log(`app handleMainInput Grammar result: ${JSON.stringify(result, null, 4)}`);
+
         // if Grammar valid:
         if (result.valid) {
             // check if result matches instruments and parts
             // ...
             // return semantic to parser
-            if (result.string != "") {
-                parser(result.semantic);
-                this.#consoleArray.push({ message: `${inputString}` });
-                this.playAlert("return");
-            } else {
-                this.playAlert("error");
-            }
-        } else {
-            if (result.string.charAt(0) == "!") this.playAlert("error");
-            else {
-                // if not valid, prepend a '!' to string, store in console string array
-                this.#consoleArray.push({ message: `! input not valid: ${inputString}` });
-                this.playAlert("error");
-            }
-        }
+            this.addToConsole({ valid: true, string: inputString });
+            parser(result.semantic);
+        } else this.addToConsole({ valid: false, string: inputString });
+
         // clear Input
         document.getElementById("mainInput").value = "";
         // FOCUS - focus back on textfield
         document.getElementById("mainInput").focus();
-        // render to Console
-        this.renderConsole();
     }
     #inputValidation = (inputString) => {
         // if input is valid
@@ -139,6 +129,30 @@ class WelleApp {
                 break;
         }
     }
+    addToConsole(message) {
+        switch (message.valid) {
+            case true:
+                if (message.string == "") this.playAlert("return");
+                else {
+                    this.#consoleArray.push({ message: `${message.string}` });
+                    this.playAlert("return");
+                }
+                break;
+            case false:
+                // if string is already false, play error, else render string
+                if (message.string.charAt(0) == "!") this.playAlert("error");
+                else {
+                    // if not valid, prepend a '!' to string, store in console string array
+                    let string = `! not valid: ${message.string}`;
+                    if (message.comment) string = `! ${message.comment}: ${message.string}`;
+                    this.#consoleArray.push({ message: string });
+                    this.playAlert("error");
+                }
+                break;
+        }
+        // render to Console
+        this.renderConsole();
+    }
     renderConsole = () => {
         const length = this.#consoleArray.length;
         let html = "";
@@ -170,19 +184,19 @@ class WelleApp {
         document.getElementById("input_bpm").value = Math.floor(this.#bpm);
     }
     addSamples(sample) {
-        this.#listOfSamples.push(sample);
-        this.#listOfAllInstruments.push(sample);
+        this.#listOfSamples[sample.name] = sample;
+        this.#listOfAllInstruments[sample.name] = sample;
     }
     addInstrument(preset) {
-        this.#ListOfInstruments.push(preset);
-        this.#listOfAllInstruments.push(preset);
+        this.#ListOfInstruments[preset.name] = preset;
+        this.#listOfAllInstruments[preset.name] = preset;
     }
     printAllInstruments() {
         if (this.debug) {
-            console.log(`App all instruments:
-            ${this.#listOfAllInstruments}`);
-            // for (let i in this.#listOfAllInstruments)
-            //     console.log(`: ${this.#listOfAllInstruments[i]}`);
+            console.log(`App all instruments:`);
+            for (let i in this.#listOfAllInstruments)
+                console.log(`: ${this.#listOfAllInstruments[i].name}`);
+            // console.log(`Details: ${JSON.stringify(this.#listOfAllInstruments, null, 0)}`);
         }
     }
 
@@ -198,6 +212,9 @@ class WelleApp {
             // extremly relevant to stability of Tone playback
             Tone.context.lookAhead = 0.2;
         }
+    }
+    startTransport(time) {
+        if (Tone.Transport.state != "started") Tone.Transport.start();
     }
 
     // ============================================
@@ -225,7 +242,9 @@ class WelleApp {
         if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
     }
 
+    // ============================================
     // print start info
+    // ============================================
     printInfo() {
         if (this.debug)
             console.log(`
@@ -240,6 +259,62 @@ class WelleApp {
             Tone:
             bpm: ${this.#bpm}
         `);
+    }
+    // ============================================
+    // Tone - plainStartInstruments
+    // ============================================
+    plainStartInstruments(message) {
+        console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
+        // check if instruments are valid
+        const validInstruments = this.checkValidInstruments(message.instruments);
+        // collect existing instruments
+        const existingInstruments = this.checkExistingInstruments(validInstruments);
+        // collect new instruments
+        const newInstruments = this.checkNewInstruments(validInstruments);
+        console.log(`Existing: ${existingInstruments} New: ${newInstruments}`);
+
+        newInstruments.map((inst) => {
+            message.name = inst;
+            this.createNewInstrument(message);
+        });
+
+        this.startTransport();
+    }
+    checkValidInstruments(instruments) {
+        // check if internal instrument list contains the instruments
+        const validInstruments = instruments.map((inst) => {
+            console.log(`Valid? check inst: ${inst} > ${this.#listOfAllInstruments[inst]}`);
+            if (this.#listOfAllInstruments[inst]) return inst;
+            else this.addToConsole({ valid: false, string: inst, comment: "no such instrument" });
+        });
+        console.log(`vaild instruments: ${validInstruments}`);
+        return validInstruments;
+    }
+    checkExistingInstruments(instruments) {
+        const existingInstruments = instruments.map((inst) => {
+            if (this.#instruments[inst]) return inst;
+        });
+        return existingInstruments;
+    }
+    checkNewInstruments(instruments) {
+        const newInstruments = instruments.map((inst) => {
+            if (!this.#instruments[inst]) return inst;
+        });
+        return newInstruments;
+    }
+    createNewInstrument(message) {
+        if (this.#listOfSamples[message.name]) {
+            message.type = "sampler";
+            message.sample = this.#listOfSamples[message.name];
+            message.preset = this.#ListOfInstruments["sampler"].preset;
+        }
+        if (this.#ListOfInstruments[message.name]) {
+            message.type = "preset";
+            message.preset = this.#ListOfInstruments[message.name].preset;
+        }
+        console.log(`create new inst as '${message.type}'`);
+        this.#instruments[message.name] = new Instrument(message);
+        // if (message.random != null) this.#instruments[inst].random = message.random;
     }
 }
 

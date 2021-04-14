@@ -6,21 +6,18 @@ manage semantics returns
 delegate input to tone, sockets, html
 */
 
-// libraries
+// libraries, functions, classes
 import * as Tone from "tone";
-
-// files
-import { printer } from "/helper/printer";
 import { Instrument } from "/instrument";
-import { instruments, listOfAllAvailableInstruments, parts, thisBPM } from "/index";
+import { App } from "/index";
 
-// local variables
-let debug = true;
-let context = "parser";
+import { instruments, listOfAllAvailableInstruments, parts, thisBPM } from "/index";
 
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
-    printer(debug, context, "input: ", input);
+    // show parser input
+    if (App.debug) console.log(`Parser input: ${JSON.stringify(input, null, 2)}`);
+
     let returnMessage = {
         cmd: "",
         string: "",
@@ -36,97 +33,100 @@ export const parser = (input) => {
 
     switch (input.event) {
         case "plainStartEvent":
-            // printer(debug, context, "playMulti, instrument: ", input.phrases[0])
-            random = input.random;
-            // first check, if input is a part
-            name = input.phrases[0];
+            // if Instrument
+            App.plainStartInstruments({ instruments: input.phrases, random: input.random });
 
-            // IF PART
-            // ===========
+            // random = input.random;
+            // // first check, if input is a part
+            // name = input.phrases[0];
 
-            // if input is a part
-            if (parts[name]) {
-                console.log(`${name} is a part: `, parts[name]);
+            // // IF PART
+            // // ===========
 
-                // STOP - clear all instruments
-                for (let instrument in instruments) {
-                    instruments[instrument].clear();
-                }
+            // // if input is a part
+            // if (parts[name]) {
+            //     console.log(`${name} is a part: `, parts[name]);
 
-                // TONE - handle tone. is best to restart tone
-                // store quant time
-                let timeDiff = toneQuant() * 1000;
-                // console.log(`timeDiff for offset: ${timeDiff}`);
-                // set timeout for restart in sync (more or less)
-                setTimeout(() => {
-                    // cancel all future jobs, clear Tone transport, stop it & start it in quant time
-                    Tone.Transport.cancel();
-                    Tone.Transport.clear();
-                    // stop if started
-                    if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+            //     // STOP - clear all instruments
+            //     for (let instrument in instruments) {
+            //         instruments[instrument].clear();
+            //     }
 
-                    // CHECK & RESTART
-                    for (let instrument in parts[name].instrumentCollection) {
-                        console.log(`check & restart process for instrument ${instrument}`);
-                        // check if saved part instrument exists in instruments
-                        if (instruments[instrument]) {
-                            console.log(`instrument ${instrument} exists in 'instruments'`);
-                            // restart instrument, if it is playing in part
-                            if (parts[name].instrumentCollection[instrument].isPlaying) {
-                                console.log(
-                                    `instrument ${instrument} is playing: `,
-                                    instruments[instrument].isPlaying
-                                );
-                                // instruments[instrument].start();
-                                instruments[instrument].restart();
-                            } else {
-                                // console.log(`stop instrument ${instrument}. `);
-                                // instruments[instrument].stop();
-                            }
-                        } else {
-                            console.log(`play part ${name}: instrument ${instrument} is gone.`);
-                        }
-                    }
+            //     // TONE - handle tone. is best to restart tone
+            //     // store quant time
+            //     let timeDiff = toneQuant() * 1000;
+            //     // console.log(`timeDiff for offset: ${timeDiff}`);
+            //     // set timeout for restart in sync (more or less)
+            //     setTimeout(() => {
+            //         // cancel all future jobs, clear Tone transport, stop it & start it in quant time
+            //         Tone.Transport.cancel();
+            //         Tone.Transport.clear();
+            //         // stop if started
+            //         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
 
-                    // start
-                    if (Tone.Transport.state != "started") Tone.Transport.start();
-                    console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
-                }, timeDiff);
+            //         // CHECK & RESTART
+            //         for (let instrument in parts[name].instrumentCollection) {
+            //             console.log(`check & restart process for instrument ${instrument}`);
+            //             // check if saved part instrument exists in instruments
+            //             if (instruments[instrument]) {
+            //                 console.log(`instrument ${instrument} exists in 'instruments'`);
+            //                 // restart instrument, if it is playing in part
+            //                 if (parts[name].instrumentCollection[instrument].isPlaying) {
+            //                     console.log(
+            //                         `instrument ${instrument} is playing: `,
+            //                         instruments[instrument].isPlaying
+            //                     );
+            //                     // instruments[instrument].start();
+            //                     instruments[instrument].restart();
+            //                 } else {
+            //                     // console.log(`stop instrument ${instrument}. `);
+            //                     // instruments[instrument].stop();
+            //                 }
+            //             } else {
+            //                 console.log(`play part ${name}: instrument ${instrument} is gone.`);
+            //             }
+            //         }
 
-                // BPM change
-                Tone.Transport.bpm.rampTo(parts[name].bpm, 0.1);
-            } else {
-                //
-                // IF INSTRUMENT
-                // ===========
-                // handle input
-                for (let i in input.phrases) {
-                    name = input.phrases[i];
-                    // if they are valid instruments
-                    if (listOfAllAvailableInstruments.includes(name)) {
-                        // printer(debug, context, "check instruments", instruments[name])
-                        // if they exist already, just start
-                        if (instruments[name]) {
-                            instruments[name].restart();
-                            // if random value, set Instrument
-                            if (random != null) instruments[name].random = random;
-                        } else {
-                            // else make new
-                            instruments[name] = new Instrument(name);
-                            // if random value, set Instrument
-                            if (random != null) instruments[name].random = random;
-                        }
-                        // push name of running inst for rendering
-                        returnMessage.instruments.push(name);
-                    } else {
-                        returnMessage.cmd = "noSuchInstrument";
-                        returnMessage.string = name;
-                        returnMessage.noInstrument.push(name);
-                    }
-                }
-            }
+            //         // start
+            //         if (Tone.Transport.state != "started") Tone.Transport.start();
+            //         console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
+            //     }, timeDiff);
+
+            //     // BPM change
+            //     Tone.Transport.bpm.rampTo(parts[name].bpm, 0.1);
+            // } else {
+            //     //
+            //     // IF INSTRUMENT
+            //     // ===========
+
+            //     // handle input
+            //     for (let i in input.phrases) {
+            //         name = input.phrases[i];
+            //         // if they are valid instruments
+            //         if (listOfAllAvailableInstruments.includes(name)) {
+            //             // printer(debug, context, "check instruments", instruments[name])
+            //             // if they exist already, just start
+            //             if (instruments[name]) {
+            //                 instruments[name].restart();
+            //                 // if random value, set Instrument
+            //                 if (random != null) instruments[name].random = random;
+            //             } else {
+            //                 // else make new
+            //                 instruments[name] = new Instrument(name);
+            //                 // if random value, set Instrument
+            //                 if (random != null) instruments[name].random = random;
+            //             }
+            //             // push name of running inst for rendering
+            //             returnMessage.instruments.push(name);
+            //         } else {
+            //             returnMessage.cmd = "noSuchInstrument";
+            //             returnMessage.string = name;
+            //             returnMessage.noInstrument.push(name);
+            //         }
+            //     }
+            // }
             // console.log("Instruments: ", instruments);
-            if (Tone.Transport.state != "started") Tone.Transport.start();
+
             break;
 
         case "assignPattern":

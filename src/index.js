@@ -73,13 +73,13 @@ Socket.on("connect", function (data) {
 
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (files) => {
-    for (let file in files) App.addSamples(file);
-    App.printAllInstruments();
+    for (let file in files) App.addSamples({ name: file, file: files[file] });
+    // App.printAllInstruments();
 });
 
 // SOCKET receive tonePresets
 Socket.on("tonePresets", (presets) => {
-    for (let preset in presets) App.addInstrument(preset);
+    for (let preset in presets) App.addInstrument({ name: preset, preset: presets[preset] });
     App.printAllInstruments();
 });
 

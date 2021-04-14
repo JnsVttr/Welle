@@ -16,66 +16,45 @@ class Instrument {
     static gainDefault = 0.6;
     static patternDefault = [0]; // default = one hit
     static masterGain = new Tone.Gain(0.8); // master output for Tone -> Speaker
-    static bpm = 120; // bpm
-    static list = []; // list of possible instrument names
-    static listSamplers = []; // list of all sample folders
-    static listAll = []; // list of all
-    static presets = {}; // settings for different instrument names
-    static bufferDefault = undefined; // placeholder default buffer
-    static files = {}; // all sample files + URLs  on server
 
     // CONSTRUCTOR - executed with every new instance
     // ================================================
-    constructor(name, pattern, rawPattern, random) {
+    constructor(message) {
         // define properties every new Instrument will have
         // this._synthType = Instrument.typeDefault;
         // create tone elements: synth -> gain -> masterOut
         // the synth creates the sound
+        console.log(`new Instrument with message: 
+        ${JSON.stringify(message)}`);
 
-        this._name = name;
+        this._name = message.name;
         this._isPlaying = false;
         this._synth = undefined;
         this._sequence = undefined;
         this._ticks = 0;
         this.measure = "8n";
-        this._rand = 0;
-        if (random) this._rand = random;
-
-        this._rawPattern = rawPattern || "#";
+        this._rand = message.random || 0;
+        this._rawPattern = message.rawPattern || "#";
         this._preset = {};
-        this._fileIndex = 0;
-        this._buffer = Instrument.bufferDefault;
 
         // if new instrument is in presets list get content from static stored presets
-        if (Instrument.list.includes(this._name)) {
-            this._preset = Instrument.presets[this._name];
-            this._settings = this._preset.settings;
-        }
-        // else check if new name = a sample folder
-        else if (Instrument.listSamplers.includes(this._name)) {
-            // console.log("detected sampler");
+        if (message.type == "preset") this._preset = message.preset;
+        // check if new name = a sample folder
+        if (message.type == "sampler") {
             // apply settings for sampler to instrument
-            this._preset = Instrument.presets["sampler"];
-            this._settings = this._preset.settings;
-            // get the URL for the sample:
-            for (let entry in Instrument.files) {
-                if (entry == this._name) {
-                    // console.log('entry found', Instrument.files[entry][0][1]);
-                    this._sampleUrl = Instrument.files[entry][this._fileIndex][1];
-                    // assign buffer to setting before buffer is actually loaded
-                    this._settings.C3 = this._buffer;
-                    // this._settings.C3 = this._sampleUrl;
-                }
-            }
+            this._preset = message.preset;
+            console.log(`sample URL: ${message.sample.file[0][1]}`);
+            this._sampleUrl = message.sample.file[0][1];
         }
 
         // set synth settings from Instrument default settings(type)
+        this._settings = this._preset.settings;
         this._transpose = this._preset.transpose;
         this._baseNote = this._preset.baseNote;
         this._type = this._preset.synthType;
         this._volume = this._preset.gain * this._preset.volume;
         // pattern
-        this.pattern = pattern || Instrument.patternDefault;
+        this.pattern = message.pattern || Instrument.patternDefault;
         // transform to MIDI pattern. maybe not even neccessary..
         this.midiPattern = this.#translatePatternToMidi(this.pattern);
         // make a trigger function based on preset values
@@ -91,13 +70,10 @@ class Instrument {
         // STARTING
         // =============
         // start instrument - if preset, than immediately
-        if (Instrument.list.includes(this._name)) {
-            this.#createPreset();
-        }
+        if (message.type == "preset") this.#createPreset();
         // start sampler, on Buffer callback
-        else if (Instrument.listSamplers.includes(this._name)) {
+        if (message.type == "sampler") {
             this._buffer = new Tone.ToneAudioBuffer(this._sampleUrl, () => {
-                // console.log("buffer loaded");
                 this.#createSampler();
             });
         }
