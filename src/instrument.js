@@ -43,7 +43,7 @@ class Instrument {
         if (message.type == "sampler") {
             // apply settings for sampler to instrument
             this._preset = message.preset;
-            console.log(`sample URL: ${message.sample.file[0][1]}`);
+            // console.log(`sample URL: ${message.sample.file[0][1]}`);
             this._sampleUrl = message.sample.file[0][1];
         }
 
@@ -52,7 +52,7 @@ class Instrument {
         this._transpose = this._preset.transpose;
         this._baseNote = this._preset.baseNote;
         this._type = this._preset.synthType;
-        this._volume = this._preset.gain * this._preset.volume;
+        this._volume = message.volume || this._preset.gain * this._preset.volume;
         // pattern
         this.pattern = message.pattern || Instrument.patternDefault;
         // transform to MIDI pattern. maybe not even neccessary..
@@ -75,8 +75,23 @@ class Instrument {
         if (message.type == "sampler") {
             this._buffer = new Tone.ToneAudioBuffer(this._sampleUrl, () => {
                 this.#createSampler();
+                this.printInfo();
             });
         }
+        this.printInfo();
+    }
+
+    printInfo() {
+        console.log(`
+        Instrument: 
+        name: ${this._name}
+        type: ${this._type}
+        isPlaying: ${this._isPlaying}
+        pattern: ${this.pattern}
+        rawPattern: ${this._rawPattern}
+        midiPattern: ${this.midiPattern}
+        random: ${this._rand}
+        `);
     }
 
     // PUBLIC FUNCTIONS - to use inside, prepend a 'this.'

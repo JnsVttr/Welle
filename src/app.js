@@ -34,7 +34,7 @@ class WelleApp {
         // print some info
         this.printInfo();
         // set initial BPM and render to Page
-        this.setBpm(this.#bpm);
+        this.setBpm({ bpm: this.#bpm });
         // connect audio to Tone master
         Instrument.masterGain.connect(Tone.getDestination()); // assign Instrument class masterOut to Tone master
     }
@@ -175,14 +175,6 @@ class WelleApp {
     // ============================================
     // general
     // ============================================
-    get bpm() {
-        return this.#bpm;
-    }
-    setBpm(bpm) {
-        this.#bpm = parseInt(bpm);
-        Tone.Transport.bpm.value = this.#bpm;
-        document.getElementById("input_bpm").value = Math.floor(this.#bpm);
-    }
     addSamples(sample) {
         this.#listOfSamples[sample.name] = sample;
         this.#listOfAllInstruments[sample.name] = sample;
@@ -214,7 +206,18 @@ class WelleApp {
         }
     }
     startTransport(time) {
-        if (Tone.Transport.state != "started") Tone.Transport.start();
+        if (time) {
+            if (Tone.Transport.state != "started") Tone.Transport.start(time);
+        } else {
+            if (Tone.Transport.state != "started") Tone.Transport.start();
+        }
+    }
+    stopTransport(time) {
+        if (time) {
+            if (Tone.Transport.state != "stopped") Tone.Transport.stop(time);
+        } else {
+            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+        }
     }
 
     // ============================================
@@ -260,48 +263,307 @@ class WelleApp {
             bpm: ${this.#bpm}
         `);
     }
+
     // ============================================
     // Tone - plainStartInstruments
     // ============================================
-    plainStartInstruments(message) {
-        console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
-        // check if instruments are valid
-        const validInstruments = this.checkValidInstruments(message.instruments);
-        // collect existing instruments
-        const existingInstruments = this.checkExistingInstruments(validInstruments);
-        // collect new instruments
-        const newInstruments = this.checkNewInstruments(validInstruments);
-        console.log(`Existing: ${existingInstruments} New: ${newInstruments}`);
 
-        newInstruments.map((inst) => {
-            message.name = inst;
-            this.createNewInstrument(message);
+    savePart(name) {
+        // check if name is reserved as instrument
+        if (this.#listOfAllInstruments[name]) {
+            if (this.debug) console.log(`part name ${name} is reserved as instrument`);
+            this.addToConsole({
+                valid: false,
+                string: name,
+                comment: "name reserved as instrument",
+            });
+        } else {
+            // init new part
+            this.#parts[name] = {
+                instrumentCollection: {},
+                bpm: this.#bpm,
+            };
+            // store instruments and their playState in the part
+            Object.keys(this.#instruments).forEach((instrument) => {
+                this.#parts[name].instrumentCollection[instrument] = {
+                    isPlaying: this.#instruments[instrument].isPlaying,
+                    instrument: this.#instruments[instrument],
+                };
+            });
+            console.log(`part ${name} saved in parts`, this.#parts[name]);
+        }
+    }
+
+    setBpm(message) {
+        const bpm = Math.min(240, Math.max(1, message.bpm));
+        if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
+        this.#bpm = bpm;
+        // if Transport running
+        if (Tone.Transport.state == "started") {
+            if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
+            else Tone.Transport.bpm.rampTo(bpm, 0.1);
+        }
+        document.getElementById("input_bpm").value = Math.floor(this.#bpm);
+    }
+
+    // ============================================
+
+    setVolume(message) {
+        // checks for instruments
+        const checks = this.checkInstruments(message.instruments);
+        if (checks.existingInstruments) {
+            checks.existingInstruments.map((instrument) => {
+                this.#instruments[instrument].setVolume(message.volume);
+            });
+        }
+    }
+
+    // ============================================
+
+    stopInstruments(instruments) {
+        // checks for instruments
+        const checks = this.checkInstruments(instruments);
+        if (checks.existingInstruments) {
+            checks.existingInstruments.map((instrument) => {
+                this.#instruments[instrument].stop();
+            });
+        }
+        // stop Tone if nothing is playing anymore
+        let nothingIsPlaying = true;
+        Object.keys(this.#instruments).forEach((instrument) => {
+            if (this.#instruments[instrument].isPlaying) nothingIsPlaying = false;
         });
+        if (nothingIsPlaying) this.stopTransport();
+    }
 
+    // ============================================
+
+    playAll() {
+        // store quant time
+        const timeDiff = this.toneQuant() * 1000;
+        // set timeout for restart in sync (more or less)
+        setTimeout(() => {
+            // cancel all future jobs, clear Tone transport, stop it & start it in quant time
+            Tone.Transport.cancel();
+            Tone.Transport.clear();
+            // stop if started
+            this.stopTransport();
+            // restart all instruments in sync
+            Object.keys(this.#instruments).forEach((instrument) => {
+                this.#instruments[instrument].restart();
+            });
+            // start
+            this.startTransport();
+        }, timeDiff);
+    }
+
+    // ============================================
+
+    stopAll() {
+        Object.keys(this.#instruments).forEach((instrument) => {
+            this.#instruments[instrument].stop();
+        });
+    }
+
+    // ============================================
+
+    copyPattern(message) {
+        // checks for instruments - extract source
+        const checks = this.checkInstruments(message.source);
+        let source = undefined;
+        if (checks.existingInstruments) source = checks.existingInstruments[0];
+
+        // if source exists
+        if (source) {
+            // checks for destinations
+            const destChecks = this.checkInstruments(message.destinations);
+            const pattern = this.#instruments[source].getPattern();
+            const rawPattern = this.#instruments[source].getRawPattern();
+            if (destChecks.existingInstruments)
+                destChecks.existingInstruments.map((instrument) => {
+                    this.#instruments[instrument].setPattern(pattern, rawPattern);
+                    // this.#instruments[source].restart();
+                });
+            if (destChecks.newInstruments)
+                destChecks.newInstruments.map((instrument) => {
+                    message.name = instrument;
+                    message.pattern = pattern;
+                    message.rawPattern = rawPattern;
+                    this.createNewInstrument(message);
+                    // this.#instruments[source].restart();
+                });
+        }
+        // restart all with quant
+        this.playAll();
+    }
+
+    // ============================================
+
+    assignPattern(message) {
+        if (this.debug) console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        // checks for instruments
+        const checks = this.checkInstruments(message.instruments);
+        // if there are new instruments, create them
+        if (checks.newInstruments)
+            checks.newInstruments.map((inst) => {
+                message.name = inst;
+                this.createNewInstrument(message);
+            });
+        if (checks.existingInstruments)
+            checks.existingInstruments.map((instrument) => {
+                this.#instruments[instrument].setPattern(message.pattern, message.rawPattern);
+                if (message.random) this.#instruments[instrument].random = message.random;
+                if (message.volume) this.#instruments[instrument].setVolume(message.volume);
+            });
         this.startTransport();
     }
+
+    // ============================================
+
+    plainStartInstruments(message) {
+        if (this.debug) console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
+
+        let isPart = false;
+        const partName = message.instruments[0];
+        // check for parts if only one instrument
+        if (message.instruments.length == 1) {
+            if (this.#parts[partName]) {
+                console.log(`part ${partName} detected`);
+                isPart = true;
+            }
+        }
+        if (isPart) {
+            this.startPart(partName);
+        } else {
+            // checks for instruments
+            const checks = this.checkInstruments(message.instruments);
+            // if there are new instruments, create them
+            if (checks.newInstruments)
+                checks.newInstruments.map((inst) => {
+                    message.name = inst;
+                    this.createNewInstrument(message);
+                });
+            // if existing, start them
+            if (checks.existingInstruments)
+                checks.existingInstruments.map((instrument) => {
+                    this.#instruments[instrument].restart();
+                    if (message.random) this.#instruments[instrument].random = message.random;
+                });
+
+            this.startTransport();
+        }
+    }
+
+    // ============================================
+
+    startPart(name) {
+        // STOP - clear all instruments
+        for (let instrument in this.#instruments) {
+            this.#instruments[instrument].clear();
+        }
+        // TONE - handle tone. is best to restart tone
+        // store quant time
+        let timeDiff = this.toneQuant() * 1000;
+        // set timeout for restart in sync (more or less)
+        setTimeout(() => {
+            // cancel all future jobs, clear Tone transport, stop it & start it in quant time
+            Tone.Transport.cancel();
+            Tone.Transport.clear();
+            // stop if started
+            this.stopTransport();
+
+            // CHECK & RESTART
+            for (let instrument in this.#parts[name].instrumentCollection) {
+                // console.log(`check & restart process for instrument ${instrument}`);
+                // check if saved part instrument exists in instruments
+                if (this.#instruments[instrument]) {
+                    // console.log(`instrument ${instrument} exists in 'instruments'`);
+                    // restart instrument, if it is playing in part
+                    if (this.#parts[name].instrumentCollection[instrument].isPlaying) {
+                        this.#instruments[instrument].restart();
+                    }
+                } else {
+                    console.log(`play part ${name}: instrument ${instrument} is gone.`);
+                }
+            }
+
+            // start Tone Transport
+            this.startTransport();
+
+            // console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
+        }, timeDiff);
+
+        // BPM change
+        this.setBpm({ bpm: this.#parts[name].bpm });
+    }
+
+    // ============================================
+
+    // check instruments
+    checkInstruments(instruments) {
+        let returnMessage = {
+            validInstruments: undefined,
+            existingInstruments: undefined,
+            newInstruments: undefined,
+        };
+        // check if instruments are valid
+        const validInstruments = this.checkValidInstruments(instruments);
+
+        if (validInstruments) {
+            returnMessage.validInstruments = validInstruments;
+            // collect existing instruments
+            const existingInstruments = this.checkExistingInstruments(validInstruments);
+            if (existingInstruments) returnMessage.existingInstruments = existingInstruments;
+            // collect new instruments
+            const newInstruments = this.checkNewInstruments(validInstruments);
+            if (newInstruments) returnMessage.newInstruments = newInstruments;
+            if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
+        }
+        if (this.debug)
+            console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
+        return returnMessage;
+    }
+
     checkValidInstruments(instruments) {
         // check if internal instrument list contains the instruments
         const validInstruments = instruments.map((inst) => {
-            console.log(`Valid? check inst: ${inst} > ${this.#listOfAllInstruments[inst]}`);
+            if (this.debug)
+                console.log(
+                    `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
+                );
             if (this.#listOfAllInstruments[inst]) return inst;
             else this.addToConsole({ valid: false, string: inst, comment: "no such instrument" });
         });
-        console.log(`vaild instruments: ${validInstruments}`);
-        return validInstruments;
+        if (this.debug)
+            console.log(
+                `vaild instruments: ${validInstruments}. Count: ${validInstruments.length}`
+            );
+        // filter null entries
+        const result = validInstruments.filter((x) => x);
+        if (result.length > 0) return result;
+        else return undefined;
     }
+
     checkExistingInstruments(instruments) {
         const existingInstruments = instruments.map((inst) => {
             if (this.#instruments[inst]) return inst;
         });
-        return existingInstruments;
+        // filter null entries
+        const result = existingInstruments.filter((x) => x);
+        if (result.length > 0) return result;
+        else return undefined;
     }
+
     checkNewInstruments(instruments) {
         const newInstruments = instruments.map((inst) => {
             if (!this.#instruments[inst]) return inst;
         });
-        return newInstruments;
+        // filter null entries
+        const result = newInstruments.filter((x) => x);
+        if (result.length > 0) return result;
+        else return undefined;
     }
+
     createNewInstrument(message) {
         if (this.#listOfSamples[message.name]) {
             message.type = "sampler";
@@ -312,10 +574,50 @@ class WelleApp {
             message.type = "preset";
             message.preset = this.#ListOfInstruments[message.name].preset;
         }
-        console.log(`create new inst as '${message.type}'`);
+        if (this.debug) console.log(`create new inst ${message.name} as '${message.type}'`);
         this.#instruments[message.name] = new Instrument(message);
-        // if (message.random != null) this.#instruments[inst].random = message.random;
     }
+
+    // ============================================
+    // Tone - helper QUANT
+    // ============================================
+    toneQuant = () => {
+        // get time
+        const now = Tone.TransportTime().valueOf();
+        // set quantize factor
+        let factor = 1;
+        let factorOffset = 0.5;
+        // get quant time
+        const quant = Tone.Time(now).quantize(factor);
+        let playTime = quant;
+        let timeDifference = 0;
+        if (this.debug) console.log(`Tone.now(): ${now}. quant: ${quant}`);
+        // if transport starts, set quant to 0
+        if (quant < now) {
+            playTime = now + factorOffset;
+            playTime = Tone.Time(playTime).quantize(factor);
+            timeDifference = playTime - now;
+            // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+        } else timeDifference = quant - now;
+
+        if (now == 0) {
+            playTime = 0;
+            timeDifference = 0;
+        } else if (now >= 0 && now <= 0.01) {
+            playTime = 0.01;
+            timeDifference = playTime;
+        }
+        // safety: if below 0 than playTime is zero
+        if (playTime < 0) playTime = 0;
+        if (timeDifference < 0) timeDifference = 0;
+        console.log(`
+    quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} - 
+    play at: ${playTime}
+    timeDifference playTime - now() : ${timeDifference}
+    `);
+        // return quant playTime
+        return timeDifference;
+    };
 }
 
 export { WelleApp };
