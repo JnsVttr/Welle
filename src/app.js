@@ -29,6 +29,10 @@ class WelleApp {
     #ListOfInstruments = {};
     #listOfSamples = {};
     #listOfAllInstruments = {};
+    // html
+    #instDiv = "instruments";
+    #partDiv = "parts";
+    #bpmDiv = "input_bpm";
 
     //
     //
@@ -373,6 +377,7 @@ class WelleApp {
             });
             console.log(`part ${name} saved in parts`, this.#parts[name]);
         }
+        this.renderContent();
     }
 
     setBpm(message) {
@@ -384,7 +389,7 @@ class WelleApp {
             if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
             else Tone.Transport.bpm.rampTo(bpm, 0.1);
         }
-        document.getElementById("input_bpm").value = Math.floor(this.#bpm);
+        this.renderContent();
     }
 
     // ============================================
@@ -397,6 +402,7 @@ class WelleApp {
                 this.#instruments[instrument].setVolume(message.volume);
             });
         }
+        this.renderContent();
     }
 
     // ============================================
@@ -415,6 +421,7 @@ class WelleApp {
             if (this.#instruments[instrument].isPlaying) nothingIsPlaying = false;
         });
         if (nothingIsPlaying) this.stopTransport();
+        this.renderContent();
     }
 
     // ============================================
@@ -435,6 +442,7 @@ class WelleApp {
             });
             // start
             this.startTransport();
+            this.renderContent();
         }, timeDiff);
     }
 
@@ -444,6 +452,7 @@ class WelleApp {
         Object.keys(this.#instruments).forEach((instrument) => {
             this.#instruments[instrument].stop();
         });
+        this.renderContent();
     }
 
     // ============================================
@@ -476,6 +485,7 @@ class WelleApp {
         }
         // restart all with quant
         this.playAll();
+        this.renderContent();
     }
 
     // ============================================
@@ -497,6 +507,7 @@ class WelleApp {
                 if (message.volume) this.#instruments[instrument].setVolume(message.volume);
             });
         this.startTransport();
+        this.renderContent();
     }
 
     // ============================================
@@ -533,6 +544,7 @@ class WelleApp {
 
             this.startTransport();
         }
+        this.renderContent();
     }
 
     // ============================================
@@ -570,6 +582,7 @@ class WelleApp {
 
             // start Tone Transport
             this.startTransport();
+            this.renderContent();
 
             // console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
         }, timeDiff);
@@ -685,6 +698,7 @@ class WelleApp {
                 delete this.#instruments[toDelete];
             }
         });
+        this.renderContent();
     }
 
     deleteAll() {
@@ -702,6 +716,7 @@ class WelleApp {
         }
         // stop Tone
         this.stopTransport();
+        this.renderContent();
     }
 
     //
@@ -762,6 +777,74 @@ class WelleApp {
         // return quant playTime
         return timeDifference;
     };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // HTML - renderer
+    // ============================================
+
+    renderContent() {
+        // add a delay to catch changes
+        setTimeout(() => {
+            this.renderInstruments();
+            this.renderParts();
+            document.getElementById(this.#bpmDiv).value = Math.floor(this.#bpm);
+        }, 100);
+    }
+    renderInstruments() {
+        let html = "";
+        // iterate through instruments collection
+        Object.keys(this.#instruments).forEach((inst) => {
+            const name = this.#instruments[inst].name();
+            let volume = this.#instruments[inst].volume();
+            const pattern = this.#instruments[inst].rawPattern();
+            const length = pattern.length + 10;
+            const isPlaying = this.#instruments[inst].isPlaying;
+
+            // round volume
+            volume = Math.round(volume * 10) / 10;
+
+            // create HTML elements for appending
+            html += "<p>";
+            if (isPlaying) {
+                html += `<input id="check_${name}" class="w3-check" type="checkbox" checked="true"><label> <b>${name}</b> </label>`;
+            } else {
+                html += `<input id="check_${name}" class="w3-check" type="checkbox"><label> <b>${name}</b> </label>`;
+            }
+
+            html += `
+		vol: 
+		<input id="vol_${name}" type="text" style="max-width: 3rem"  size="10" autocomplete=off value="${volume}">
+		pattern: 
+		<input id="pattern_${name}" type="text"  style="max-width: 55rem" size="${length}" autocomplete=off value="${pattern}">
+		   
+		</p>`;
+        });
+        // replace html content
+        document.getElementById(this.#instDiv).innerHTML = "";
+        document.getElementById(this.#instDiv).innerHTML += html;
+    }
+
+    renderParts() {
+        let html = "";
+        // iterate through parts collection
+        Object.keys(this.#parts).forEach((part) => {
+            html += `
+		<input type="button" class="w3-button w3-round-large w3-border w3-black w3-medium" value="${part}"></input>   
+		`;
+        });
+
+        document.getElementById(this.#partDiv).innerHTML = "";
+        document.getElementById(this.#partDiv).innerHTML += html;
+    }
 }
 
 export { WelleApp };

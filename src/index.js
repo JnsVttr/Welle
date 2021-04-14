@@ -13,7 +13,6 @@ global var naming: GlobalVar
 // ===================================
 import io from "socket.io-client";
 import SocketIOFileClient from "socket.io-file-client";
-import * as Tone from "tone";
 import "regenerator-runtime/runtime"; // for async functions with parcel bundler
 import { WelleApp } from "/app";
 

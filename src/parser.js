@@ -26,7 +26,7 @@ export const parser = (input) => {
             App.assignPattern({
                 instruments: input.phrases,
                 pattern: input.pattern,
-                patternString: input.patternString,
+                rawPattern: input.patternString,
                 volume: input.volume[0],
                 random: input.random,
             });
