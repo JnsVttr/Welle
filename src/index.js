@@ -23,9 +23,19 @@ export const Socket = io.connect(); // socket var - server connect, also for exp
 const debug = true;
 //
 
+// IMPORTANT: teleport functions to document scope by creating
+// window object and storing functions/classes there
+window.welle = { name: "welle", app: App };
+console.log(`
+Window: this is the document window's name: ${window.welle.name}.
+And this is the App: ${JSON.stringify(window.welle.app)}`);
+
 // ============================================
 // INPUT - manage text input & key interactions
 // ============================================
+
+// focus on main input field:
+document.getElementById("mainInput").focus();
 
 // start Tone.js on keydown
 document.getElementById("mainDiv").addEventListener("keydown", (e) => {
@@ -54,6 +64,13 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // 	printer(debug, context, "request Server Files", `Index: socket send "requestServerFiles", 'samples'.. `)
     // }
 });
+
+// const checkCheckboxes = (message) => {
+//     const allCheckboxes = document.getElementsByTagName("input");
+//     allCheckboxes.map((checks) => {
+//         console.log(`all checkboxes: ${checks}`);
+//     });
+// };
 
 //
 

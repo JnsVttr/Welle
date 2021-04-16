@@ -436,6 +436,11 @@ class WelleApp {
         if (checks.existingInstruments) {
             checks.existingInstruments.map((instrument) => {
                 this.#instruments[instrument].stop();
+                console.log(
+                    `show stopped instruments: ${instrument}, isPlaying: ${
+                        this.#instruments[instrument].isPlaying
+                    }`
+                );
             });
         }
         // stop Tone if nothing is playing anymore
@@ -821,7 +826,7 @@ class WelleApp {
             this.renderParts();
             this.renderInstrumentsOverview();
             document.getElementById(this.#bpmDiv).value = Math.floor(this.#bpm);
-        }, 100);
+        }, 200);
     }
     renderInstrumentsOverview() {
         let html = `List of Instruments: &nbsp;&nbsp;`;
@@ -866,6 +871,7 @@ class WelleApp {
             let volume = this.#instruments[inst].volume();
             const pattern = this.#instruments[inst].rawPattern();
             const isPlaying = this.#instruments[inst].isPlaying;
+            console.log(`render instruments: name ${name}, isPlaying ${isPlaying}`);
 
             // round volume
             volume = Math.round(volume * 10) / 10;
@@ -888,8 +894,7 @@ class WelleApp {
                     <input 
                     id="check_${name}" 
                     class="w3-check" 
-                    type="checkbox" 
-                    checked="false">
+                    type="checkbox"> 
                     <label> <b>${name}</b> </label>
                 </div>`;
             }
@@ -914,17 +919,18 @@ class WelleApp {
         Object.keys(this.#instruments).forEach((inst) => {
             const name = this.#instruments[inst].name();
             const isPlaying = this.#instruments[inst].isPlaying;
-            document.getElementById(`check_${inst}`).addEventListener("change", (c) => {
+            document.getElementById(`check_${inst}`).addEventListener("click", (c) => {
                 if (c.target.checked) {
-                    console.log(`happy checkbox instrument: ${inst}. CHECKED`);
-                    // checkOnChange();
-                    // App.plainStartInstruments({
-                    //     instruments: [inst],
-                    //     random: null,
-                    // });
-                } else {
-                    console.log(`happy checkbox instrument: ${inst}. UN-CHECKED`);
-                    // App.stopInstruments([inst]);
+                    console.log(`check checkbox: ${inst}. Start instrument. `);
+                    // console.log(`Window: this is the window: ${window.welle.name}`);
+                    window.welle.app.plainStartInstruments({
+                        instruments: [inst],
+                        random: null,
+                    });
+                }
+                if (!c.target.checked) {
+                    console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
+                    window.welle.app.stopInstruments([inst]);
                 }
             });
         });
