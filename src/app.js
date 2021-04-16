@@ -80,7 +80,6 @@ class WelleApp {
             Tone:
             bpm: ${this.#bpm}
 
-            consoleArray: ${JSON.stringify(this.#consoleArray)}
         `);
     }
 
@@ -265,12 +264,11 @@ class WelleApp {
         for (let preset in presets) {
             const name = preset;
             const fullPreset = { name: name, preset: presets[preset] };
-            if (this.debug)
-                console.log(`
-            incoming preset name:  ${name}
-            preset: ${JSON.stringify(fullPreset)}
-
-            `);
+            // if (this.debug)
+            //     console.log(`
+            // incoming preset name:  ${name}
+            // preset: ${JSON.stringify(fullPreset)}
+            // `);
             this.#ListOfInstruments[name] = fullPreset;
             this.#listOfAllInstruments[name] = fullPreset;
         }
@@ -300,7 +298,7 @@ class WelleApp {
     printAlerts() {
         if (this.debug) {
             Object.keys(this.#alerts).forEach((alert) => {
-                console.log(`App stored alerts: ${alert}`);
+                // console.log(`App stored alerts: ${alert}`);
             });
             // let allAlertNames = [];
             // for (let i in this.#alerts) allAlertNames.push(this.#alerts[i].name);
@@ -381,7 +379,7 @@ class WelleApp {
 
     setBpm(message) {
         const bpm = Math.min(240, Math.max(1, message.bpm));
-        if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
+        // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
         this.#bpm = bpm;
         // if Transport running
         if (Tone.Transport.state == "started") {
@@ -412,11 +410,11 @@ class WelleApp {
         if (checks.existingInstruments) {
             checks.existingInstruments.map((instrument) => {
                 this.#instruments[instrument].stop();
-                console.log(
-                    `show stopped instruments: ${instrument}, isPlaying: ${
-                        this.#instruments[instrument].isPlaying
-                    }`
-                );
+                // console.log(
+                //     `show stopped instruments: ${instrument}, isPlaying: ${
+                //         this.#instruments[instrument].isPlaying
+                //     }`
+                // );
             });
         }
         // stop Tone if nothing is playing anymore
@@ -495,7 +493,7 @@ class WelleApp {
     // ============================================
 
     assignPattern(message) {
-        if (this.debug) console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        // if (this.debug) console.log(`assignPattern. message: ${JSON.stringify(message)}`);
         // checks for instruments
         const checks = this.checkInstruments(message.instruments);
         // if there are new instruments, create them
@@ -517,14 +515,14 @@ class WelleApp {
     // ============================================
 
     plainStartInstruments(message) {
-        if (this.debug) console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
+        // if (this.debug) console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
 
         let isPart = false;
         const partName = message.instruments[0];
         // check for parts if only one instrument
         if (message.instruments.length == 1) {
             if (this.#parts[partName]) {
-                console.log(`part ${partName} detected`);
+                // console.log(`part ${partName} detected`);
                 isPart = true;
             }
         }
@@ -571,23 +569,23 @@ class WelleApp {
 
             // CHECK & RESTART
             for (let instrument in this.#parts[name].instrumentCollection) {
-                console.log(`check & restart process for instrument ${instrument}`);
+                // console.log(`check & restart process for instrument ${instrument}`);
                 const pattern = this.#parts[name].instrumentCollection[instrument].pattern;
                 const rawPattern = this.#parts[name].instrumentCollection[instrument].rawPattern;
                 const volume = this.#parts[name].instrumentCollection[instrument].volume;
                 const random = this.#parts[name].instrumentCollection[instrument].random;
 
-                console.log(`
-                        Part ${name} restart instrument ${instrument} 
-                        with: 
-                        pattern ${pattern}
-                        rawPattern ${rawPattern}
-                        volume: ${volume}
-                        random: ${random}
-                        `);
+                // console.log(`
+                //         Part ${name} restart instrument ${instrument}
+                //         with:
+                //         pattern ${pattern}
+                //         rawPattern ${rawPattern}
+                //         volume: ${volume}
+                //         random: ${random}
+                //         `);
                 // check if saved part instrument exists in instruments
                 if (this.#instruments[instrument]) {
-                    console.log(`instrument ${instrument} exists in 'instruments'`);
+                    // console.log(`instrument ${instrument} exists in 'instruments'`);
                     // restart instrument, if it was playing in part
                     if (this.#parts[name].instrumentCollection[instrument].isPlaying) {
                         // prepare instrument:
@@ -599,7 +597,7 @@ class WelleApp {
                 } else {
                     // if saved instrument is not activated (e.g. deleted or not initialized)
                     // then restart?
-                    console.log(`play part ${name}: instrument ${instrument} is gone. create new!`);
+                    // console.log(`play part ${name}: instrument ${instrument} is gone. create new!`);
                     this.createNewInstrument({
                         name: instrument,
                         pattern: pattern,
@@ -625,10 +623,10 @@ class WelleApp {
     }
 
     savePart(name) {
-        console.log(`save new part : ${name}`);
+        // console.log(`save new part : ${name}`);
         // check if name is reserved as instrument
         if (this.#listOfAllInstruments[name]) {
-            if (this.debug) console.log(`part name ${name} is reserved as instrument`);
+            // if (this.debug) console.log(`part name ${name} is reserved as instrument`);
             this.addToConsole({
                 valid: false,
                 string: name,
@@ -675,27 +673,27 @@ class WelleApp {
             // collect new instruments
             const newInstruments = this.checkNewInstruments(validInstruments);
             if (newInstruments) returnMessage.newInstruments = newInstruments;
-            if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
+            // if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
         }
-        if (this.debug)
-            console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
+        // if (this.debug)
+        //     console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
         return returnMessage;
     }
 
     checkValidInstruments(instruments) {
         // check if internal instrument list contains the instruments
         const validInstruments = instruments.map((inst) => {
-            if (this.debug)
-                console.log(
-                    `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
-                );
+            // if (this.debug)
+            //     console.log(
+            //         `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
+            //     );
             if (this.#listOfAllInstruments[inst]) return inst;
             else this.addToConsole({ valid: false, string: inst, comment: "no such instrument" });
         });
-        if (this.debug)
-            console.log(
-                `vaild instruments: ${validInstruments}. Count: ${validInstruments.length}`
-            );
+        // if (this.debug)
+        //     console.log(
+        //         `vaild instruments: ${validInstruments}. Count: ${validInstruments.length}`
+        //     );
         // filter null entries
         const result = validInstruments.filter((x) => x);
         if (result.length > 0) return result;
@@ -750,16 +748,16 @@ class WelleApp {
 
     delete(names) {
         console.log(`delete this: ${names}`);
-        names.map((toDelete) => {
-            if (this.#parts[toDelete]) {
-                delete this.#parts[toDelete];
-                console.log(`delete this part: ${toDelete}`);
+        names.map((name) => {
+            if (this.#parts[name]) {
+                delete this.#parts[name];
+                // console.log(`delete this part: ${name}`);
             }
-            if (this.#instruments[toDelete]) {
-                console.log(`delete this instrument: ${toDelete}`);
-                this.#instruments[toDelete].clear();
-                delete this.#instruments[toDelete];
-                window.document.getElementById(`inst_${toDelete}`).remove();
+            if (this.#instruments[name]) {
+                // console.log(`delete this instrument: ${name}`);
+                this.#instruments[name].clear();
+                delete this.#instruments[name];
+                window.document.getElementById(`inst_${name}`).remove();
             }
         });
         this.renderContent();
@@ -769,13 +767,14 @@ class WelleApp {
         console.log(`App delete all..`);
         // clear & delete every instrument
         for (let instrument in this.#instruments) {
-            console.log(`delete this instrument: ${instrument}`);
+            // console.log(`delete this instrument: ${instrument}`);
             this.#instruments[instrument].clear();
             delete this.#instruments[instrument];
+            window.document.getElementById(`inst_${instrument}`).remove();
         }
         // delete all parts
         for (let part in this.#parts) {
-            console.log(`delete this part: ${part}`);
+            // console.log(`delete this part: ${part}`);
             delete this.#parts[part];
         }
         // stop Tone
@@ -814,7 +813,7 @@ class WelleApp {
         const quant = Tone.Time(now).quantize(factor);
         let playTime = quant;
         let timeDifference = 0;
-        if (this.debug) console.log(`Tone.now(): ${now}. quant: ${quant}`);
+        // if (this.debug) console.log(`Tone.now(): ${now}. quant: ${quant}`);
         // if transport starts, set quant to 0
         if (quant < now) {
             playTime = now + factorOffset;
@@ -896,7 +895,7 @@ class WelleApp {
         // first create html, then event listener
         Object.keys(this.#parts).forEach((part) => {
             document.getElementById(part).addEventListener("click", () => {
-                console.log(`happy button part: ${part}`);
+                // console.log(`happy button part: ${part}`);
                 window.welle.app.startPart(part);
             });
         });
@@ -959,11 +958,11 @@ class WelleApp {
         // first create html, then event listener
         Object.keys(this.#instruments).forEach((inst) => {
             if (!this.#instruments[inst].rendered) {
-                console.log(`assign event listener to checkbox for ${inst}`);
+                // console.log(`assign event listener to checkbox for ${inst}`);
                 // add checkbox update
                 window.document.getElementById(`check_${inst}`).addEventListener("click", (c) => {
                     if (c.target.checked) {
-                        console.log(`check checkbox: ${inst}. Start instrument. `);
+                        // console.log(`check checkbox: ${inst}. Start instrument. `);
                         // console.log(`Window: this is the window: ${window.welle.name}`);
                         window.welle.app.plainStartInstruments({
                             instruments: [inst],
@@ -971,7 +970,7 @@ class WelleApp {
                         });
                     }
                     if (!c.target.checked) {
-                        console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
+                        // console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
                         window.welle.app.stopInstruments([inst]);
                     }
                 });

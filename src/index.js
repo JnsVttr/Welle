@@ -26,9 +26,9 @@ const debug = true;
 // IMPORTANT: teleport functions to document scope by creating
 // window object and storing functions/classes there
 window.welle = { name: "welle", app: App };
-console.log(`
-Window: this is the document window's name: ${window.welle.name}.
-And this is the App: ${JSON.stringify(window.welle.app)}`);
+// console.log(`
+// Window: this is the document window's name: ${window.welle.name}.
+// And this is the App: ${JSON.stringify(window.welle.app)}`);
 
 // ============================================
 // INPUT - manage text input & key interactions

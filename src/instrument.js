@@ -61,9 +61,9 @@ class Instrument {
         // this.#synthType = Instrument.typeDefault;
         // create tone elements: synth -> gain -> masterOut
         // the synth creates the sound
-        console.log(`new Instrument with message: 
-        ${JSON.stringify(message)}
-        `);
+        // console.log(`new Instrument with message:
+        // ${JSON.stringify(message)}
+        // `);
 
         this.name = message.name;
         this.#rand = message.random || 0;
@@ -102,9 +102,9 @@ class Instrument {
         if (message.type == "sampler") {
             this.#buffer = Instrument.buffers[this.name];
             this.#createSampler();
-            this.printInfo();
+            // this.printInfo();
         }
-        this.printInfo();
+        // this.printInfo();
     }
 
     printInfo() {
