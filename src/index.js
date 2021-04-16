@@ -72,7 +72,7 @@ Socket.on("connect", function (data) {
 
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (files) => {
-    for (let file in files) App.addSamples({ name: file, file: files[file] });
+    App.addSamples(files);
     // App.printAllInstruments();
 });
 
@@ -83,7 +83,7 @@ Socket.on("tonePresets", (presets) => {
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
-Socket.on("alerts", (alertFiles) => {
-    for (let i in alertFiles) App.addAlert(alertFiles[i]);
+Socket.on("alerts", (files) => {
+    App.addAlerts(files);
     App.printAlerts();
 });

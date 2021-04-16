@@ -16,6 +16,7 @@ class Instrument {
     static gainDefault = 0.6;
     static patternDefault = [0]; // default = one hit
     static masterGain = new Tone.Gain(0.8); // master output for Tone -> Speaker
+    static buffers = {}; // place for ToneBuffers
 
     // CONSTRUCTOR - executed with every new instance
     // ================================================
@@ -73,10 +74,9 @@ class Instrument {
         if (message.type == "preset") this.#createPreset();
         // start sampler, on Buffer callback
         if (message.type == "sampler") {
-            this._buffer = new Tone.ToneAudioBuffer(this._sampleUrl, () => {
-                this.#createSampler();
-                this.printInfo();
-            });
+            this._buffer = Instrument.buffers[this._name];
+            this.#createSampler();
+            this.printInfo();
         }
         this.printInfo();
     }

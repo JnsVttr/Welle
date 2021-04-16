@@ -243,10 +243,20 @@ class WelleApp {
     // ============================================
     // general
     // ============================================
-    addSamples(sample) {
-        this.#listOfSamples[sample.name] = sample;
-        this.#listOfAllInstruments[sample.name] = sample;
+    addSamples(files) {
+        files.map((file) => {
+            const name = file.split(".")[0];
+            const path = `/audio/${file}`;
+            const content = { name: name, file: file, path: path };
+            // console.log(`App incoming sample file: ${file}, name: ${name}, path: ${path}`);
+            this.#listOfSamples[name] = content;
+            Instrument.buffers[name] = new Tone.ToneAudioBuffer(path, () => {
+                // console.log(`new Tone Buffer for ${name} loaded..`);
+            });
+            this.#listOfAllInstruments[name] = content;
+        });
     }
+
     addInstrument(preset) {
         this.#ListOfInstruments[preset.name] = preset;
         this.#listOfAllInstruments[preset.name] = preset;
@@ -258,6 +268,33 @@ class WelleApp {
                 console.log(`: ${this.#listOfAllInstruments[i].name}`);
             // console.log(`Details: ${JSON.stringify(this.#listOfAllInstruments, null, 0)}`);
         }
+    }
+    // ============================================
+    // hande Alerts
+    // ============================================
+    addAlerts(files) {
+        files.map((file) => {
+            const name = file.split(".")[0];
+            const path = `/alerts/${file}`;
+            const content = { name: name, file: file, path: path };
+            // console.log(`App incoming sample file: ${file}, name: ${name}, path: ${path}`);
+            this.#alerts[name] = content;
+            this.#alerts[name].player = new Tone.Player(this.#alerts[name].path).toDestination();
+            this.#alerts[name].player.autostart = false;
+        });
+    }
+    printAlerts() {
+        if (this.debug) {
+            Object.keys(this.#alerts).forEach((alert) => {
+                console.log(`App stored alerts: ${alert}`);
+            });
+            // let allAlertNames = [];
+            // for (let i in this.#alerts) allAlertNames.push(this.#alerts[i].name);
+            // console.log(`App stored alerts: ${allAlertNames}`);
+        }
+    }
+    playAlert(alertName) {
+        if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
     }
 
     //
@@ -305,31 +342,6 @@ class WelleApp {
     //
     //
     //
-
-    // ============================================
-    // hande Alerts
-    // ============================================
-    addAlert(alertContent) {
-        const alertName = alertContent.name;
-        this.#alerts[alertName] = {};
-        this.#alerts[alertName].name = alertName;
-        this.#alerts[alertName].file = alertContent.file;
-        this.#alerts[alertName].path = alertContent.path;
-        this.#alerts[alertName].player = new Tone.Player(
-            this.#alerts[alertName].path
-        ).toDestination();
-        this.#alerts[alertName].player.autostart = false;
-    }
-    printAlerts() {
-        if (this.debug) {
-            let allAlertNames = [];
-            for (let i in this.#alerts) allAlertNames.push(this.#alerts[i].name);
-            console.log(`App stored alerts: ${allAlertNames}`);
-        }
-    }
-    playAlert(alertName) {
-        if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
-    }
 
     //
     //

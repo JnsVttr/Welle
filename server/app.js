@@ -10,15 +10,10 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 
-// files
-// ===================
-import { printer } from "./printer.js";
-import { readFiles, readAlerts } from "./files.js";
-
 // app + server + sockets
 // ===========================
 // create app - will be the app that points to client dir
-let app = express();
+const app = express();
 const port = process.env.PORT || 3000;
 // create a server with the app
 const httpServer = createServer(app);
@@ -27,7 +22,7 @@ const io = new Server(httpServer);
 // local resources
 // ===================
 const pageSource = "../client/";
-const audioSource = "../data/audio";
+const audioSource = "../data/samples";
 const alertSource = "../data/alerts";
 const historySource = "../data/history";
 const presetsSource = "../data/presets";
@@ -44,11 +39,11 @@ const alertsPath = path.join(__dirname, alertSource);
 const tonePresetsPath = path.join(__dirname, tonePresets);
 const historyURL = path.join(__dirname, historySource);
 const presetsURL = path.join(__dirname, presetsSource);
-let restartServerScript = ". /home/tangible/bin/restart_app.sh ";
+const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
 
 // variables
 // ===================
-let debug = true;
+const debug = true;
 let baseUrl = "";
 // check, if server is local or on tangible.uber.space
 if (path.join(__dirname) != "/var/www/virtual/tangible/html/server")
@@ -66,12 +61,6 @@ app.get("/", function (req, res) {
     res.sendFile("index.html");
 });
 
-// Samples & Folders - handle audio files
-// =========================================
-let audioFiles = {};
-let alerts = {};
-// audioFiles = readFiles(audioPath, baseUrl, audioPathRel);
-
 //
 //
 //
@@ -86,32 +75,30 @@ io.on("connection", (socket) => {
 
     // HELLO MESSAGE
     socket.on("message", (string) => {
-        printer(debug, "socket.on", "message", string);
+        if (debug) console.log(`socket on message: ${string}`);
     });
 
     // TONE PRESETS
     socket.on("requestTonePresets", () => {
-        printer(debug, "requestTonePresets", "client requests", "tone presets JSON");
+        if (debug) console.log(`requestTonePresets for Client`);
         tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
         io.sockets.emit("tonePresets", tonePresetsJSON);
     });
 
     // AUDIO FILES
     socket.on("requestSampleFiles", () => {
-        printer(debug, "requestSampleFiles", `client requests`, "sample files");
+        if (debug) console.log(`requestSampleFiles for Client`);
         // read & print files 'samples'
-        audioFiles = readFiles(audioPath, baseUrl, audioPathRel);
-        io.sockets.emit("audioFiles", audioFiles);
+        const samples = getSamples({ path: audioPath });
+        io.sockets.emit("audioFiles", samples);
     });
 
     // ALERTS FILES
     socket.on("requestAlerts", () => {
-        printer(debug, "requestAlerts", `client requests: `, "alerts");
+        if (debug) console.log(`requestAlerts for Client`);
         // read & print files 'samples'
-        alerts = readAlerts(alertsPath, baseUrl, "alerts");
-        for (let entry in alerts) console.log("  ->  ", entry);
-        // console.log("alerts: ", alerts);
-        io.sockets.emit("alerts", alerts);
+        const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
+        io.sockets.emit("alerts", samples);
     });
 });
 
@@ -122,3 +109,20 @@ httpServer.listen(port, hostname, () => {
     console.log(`Serving running at http://${hostname}:${port}`);
     console.log("");
 });
+
+// functions
+
+// Samples - get files from folders, save URL according to baseUrl
+const getSamples = (message) => {
+    // read sample entries
+    const entries = fs.readdirSync(message.path, (err) => {
+        if (err) return console.log("Unable to scan directory: " + err);
+    });
+
+    const samples = entries.filter((entry) => {
+        if (!entry.startsWith(".")) return entry;
+    });
+    console.log(`getSamples(): `, samples);
+
+    return samples;
+};
