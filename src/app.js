@@ -380,33 +380,6 @@ class WelleApp {
     // Tone - plainStartInstruments
     // ============================================
 
-    savePart(name) {
-        // check if name is reserved as instrument
-        if (this.#listOfAllInstruments[name]) {
-            if (this.debug) console.log(`part name ${name} is reserved as instrument`);
-            this.addToConsole({
-                valid: false,
-                string: name,
-                comment: "name reserved as instrument",
-            });
-        } else {
-            // init new part
-            this.#parts[name] = {
-                instrumentCollection: {},
-                bpm: this.#bpm,
-            };
-            // store instruments and their playState in the part
-            Object.keys(this.#instruments).forEach((instrument) => {
-                this.#parts[name].instrumentCollection[instrument] = {
-                    isPlaying: this.#instruments[instrument].isPlaying,
-                    instrument: this.#instruments[instrument],
-                };
-            });
-            console.log(`part ${name} saved in parts`, this.#parts[name]);
-        }
-        this.renderContent();
-    }
-
     setBpm(message) {
         const bpm = Math.min(240, Math.max(1, message.bpm));
         if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
@@ -599,16 +572,44 @@ class WelleApp {
 
             // CHECK & RESTART
             for (let instrument in this.#parts[name].instrumentCollection) {
-                // console.log(`check & restart process for instrument ${instrument}`);
+                console.log(`check & restart process for instrument ${instrument}`);
+                const pattern = this.#parts[name].instrumentCollection[instrument].pattern;
+                const rawPattern = this.#parts[name].instrumentCollection[instrument].rawPattern;
+                const volume = this.#parts[name].instrumentCollection[instrument].volume;
+                const random = this.#parts[name].instrumentCollection[instrument].random;
+                console.log(`
+                        Part ${name} restart instrument ${instrument} 
+                        with: 
+                        pattern ${pattern}
+                        rawPattern ${rawPattern}
+                        volume: ${volume}
+                        random: ${random}
+                        `);
                 // check if saved part instrument exists in instruments
                 if (this.#instruments[instrument]) {
-                    // console.log(`instrument ${instrument} exists in 'instruments'`);
-                    // restart instrument, if it is playing in part
+                    console.log(`instrument ${instrument} exists in 'instruments'`);
+                    // restart instrument, if it was playing in part
                     if (this.#parts[name].instrumentCollection[instrument].isPlaying) {
+                        // prepare instrument:
+                        this.#instruments[instrument].random = random;
+                        this.#instruments[instrument].setPattern(pattern, rawPattern);
+                        this.#instruments[instrument].setVolume(volume);
                         this.#instruments[instrument].restart();
                     }
                 } else {
-                    console.log(`play part ${name}: instrument ${instrument} is gone.`);
+                    // if saved instrument is not activated (e.g. deleted or not initialized)
+                    // then restart?
+                    console.log(`play part ${name}: instrument ${instrument} is gone. create new!`);
+                    this.createNewInstrument({
+                        name: instrument,
+                        pattern: pattern,
+                        rawPattern: rawPattern,
+                        random: random,
+                        volume: volume,
+                        type: "sampler",
+                        sample: this.#listOfSamples[instrument],
+                        preset: this.#ListOfInstruments["sampler"].preset,
+                    });
                 }
             }
 
@@ -621,6 +622,37 @@ class WelleApp {
 
         // BPM change
         this.setBpm({ bpm: this.#parts[name].bpm });
+    }
+
+    savePart(name) {
+        console.log(`save new part : ${name}`);
+        // check if name is reserved as instrument
+        if (this.#listOfAllInstruments[name]) {
+            if (this.debug) console.log(`part name ${name} is reserved as instrument`);
+            this.addToConsole({
+                valid: false,
+                string: name,
+                comment: "name reserved as instrument",
+            });
+        } else {
+            // init new part
+            this.#parts[name] = {
+                instrumentCollection: {},
+                bpm: this.#bpm,
+            };
+            // store instruments and their playState in the part
+            Object.keys(this.#instruments).forEach((instrument) => {
+                this.#parts[name].instrumentCollection[instrument] = {
+                    isPlaying: this.#instruments[instrument].isPlaying,
+                    pattern: this.#instruments[instrument].getPattern(),
+                    rawPattern: this.#instruments[instrument].getRawPattern(),
+                    volume: this.#instruments[instrument].getVolume(),
+                    random: this.#instruments[instrument].random,
+                };
+            });
+            console.log(`part ${name} saved in parts`, this.#parts[name]);
+        }
+        this.renderContent();
     }
 
     // ============================================
@@ -802,11 +834,11 @@ class WelleApp {
         // safety: if below 0 than playTime is zero
         if (playTime < 0) playTime = 0;
         if (timeDifference < 0) timeDifference = 0;
-        console.log(`
-    quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} - 
-    play at: ${playTime}
-    timeDifference playTime - now() : ${timeDifference}
-    `);
+        //     console.log(`
+        // quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} -
+        // play at: ${playTime}
+        // timeDifference playTime - now() : ${timeDifference}
+        // `);
         // return quant playTime
         return timeDifference;
     };
@@ -835,9 +867,9 @@ class WelleApp {
     }
     renderInstrumentsOverview() {
         let html = ``;
-        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
+        Object.keys(this.#listOfSamples).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
-            html += `${this.#listOfAllInstruments[inst].name} `;
+            html += `${this.#listOfSamples[inst].name} `;
         });
         // replace html content
         document.getElementById(this.#instListDiv).innerHTML = "";

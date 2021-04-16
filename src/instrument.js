@@ -123,26 +123,10 @@ class Instrument {
     clear() {
         if (this._isPlaying) this._sequence.stop();
         this._sequence.clear();
+        // this._rawPattern = [];
+        // this.midiPattern = [];
         this._isPlaying = false;
         this._ticks = 0;
-    }
-
-    setPattern(pattern, rawPattern) {
-        this._rawPattern = rawPattern || "";
-        this.pattern = pattern;
-        this.midiPattern = this.#translatePatternToMidi(this.pattern);
-        if (this._isPlaying) this._sequence.stop();
-        this._ticks = 0;
-        this.#initSequence();
-        this.start();
-        this._isPlaying = true;
-    }
-
-    setVolume(volume) {
-        if (volume > 1) volume = 1;
-        this._volume = volume;
-        this._gain.gain.rampTo(this._volume, 0.1);
-        // console.log(`this._gain.gain: ${this._gain}, this._volume: ${this._volume}`);
     }
 
     // GETTER & SETTER - only one value each
@@ -165,11 +149,33 @@ class Instrument {
     set random(random) {
         this._rand = random;
     }
+
+    getVolume() {
+        return this._volume;
+    }
+
     getPattern() {
         return this.pattern;
     }
     getRawPattern() {
         return this._rawPattern;
+    }
+    setPattern(pattern, rawPattern) {
+        this._rawPattern = rawPattern || "";
+        this.pattern = pattern;
+        this.midiPattern = this.#translatePatternToMidi(this.pattern);
+        if (this._isPlaying) this._sequence.stop();
+        this._ticks = 0;
+        this.#initSequence();
+        this.start();
+        this._isPlaying = true;
+    }
+
+    setVolume(volume) {
+        if (volume > 1) volume = 1;
+        this._volume = volume;
+        this._gain.gain.rampTo(this._volume, 0.1);
+        // console.log(`this._gain.gain: ${this._gain}, this._volume: ${this._volume}`);
     }
     name() {
         return this._name;

@@ -34,7 +34,7 @@ And this is the App: ${JSON.stringify(window.welle.app)}`);
 // INPUT - manage text input & key interactions
 // ============================================
 
-// focus on main input field:
+// focus on main input field: - maybe not to explore the whole site before..
 document.getElementById("mainInput").focus();
 
 // start Tone.js on keydown
