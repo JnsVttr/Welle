@@ -20,7 +20,7 @@ import { WelleApp } from "/app";
 // ===================================
 export const App = new WelleApp();
 export const Socket = io.connect(); // socket var - server connect, also for exports
-
+const debug = true;
 //
 
 // ============================================
@@ -73,13 +73,13 @@ Socket.on("connect", function (data) {
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (files) => {
     App.addSamples(files);
-    // App.printAllInstruments();
 });
 
 // SOCKET receive tonePresets
 Socket.on("tonePresets", (presets) => {
-    for (let preset in presets) App.addInstrument({ name: preset, preset: presets[preset] });
+    App.addInstruments(presets);
     App.printAllInstruments();
+    App.renderInstrumentsOverview();
 });
 
 // SOCKET receive alerts - createAlerts(alerts);

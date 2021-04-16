@@ -33,6 +33,7 @@ class WelleApp {
     #instDiv = "instruments";
     #partDiv = "parts";
     #bpmDiv = "input_bpm";
+    #instListDiv = "listOfInstruments";
 
     //
     //
@@ -257,9 +258,19 @@ class WelleApp {
         });
     }
 
-    addInstrument(preset) {
-        this.#ListOfInstruments[preset.name] = preset;
-        this.#listOfAllInstruments[preset.name] = preset;
+    addInstruments(presets) {
+        for (let preset in presets) {
+            const name = preset;
+            const fullPreset = { name: name, preset: presets[preset] };
+            if (this.debug)
+                console.log(`
+            incoming preset name:  ${name}
+            preset: ${JSON.stringify(fullPreset)}
+
+            `);
+            this.#ListOfInstruments[name] = fullPreset;
+            this.#listOfAllInstruments[name] = fullPreset;
+        }
     }
     printAllInstruments() {
         if (this.debug) {
@@ -808,41 +819,19 @@ class WelleApp {
         setTimeout(() => {
             this.renderInstruments();
             this.renderParts();
+            this.renderInstrumentsOverview();
             document.getElementById(this.#bpmDiv).value = Math.floor(this.#bpm);
         }, 100);
     }
-    renderInstruments() {
-        let html = "";
-        // iterate through instruments collection
-        Object.keys(this.#instruments).forEach((inst) => {
-            const name = this.#instruments[inst].name();
-            let volume = this.#instruments[inst].volume();
-            const pattern = this.#instruments[inst].rawPattern();
-            const length = pattern.length + 10;
-            const isPlaying = this.#instruments[inst].isPlaying;
-
-            // round volume
-            volume = Math.round(volume * 10) / 10;
-
-            // create HTML elements for appending
-            html += "<p>";
-            if (isPlaying) {
-                html += `<input id="check_${name}" class="w3-check" type="checkbox" checked="true"><label> <b>${name}</b> </label>`;
-            } else {
-                html += `<input id="check_${name}" class="w3-check" type="checkbox"><label> <b>${name}</b> </label>`;
-            }
-
-            html += `
-		vol: 
-		<input id="vol_${name}" type="text" style="max-width: 3rem"  size="10" autocomplete=off value="${volume}">
-		pattern: 
-		<input id="pattern_${name}" type="text"  style="max-width: 55rem" size="${length}" autocomplete=off value="${pattern}">
-		   
-		</p>`;
+    renderInstrumentsOverview() {
+        let html = `List of Instruments: &nbsp;&nbsp;`;
+        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
+            // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
+            html += `${this.#listOfAllInstruments[inst].name} - `;
         });
         // replace html content
-        document.getElementById(this.#instDiv).innerHTML = "";
-        document.getElementById(this.#instDiv).innerHTML += html;
+        document.getElementById(this.#instListDiv).innerHTML = "";
+        document.getElementById(this.#instListDiv).innerHTML += html;
     }
 
     renderParts() {
@@ -850,12 +839,95 @@ class WelleApp {
         // iterate through parts collection
         Object.keys(this.#parts).forEach((part) => {
             html += `
-		<input type="button" class="w3-button w3-round-large w3-border w3-black w3-medium" value="${part}"></input>   
-		`;
+		    <input 
+                type = "button" 
+                class = "w3-button w3-round-large w3-border w3-black w3-small" 
+                value = "${part}">
+                id = "${part}">
+            </input> `;
         });
 
         document.getElementById(this.#partDiv).innerHTML = "";
         document.getElementById(this.#partDiv).innerHTML += html;
+
+        // first create html, then event listener
+        Object.keys(this.#parts).forEach((part) => {
+            document.getElementById(part).addEventListener("click", () => {
+                console.log(`happy button part: ${part}`);
+            });
+        });
+    }
+
+    renderInstruments() {
+        let html = ``;
+        // iterate through instruments collection
+        Object.keys(this.#instruments).forEach((inst) => {
+            const name = this.#instruments[inst].name();
+            let volume = this.#instruments[inst].volume();
+            const pattern = this.#instruments[inst].rawPattern();
+            const isPlaying = this.#instruments[inst].isPlaying;
+
+            // round volume
+            volume = Math.round(volume * 10) / 10;
+
+            // create HTML elements for appending
+            html += `<div class="w3-row">`;
+            if (isPlaying) {
+                html += `
+                <div class="w3-col" style="width:120px">
+                    <input 
+                    id="check_${name}" 
+                    class="w3-check" 
+                    type="checkbox" 
+                    checked="true">
+                    <label> <b>${name}</b> </label>
+                </div>`;
+            } else {
+                html += `
+                <div class="w3-col" style="width:120px">
+                    <input 
+                    id="check_${name}" 
+                    class="w3-check" 
+                    type="checkbox" 
+                    checked="false">
+                    <label> <b>${name}</b> </label>
+                </div>`;
+            }
+
+            html += `
+            <div class="w3-col" style="width:80px">
+                vol: ${volume}
+            </div>
+            <div class="w3-half">
+                pattern: ${pattern}
+            </div>
+
+		</div>`;
+        });
+        html += `</div>`;
+
+        // replace html content
+        document.getElementById(this.#instDiv).innerHTML = "";
+        document.getElementById(this.#instDiv).innerHTML += html;
+
+        // first create html, then event listener
+        Object.keys(this.#instruments).forEach((inst) => {
+            const name = this.#instruments[inst].name();
+            const isPlaying = this.#instruments[inst].isPlaying;
+            document.getElementById(`check_${inst}`).addEventListener("change", (c) => {
+                if (c.target.checked) {
+                    console.log(`happy checkbox instrument: ${inst}. CHECKED`);
+                    // checkOnChange();
+                    // App.plainStartInstruments({
+                    //     instruments: [inst],
+                    //     random: null,
+                    // });
+                } else {
+                    console.log(`happy checkbox instrument: ${inst}. UN-CHECKED`);
+                    // App.stopInstruments([inst]);
+                }
+            });
+        });
     }
 }
 
