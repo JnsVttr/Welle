@@ -65,13 +65,6 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // }
 });
 
-// const checkCheckboxes = (message) => {
-//     const allCheckboxes = document.getElementsByTagName("input");
-//     allCheckboxes.map((checks) => {
-//         console.log(`all checkboxes: ${checks}`);
-//     });
-// };
-
 //
 
 // ============================================
