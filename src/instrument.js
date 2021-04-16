@@ -11,12 +11,25 @@ class Instrument {
     // from inside the class. in 'static' scope as this.property, else as ClassName.property
     static baseNoteDefault = 16; // midi notes from lowest 0 upwards
     static transposeDefault = 2; // default transpose
-    static samplePathDefault = "../data/defaultSample"; // default sample path, needs review
     static typeDefault = "MembraneSynth"; // default synth type = Sampler
     static gainDefault = 0.6;
     static patternDefault = [0]; // default = one hit
     static masterGain = new Tone.Gain(0.8); // master output for Tone -> Speaker
     static buffers = {}; // place for ToneBuffers
+    static presetSampler = {
+        synthType: "Sampler",
+        gain: 1,
+        volume: 0.6,
+        baseNote: 48,
+        transpose: 0,
+        triggerFunction: {
+            arguments: "_synth, _note, _time",
+            body: "_synth.triggerAttack(_note, '@16n')",
+        },
+        settings: {
+            C3: "./audio/hit/hit.mp3",
+        },
+    };
 
     // CONSTRUCTOR - executed with every new instance
     // ================================================
@@ -43,7 +56,7 @@ class Instrument {
         // check if new name = a sample folder
         if (message.type == "sampler") {
             // apply settings for sampler to instrument
-            this._preset = message.preset;
+            this._preset = Instrument.presetSampler;
             // console.log(`sample URL: ${message.sample.file[0][1]}`);
             this._sampleUrl = message.sample.file[0][1];
         }

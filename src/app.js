@@ -19,7 +19,6 @@ class WelleApp {
     #bpm = 120;
     // console
     #consoleInput = "";
-
     #consolePointer = 0;
     #consoleMaxLength = 14;
     #consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
@@ -577,6 +576,7 @@ class WelleApp {
                 const rawPattern = this.#parts[name].instrumentCollection[instrument].rawPattern;
                 const volume = this.#parts[name].instrumentCollection[instrument].volume;
                 const random = this.#parts[name].instrumentCollection[instrument].random;
+
                 console.log(`
                         Part ${name} restart instrument ${instrument} 
                         with: 
@@ -726,7 +726,6 @@ class WelleApp {
         if (this.#listOfSamples[message.name]) {
             message.type = "sampler";
             message.sample = this.#listOfSamples[message.name];
-            message.preset = this.#ListOfInstruments["sampler"].preset;
         }
         if (this.#ListOfInstruments[message.name]) {
             message.type = "preset";
@@ -867,9 +866,9 @@ class WelleApp {
     }
     renderInstrumentsOverview() {
         let html = ``;
-        Object.keys(this.#listOfSamples).forEach((inst) => {
+        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
-            html += `${this.#listOfSamples[inst].name} `;
+            html += `${this.#listOfAllInstruments[inst].name} `;
         });
         // replace html content
         document.getElementById(this.#instListDiv).innerHTML = "";
