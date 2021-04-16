@@ -912,25 +912,25 @@ class WelleApp {
 
             if (!this.#instruments[inst].rendered) {
                 // round volume
-                const volume = Math.round(this.#instruments[inst].volume() * 10) / 10;
+                const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
 
                 // create HTML elements for appending
                 this.#instruments[inst].html = `
                 <div id="inst_${inst}" class="w3-row">
                     <div class="w3-col" style="width:120px">
                         <input 
-                        id="check_${this.#instruments[inst].name()}" 
+                        id="check_${this.#instruments[inst].name}" 
                         class="w3-check" 
                         type="checkbox" 
                         title = "check: ${inst}"
                         checked="true">
-                        <label> <b>${this.#instruments[inst].name()}</b> </label>
+                        <label> <b>${this.#instruments[inst].name}</b> </label>
                     </div>
                     <div id="vol_${inst}" class="w3-col" style="width:80px">
                         vol: ${volume}
                     </div>
                     <div id="pattern_${inst}" class="w3-half">
-                        pattern: ${this.#instruments[inst].rawPattern()}
+                        pattern: ${this.#instruments[inst].getRawPattern()}
                     </div>
                 </div>`;
                 html += this.#instruments[inst].html;
@@ -947,12 +947,12 @@ class WelleApp {
                 window.document.getElementById(`check_${inst}`).checked = true;
             else window.document.getElementById(`check_${inst}`).checked = false;
             // update volume . round volume
-            const volume = Math.round(this.#instruments[inst].volume() * 10) / 10;
+            const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
             window.document.getElementById(`vol_${inst}`).innerHTML = `vol: ${volume}`;
             // update pattern
             window.document.getElementById(
                 `pattern_${inst}`
-            ).innerHTML = `pattern: ${this.#instruments[inst].rawPattern()}`;
+            ).innerHTML = `pattern: ${this.#instruments[inst].getRawPattern()}`;
         });
         //
 
