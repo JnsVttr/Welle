@@ -436,7 +436,7 @@ class WelleApp {
             const player = new Tone.Player().toDestination();
             // play one of the samples when they all load
             player.buffer = Instrument.buffers[inst].get("C3");
-            player.volume.value = -15;
+            player.volume.value = -12;
             player.start();
         }
         if (this.#ListOfInstruments[inst]) {
@@ -446,7 +446,7 @@ class WelleApp {
             const baseNote = preset.baseNote;
             const settings = preset.settings;
             const synth = new Tone[type](settings).toDestination();
-            synth.volume.value = -15;
+            synth.volume.value = -12;
             synth.triggerAttackRelease(baseNote, "8n");
         }
     }
@@ -564,7 +564,8 @@ class WelleApp {
             if (checks.existingInstruments)
                 checks.existingInstruments.map((instrument) => {
                     this.#instruments[instrument].restart();
-                    if (message.random) this.#instruments[instrument].random = message.random;
+                    if (message.random != null)
+                        this.#instruments[instrument].random = message.random;
                 });
 
             this.startTransport();
@@ -960,8 +961,11 @@ class WelleApp {
                         checked="true">
                         <label> <b>${this.#instruments[inst].name}</b> </label>
                     </div>
-                    <div id="vol_${inst}" class="w3-col" style="width:80px">
+                    <div id="vol_${inst}" class="w3-col" style="width:70px">
                         vol: ${volume}
+                    </div>
+                    <div id="rand_${inst}" class="w3-col" style="width:70px">
+                        % ${this.#instruments[inst].random}
                     </div>
                     <div id="pattern_${inst}" class="w3-half">
                         pattern: ${this.#instruments[inst].getRawPattern()}
@@ -983,6 +987,10 @@ class WelleApp {
             // update volume . round volume
             const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
             window.document.getElementById(`vol_${inst}`).innerHTML = `vol: ${volume}`;
+            // update random
+            window.document.getElementById(`rand_${inst}`).innerHTML = `% ${
+                this.#instruments[inst].random
+            }`;
             // update pattern
             window.document.getElementById(
                 `pattern_${inst}`
