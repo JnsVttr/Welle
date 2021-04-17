@@ -428,6 +428,29 @@ class WelleApp {
 
     // ============================================
 
+    playOnce(inst) {
+        // if inst is sample
+        if (this.#listOfSamples[inst]) {
+            console.log(`playOnce is sample.. `);
+            // Instrument.buffers[inst].play;
+            const player = new Tone.Player().toDestination();
+            // play one of the samples when they all load
+            player.buffer = Instrument.buffers[inst].get("C3");
+            player.volume.value = -15;
+            player.start();
+        }
+        if (this.#ListOfInstruments[inst]) {
+            console.log(`playOnce is instrument .. `);
+            const preset = this.#ListOfInstruments[inst].preset;
+            const type = preset.synthType;
+            const baseNote = preset.baseNote;
+            const settings = preset.settings;
+            const synth = new Tone[type](settings).toDestination();
+            synth.volume.value = -15;
+            synth.triggerAttackRelease(baseNote, "8n");
+        }
+    }
+
     playAll() {
         // store quant time
         const timeDiff = this.toneQuant() * 1000;
@@ -595,7 +618,7 @@ class WelleApp {
                         this.#instruments[instrument].restart();
                     }
                 } else {
-                    // if saved instrument is not activated (e.g. deleted or not initialized)
+                    // if saved instrument does not exists (e.g. deleted or not initialized)
                     // then restart?
                     // console.log(`play part ${name}: instrument ${instrument} is gone. create new!`);
                     this.createNewInstrument({
@@ -605,8 +628,6 @@ class WelleApp {
                         random: random,
                         volume: volume,
                         type: "sampler",
-                        sample: this.#listOfSamples[instrument],
-                        preset: this.#ListOfInstruments["sampler"].preset,
                     });
                 }
             }
@@ -779,6 +800,8 @@ class WelleApp {
         }
         // stop Tone
         this.stopTransport();
+        Tone.Transport.cancel();
+        Tone.Transport.clear();
         this.renderContent();
     }
 
@@ -867,11 +890,23 @@ class WelleApp {
         let html = ``;
         Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
-            html += `${this.#listOfAllInstruments[inst].name} `;
+            html += `
+            <a id="play_${this.#listOfAllInstruments[inst].name}"  href='#'>${
+                this.#listOfAllInstruments[inst].name
+            }</a> 
+            `;
         });
         // replace html content
         document.getElementById(this.#instListDiv).innerHTML = "";
         document.getElementById(this.#instListDiv).innerHTML += html;
+
+        // add event listener
+        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
+            document.getElementById(`play_${inst}`).addEventListener("click", () => {
+                console.log(`play inst: ${inst} once ...`);
+                window.welle.app.playOnce(inst);
+            });
+        });
     }
 
     renderParts() {

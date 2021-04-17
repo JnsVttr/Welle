@@ -61,9 +61,9 @@ class Instrument {
         // this.#synthType = Instrument.typeDefault;
         // create tone elements: synth -> gain -> masterOut
         // the synth creates the sound
-        // console.log(`new Instrument with message:
-        // ${JSON.stringify(message)}
-        // `);
+        console.log(`new Instrument with message:
+        ${JSON.stringify(message)}
+        `);
 
         this.name = message.name;
         this.#rand = message.random || 0;
@@ -234,8 +234,13 @@ class Instrument {
     #callbackSequence = (time, note) => {
         this.#triggerFunction(this.#synth, note, time);
         this.#ticks++;
+        const events = this.#midiPattern.filter((x) => x); // (filter(x => x)) removes undefined/null/NaN from array
+        const patternTicks = events.length;
+        // console.log(
+        //     `this ticks: ${this.#ticks}. events: ${events} And patternTicks: ${patternTicks}`
+        // );
         if (this.#rand > 0) {
-            if (this.#ticks % (this.#midiPattern.length * this.#rand) == 0) {
+            if (this.#ticks % (patternTicks * this.#rand) == 0) {
                 // console.log("rand: ", this.#rand);
                 this.#createRandomPattern();
             }
