@@ -18,74 +18,39 @@
     </head>
 
     <body class="w3-black">
-        <div id="mainDiv" class="w3-container w3-small w3-black">
-            <!-- main title ==============================  -->
-            <div class="w3-center">
-                <h1>WELLE</h1>
+        <div id="mainDiv" class="w3-container w3-small w3-black mainCenter">
+            <!-- top line  ==============================  -->
+            <div class="w3-row">
+                <div class="w3-col m3">
+                    <!-- <p><span class="w3-xlarge">WELLE</span></p> -->
+                    <h1>WELLE</h1>
+                </div>
+                <div class="w3-col m2">
+                    <p>
+                        <input class="w3-check" type="checkbox" /><label>
+                            <span>alerts</span>
+                        </label>
+                    </p>
+                    <p>BPM: <span id="input_bpm" title="bpm"></span></p>
+                </div>
             </div>
 
-            <!-- controls ==============================  -->
-            <h2 class="w3-large">controls</h2>
-
-            <div class="w3-container">
-                <!-- <input type="button" class="w3-button w3-round-large w3-black" value="sound off">
-			<input type="button" class="w3-button w3-round-large w3-black" value="alerts off"> -->
-
-                <input class="w3-check" type="checkbox" checked="checked" /><label> sound </label>
-                <input class="w3-check" type="checkbox" /><label> alerts </label>
-
-                <table>
-                    <caption></caption>
-
-                    <tr>
-                        <td>recorder</td>
-                        <td>
-                            <!-- audio player only for internal processing, not shown -->
-                            <div id="audioDiv" style="display: none">
-                                <audio controls id="audioPlayer"></audio>
-                            </div>
-                            <button id="buttonPlay" style="display: none">Play</button>
-                            <button id="buttonPause" style="display: none">Pause</button>
-                            <button id="recordStatus" style="display: none">record:</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="group">group</td>
-                        <td>
-                            <usr id="localUser"></usr>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>bpm</td>
-                        <td>
-                            <input
-                                id="input_bpm"
-                                style="max-width: 3rem"
-                                type="text"
-                                size="10"
-                                autocomplete="off"
-                                value=""
-                            />
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- not shown, form handles upload -->
-            <form id="form" style="display: none">
-                <input type="file" id="file" />
-                <input type="submit" id="uploader" value="Upload" />
-            </form>
-
+            <p class="w3-text-grey">
+                <a href="#">Info</a> /
+                <a href="#">Tutorials</a>
+            </p>
             <!-- console ==============================  -->
-            <h2 class="w3-large">console</h2>
 
-            <div class="w3-container w3-padding w3-black w3-medium">
-                <p id="listOfInstruments" class="w3-small"></p>
+            <div class="w3-black w3-medium" title="list of instruments">
+                <p id="listOfInstruments" class="w3-small w3-text-gray"></p>
             </div>
 
-            <div class="w3-container w3-padding w3-black w3-medium">
-                <p id="console" class="w3-small"></p>
+            <div
+                id="consoleField"
+                title="console"
+                class="w3-container w3-padding w3-black w3-medium"
+            >
+                <p id="console"></p>
 
                 <!-- console input field ==============================  -->
                 <input
@@ -96,25 +61,15 @@
                     autocomplete="off"
                     value=""
                 />
-            </div>
 
-            <div class="">
                 <!-- parts display ==============================  -->
-                <h2 class="w3-large">parts</h2>
-                <div id="parts" class="w3-padding"></div>
+                <div id="parts" class="w3-padding-16"></div>
 
                 <!-- instruments display ==============================  -->
-                <h2 class="w3-large">instruments</h2>
-                <div id="instruments" class="w3-padding"></div>
+                <div id="instruments" class="w3-text-gray w3-small"></div>
             </div>
 
             <!-- help display ==============================  -->
-            <!-- <h2> help</h2>
-	    <p id="help-overview"  ></p>
-	    <p id="help-container"  ></p>
-
-	    <p id="shortDesc"  ></p>
-	    <p id="info"  ></p> -->
         </div>
 
         <script type="text/javascript" src="./index.js"></script>

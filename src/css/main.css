@@ -2,7 +2,7 @@
 
 body {
     /* background: black; */
-    font-family: 'Roboto', sans-serif;
+    font-family: "Roboto", sans-serif;
     /* color: white; */
 }
 
@@ -11,7 +11,6 @@ body {
     background-color: #ffffff;
     border: 2px solid black;
     font-weight: bold;
-    ;
 }
 
 #mainInput {
@@ -32,6 +31,9 @@ body {
 #console {
     /* font-size: 0.9em; */
     word-wrap: break-word;
+}
+#consoleField {
+    border: 1px solid rgb(112, 112, 112);
 }
 
 #consoleLine {
@@ -62,22 +64,30 @@ label {
     padding-right: 1rem;
 }
 
+.mainCenter {
+    margin: auto;
+    max-width: 800px;
+    /* border: 3px solid green; */
+    padding: 10px;
+    padding-bottom: 200px !important;
+}
 
 /* Extra small devices (phones, 600px and down) */
 
-@media only screen and (max-width: 600px) {}
-
+@media only screen and (max-width: 600px) {
+}
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 
-@media only screen and (min-width: 600px) {}
-
+@media only screen and (min-width: 600px) {
+}
 
 /* Large devices (laptops/desktops, 992px and up) */
 
-@media only screen and (min-width: 992px) {}
-
+@media only screen and (min-width: 992px) {
+}
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 
-@media only screen and (min-width: 1200px) {}
+@media only screen and (min-width: 1200px) {
+}

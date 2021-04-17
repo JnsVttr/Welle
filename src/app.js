@@ -20,7 +20,7 @@ class WelleApp {
     // console
     #consoleInput = "";
     #consolePointer = 0;
-    #consoleMaxLength = 14;
+    #consoleMaxLength = 10;
     #consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
     #consoleID = "console";
     // sound
@@ -884,11 +884,11 @@ class WelleApp {
             this.renderInstruments();
             this.renderParts();
             this.renderInstrumentsOverview();
-            document.getElementById(this.#bpmDiv).value = Math.floor(this.#bpm);
+            document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
         }, 200);
     }
     renderInstrumentsOverview() {
-        let html = ``;
+        let html = `instruments: `;
         Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
             html += `

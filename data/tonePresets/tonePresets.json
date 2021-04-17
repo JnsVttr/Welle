@@ -1,7 +1,7 @@
 {
     "drum": {
         "synthType": "MembraneSynth",
-        "gain": 1,
+        "gain": 0.7,
         "volume": 0.6,
         "baseNote": 16,
         "transpose": 0,
@@ -27,7 +27,7 @@
     },
     "bass": {
         "synthType": "MonoSynth",
-        "gain": 0.5,
+        "gain": 0.4,
         "volume": 0.6,
         "baseNote": 32,
         "transpose": 0,
@@ -42,23 +42,23 @@
                 "type": "square"
             },
             "filter": {
-                "Q": 6,
+                "Q": 1,
                 "type": "lowpass",
                 "rolloff": -24
             },
             "envelope": {
                 "attack": 0.005,
                 "decay": 0.1,
-                "sustain": 0.9,
-                "release": 1
+                "sustain": 0.1,
+                "release": 0.3
             },
             "filterEnvelope": {
                 "attack": 0.06,
                 "decay": 0.1,
                 "sustain": 0.2,
                 "release": 0.3,
-                "baseFrequency": 200,
-                "octaves": 7,
+                "baseFrequency": 900,
+                "octaves": 3,
                 "exponent": 2
             }
         }
