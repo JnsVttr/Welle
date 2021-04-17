@@ -47,7 +47,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
     if (e.code == "Enter") {
         // get input string
         const input = document.getElementById("mainInput").value.toLowerCase();
-        Socket.emit("message", `enter: "${input}"`);
+        Socket.emit("consoleInput", { id: App.id, input: input });
         // send input to App to handle
         App.handleMainInput(input);
     }
@@ -73,27 +73,33 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 
 // SOCKET on initial connection
 Socket.on("connect", function (data) {
-    console.log("Socket Connected!");
-    Socket.emit("message", { message: "Hello from client!" });
-    Socket.emit("requestAlerts");
-    Socket.emit("requestSampleFiles");
-    Socket.emit("requestTonePresets");
+    App.id = Socket.id;
+    console.log(`Socket Connected! Id: ${App.id}, user: ${App.user}`);
+    if (App.getAlertsNum() == 0) Socket.emit("requestAlerts");
+    if (App.getSamplesNum() == 0) Socket.emit("requestSampleFiles");
+    if (App.getInstrumentsNum() == 0) Socket.emit("requestTonePresets");
 });
 
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (files) => {
-    App.addSamples(files);
+    if (App.getSamplesNum() == 0) {
+        App.addSamples(files);
+    }
 });
 
 // SOCKET receive tonePresets
 Socket.on("tonePresets", (presets) => {
-    App.addInstruments(presets);
-    App.printAllInstruments();
-    App.renderInstrumentsOverview();
+    if (App.getInstrumentsNum() == 0) {
+        App.addInstruments(presets);
+        App.printAllInstruments();
+        App.renderInstrumentsOverview();
+    }
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
 Socket.on("alerts", (files) => {
-    App.addAlerts(files);
-    App.printAlerts();
+    if (App.getAlertsNum() == 0) {
+        App.addAlerts(files);
+        App.printAlerts();
+    }
 });

@@ -33,7 +33,6 @@ const hostname = "localhost";
 const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(moduleURL.pathname);
 const clientDir = path.join(__dirname, pageSource);
-const audioPathRel = "audio";
 const audioPath = path.join(__dirname, audioSource);
 const alertsPath = path.join(__dirname, alertSource);
 const tonePresetsPath = path.join(__dirname, tonePresets);
@@ -69,13 +68,25 @@ app.get("/", function (req, res) {
 // SOCKETS connection: io.sockets.emit, socket.on
 // ======================================================================
 
+const clients = {};
+
 io.on("connection", (socket) => {
-    console.log("");
-    console.log("socket connects to client");
+    const date = new Date().toISOString().slice(0, 10);
+    console.log(`socket connects to client: id: ${socket.id}`);
+
+    clients[socket.id] = { history: [] };
+    socket.emit({ message: "new connection", clients: clients });
+    // console.log(`socket new connection, clients: ${JSON.stringify(clients, null, 2)}`);
 
     // HELLO MESSAGE
-    socket.on("message", (string) => {
-        if (debug) console.log(`socket on message: ${string}`);
+    socket.on("message", (message) => {
+        if (debug) console.log(`socket on message: ${message.string}`);
+    });
+    // console input
+    socket.on("consoleInput", (message) => {
+        if (debug)
+            console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
+        clients[socket.id].history.push(message.input);
     });
 
     // TONE PRESETS
@@ -100,6 +111,22 @@ io.on("connection", (socket) => {
         const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
         io.sockets.emit("alerts", samples);
     });
+
+    socket.on("disconnect", () => {
+        // if there is some histoy, save it as file
+        if (clients[socket.id].history.length > 0) {
+            const file = path.join(historyURL, `${date}-${socket.id}.txt`);
+            let history = `WELLE history - date: ${date}\n\n`;
+            clients[socket.id].history.map((line) => {
+                history += `${line} \n`;
+            });
+            fs.writeFile(file, history, (err) => {
+                if (err) throw err;
+            });
+        }
+        delete clients[socket.id];
+        console.log(`deleted. client from clients: ${socket.id}`);
+    });
 });
 
 // start server
@@ -122,7 +149,7 @@ const getSamples = (message) => {
     const samples = entries.filter((entry) => {
         if (!entry.startsWith(".")) return entry;
     });
-    console.log(`getSamples(): `, samples);
+    // console.log(`getSamples(): `, samples);
 
     return samples;
 };

@@ -11,7 +11,8 @@ class WelleApp {
     // debug
     debug = true;
     // general
-    #user = "local";
+    user = "local";
+    id = "xxx";
     #muteSound = false;
     #muteAlerts = false;
     #alerts = {};
@@ -26,7 +27,7 @@ class WelleApp {
     // sound
     #instruments = {};
     #parts = {};
-    #ListOfInstruments = {};
+    #listOfInstruments = {};
     #listOfSamples = {};
     #listOfAllInstruments = {};
     // html
@@ -72,7 +73,7 @@ class WelleApp {
             Welle App created.
             ==
             debug state: ${this.debug}
-            user: ${this.#user}
+            user: ${this.user}
             alerts: ${JSON.stringify(this.#alerts)}
             muteSound: ${this.#muteSound}
             muteAlerts: ${this.#muteAlerts}
@@ -82,7 +83,18 @@ class WelleApp {
 
         `);
     }
-
+    getAlertsNum() {
+        if (Object.keys(this.#alerts).length == 0) return 0;
+        else return this.#alerts.length;
+    }
+    getSamplesNum() {
+        if (Object.keys(this.#listOfSamples).length == 0) return 0;
+        else return this.#listOfSamples.length;
+    }
+    getInstrumentsNum() {
+        if (Object.keys(this.#listOfInstruments).length == 0) return 0;
+        else return this.#listOfInstruments.length;
+    }
     //
     //
     //
@@ -221,10 +233,10 @@ class WelleApp {
         let pointer = 0;
         if (length > this.#consoleMaxLength) pointer = length - this.#consoleMaxLength;
         for (let i = pointer; i < length; i++) {
-            if (this.#user == "local") {
+            if (this.user == "local") {
                 html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
             } else {
-                html += `<p id="consoleLine"><b>${this.#user}: &nbsp;&nbsp;</b> ${
+                html += `<p id="consoleLine"><b>${this.user}: &nbsp;&nbsp;</b> ${
                     this.#consoleArray[i].message
                 }</p>`;
             }
@@ -269,7 +281,7 @@ class WelleApp {
             // incoming preset name:  ${name}
             // preset: ${JSON.stringify(fullPreset)}
             // `);
-            this.#ListOfInstruments[name] = fullPreset;
+            this.#listOfInstruments[name] = fullPreset;
             this.#listOfAllInstruments[name] = fullPreset;
         }
     }
@@ -439,9 +451,9 @@ class WelleApp {
             player.volume.value = -12;
             player.start();
         }
-        if (this.#ListOfInstruments[inst]) {
+        if (this.#listOfInstruments[inst]) {
             console.log(`playOnce is instrument .. `);
-            const preset = this.#ListOfInstruments[inst].preset;
+            const preset = this.#listOfInstruments[inst].preset;
             const type = preset.synthType;
             const baseNote = preset.baseNote;
             const settings = preset.settings;
@@ -747,9 +759,9 @@ class WelleApp {
             message.type = "sampler";
             message.sample = this.#listOfSamples[message.name];
         }
-        if (this.#ListOfInstruments[message.name]) {
+        if (this.#listOfInstruments[message.name]) {
             message.type = "preset";
-            message.preset = this.#ListOfInstruments[message.name].preset;
+            message.preset = this.#listOfInstruments[message.name].preset;
         }
         if (this.debug) console.log(`create new inst ${message.name} as '${message.type}'`);
         this.#instruments[message.name] = new Instrument(message);
