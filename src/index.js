@@ -103,3 +103,9 @@ Socket.on("alerts", (files) => {
         App.printAlerts();
     }
 });
+
+// SOCKET presets
+Socket.on("presets", (presets) => {
+    console.log(`incoming presets: `, presets);
+    App.storePresets(presets);
+});

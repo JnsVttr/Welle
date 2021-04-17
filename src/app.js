@@ -25,6 +25,7 @@ class WelleApp {
     #consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
     #consoleID = "console";
     // sound
+    #presets = {};
     #instruments = {};
     #parts = {};
     #listOfInstruments = {};
@@ -94,6 +95,21 @@ class WelleApp {
     getInstrumentsNum() {
         if (Object.keys(this.#listOfInstruments).length == 0) return 0;
         else return this.#listOfInstruments.length;
+    }
+    createPreset(name) {
+        const preset = { name: name, parts: this.#parts, instruments: this.#instruments };
+        return preset;
+    }
+    storePresets(presets) {
+        presets.map((preset) => {
+            const name = preset.name;
+            this.#presets[name] = preset;
+        });
+        // console.log(`this.#presets stored: ${JSON.stringify(this.#presets)}`);
+    }
+    loadPreset(name) {
+        this.#parts = this.#presets[name].parts;
+        this.renderContent();
     }
     //
     //

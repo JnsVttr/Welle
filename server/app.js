@@ -76,12 +76,15 @@ io.on("connection", (socket) => {
 
     clients[socket.id] = { history: [] };
     socket.emit({ message: "new connection", clients: clients });
+    const presets = getPresets({ path: presetsURL });
+    socket.emit("presets", presets);
     // console.log(`socket new connection, clients: ${JSON.stringify(clients, null, 2)}`);
 
     // HELLO MESSAGE
     socket.on("message", (message) => {
         if (debug) console.log(`socket on message: ${message.string}`);
     });
+
     // console input
     socket.on("consoleInput", (message) => {
         if (debug)
@@ -112,6 +115,17 @@ io.on("connection", (socket) => {
         io.sockets.emit("alerts", samples);
     });
 
+    // store preset
+    socket.on("storePreset", (preset) => {
+        const file = path.join(presetsURL, `${preset.name}.json`);
+        fs.writeFile(file, JSON.stringify(preset, null, 4), (err) => {
+            if (err) throw err;
+            const presets = getPresets({ path: presetsURL });
+            socket.emit("presets", presets);
+        });
+    });
+
+    // on disconnect
     socket.on("disconnect", () => {
         // if there is some histoy, save it as file
         if (clients[socket.id].history.length > 0) {
@@ -138,18 +152,29 @@ httpServer.listen(port, hostname, () => {
 });
 
 // functions
-
-// Samples - get files from folders, save URL according to baseUrl
 const getSamples = (message) => {
     // read sample entries
     const entries = fs.readdirSync(message.path, (err) => {
         if (err) return console.log("Unable to scan directory: " + err);
     });
-
     const samples = entries.filter((entry) => {
         if (!entry.startsWith(".")) return entry;
     });
-    // console.log(`getSamples(): `, samples);
-
     return samples;
+};
+
+const getPresets = (message) => {
+    const entries = fs.readdirSync(message.path, (err) => {
+        if (err) return console.log("Unable to scan directory: " + err);
+    });
+    const presets = entries.filter((entry) => {
+        if (!entry.startsWith(".")) return entry;
+    });
+    const presetsData = presets.map((preset) => {
+        const rawdata = fs.readFileSync(path.join(message.path, preset), (err) => {
+            if (err) throw err;
+        });
+        return JSON.parse(rawdata);
+    });
+    return presetsData;
 };

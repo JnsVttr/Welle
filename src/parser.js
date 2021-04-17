@@ -7,12 +7,12 @@ delegate input to tone, sockets, html
 */
 
 // libraries, functions, classes
-import { App } from "/index";
+import { App, Socket } from "/index";
 
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
     // show parser input
-    // if (App.debug) console.log(`Parser input: ${JSON.stringify(input, null, 2)}`);
+    if (App.debug) console.log(`Parser input: ${JSON.stringify(input, null, 2)}`);
 
     switch (input.event) {
         case "plainStartEvent":
@@ -85,9 +85,14 @@ export const parser = (input) => {
             break;
 
         case "storeEvent":
+            const preset = App.createPreset(input.phrase);
+            // console.log(`preset ${preset.name}: ${JSON.stringify(preset, null, 0)}`);
+            Socket.emit("storePreset", preset);
             break;
 
         case "loadEvent":
+            const name = input.phrase;
+            App.loadPreset(name);
             break;
 
         case "uploadEvent":
