@@ -12,7 +12,13 @@ body {
     border: 2px solid black;
     font-weight: bold;
 }
-
+.links {
+    padding-left: 0.5em;
+}
+.linkRow {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
 #mainInput {
     /* background: black; */
     /* color: white; */

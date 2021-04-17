@@ -217,9 +217,9 @@ class WelleApp {
                 if (length > 0 && this.#consolePointer < length) {
                     // set HTML
                     document.getElementById("mainInput").value = "";
-                    document.getElementById("mainInput").value = this.#consoleArray[
-                        length - 1 - this.#consolePointer
-                    ].message;
+                    const element = this.#consoleArray[length - 1 - this.#consolePointer].message;
+                    if (element != "&nbsp;") document.getElementById("mainInput").value = element;
+
                     // update pointer
                     if (this.#consolePointer < length) {
                         this.#consolePointer += 1;
@@ -233,9 +233,9 @@ class WelleApp {
                     // set HTML
                     document.getElementById("mainInput").value = "";
                     if (this.#consolePointer != 0) {
-                        document.getElementById("mainInput").value = this.#consoleArray[
-                            length - this.#consolePointer
-                        ].message;
+                        const element = this.#consoleArray[length - this.#consolePointer].message;
+                        if (element != "&nbsp;")
+                            document.getElementById("mainInput").value = element;
                     } else {
                         document.getElementById("mainInput").value = "";
                     }
@@ -972,9 +972,8 @@ class WelleApp {
         let html = ``;
         Object.keys(this.#presets).forEach((preset) => {
             html += `
-            <a id="preset_${this.#presets[preset].name}"  href='#'>${
-                this.#presets[preset].name
-            }</a> 
+            <a id="preset_${this.#presets[preset].name}" class="links" 
+            title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a> 
             `;
         });
         // replace html content
@@ -995,7 +994,8 @@ class WelleApp {
         Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
             html += `
-            <a id="play_${this.#listOfAllInstruments[inst].name}"  href='#'>${
+            <a id="play_${this.#listOfAllInstruments[inst].name}" class="links" 
+                title="click to play sound: ${inst}" href='#'>${
                 this.#listOfAllInstruments[inst].name
             }</a> 
             `;

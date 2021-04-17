@@ -21,23 +21,16 @@ const io = new Server(httpServer);
 
 // local resources
 // ===================
-const pageSource = "../client/";
-const audioSource = "../data/samples";
-const alertSource = "../data/alerts";
-const historySource = "../data/history";
-const presetsSource = "../data/presets";
-const tonePresets = "../data/tonePresets/tonePresets.json";
-// const hostname = '127.0.0.1';
-const hostname = "localhost";
+const hostname = "localhost"; // const hostname = '127.0.0.1';
 // get paths and set __dirname (not there in es6)
 const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(moduleURL.pathname);
-const clientDir = path.join(__dirname, pageSource);
-const audioPath = path.join(__dirname, audioSource);
-const alertsPath = path.join(__dirname, alertSource);
-const tonePresetsPath = path.join(__dirname, tonePresets);
-const historyURL = path.join(__dirname, historySource);
-const presetsURL = path.join(__dirname, presetsSource);
+const clientDir = path.join(__dirname, "../client/");
+const audioPath = path.join(__dirname, "../data/samples");
+const alertsPath = path.join(__dirname, "../data/alerts");
+const tonePresetsPath = path.join(__dirname, "../data/tonePresets/tonePresets.json");
+const historyURL = path.join(__dirname, "../data/history");
+const presetsURL = path.join(__dirname, "../data/presets");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
 
 // variables
@@ -54,8 +47,8 @@ let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 // app folders + startpage
 // ================================
 app.use(express.static(clientDir));
-app.use("/audio", express.static(path.join(__dirname, audioSource)));
-app.use("/alerts", express.static(path.join(__dirname, alertSource)));
+app.use("/audio", express.static(audioPath));
+app.use("/alerts", express.static(alertsPath));
 app.get("/", function (req, res) {
     res.sendFile("index.html");
 });
@@ -82,7 +75,7 @@ io.on("connection", (socket) => {
 
     // HELLO MESSAGE
     socket.on("message", (message) => {
-        if (debug) console.log(`socket on message: ${message.string}`);
+        // if (debug) console.log(`socket on message: ${message.string}`);
         io.sockets.emit("allUsers", { users: users });
     });
 
@@ -109,14 +102,14 @@ io.on("connection", (socket) => {
 
     // TONE PRESETS
     socket.on("requestTonePresets", () => {
-        if (debug) console.log(`requestTonePresets for Client`);
+        // if (debug) console.log(`requestTonePresets for Client`);
         tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
         io.sockets.emit("tonePresets", tonePresetsJSON);
     });
 
     // AUDIO FILES
     socket.on("requestSampleFiles", () => {
-        if (debug) console.log(`requestSampleFiles for Client`);
+        // if (debug) console.log(`requestSampleFiles for Client`);
         // read & print files 'samples'
         const samples = getSamples({ path: audioPath });
         io.sockets.emit("audioFiles", samples);
@@ -124,7 +117,7 @@ io.on("connection", (socket) => {
 
     // ALERTS FILES
     socket.on("requestAlerts", () => {
-        if (debug) console.log(`requestAlerts for Client`);
+        // if (debug) console.log(`requestAlerts for Client`);
         // read & print files 'samples'
         const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
         io.sockets.emit("alerts", samples);
