@@ -33,19 +33,27 @@
                     </p>
                     <p>BPM: <span id="input_bpm" title="bpm"></span></p>
                 </div>
+                <div class="w3-col m2">
+                    <p><a href="#">Info</a></p>
+                    <p><a href="#">Tutorials</a></p>
+                </div>
             </div>
 
-            <p class="w3-text-grey">
-                <a href="#">Info</a> /
-                <a href="#">Tutorials</a>
-                <a href="#">Presets</a>
-            </p>
+            <div class="w3-row">
+                <div class="w3-col m2 w3-text-gray">presets:</div>
+                <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
+            </div>
+
+            <div class="w3-row">
+                <div class="w3-col m2 w3-text-gray">instruments:</div>
+                <div
+                    id="listOfInstruments"
+                    class="w3-col m10 w3-text-gray"
+                    title="list of instruments"
+                ></div>
+            </div>
+
             <!-- console ==============================  -->
-
-            <div class="w3-black w3-medium" title="list of instruments">
-                <p id="listOfInstruments" class="w3-small w3-text-gray"></p>
-            </div>
-
             <div
                 id="consoleField"
                 title="console"
@@ -53,6 +61,7 @@
             >
                 <p id="console"></p>
 
+                <span class="w3-small w3-text-grey">console</span>
                 <!-- console input field ==============================  -->
                 <input
                     id="mainInput"

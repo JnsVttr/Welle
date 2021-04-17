@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import { livecode, semantics } from "/html/ohm/semantic2021";
 import { Instrument } from "/instrument";
 import { parser } from "/parser";
+import { Socket } from "/index";
 
 // ============================================
 // WELLE APP
@@ -36,6 +37,7 @@ class WelleApp {
     #partDiv = "parts";
     #bpmDiv = "input_bpm";
     #instListDiv = "listOfInstruments";
+    #presetsDiv = "presets";
 
     //
     //
@@ -106,6 +108,7 @@ class WelleApp {
             this.#presets[name] = preset;
         });
         // console.log(`this.#presets stored: ${JSON.stringify(this.#presets)}`);
+        this.renderPresets();
     }
     loadPreset(name) {
         this.#parts = this.#presets[name].parts;
@@ -649,15 +652,17 @@ class WelleApp {
                 } else {
                     // if saved instrument does not exists (e.g. deleted or not initialized)
                     // then restart?
-                    // console.log(`play part ${name}: instrument ${instrument} is gone. create new!`);
-                    this.createNewInstrument({
-                        name: instrument,
-                        pattern: pattern,
-                        rawPattern: rawPattern,
-                        random: random,
-                        volume: volume,
-                        type: "sampler",
-                    });
+
+                    // check if instrument is availible
+                    if (this.#listOfAllInstruments[instrument]) {
+                        this.createNewInstrument({
+                            name: instrument,
+                            pattern: pattern,
+                            rawPattern: rawPattern,
+                            random: random,
+                            volume: volume,
+                        });
+                    }
                 }
             }
 
@@ -812,6 +817,13 @@ class WelleApp {
         });
         this.renderContent();
     }
+    deletePreset(name) {
+        if (this.#presets[name]) {
+            console.log(`delete this preset: ${name}`);
+            delete this.#presets[name];
+            Socket.emit("deletePreset", { name: name });
+        }
+    }
 
     deleteAll() {
         console.log(`App delete all..`);
@@ -915,8 +927,31 @@ class WelleApp {
             document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
         }, 200);
     }
+
+    renderPresets() {
+        let html = ``;
+        Object.keys(this.#presets).forEach((preset) => {
+            html += `
+            <a id="preset_${this.#presets[preset].name}"  href='#'>${
+                this.#presets[preset].name
+            }</a> 
+            `;
+        });
+        // replace html content
+        document.getElementById(this.#presetsDiv).innerHTML = "";
+        document.getElementById(this.#presetsDiv).innerHTML += html;
+
+        // add event listener
+        Object.keys(this.#presets).forEach((preset) => {
+            document.getElementById(`preset_${preset}`).addEventListener("click", () => {
+                console.log(`load preset: ${preset}  ...`);
+                window.welle.app.loadPreset(preset);
+            });
+        });
+    }
+
     renderInstrumentsOverview() {
-        let html = `instruments: `;
+        let html = ``;
         Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
             html += `

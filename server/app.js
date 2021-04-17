@@ -78,7 +78,6 @@ io.on("connection", (socket) => {
     socket.emit({ message: "new connection", clients: clients });
     const presets = getPresets({ path: presetsURL });
     socket.emit("presets", presets);
-    // console.log(`socket new connection, clients: ${JSON.stringify(clients, null, 2)}`);
 
     // HELLO MESSAGE
     socket.on("message", (message) => {
@@ -87,8 +86,7 @@ io.on("connection", (socket) => {
 
     // console input
     socket.on("consoleInput", (message) => {
-        if (debug)
-            console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
+        // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
         clients[socket.id].history.push(message.input);
     });
 
@@ -120,6 +118,16 @@ io.on("connection", (socket) => {
         const file = path.join(presetsURL, `${preset.name}.json`);
         fs.writeFile(file, JSON.stringify(preset, null, 4), (err) => {
             if (err) throw err;
+            const presets = getPresets({ path: presetsURL });
+            socket.emit("presets", presets);
+        });
+    });
+    // socket on delete Preset
+    socket.on("deletePreset", (message) => {
+        const file = path.join(presetsURL, `${message.name}.json`);
+        fs.unlink(file, function (err) {
+            if (err) throw err;
+            console.log(`File ${message.name}.json deleted!`);
             const presets = getPresets({ path: presetsURL });
             socket.emit("presets", presets);
         });

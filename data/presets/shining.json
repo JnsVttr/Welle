@@ -1,0 +1,139 @@
+{
+    "name": "shining",
+    "parts": {
+        "kicky": {
+            "instrumentCollection": {
+                "kick": {
+                    "isPlaying": true,
+                    "pattern": [
+                        -1,
+                        2,
+                        -3,
+                        null,
+                        null,
+                        2
+                    ],
+                    "rawPattern": "#-1#2#-3--#2",
+                    "volume": 0.6,
+                    "random": 0
+                }
+            },
+            "bpm": 120,
+            "html": "\n                <input \n                    type = \"button\" \n                    class = \"w3-button w3-round-large w3-border w3-black w3-small\" \n                    value = \"kicky\"\n                    title = \"part: kicky\"\n                    id = \"kicky\">\n                </input> "
+        },
+        "move": {
+            "instrumentCollection": {
+                "kick": {
+                    "isPlaying": true,
+                    "pattern": [
+                        -1,
+                        2,
+                        -3,
+                        null,
+                        null,
+                        2
+                    ],
+                    "rawPattern": "#-1#2#-3--#2",
+                    "volume": 0.6,
+                    "random": 0
+                },
+                "hh": {
+                    "isPlaying": true,
+                    "pattern": [
+                        1,
+                        null,
+                        2,
+                        4,
+                        5,
+                        7,
+                        7,
+                        5,
+                        4,
+                        4
+                    ],
+                    "rawPattern": "#-#2#4#5#7#7#5#4#4",
+                    "volume": 0.6,
+                    "random": 0
+                }
+            },
+            "bpm": 120,
+            "html": "\n                <input \n                    type = \"button\" \n                    class = \"w3-button w3-round-large w3-border w3-black w3-small\" \n                    value = \"move\"\n                    title = \"part: move\"\n                    id = \"move\">\n                </input> "
+        },
+        "hectic": {
+            "instrumentCollection": {
+                "kick": {
+                    "isPlaying": true,
+                    "pattern": [
+                        -1,
+                        2,
+                        -3,
+                        null,
+                        null,
+                        2
+                    ],
+                    "rawPattern": "#-1#2#-3--#2",
+                    "volume": 0.6,
+                    "random": 0
+                },
+                "hh": {
+                    "isPlaying": true,
+                    "pattern": [
+                        1,
+                        null,
+                        2,
+                        4,
+                        5,
+                        7,
+                        7,
+                        5,
+                        4,
+                        4
+                    ],
+                    "rawPattern": "#-#2#4#5#7#7#5#4#4",
+                    "volume": 0.6,
+                    "random": 0
+                },
+                "string": {
+                    "isPlaying": true,
+                    "pattern": [
+                        12,
+                        null,
+                        null,
+                        null,
+                        4,
+                        3,
+                        4,
+                        5,
+                        null,
+                        22
+                    ],
+                    "rawPattern": "#12---#4#3#4#5-#22",
+                    "volume": 0.6,
+                    "random": 0
+                }
+            },
+            "bpm": 120,
+            "html": "\n                <input \n                    type = \"button\" \n                    class = \"w3-button w3-round-large w3-border w3-black w3-small\" \n                    value = \"hectic\"\n                    title = \"part: hectic\"\n                    id = \"hectic\">\n                </input> "
+        }
+    },
+    "instruments": {
+        "kick": {
+            "name": "kick",
+            "isPlaying": true,
+            "rendered": true,
+            "html": "\n                <div id=\"inst_kick\" class=\"w3-row\">\n                    <div class=\"w3-col\" style=\"width:120px\">\n                        <input \n                        id=\"check_kick\" \n                        class=\"w3-check\" \n                        type=\"checkbox\" \n                        title = \"check: kick\"\n                        checked=\"true\">\n                        <label> <b>kick</b> </label>\n                    </div>\n                    <div id=\"vol_kick\" class=\"w3-col\" style=\"width:70px\">\n                        vol: 0.6\n                    </div>\n                    <div id=\"rand_kick\" class=\"w3-col\" style=\"width:70px\">\n                        % 0\n                    </div>\n                    <div id=\"pattern_kick\" class=\"w3-half\">\n                        pattern: #-1#2#3#2\n                    </div>\n                </div>"
+        },
+        "hh": {
+            "name": "hh",
+            "isPlaying": true,
+            "rendered": true,
+            "html": "\n                <div id=\"inst_hh\" class=\"w3-row\">\n                    <div class=\"w3-col\" style=\"width:120px\">\n                        <input \n                        id=\"check_hh\" \n                        class=\"w3-check\" \n                        type=\"checkbox\" \n                        title = \"check: hh\"\n                        checked=\"true\">\n                        <label> <b>hh</b> </label>\n                    </div>\n                    <div id=\"vol_hh\" class=\"w3-col\" style=\"width:70px\">\n                        vol: 0.6\n                    </div>\n                    <div id=\"rand_hh\" class=\"w3-col\" style=\"width:70px\">\n                        % 0\n                    </div>\n                    <div id=\"pattern_hh\" class=\"w3-half\">\n                        pattern: #-#2#4#5#7#7#5#4#4\n                    </div>\n                </div>"
+        },
+        "string": {
+            "name": "string",
+            "isPlaying": true,
+            "rendered": true,
+            "html": "\n                <div id=\"inst_string\" class=\"w3-row\">\n                    <div class=\"w3-col\" style=\"width:120px\">\n                        <input \n                        id=\"check_string\" \n                        class=\"w3-check\" \n                        type=\"checkbox\" \n                        title = \"check: string\"\n                        checked=\"true\">\n                        <label> <b>string</b> </label>\n                    </div>\n                    <div id=\"vol_string\" class=\"w3-col\" style=\"width:70px\">\n                        vol: 0.6\n                    </div>\n                    <div id=\"rand_string\" class=\"w3-col\" style=\"width:70px\">\n                        % 0\n                    </div>\n                    <div id=\"pattern_string\" class=\"w3-half\">\n                        pattern: #12---#4#3#4#5-#22\n                    </div>\n                </div>"
+        }
+    }
+}

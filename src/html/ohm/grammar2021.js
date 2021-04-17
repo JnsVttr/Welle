@@ -33,8 +33,9 @@ livecode {
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
         | ":" phrase           	    --savePartEvent
-        | "/" PhraseList		    --deletEvent
+        | "/" PhraseList		    --deleteEvent
         | "save" phrase         	--saveEvent
+        | "delete" phrase         	--deleteWordEvent
         | "join" phrase 			--joinEvent
         | "restart" phrase      	--restartEvent
         | "store" phrase 			--storeEvent

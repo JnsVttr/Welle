@@ -12,7 +12,7 @@ import { App, Socket } from "/index";
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
     // show parser input
-    if (App.debug) console.log(`Parser input: ${JSON.stringify(input, null, 2)}`);
+    // if (App.debug) console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
 
     switch (input.event) {
         case "plainStartEvent":
@@ -70,6 +70,9 @@ export const parser = (input) => {
         case "deleteEvent":
             App.delete(input.phrases);
             break;
+        case "deleteWordEvent":
+            App.deletePreset(input.phrase);
+            break;
 
         case "deleteAllEvent":
             App.deleteAll();
@@ -87,7 +90,7 @@ export const parser = (input) => {
         case "storeEvent":
             const preset = App.createPreset(input.phrase);
             // console.log(`preset ${preset.name}: ${JSON.stringify(preset, null, 0)}`);
-            Socket.emit("storePreset", preset);
+            if (preset) Socket.emit("storePreset", preset);
             break;
 
         case "loadEvent":

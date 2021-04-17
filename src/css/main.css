@@ -33,6 +33,7 @@ body {
     word-wrap: break-word;
 }
 #consoleField {
+    margin-top: 15px;
     border: 1px solid rgb(112, 112, 112);
 }
 
