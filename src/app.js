@@ -14,6 +14,7 @@ class WelleApp {
     // general
     user = "local";
     id = "xxx";
+    session = [];
     #muteSound = false;
     #muteAlerts = false;
     #alerts = {};
@@ -38,6 +39,7 @@ class WelleApp {
     #bpmDiv = "input_bpm";
     #instListDiv = "listOfInstruments";
     #presetsDiv = "presets";
+    #sessionDiv = "session";
 
     //
     //
@@ -114,6 +116,19 @@ class WelleApp {
         this.#parts = this.#presets[name].parts;
         this.renderContent();
     }
+    updateUsers(users) {
+        if (this.user != "local") {
+            this.session = [];
+            this.session = users;
+        }
+        this.renderContent();
+    }
+    setUser(name) {
+        this.user = name;
+        this.session.push(name);
+        console.log(`new user name: ${name}`);
+        this.renderSession();
+    }
     //
     //
     //
@@ -140,9 +155,9 @@ class WelleApp {
             // check if result matches instruments and parts
             // ...
             // return semantic to parser
-            this.addToConsole({ valid: true, string: inputString });
+            this.addToConsole({ valid: true, string: inputString, user: this.user });
             parser(result.semantic);
-        } else this.addToConsole({ valid: false, string: inputString });
+        } else this.addToConsole({ valid: false, string: inputString, user: this.user });
 
         // clear Input
         document.getElementById("mainInput").value = "";
@@ -162,7 +177,13 @@ class WelleApp {
             return { valid: false, string: inputString, semantic: null };
         }
     };
-
+    handleRemoteInput(message) {
+        if (this.user != message.user) {
+            const result = this.#inputValidation(message.string);
+            this.addToConsole({ valid: true, string: message.string, user: message.user });
+            parser(result.semantic);
+        }
+    }
     //
     //
     //
@@ -227,7 +248,15 @@ class WelleApp {
             case true:
                 if (message.string == "") this.playAlert("return");
                 else {
-                    this.#consoleArray.push({ message: `${message.string}` });
+                    if (message.user == "local") {
+                        this.#consoleArray.push({ message: `${message.string}` });
+                    } else {
+                        // here if joined the session
+                        this.#consoleArray.push({ message: `${message.user}: ${message.string}` });
+                        if (message.user == this.user) {
+                            Socket.emit("sessionData", { user: this.user, string: message.string });
+                        }
+                    }
                     this.playAlert("return");
                 }
                 break;
@@ -252,13 +281,7 @@ class WelleApp {
         let pointer = 0;
         if (length > this.#consoleMaxLength) pointer = length - this.#consoleMaxLength;
         for (let i = pointer; i < length; i++) {
-            if (this.user == "local") {
-                html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
-            } else {
-                html += `<p id="consoleLine"><b>${this.user}: &nbsp;&nbsp;</b> ${
-                    this.#consoleArray[i].message
-                }</p>`;
-            }
+            html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
         }
         // render array to div
         document.getElementById(this.#consoleID).innerHTML = "";
@@ -686,6 +709,7 @@ class WelleApp {
                 valid: false,
                 string: name,
                 comment: "name reserved as instrument",
+                user: this.user,
             });
         } else {
             // init new part
@@ -743,7 +767,13 @@ class WelleApp {
             //         `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
             //     );
             if (this.#listOfAllInstruments[inst]) return inst;
-            else this.addToConsole({ valid: false, string: inst, comment: "no such instrument" });
+            else
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                    user: this.user,
+                });
         });
         // if (this.debug)
         //     console.log(
@@ -924,10 +954,20 @@ class WelleApp {
             this.renderInstruments();
             this.renderParts();
             this.renderInstrumentsOverview();
+            this.renderSession();
             document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
         }, 200);
     }
 
+    renderSession() {
+        if (this.user != "local") {
+            let html = "group: ";
+            this.session.map((entry) => {
+                html += `${entry} `;
+            });
+            document.getElementById(this.#sessionDiv).innerHTML = html;
+        }
+    }
     renderPresets() {
         let html = ``;
         Object.keys(this.#presets).forEach((preset) => {

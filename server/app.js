@@ -69,6 +69,7 @@ app.get("/", function (req, res) {
 // ======================================================================
 
 const clients = {};
+const users = [];
 
 io.on("connection", (socket) => {
     const date = new Date().toISOString().slice(0, 10);
@@ -82,6 +83,22 @@ io.on("connection", (socket) => {
     // HELLO MESSAGE
     socket.on("message", (message) => {
         if (debug) console.log(`socket on message: ${message.string}`);
+        io.sockets.emit("allUsers", { users: users });
+    });
+
+    // new user
+    socket.on("newUser", (message) => {
+        clients[socket.id].user = message.user;
+        if (!users[message.user]) users.push(message.user);
+        io.sockets.emit("allUsers", { users: users });
+    });
+
+    // session data
+    socket.on("sessionData", (message) => {
+        console.log(
+            `>> received session data from ${message.user}: ${message.string}. users: ${users}`
+        );
+        io.sockets.emit("sessionData", message);
     });
 
     // console input
@@ -146,6 +163,13 @@ io.on("connection", (socket) => {
                 if (err) throw err;
             });
         }
+        if (clients[socket.id].user) {
+            const index = users.indexOf(clients[socket.id].user);
+            if (index > -1) {
+                users.splice(index, 1);
+            }
+        }
+        io.sockets.emit("allUsers", { users: users });
         delete clients[socket.id];
         console.log(`deleted. client from clients: ${socket.id}`);
     });

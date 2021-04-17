@@ -82,6 +82,8 @@ export const parser = (input) => {
             break;
 
         case "joinEvent":
+            App.setUser(input.phrase);
+            Socket.emit("newUser", { user: input.phrase });
             break;
 
         case "restartEvent":

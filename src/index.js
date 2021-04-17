@@ -109,3 +109,14 @@ Socket.on("presets", (presets) => {
     console.log(`incoming presets: `, presets);
     App.storePresets(presets);
 });
+
+// SOCKET new User
+Socket.on("allUsers", (message) => {
+    console.log(`incoming all users: ${message.users}`);
+    App.updateUsers(message.users);
+});
+// SOCKET session data
+Socket.on("sessionData", (message) => {
+    console.log(`incoming session data: ${JSON.stringify(message)}`);
+    App.handleRemoteInput(message);
+});
