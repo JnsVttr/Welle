@@ -155,7 +155,7 @@ class WelleApp {
     }
     async handleRecord() {
         const value = window.document.getElementById("rec-button").value;
-        if (value == "REC") {
+        if (value == "RECORD") {
             console.log(`start recorder`);
             this.recorder.start();
             if (window.document.getElementById("file").innerHTML != "") {
@@ -167,7 +167,7 @@ class WelleApp {
             window.document.getElementById("rec-button").value = "STOP";
             document.getElementById("rec-button").classList.add("w3-red");
         } else {
-            window.document.getElementById("rec-button").value = "REC";
+            window.document.getElementById("rec-button").value = "RECORD";
             document.getElementById("rec-button").classList.remove("w3-red");
             console.log(`stop recorder`);
 
@@ -177,7 +177,7 @@ class WelleApp {
                 console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
                 document.getElementById(
                     "file"
-                ).innerHTML = `<a id="downloadFile" href="#">download audio file (webm)</a>`;
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();
