@@ -15,8 +15,8 @@ class WelleApp {
     user = "local";
     id = "xxx";
     session = [];
-    #muteSound = false;
-    #muteAlerts = false;
+    #playSound = false;
+    #playAlerts = true;
     #alerts = {};
     #toneStarted = false;
     #bpm = 120;
@@ -57,7 +57,15 @@ class WelleApp {
         this.setBpm({ bpm: this.#bpm });
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
-        this.renderConsole();
+
+        window.addEventListener("load", () => {
+            console.log(`Document window loaded.`);
+            this.renderConsole();
+            window.document.getElementById("checkAlerts").checked = this.#playAlerts;
+            window.document.getElementById(`checkAlerts`).addEventListener("click", (c) => {
+                this.handleAlerts(c.target.checked);
+            });
+        });
     }
 
     //
@@ -80,8 +88,8 @@ class WelleApp {
             debug state: ${this.debug}
             user: ${this.user}
             alerts: ${JSON.stringify(this.#alerts)}
-            muteSound: ${this.#muteSound}
-            muteAlerts: ${this.#muteAlerts}
+            muteSound: ${this.#playSound}
+            muteAlerts: ${this.#playAlerts}
 
             Tone:
             bpm: ${this.#bpm}
@@ -360,9 +368,12 @@ class WelleApp {
         }
     }
     playAlert(alertName) {
-        if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
+        if (this.#playAlerts) if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
     }
-
+    handleAlerts(checked) {
+        console.log(`Play Alerts. change to: ${checked}`);
+        this.#playAlerts = checked;
+    }
     //
     //
     //
