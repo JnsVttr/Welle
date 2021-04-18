@@ -23,11 +23,16 @@
             <div class="w3-row w3-padding-16">
                 <div class="w3-col m3">
                     <!-- <p><span class="w3-xlarge">WELLE</span></p> -->
-                    <h1>WELLE</h1>
+                    <a
+                        href="https:tangible.uber.space"
+                        title="WELLE music app"
+                        style="text-decoration: none"
+                        ><h1>WELLE</h1></a
+                    >
                 </div>
                 <div class="w3-col m2">
-                    <p><a href="#">Info</a></p>
-                    <p><a href="#">Tutorials</a></p>
+                    <p><a href="#welle-tutorial">Tutorials</a></p>
+                    <p><a href="#welle-info">Info</a></p>
                 </div>
                 <div class="w3-col m2">
                     <p>
@@ -43,12 +48,16 @@
             </div>
 
             <div class="w3-row linkRow">
-                <div class="w3-col m2 w3-text-gray">presets:</div>
+                <div class="w3-col m2 w3-text-gray">
+                    <h2 class="w3-medium">Presets:</h2>
+                </div>
                 <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
             </div>
 
             <div class="w3-row linkRow">
-                <div class="w3-col m2 w3-text-gray">instruments:</div>
+                <div class="w3-col m2 w3-text-gray">
+                    <h2 class="w3-medium">Instruments:</h2>
+                </div>
                 <div
                     id="listOfInstruments"
                     class="w3-col m10 w3-text-gray"
@@ -64,7 +73,8 @@
             >
                 <p id="console"></p>
 
-                <span class="w3-small w3-text-grey">console</span>
+                <!-- <span class="w3-small w3-text-grey">console</span> -->
+                <h2 class="w3-small w3-text-grey">console</h2>
                 <!-- console input field ==============================  -->
                 <input
                     id="mainInput"
@@ -82,7 +92,16 @@
                 <div id="instruments" class="w3-text-gray w3-small"></div>
             </div>
 
-            <!-- help display ==============================  -->
+            <!-- tutorial display ==============================  -->
+            <h2 id="welle-tutorial" class="w3-medium">TUTORIAL</h2>
+            <hr />
+            <div id="tutorial" class="w3-medium"></div>
+
+            <!-- info display ==============================  -->
+            <div style="padding-top: 200px; padding-bottom: 10px"></div>
+            <h2 id="welle-info" class="w3-medium">INFO</h2>
+            <hr />
+            <div id="info" class="w3-medium"></div>
         </div>
 
         <script type="text/javascript" src="./index.js"></script>

@@ -45,6 +45,7 @@ document.getElementById("mainDiv").addEventListener("keydown", (e) => {
 document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // ENTER - in main input field
     if (e.code == "Enter") {
+        App.tutorial = false;
         // get input string
         const input = document.getElementById("mainInput").value.toLowerCase();
         Socket.emit("consoleInput", { id: App.id, input: input });

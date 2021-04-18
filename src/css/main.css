@@ -6,6 +6,10 @@ body {
     /* color: white; */
 }
 
+h3 {
+    padding-top: 3em;
+    padding-bottom: 1em;
+}
 #mainInput:focus,
 #input:focus {
     background-color: #ffffff;
@@ -16,8 +20,8 @@ body {
     padding-left: 0.5em;
 }
 .linkRow {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+    /* padding-top: -0.2em !important;
+    padding-bottom: -0.2em !important; */
 }
 #mainInput {
     /* background: black; */
@@ -41,6 +45,7 @@ body {
 #consoleField {
     margin-top: 15px;
     border: 1px solid rgb(112, 112, 112);
+    margin-bottom: 300px !important;
 }
 
 #consoleLine {

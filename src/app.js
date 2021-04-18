@@ -3,6 +3,8 @@ import { livecode, semantics } from "/html/ohm/semantic2021";
 import { Instrument } from "/instrument";
 import { parser } from "/parser";
 import { Socket } from "/index";
+import { text } from "/text";
+import { tutorial } from "/tutorial";
 
 // ============================================
 // WELLE APP
@@ -15,6 +17,7 @@ class WelleApp {
     user = "local";
     id = "xxx";
     session = [];
+    tutorial = false;
     #playSound = false;
     #playAlerts = true;
     #alerts = {};
@@ -40,6 +43,8 @@ class WelleApp {
     #instListDiv = "listOfInstruments";
     #presetsDiv = "presets";
     #sessionDiv = "session";
+    #infoDiv = "info";
+    #tutorialDiv = "tutorial";
 
     //
     //
@@ -57,6 +62,8 @@ class WelleApp {
         this.setBpm({ bpm: this.#bpm });
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
+        // render info + tutorial
+        this.renderExternal();
 
         window.addEventListener("load", () => {
             console.log(`Document window loaded.`);
@@ -167,10 +174,12 @@ class WelleApp {
             parser(result.semantic);
         } else this.addToConsole({ valid: false, string: inputString, user: this.user });
 
-        // clear Input
-        document.getElementById("mainInput").value = "";
-        // FOCUS - focus back on textfield
-        document.getElementById("mainInput").focus();
+        if (!this.tutorial) {
+            // clear Input
+            document.getElementById("mainInput").value = "";
+            // FOCUS - focus back on textfield
+            document.getElementById("mainInput").focus();
+        }
     }
     #inputValidation = (inputString) => {
         // if input is valid
@@ -970,6 +979,30 @@ class WelleApp {
         }, 200);
     }
 
+    renderExternal() {
+        // info text
+        document.getElementById(this.#infoDiv).innerHTML = text.info;
+        // tutorial
+        let html = tutorial.start;
+        document.getElementById(this.#tutorialDiv).innerHTML = html;
+        // const checks = document.getElementsByTagName("input");
+        // console.log("these are the inputs: ", checks);
+        document.querySelectorAll(".tutorialInput").forEach((item) => {
+            item.addEventListener("keydown", (e) => {
+                if (e.code == "Enter") {
+                    window.welle.app.tutorial = true;
+                    const input = item.value.toLowerCase();
+                    console.log(`message from tutorial input: ${input}`);
+                    window.welle.app.handleMainInput(input);
+                    item.value = "";
+                    setTimeout(() => {
+                        window.welle.app.handleMainInput("/");
+                    }, 3000);
+                }
+            });
+        });
+    }
+
     renderSession() {
         if (this.user != "local") {
             let html = "group: ";
@@ -980,13 +1013,14 @@ class WelleApp {
         }
     }
     renderPresets() {
-        let html = ``;
+        let html = `<p>`;
         Object.keys(this.#presets).forEach((preset) => {
             html += `
             <a id="preset_${this.#presets[preset].name}" class="links" 
             title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a> 
             `;
         });
+        html += "</p>";
         // replace html content
         document.getElementById(this.#presetsDiv).innerHTML = "";
         document.getElementById(this.#presetsDiv).innerHTML += html;
@@ -1001,7 +1035,7 @@ class WelleApp {
     }
 
     renderInstrumentsOverview() {
-        let html = ``;
+        let html = `<p>`;
         Object.keys(this.#listOfAllInstruments).forEach((inst) => {
             // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
             html += `
@@ -1011,6 +1045,7 @@ class WelleApp {
             }</a> 
             `;
         });
+        html += "</p>";
         // replace html content
         document.getElementById(this.#instListDiv).innerHTML = "";
         document.getElementById(this.#instListDiv).innerHTML += html;
