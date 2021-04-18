@@ -22,7 +22,6 @@ const io = new Server(httpServer);
 // local resources
 // ===================
 const hostname = "localhost"; // const hostname = '127.0.0.1';
-// get paths and set __dirname (not there in es6)
 const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(moduleURL.pathname);
 const clientDir = path.join(__dirname, "../client/");
@@ -32,16 +31,6 @@ const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.js
 const historyURL = path.join(__dirname, "../data/history");
 const presetsURL = path.join(__dirname, "../data/presets");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
-
-// variables
-// ===================
-const debug = true;
-let baseUrl = "";
-// check, if server is local or on tangible.uber.space
-if (path.join(__dirname) != "/var/www/virtual/tangible/html/server")
-    baseUrl = "http://localhost:3000/";
-if (path.join(__dirname) == "/var/www/virtual/tangible/html/server")
-    baseUrl = "https://tangible.uber.space/";
 let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 
 // app folders + startpage
@@ -52,6 +41,13 @@ app.use("/alerts", express.static(alertsPath));
 app.get("/", function (req, res) {
     res.sendFile("index.html");
 });
+
+// let baseUrl = "";
+// // check, if server is local or on tangible.uber.space
+// if (path.join(__dirname) != "/var/www/virtual/tangible/html/server")
+//     baseUrl = "http://localhost:3000/";
+// if (path.join(__dirname) == "/var/www/virtual/tangible/html/server")
+//     baseUrl = "https://tangible.uber.space/";
 
 //
 //
