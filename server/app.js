@@ -28,6 +28,7 @@ const __dirname = path.dirname(moduleURL.pathname);
 const clientDir = path.join(__dirname, "../client/");
 const audioPath = path.join(__dirname, "../data/samples");
 const alertsPath = path.join(__dirname, "../data/alerts");
+const recorderPath = path.join(__dirname, "../data/recorder");
 const tonePresetsPath = path.join(__dirname, "../data/tonePresets/tonePresets.json");
 const historyURL = path.join(__dirname, "../data/history");
 const presetsURL = path.join(__dirname, "../data/presets");
@@ -49,6 +50,7 @@ let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 app.use(express.static(clientDir));
 app.use("/audio", express.static(audioPath));
 app.use("/alerts", express.static(alertsPath));
+app.use("/recorder", express.static(recorderPath));
 app.get("/", function (req, res) {
     res.sendFile("index.html");
 });
