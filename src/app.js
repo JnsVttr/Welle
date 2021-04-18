@@ -36,6 +36,9 @@ class WelleApp {
     #listOfInstruments = {};
     #listOfSamples = {};
     #listOfAllInstruments = {};
+    // recorder
+    recorder = new Tone.Recorder();
+    recording = undefined;
     // html
     #instDiv = "instruments";
     #partDiv = "parts";
@@ -62,15 +65,21 @@ class WelleApp {
         this.setBpm({ bpm: this.#bpm });
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
+        Instrument.masterGain.connect(this.recorder);
         // render info + tutorial
         this.renderExternal();
 
         window.addEventListener("load", () => {
             console.log(`Document window loaded.`);
             this.renderConsole();
+            // alerts
             window.document.getElementById("checkAlerts").checked = this.#playAlerts;
             window.document.getElementById(`checkAlerts`).addEventListener("click", (c) => {
                 this.handleAlerts(c.target.checked);
+            });
+            // record button
+            window.document.getElementById(`rec-button`).addEventListener("click", (c) => {
+                this.handleRecord();
             });
         });
     }
@@ -144,6 +153,48 @@ class WelleApp {
         console.log(`new user name: ${name}`);
         this.renderSession();
     }
+    async handleRecord() {
+        const value = window.document.getElementById("rec-button").value;
+        if (value == "REC") {
+            console.log(`start recorder`);
+            this.recorder.start();
+            if (window.document.getElementById("file").innerHTML != "") {
+                window.document.getElementById("file").innerHTML = "";
+                console.log(`id file not empty..`);
+                this.recording = undefined;
+            }
+
+            window.document.getElementById("rec-button").value = "STOP";
+            document.getElementById("rec-button").classList.add("w3-red");
+        } else {
+            window.document.getElementById("rec-button").value = "REC";
+            document.getElementById("rec-button").classList.remove("w3-red");
+            console.log(`stop recorder`);
+
+            if (this.recorder.state == "started") {
+                // the recorded audio is returned as a blob
+                this.recording = await this.recorder.stop();
+                console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
+                document.getElementById(
+                    "file"
+                ).innerHTML = `<a id="downloadFile" href="#">download audio file (webm)</a>`;
+                document.getElementById("downloadFile").addEventListener("click", (c) => {
+                    console.log(`file link clicked. date: ${new Date()}`);
+                    const recording = window.welle.app.getRecording();
+                    const url = URL.createObjectURL(recording);
+                    const anchor = document.createElement("a", { href: url }, "ANCHOR");
+                    anchor.download = "welle-record.webm";
+                    anchor.href = url;
+                    anchor.click();
+                    anchor.remove();
+                });
+            }
+        }
+    }
+    getRecording() {
+        return this.recording;
+    }
+
     //
     //
     //
