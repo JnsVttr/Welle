@@ -1,10 +1,10 @@
 import * as Tone from "tone";
 import { livecode, semantics } from "/html/ohm/semantic2021";
-import { Instrument } from "/instrument";
-import { parser } from "/parser";
+import { Instrument } from "/js/instrument";
+import { parser } from "/js/parser";
 import { Socket } from "/index";
-import { text } from "/text";
-import { tutorial } from "/tutorial";
+import { text } from "/js/text";
+import { tutorial } from "/js/tutorial";
 
 // ============================================
 // WELLE APP

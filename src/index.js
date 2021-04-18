@@ -14,7 +14,7 @@ global var naming: GlobalVar
 import io from "socket.io-client";
 import SocketIOFileClient from "socket.io-file-client";
 import "regenerator-runtime/runtime"; // for async functions with parcel bundler
-import { WelleApp } from "/app";
+import { WelleApp } from "/js/app";
 
 // global variables
 // ===================================
