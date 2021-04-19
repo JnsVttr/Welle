@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import WebMidi from "webmidi";
 
 // INSTRUMENT CLASS
 // ===================================================================
@@ -34,6 +35,7 @@ class Instrument {
 
     name = "Synth";
     isPlaying = false;
+    midiChan = 1;
     #pattern = Instrument.patternDefault;
     #synth = undefined;
     #sequence = undefined;
@@ -67,6 +69,7 @@ class Instrument {
         // `);
 
         this.name = message.name;
+        this.assignMidiChan(this.name);
         this.#rand = message.random || 0;
         this.#volume = message.volume || this.#volume;
 
@@ -120,6 +123,32 @@ class Instrument {
         random: ${this.#rand}
         basenote: ${this.#baseNote}
         `);
+    }
+
+    assignMidiChan(name) {
+        switch (name) {
+            case "kick":
+                this.midiChan = 1;
+                break;
+            case "snare":
+                this.midiChan = 2;
+                break;
+            case "hh":
+                this.midiChan = 3;
+                break;
+            case "bass":
+                this.midiChan = 4;
+                break;
+            case "string":
+                this.midiChan = 5;
+                break;
+            case "hit":
+                this.midiChan = 6;
+                break;
+            case "fx":
+                this.midiChan = 7;
+                break;
+        }
     }
 
     // PUBLIC FUNCTIONS - to use inside, prepend a 'this.'
@@ -244,17 +273,42 @@ class Instrument {
                 this.#createRandomPattern();
             }
         }
-        // external midi in time?
-        let transportTime = Tone.TransportTime().valueOf();
-        let diff = transportTime - Tone.Time(transportTime).quantize(1);
-        diff += 350;
-        setTimeout(() => {
-            Instrument.playMidiNote({ note: note, velocity: this.#volume });
-        }, diff);
+        // // external midi in time?
+        // const quant = Tone.Time(time).quantize(0.25) + 100;
+        // const webMidiTime = WebMidi.time / 1000;
+        // const immediate = Tone.immediate();
+        // const globalDiff = webMidiTime - Tone.now();
+        // const toneTime = Tone.Time().toSeconds(); //Tone.Time().toSeconds(); Tone.now()
+        // const transportSeconds = Tone.Transport.seconds;
+        // const inDiff = time - toneTime;
+        // const midiDiff = inDiff - globalDiff;
+        // const futureTime = webMidiTime + midiDiff + 20;
+        // const quantFuture = Tone.Time(futureTime).quantize(0.5);
+
+        // Instrument.playMidiNote({
+        //     note: note,
+        //     channel: this.midiChan,
+        //     velocity: this.#volume,
+        //     time: futureTime,
+        // });
+
+        // Tone.Transport.scheduleOnce((time) => {}, Tone.Transport.position);
+
         // console.log(`
-        // transportTime ${Tone.TransportTime().valueOf()}
-        // this.quant: ${this.#quant()}
-        // settimeout diff: ${diff} `);
+        // in: time ${Math.round(time * 1000) / 1000}
+        // Tone.now() ${Math.round(toneTime * 1000) / 1000}
+        // transport seconds: ${Math.round(transportSeconds * 1000) / 1000}
+        // immediate: ${Math.round(immediate * 1000) / 1000}
+        // inDiff ${Math.round(inDiff * 1000) / 1000}
+        // midiDiff: ${Math.round(midiDiff * 1000) / 1000}
+        // quantFuture: ${Math.round(quantFuture * 1000) / 1000}
+
+        // webMidiTime: ${Math.round(webMidiTime * 1000) / 1000}
+        // global rel time ${Math.round(globalDiff * 1000) / 1000}
+        // quant '16n': ${Math.round(quant * 1000) / 1000}
+        // tone position: ${Tone.Transport.position}
+
+        //         `);
     };
 
     #createRandomPattern() {

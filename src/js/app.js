@@ -19,7 +19,7 @@ class WelleApp {
     id = "xxx";
     session = [];
     tutorial = false;
-    #playSound = false;
+    #playSound = true;
     #playAlerts = true;
     #alerts = {};
     #toneStarted = false;
@@ -82,13 +82,19 @@ class WelleApp {
             window.document.getElementById(`checkAlerts`).addEventListener("click", (c) => {
                 this.handleAlerts(c.target.checked);
             });
+            // sound
+            window.document.getElementById("checkSound").checked = this.#playSound;
+            this.handleSound(this.#playSound);
+            window.document.getElementById(`checkSound`).addEventListener("click", (c) => {
+                this.handleSound(c.target.checked);
+            });
             // record button
             window.document.getElementById(`rec-button`).addEventListener("click", (c) => {
                 this.handleRecord();
             });
         });
 
-        this.startMIDI();
+        // this.startMIDI();
     }
 
     //
@@ -234,10 +240,13 @@ class WelleApp {
         const chan = message.channel || 5;
         const vel = message.velocity || 1;
         const dur = message.duration || 100;
+        const time = message.time || 0;
         // if MIDI device is connected
         if (MIDIOutput) {
             // console.log(`play MIDI note ${note}`);
-            window.welle.app.MIDIOutput.playNote(note, chan, { velocity: vel });
+            setTimeout(() => {
+                window.welle.app.MIDIOutput.playNote(note, chan, { velocity: vel });
+            }, time);
             setTimeout(() => {
                 window.welle.app.MIDIOutput.stopNote(note, chan);
             }, dur);
@@ -482,6 +491,12 @@ class WelleApp {
         console.log(`Play Alerts. change to: ${checked}`);
         this.#playAlerts = checked;
     }
+    handleSound(checked) {
+        console.log(`Play Sound. change to: ${checked}`);
+        this.#playSound = checked;
+        if (this.#playSound) Instrument.masterGain.gain.rampTo(0.8, 0.1);
+        else Instrument.masterGain.gain.rampTo(0, 0.1);
+    }
     //
     //
     //
@@ -501,7 +516,7 @@ class WelleApp {
             console.log(">> App started Tone on first Keydown");
 
             // extremly relevant to stability of Tone playback
-            Tone.context.lookAhead = 0.2;
+            Tone.context.lookAhead = 0.3;
         }
     }
     startTransport(time) {
