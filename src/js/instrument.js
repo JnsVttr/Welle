@@ -16,6 +16,7 @@ class Instrument {
     static patternDefault = [0]; // default = one hit
     static masterGain = new Tone.Gain(0.8); // master output for Tone -> Speaker
     static buffers = {}; // place for ToneBuffers
+    static playMidiNote = undefined;
     static presetSampler = {
         synthType: "Sampler",
         gain: 1,
@@ -24,7 +25,7 @@ class Instrument {
         transpose: 0,
         triggerFunction: {
             arguments: "_synth, _note, _time",
-            body: "_synth.triggerAttack(_note, '@16n')",
+            body: `_synth.triggerAttack(_note, '@16n');`,
         },
         settings: {
             C3: "./audio/hit/hit.mp3",
@@ -234,17 +235,26 @@ class Instrument {
     #callbackSequence = (time, note) => {
         this.#triggerFunction(this.#synth, note, time);
         this.#ticks++;
+        // random
         const events = this.#midiPattern.filter((x) => x); // (filter(x => x)) removes undefined/null/NaN from array
         const patternTicks = events.length;
-        // console.log(
-        //     `this ticks: ${this.#ticks}. events: ${events} And patternTicks: ${patternTicks}`
-        // );
         if (this.#rand > 0) {
             if (this.#ticks % (patternTicks * this.#rand) == 0) {
                 // console.log("rand: ", this.#rand);
                 this.#createRandomPattern();
             }
         }
+        // external midi in time?
+        let transportTime = Tone.TransportTime().valueOf();
+        let diff = transportTime - Tone.Time(transportTime).quantize(1);
+        diff += 350;
+        setTimeout(() => {
+            Instrument.playMidiNote({ note: note, velocity: this.#volume });
+        }, diff);
+        // console.log(`
+        // transportTime ${Tone.TransportTime().valueOf()}
+        // this.quant: ${this.#quant()}
+        // settimeout diff: ${diff} `);
     };
 
     #createRandomPattern() {

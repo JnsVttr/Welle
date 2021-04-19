@@ -35,6 +35,7 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // ============================================
 
 // focus on main input field: - maybe not to explore the whole site before..
+// for development
 document.getElementById("mainInput").focus();
 
 // start Tone.js on keydown

@@ -5,6 +5,7 @@ import { parser } from "/js/parser";
 import { Socket } from "/index";
 import { text } from "/js/text";
 import { tutorial } from "/js/tutorial";
+import WebMidi from "webmidi";
 
 // ============================================
 // WELLE APP
@@ -39,6 +40,9 @@ class WelleApp {
     // recorder
     recorder = new Tone.Recorder();
     recording = undefined;
+    // MIDI
+    selectedMIDIDevice = undefined;
+    MIDIOutput = undefined;
     // html
     #instDiv = "instruments";
     #partDiv = "parts";
@@ -66,6 +70,7 @@ class WelleApp {
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
         Instrument.masterGain.connect(this.recorder);
+        Instrument.playMidiNote = this.playMidiNote;
         // render info + tutorial
         this.renderExternal();
 
@@ -82,6 +87,8 @@ class WelleApp {
                 this.handleRecord();
             });
         });
+
+        this.startMIDI();
     }
 
     //
@@ -195,7 +202,47 @@ class WelleApp {
     getRecording() {
         return this.recording;
     }
+    startMIDI() {
+        WebMidi.enable(function (err) {
+            if (err) {
+                console.log("WebMidi could not be enabled.", err);
+            } else {
+                console.log("WebMidi enabled!");
+            }
+            window.welle.app.selectMIDIdevice("Pro40 MIDI");
+            setTimeout(() => {
+                window.welle.app.playMidiNote({});
+            }, 2000);
+        });
+    }
+    selectMIDIdevice(selectedName) {
+        // "Pro40 MIDI"
+        const midiOutputs = WebMidi.outputs;
+        midiOutputs.map((output) => {
+            const name = output.name;
+            if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
+            console.log(`MIDI devices: ${name}`);
+        });
+        if (this.MIDIOutput) console.log(`MIDI connected to ${this.MIDIOutput.name}`);
+    }
 
+    playMidiNote(message) {
+        // console.log(`play midi not message: ${JSON.stringify(message)}`);
+        // message.note, message.channel, message.velocity, message.duration
+        if (!message) message = {}; // if no message send, create empty object
+        const note = message.note || "C3";
+        const chan = message.channel || 5;
+        const vel = message.velocity || 1;
+        const dur = message.duration || 100;
+        // if MIDI device is connected
+        if (MIDIOutput) {
+            // console.log(`play MIDI note ${note}`);
+            window.welle.app.MIDIOutput.playNote(note, chan, { velocity: vel });
+            setTimeout(() => {
+                window.welle.app.MIDIOutput.stopNote(note, chan);
+            }, dur);
+        }
+    }
     //
     //
     //
