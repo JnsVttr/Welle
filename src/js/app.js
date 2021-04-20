@@ -11,6 +11,10 @@ import WebMidi from "webmidi";
 // WELLE APP
 // ============================================
 
+/*
+WEBMIDI API https://djipco.github.io/webmidi/latest/classes/Output.html#method_playNote
+*/
+
 class WelleApp {
     // debug
     debug = true;
@@ -94,7 +98,9 @@ class WelleApp {
             });
         });
 
-        this.startMIDI();
+        setTimeout(() => {
+            this.startMIDI();
+        }, 500);
     }
 
     //
@@ -215,7 +221,8 @@ class WelleApp {
             } else {
                 console.log("WebMidi enabled!");
             }
-            window.welle.app.selectMIDIdevice("Pro40 MIDI");
+            // window.welle.app.selectMIDIdevice("Pro40 MIDI");
+            window.welle.app.selectMIDIdevice("IAC-Treiber Bus 1");
             // setTimeout(() => {
             //     window.welle.app.playMidiNote({});
             // }, 2000);
@@ -250,7 +257,7 @@ class WelleApp {
                 velocity: vel,
                 duration: dur,
             });
-            // setTimeout(() => {}, time);
+
             // setTimeout(() => {
             //     window.welle.app.MIDIOutput.stopNote(note, chan);
             // }, dur);
