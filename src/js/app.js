@@ -19,7 +19,7 @@ class WelleApp {
     id = "xxx";
     session = [];
     tutorial = false;
-    #playSound = true;
+    #playSound = false;
     #playAlerts = true;
     #alerts = {};
     #toneStarted = false;
@@ -94,7 +94,7 @@ class WelleApp {
             });
         });
 
-        // this.startMIDI();
+        this.startMIDI();
     }
 
     //
@@ -216,9 +216,9 @@ class WelleApp {
                 console.log("WebMidi enabled!");
             }
             window.welle.app.selectMIDIdevice("Pro40 MIDI");
-            setTimeout(() => {
-                window.welle.app.playMidiNote({});
-            }, 2000);
+            // setTimeout(() => {
+            //     window.welle.app.playMidiNote({});
+            // }, 2000);
         });
     }
     selectMIDIdevice(selectedName) {
@@ -239,17 +239,21 @@ class WelleApp {
         const note = message.note || "C3";
         const chan = message.channel || 5;
         const vel = message.velocity || 1;
-        const dur = message.duration || 100;
+        const dur = message.duration || 200;
         const time = message.time || 0;
+        // console.log(`incoming MIDI time shift: ${time}`);
         // if MIDI device is connected
         if (MIDIOutput) {
             // console.log(`play MIDI note ${note}`);
-            setTimeout(() => {
-                window.welle.app.MIDIOutput.playNote(note, chan, { velocity: vel });
-            }, time);
-            setTimeout(() => {
-                window.welle.app.MIDIOutput.stopNote(note, chan);
-            }, dur);
+            window.welle.app.MIDIOutput.playNote(note, chan, {
+                time: time,
+                velocity: vel,
+                duration: dur,
+            });
+            // setTimeout(() => {}, time);
+            // setTimeout(() => {
+            //     window.welle.app.MIDIOutput.stopNote(note, chan);
+            // }, dur);
         }
     }
     //

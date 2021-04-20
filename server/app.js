@@ -9,7 +9,6 @@ import { Server } from "socket.io";
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { Server as NodeOscServer } from "node-osc";
 
 // app + server + sockets
 // ===========================
@@ -19,13 +18,6 @@ const port = process.env.PORT || 3000;
 // create a server with the app
 const httpServer = createServer(app);
 const io = new Server(httpServer);
-var oscServer = new NodeOscServer(port, "0.0.0.0", () => {
-    console.log("OSC Server is listening");
-});
-oscServer.on("message", function (msg) {
-    console.log(`Message: ${msg}`);
-    // oscServer.close();
-});
 
 // local resources
 // ===================

@@ -274,41 +274,49 @@ class Instrument {
             }
         }
         // // external midi in time?
-        // const quant = Tone.Time(time).quantize(0.25) + 100;
-        // const webMidiTime = WebMidi.time / 1000;
-        // const immediate = Tone.immediate();
-        // const globalDiff = webMidiTime - Tone.now();
-        // const toneTime = Tone.Time().toSeconds(); //Tone.Time().toSeconds(); Tone.now()
-        // const transportSeconds = Tone.Transport.seconds;
-        // const inDiff = time - toneTime;
-        // const midiDiff = inDiff - globalDiff;
-        // const futureTime = webMidiTime + midiDiff + 20;
-        // const quantFuture = Tone.Time(futureTime).quantize(0.5);
+        const quant = Tone.Time(time).quantize(0.25) + 100;
+        const webMidiTime = WebMidi.time / 1000;
+        const immediate = Tone.immediate();
+        const globalDiff = webMidiTime - Tone.now();
+        const toneTime = Tone.Time().toSeconds(); //Tone.Time().toSeconds(); Tone.now()
+        const transportSeconds = Tone.Transport.seconds;
+        const inDiff = toneTime - time;
+        const webDiff = WebMidi.time - time * 1000 + 20;
+        const midiDiff = inDiff - globalDiff;
+        const futureTime = midiDiff + 20;
+        const quantFuture = Tone.Time(futureTime).quantize(0.5);
 
-        // Instrument.playMidiNote({
-        //     note: note,
-        //     channel: this.midiChan,
-        //     velocity: this.#volume,
-        //     time: futureTime,
-        // });
+        const xTime = Tone.Time("@16n").toSeconds();
+        let sendTime = xTime * 1000 + 20;
+        // let sendTime = WebMidi.time + 1200;
+        // let sendTime = undefined;
+
+        Instrument.playMidiNote({
+            note: note,
+            channel: this.midiChan,
+            velocity: this.#volume,
+            time: sendTime,
+        });
 
         // Tone.Transport.scheduleOnce((time) => {}, Tone.Transport.position);
 
-        // console.log(`
-        // in: time ${Math.round(time * 1000) / 1000}
-        // Tone.now() ${Math.round(toneTime * 1000) / 1000}
-        // transport seconds: ${Math.round(transportSeconds * 1000) / 1000}
-        // immediate: ${Math.round(immediate * 1000) / 1000}
-        // inDiff ${Math.round(inDiff * 1000) / 1000}
-        // midiDiff: ${Math.round(midiDiff * 1000) / 1000}
-        // quantFuture: ${Math.round(quantFuture * 1000) / 1000}
+        console.log(`
+        webMidiTime: ${WebMidi.time}
+        send param time: ${sendTime}
+        in: time ${Math.round(time * 1000) / 1000}
+        Tone.now() ${Math.round(toneTime * 1000) / 1000}
+        transport seconds: ${Math.round(transportSeconds * 1000) / 1000}
+        immediate: ${Math.round(immediate * 1000) / 1000}
+        inDiff ${Math.round(inDiff * 1000) / 1000}
+        midiDiff: ${Math.round(midiDiff * 1000) / 1000}
+        quantFuture: ${Math.round(quantFuture * 1000) / 1000}
 
-        // webMidiTime: ${Math.round(webMidiTime * 1000) / 1000}
-        // global rel time ${Math.round(globalDiff * 1000) / 1000}
-        // quant '16n': ${Math.round(quant * 1000) / 1000}
-        // tone position: ${Tone.Transport.position}
+        webMidiTime: ${Math.round(webMidiTime * 1000) / 1000}
+        global rel time ${Math.round(globalDiff * 1000) / 1000}
+        quant '16n': ${Math.round(quant * 1000) / 1000}
+        tone position: ${Tone.Transport.position}
 
-        //         `);
+                `);
     };
 
     #createRandomPattern() {
