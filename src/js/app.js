@@ -96,11 +96,16 @@ class WelleApp {
             window.document.getElementById(`rec-button`).addEventListener("click", (c) => {
                 this.handleRecord();
             });
+            // Midi select
+            window.document.getElementById(`midiSelect`).addEventListener("click", (c) => {
+                // console.log(`select click.. ${c.target}`);
+                this.startMIDI();
+            });
+            window.document.getElementById(`midiSelect`).addEventListener("change", (c) => {
+                console.log(`select change.. ${c.target.value}`);
+                this.selectMIDIdevice(c.target.value);
+            });
         });
-
-        setTimeout(() => {
-            this.startMIDI();
-        }, 500);
     }
 
     //
@@ -215,18 +220,23 @@ class WelleApp {
         return this.recording;
     }
     startMIDI() {
-        WebMidi.enable(function (err) {
-            if (err) {
-                console.log("WebMidi could not be enabled.", err);
-            } else {
-                console.log("WebMidi enabled!");
-            }
-            // window.welle.app.selectMIDIdevice("Pro40 MIDI");
-            window.welle.app.selectMIDIdevice("IAC-Treiber Bus 1");
-            // setTimeout(() => {
-            //     window.welle.app.playMidiNote({});
-            // }, 2000);
-        });
+        if (WebMidi.state == undefined) {
+            WebMidi.enable(function (err) {
+                if (err) {
+                    console.log("WebMidi could not be enabled.", err);
+                } else {
+                    console.log("WebMidi enabled!");
+                }
+                const selectBox = window.document.getElementById("midiSelect");
+
+                WebMidi.outputs.map((output) => {
+                    console.log(`Midi out: ${output.name}`);
+                    let option = document.createElement("option");
+                    option.text = output.name;
+                    selectBox.add(option);
+                });
+            });
+        }
     }
     selectMIDIdevice(selectedName) {
         // "Pro40 MIDI"
@@ -234,13 +244,14 @@ class WelleApp {
         midiOutputs.map((output) => {
             const name = output.name;
             if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
-            console.log(`MIDI devices: ${name}`);
         });
         if (this.MIDIOutput) console.log(`MIDI connected to ${this.MIDIOutput.name}`);
     }
 
     playMidiNote(message) {
-        // console.log(`play midi not message: ${JSON.stringify(message)}`);
+        // console.log(
+        //     `play midi not message: ${message.note} to this midi out: ${window.welle.app.MIDIOutput}`
+        // );
         // message.note, message.channel, message.velocity, message.duration
         if (!message) message = {}; // if no message send, create empty object
         const note = message.note || "C3";
@@ -250,7 +261,7 @@ class WelleApp {
         const time = message.time || 0;
         // console.log(`incoming MIDI time shift: ${time}`);
         // if MIDI device is connected
-        if (MIDIOutput) {
+        if (window.welle.app.MIDIOutput != undefined) {
             // console.log(`play MIDI note ${note}`);
             window.welle.app.MIDIOutput.playNote(note, chan, {
                 time: time,

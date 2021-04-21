@@ -21,24 +21,25 @@
         <div id="mainDiv" class="w3-container w3-small w3-black mainCenter">
             <!-- top line  ==============================  -->
             <div class="w3-row w3-padding-16">
-                <div class="w3-col m3">
+                <div class="w3-col m3" style="margin-top: -0.8em">
                     <a
                         href="https:tangible.uber.space"
                         title="WELLE music app"
                         style="text-decoration: none"
-                        ><h1>WELLE</h1></a
+                        ><h1 class="w3-xxlarge" style="margin: 0px">WELLE</h1></a
                     >
-                </div>
-                <div class="w3-col m2">
-                    <p><a href="#welle-tutorial">Tutorials</a></p>
-                    <p><a href="#welle-info">Info</a></p>
+
+                    <p style="margin: 0">
+                        <a href="#welle-tutorial">Tutorials</a> / <a href="#welle-info">Info</a>
+                    </p>
                 </div>
                 <div class="w3-col m2">
                     <p>
                         <input id="checkAlerts" class="w3-check" type="checkbox" /><label>
                             <span>alerts</span>
                         </label>
-                        <br />
+                    </p>
+                    <p>
                         <!-- <span style="display: none"> -->
                         <span>
                             <input id="checkSound" class="w3-check" type="checkbox" /><label>
@@ -46,8 +47,21 @@
                             </label>
                         </span>
                     </p>
+                </div>
+                <div class="w3-col m2">
+                    <p>
+                        <select
+                            id="midiSelect"
+                            class="w3-border w3-round"
+                            name="midi"
+                            style="width: 110px"
+                        >
+                            <option value="" disabled selected>select midi</option>
+                        </select>
+                    </p>
                     <p>BPM: <span id="input_bpm" title="bpm"></span></p>
                 </div>
+
                 <div class="w3-col m2">
                     <p><span id="session"></span></p>
                 </div>
@@ -62,6 +76,9 @@
                         />
                     </p>
                     <p id="file"></p>
+                </div>
+                <div class="w3-col m2">
+                    <p></p>
                 </div>
             </div>
             <!-- top line  ==============================  -->
