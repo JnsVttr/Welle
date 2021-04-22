@@ -17,10 +17,10 @@
                 "type": "square"
             },
             "envelope": {
-                "attack": 0.001,
+                "attack": 0.2,
                 "decay": 0.4,
                 "sustain": 0.01,
-                "release": 1.4,
+                "release": 0.9,
                 "attackCurve": "exponential"
             }
         }

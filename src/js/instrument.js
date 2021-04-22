@@ -37,8 +37,15 @@ class Instrument {
     name = "Synth";
     isPlaying = false;
     midiChan = 1;
+    envSettings = {
+        attack: 0.1,
+        decay: 0.1,
+        sustain: 0.2,
+        release: 0.01,
+    }; // attk, dec, sus, rel
     #pattern = Instrument.patternDefault;
     #synth = undefined;
+    #envelope = undefined;
     #sequence = undefined;
     #ticks = 0;
     #rand = 0;
@@ -110,6 +117,7 @@ class Instrument {
             // this.printInfo();
         }
         // this.printInfo();
+        this.constantLog();
     }
 
     printInfo() {
@@ -124,6 +132,15 @@ class Instrument {
         random: ${this.#rand}
         basenote: ${this.#baseNote}
         `);
+    }
+    constantLog() {
+        const logEvent = new Tone.ToneEvent((time, chord) => {
+            // console.log(`loop to display or send data ${time}`);
+        });
+        logEvent.start();
+        // loop it every measure for 8 measures
+        logEvent.loop = true;
+        logEvent.loopEnd = "32n";
     }
 
     assignMidiChan(name) {
@@ -254,6 +271,7 @@ class Instrument {
     // init synth
     #initSynth = () => {
         this.#synth = new Tone[this.#type](this.#settings);
+        this.#synth.attack = 0.01;
     };
 
     // init a sequence

@@ -23,7 +23,7 @@ class WelleApp {
     id = "xxx";
     session = [];
     tutorial = false;
-    #playSound = false;
+    #playSound = true;
     #playAlerts = true;
     #alerts = {};
     #toneStarted = false;
@@ -287,7 +287,6 @@ class WelleApp {
     // handle main string input
     // ============================================
     handleMainInput(inputString) {
-        if (this.debug) console.log("");
         // reset console pointer for arrow navigation
         this.#consolePointer = 0;
         this.#consoleInput = inputString;
