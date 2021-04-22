@@ -47,6 +47,14 @@ class WelleApp {
     // MIDI
     selectedMIDIDevice = undefined;
     MIDIOutput = undefined;
+    // MIDI Interaction (name, vol, env, pattern, eq?)
+    selected = {
+        name: "",
+        vol: 1,
+        env: [0.1, 0.2, 0.3, 0.1],
+        eq: [],
+        pattern: [1, null, 1, null],
+    };
     // html
     #instDiv = "instruments";
     #partDiv = "parts";
@@ -586,6 +594,30 @@ class WelleApp {
     // Tone - plainStartInstruments
     // ============================================
 
+    setSelected(inst) {
+        this.selected.name = this.#instruments[inst].name;
+        this.selected.vol = this.#instruments[inst].getVolume();
+        this.selected.eq = this.#instruments[inst].getEq();
+        this.selected.env = this.#instruments[inst].getEnv();
+        this.selected.pattern = this.#instruments[inst].getPattern();
+        console.log(
+            `selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected, null, 2)}`
+        );
+        // <div id="inst_${inst}"
+        setTimeout(() => {
+            Object.keys(this.#instruments).forEach((instrument) => {
+                if (instrument == inst)
+                    window.document
+                        .getElementById(`inst_${instrument}`)
+                        .classList.add("selectedInst");
+                else
+                    window.document
+                        .getElementById(`inst_${instrument}`)
+                        .classList.remove("selectedInst");
+            });
+        }, 300);
+    }
+
     setBpm(message) {
         const bpm = Math.min(240, Math.max(1, message.bpm));
         // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
@@ -607,6 +639,7 @@ class WelleApp {
             checks.existingInstruments.map((instrument) => {
                 this.#instruments[instrument].setVolume(message.volume);
             });
+            this.setSelected(instrument);
         }
         this.renderContent();
     }
@@ -624,6 +657,7 @@ class WelleApp {
                 //         this.#instruments[instrument].isPlaying
                 //     }`
                 // );
+                this.setSelected(instrument);
             });
         }
         // stop Tone if nothing is playing anymore
@@ -733,12 +767,14 @@ class WelleApp {
             checks.newInstruments.map((inst) => {
                 message.name = inst;
                 this.createNewInstrument(message);
+                this.setSelected(inst);
             });
         if (checks.existingInstruments)
-            checks.existingInstruments.map((instrument) => {
-                this.#instruments[instrument].setPattern(message.pattern, message.rawPattern);
-                if (message.random) this.#instruments[instrument].random = message.random;
-                if (message.volume) this.#instruments[instrument].setVolume(message.volume);
+            checks.existingInstruments.map((inst) => {
+                this.#instruments[inst].setPattern(message.pattern, message.rawPattern);
+                if (message.random) this.#instruments[inst].random = message.random;
+                if (message.volume) this.#instruments[inst].setVolume(message.volume);
+                this.setSelected(inst);
             });
         this.startTransport();
         this.renderContent();
@@ -768,13 +804,14 @@ class WelleApp {
                 checks.newInstruments.map((inst) => {
                     message.name = inst;
                     this.createNewInstrument(message);
+                    this.setSelected(inst);
                 });
             // if existing, start them
             if (checks.existingInstruments)
-                checks.existingInstruments.map((instrument) => {
-                    this.#instruments[instrument].restart();
-                    if (message.random != null)
-                        this.#instruments[instrument].random = message.random;
+                checks.existingInstruments.map((inst) => {
+                    this.#instruments[inst].restart();
+                    if (message.random != null) this.#instruments[inst].random = message.random;
+                    this.setSelected(inst);
                 });
 
             this.startTransport();
@@ -1235,8 +1272,9 @@ class WelleApp {
 
                 // create HTML elements for appending
                 this.#instruments[inst].html = `
-                <div id="inst_${inst}" class="w3-row">
-                    <div class="w3-col" style="width:120px">
+                <div id="inst_${inst}" class="w3-row" 
+                style="padding-top: 3px; padding-left: 3px;">
+                    <div class="w3-col" style="width:120px;">
                         <input 
                         id="check_${this.#instruments[inst].name}" 
                         class="w3-check" 

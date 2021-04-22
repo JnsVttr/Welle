@@ -58,6 +58,11 @@ h3 {
     margin-left: 0.8em;
 }
 
+.selectedInst {
+    margin-left: -4px;
+    border-left: 4px solid white;
+}
+
 input[type="checkbox"] {
     width: 1rem;
     height: 1rem;

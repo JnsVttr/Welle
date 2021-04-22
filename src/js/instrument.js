@@ -45,7 +45,15 @@ class Instrument {
     }; // attk, dec, sus, rel
     #pattern = Instrument.patternDefault;
     #synth = undefined;
-    #envelope = undefined;
+    #envelope = [];
+    #eqSettings = {
+        high: 0,
+        highFrequency: 5000,
+        mid: 0,
+        lowFrequency: 400,
+        low: 0,
+    };
+    #eq = new Tone.EQ3();
     #sequence = undefined;
     #ticks = 0;
     #rand = 0;
@@ -244,13 +252,21 @@ class Instrument {
         this.#volume = volume;
         this.#gain.gain.rampTo(this.#volume, 0.1);
     }
+    getEq() {
+        return [this.#eqSettings];
+    }
+    getEnv() {
+        return this.#envelope;
+    }
 
     // PRIVATE FUNCTIONS - start with #
     // =========================================
     #createPreset() {
         // create Synth
         this.#initSynth();
-        this.#synth.connect(this.#gain);
+        // this.#synth.connect(this.#gain);
+        this.#synth.connect(this.#eq);
+        this.#eq.connect(this.#gain);
         // create sequence - the sequence calls the synth at time+note defined by the pattern
         this.#initSequence();
         this.start();
@@ -261,7 +277,9 @@ class Instrument {
         this.#settings.C3 = this.#buffer;
         // create Synth
         this.#initSynth();
-        this.#synth.connect(this.#gain);
+        // this.#synth.connect(this.#gain);
+        this.#synth.connect(this.#eq);
+        this.#eq.connect(this.#gain);
         // create sequence - the sequence calls the synth at time+note defined by the pattern
         this.#initSequence();
         this.start();
