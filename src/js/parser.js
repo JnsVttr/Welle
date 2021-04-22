@@ -52,7 +52,8 @@ export const parser = (input) => {
             break;
 
         case "questionEvent":
-            // nothing here yet
+            // App.setSelectedEq();
+            App.setEnvToSelected();
             break;
 
         case "setVolume":

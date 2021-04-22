@@ -255,8 +255,30 @@ class Instrument {
     getEq() {
         return [this.#eqSettings];
     }
+    setEq(message) {
+        this.#eqSettings.high = message.high;
+        this.#eqSettings.highFrequency = message.highFrequency;
+        this.#eqSettings.mid = message.mid;
+        this.#eqSettings.lowFrequency = message.lowFrequency;
+        this.#eqSettings.low = message.low;
+        this.#eq.set(this.#eqSettings);
+    }
     getEnv() {
         return this.#envelope;
+    }
+    setEnv(message) {
+        if (this.#type != "Sampler") {
+            // no envelope at Samplers
+            this.#envelope.atk = message.atk;
+            this.#envelope.dec = message.dec;
+            this.#envelope.sus = message.sus;
+            this.#envelope.rel = message.rel;
+
+            this.#synth.envelope.attack = this.#envelope.atk;
+            this.#synth.envelope.decay = this.#envelope.dec;
+            this.#synth.envelope.sustain = this.#envelope.sus;
+            this.#synth.envelope.release = this.#envelope.rel;
+        }
     }
 
     // PRIVATE FUNCTIONS - start with #

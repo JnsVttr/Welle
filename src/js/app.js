@@ -617,6 +617,33 @@ class WelleApp {
             });
         }, 300);
     }
+    setEqToSelected(message) {
+        console.log(`set selected instrument's EQ...`);
+        if (message == undefined) {
+            message = {
+                name: this.selected.name,
+                high: 0,
+                highFrequency: 5000,
+                mid: 0,
+                lowFrequency: 300,
+                low: -42,
+            };
+        }
+        this.#instruments[message.name].setEq(message);
+    }
+    setEnvToSelected(message) {
+        console.log(`set selected instrument's EQ...`);
+        if (message == undefined) {
+            message = {
+                name: this.selected.name,
+                atk: 0.01,
+                dec: 0.3,
+                sus: 0.2,
+                rel: 1.1,
+            };
+        }
+        this.#instruments[message.name].setEnv(message);
+    }
 
     setBpm(message) {
         const bpm = Math.min(240, Math.max(1, message.bpm));
