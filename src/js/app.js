@@ -47,6 +47,7 @@ class WelleApp {
     // MIDI
     selectedMIDIDevice = undefined;
     MIDIOutput = undefined;
+    MIDIInput = undefined;
     // MIDI Interaction (name, vol, env, pattern, eq?)
     selected = {
         name: "",
@@ -249,11 +250,18 @@ class WelleApp {
     selectMIDIdevice(selectedName) {
         // "Pro40 MIDI"
         const midiOutputs = WebMidi.outputs;
+        const midiInputs = WebMidi.inputs;
         midiOutputs.map((output) => {
             const name = output.name;
             if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
         });
-        if (this.MIDIOutput) console.log(`MIDI connected to ${this.MIDIOutput.name}`);
+        if (this.MIDIOutput) console.log(`MIDI Out connected to ${this.MIDIOutput.name}`);
+        // MIDIInput
+        midiInputs.map((input) => {
+            const name = input.name;
+            if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
+        });
+        if (this.MIDIInput) console.log(`MIDI In connected to ${this.MIDIInput.name}`);
     }
 
     playMidiNote(message) {
@@ -280,6 +288,28 @@ class WelleApp {
             // setTimeout(() => {
             //     window.welle.app.MIDIOutput.stopNote(note, chan);
             // }, dur);
+        }
+    }
+    sendMidiSelectedInstState() {
+        if (window.welle.app.MIDIInput != undefined) {
+            console.log(`send MIDI status for selected Instr.`);
+            /*
+            CC map, MIDI channel 1
+            Controller (max 120): 
+                1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
+                9       = volume (CC map 0.0-1.0 -> 0-127)
+                10-15   = EQ 5 values
+                16-20   = Env 4 values
+            */
+            // map function
+            const map = (value, x1, y1, x2, y2) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+            const vol = this.selected.vol;
+            // volume
+            window.welle.app.MIDIOutput.sendControlChange(
+                9, // cc controller
+                map(vol, 0, 1, 0, 126), // CC value
+                1 // channel
+            );
         }
     }
     //
@@ -600,9 +630,7 @@ class WelleApp {
         this.selected.eq = this.#instruments[inst].getEq();
         this.selected.env = this.#instruments[inst].getEnv();
         this.selected.pattern = this.#instruments[inst].getPattern();
-        console.log(
-            `selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected, null, 2)}`
-        );
+        console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
         // <div id="inst_${inst}"
         setTimeout(() => {
             Object.keys(this.#instruments).forEach((instrument) => {
@@ -616,6 +644,7 @@ class WelleApp {
                         .classList.remove("selectedInst");
             });
         }, 300);
+        this.sendMidiSelectedInstState();
     }
     setEqToSelected(message) {
         console.log(`set selected instrument's EQ...`);
@@ -665,8 +694,8 @@ class WelleApp {
         if (checks.existingInstruments) {
             checks.existingInstruments.map((instrument) => {
                 this.#instruments[instrument].setVolume(message.volume);
+                this.setSelected(instrument);
             });
-            this.setSelected(instrument);
         }
         this.renderContent();
     }
