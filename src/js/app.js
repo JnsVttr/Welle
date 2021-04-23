@@ -261,7 +261,10 @@ class WelleApp {
             const name = input.name;
             if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
         });
-        if (this.MIDIInput) console.log(`MIDI In connected to ${this.MIDIInput.name}`);
+        if (this.MIDIInput) {
+            console.log(`MIDI In connected to ${this.MIDIInput.name}`);
+            this.addMIDIInputListeners();
+        }
     }
 
     playMidiNote(message) {
@@ -312,6 +315,26 @@ class WelleApp {
             );
         }
     }
+
+    addMIDIInputListeners() {
+        // Listen for a 'note on' message on all channels
+        this.MIDIInput.addListener("noteon", "all", function (e) {
+            console.log("Received 'noteon' message (" + e.note.name + e.note.octave + ").");
+        });
+        // Listen to control change message on all channels
+        this.MIDIInput.addListener("controlchange", "all", function (e) {
+            console.log(
+                `Received 'controlchange' message. C: ${e.controller.number}, CC: ${e.value}`
+            );
+        });
+    }
+    /*
+    SuperCollider MIDI out Test:
+        MIDIClient.init;
+        m = MIDIOut.newByName("IAC-Treiber","Bus 1");
+        m.noteOn(16, 60, 60);
+        m.control(1, 15, 120)
+     */
     //
     //
     //
