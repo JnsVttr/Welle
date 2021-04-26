@@ -230,6 +230,8 @@ class WelleApp {
     getRecording() {
         return this.recording;
     }
+
+    // MIDI handling
     startMIDI() {
         if (WebMidi.state == undefined) {
             WebMidi.enable(function (err) {
@@ -270,9 +272,6 @@ class WelleApp {
     }
 
     playMidiNote(message) {
-        // console.log(
-        //     `play midi not message: ${message.note} to this midi out: ${window.welle.app.MIDIOutput}`
-        // );
         // message.note, message.channel, message.velocity, message.duration
         if (!message) message = {}; // if no message send, create empty object
         const note = message.note || "C3";
@@ -280,7 +279,6 @@ class WelleApp {
         const vel = message.velocity || 1;
         const dur = message.duration || 200;
         const time = message.time || 0;
-        // console.log(`incoming MIDI time shift: ${time}`);
         // if MIDI device is connected
         if (window.welle.app.MIDIOutput != undefined) {
             // console.log(`play MIDI note ${note}`);
@@ -289,12 +287,9 @@ class WelleApp {
                 velocity: vel,
                 duration: dur,
             });
-
-            // setTimeout(() => {
-            //     window.welle.app.MIDIOutput.stopNote(note, chan);
-            // }, dur);
         }
     }
+
     sendMidiSelectedInstState() {
         if (window.welle.app.MIDIInput != undefined) {
             console.log(`send MIDI status for selected Instr.`);
