@@ -65,7 +65,9 @@ class WelleApp {
     #sessionDiv = "session";
     #infoDiv = "info";
     #tutorialDiv = "tutorial";
-
+    // functions
+    // map function
+    map = (value, x1, y1, x2, y2) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
     //
     //
     //
@@ -304,37 +306,44 @@ class WelleApp {
                 10-15   = EQ 5 values
                 16-20   = Env 4 values
             */
-            // map function
-            const map = (value, x1, y1, x2, y2) => ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+
             const vol = this.selected.vol;
             // volume
             window.welle.app.MIDIOutput.sendControlChange(
                 9, // cc controller
-                map(vol, 0, 1, 0, 126), // CC value
+                window.welle.app.map(vol, 0, 1, 0, 126), // CC value
                 1 // channel
             );
         }
     }
 
     addMIDIInputListeners() {
-        // Listen for a 'note on' message on all channels
-        this.MIDIInput.addListener("noteon", "all", function (e) {
-            console.log("Received 'noteon' message (" + e.note.name + e.note.octave + ").");
-        });
         // Listen to control change message on all channels
-        this.MIDIInput.addListener("controlchange", "all", function (e) {
-            console.log(
-                `Received 'controlchange' message. C: ${e.controller.number}, CC: ${e.value}`
-            );
+        this.MIDIInput.addListener("controlchange", 2, function (e) {
+            const num = e.controller.number;
+            const val = e.value;
+            const round = (num) => Math.round(num * 100) / 100;
+            // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
+            if (num == 9) {
+                const vol = round(val / 126);
+                console.log(`In Volume: ${vol}`);
+            }
+            if (num >= 1 && num <= 8) {
+                const index = num - 1;
+                console.log(`In Pattern[${index}]: ${val}`);
+            }
+            if (num >= 10 && num <= 14) {
+                const index = num - 10;
+                const eq = round(val / 126);
+                console.log(`In Eq[${index}]: ${eq}`);
+            }
+            if (num >= 16 && num <= 19) {
+                const index = num - 16;
+                const env = round(val / 126);
+                console.log(`In Envelope[${index}]: ${env}`);
+            }
         });
     }
-    /*
-    SuperCollider MIDI out Test:
-        MIDIClient.init;
-        m = MIDIOut.newByName("IAC-Treiber","Bus 1");
-        m.noteOn(16, 60, 60);
-        m.control(1, 15, 120)
-     */
     //
     //
     //
