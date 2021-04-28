@@ -264,20 +264,20 @@ class Instrument {
         this.#eq.set(this.#eqSettings);
     }
     getEnv() {
-        return this.#envelope;
+        return this.envSettings;
     }
     setEnv(message) {
         if (this.#type != "Sampler") {
             // no envelope at Samplers
-            this.#envelope.atk = message.atk;
-            this.#envelope.dec = message.dec;
-            this.#envelope.sus = message.sus;
-            this.#envelope.rel = message.rel;
+            this.envSettings.attack = message.attack;
+            this.envSettings.decay = message.decay;
+            this.envSettings.sustain = message.sustain;
+            this.envSettings.release = message.release;
 
-            this.#synth.envelope.attack = this.#envelope.atk;
-            this.#synth.envelope.decay = this.#envelope.dec;
-            this.#synth.envelope.sustain = this.#envelope.sus;
-            this.#synth.envelope.release = this.#envelope.rel;
+            this.#synth.envelope.attack = this.envSettings.attack;
+            this.#synth.envelope.decay = this.envSettings.decay;
+            this.#synth.envelope.sustain = this.envSettings.sustain;
+            this.#synth.envelope.release = this.envSettings.release;
         }
     }
 

@@ -347,7 +347,6 @@ class WelleApp {
 
             // Send EQ
             // ==================================================
-            console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
             /*
             settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0} 
             eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
@@ -355,11 +354,12 @@ class WelleApp {
             map freq low: 0-2000 -> 0.0-0.5
             map freq high: 2000-8000 -> 0.5-1.0 
             */
-            const low = this.map(this.selected.eq.low, -24, 24, 0.0, 1.0);
-            const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 2000, 0.0, 0.5);
-            const mid = this.map(this.selected.eq.mid, -24, 24, 0.0, 1.0);
-            const highFreq = this.map(this.selected.eq.highFrequency, 2000, 13000, 0.5, 1.0);
-            const high = this.map(this.selected.eq.high, -24, 24, 0.0, 1.0);
+            console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
+            const low = this.map(this.selected.eq.low, -12, 12, 0.0, 1.0);
+            const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 1000, 0.0, 0.5);
+            const mid = this.map(this.selected.eq.mid, -12, 12, 0.0, 1.0);
+            const highFreq = this.map(this.selected.eq.highFrequency, 1000, 13000, 0.5, 1.0);
+            const high = this.map(this.selected.eq.high, -12, 12, 0.0, 1.0);
             console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
 
             const newEq = [high, highFreq, mid, lowFreq, low];
@@ -367,6 +367,21 @@ class WelleApp {
                 const cc = 14 - c;
                 eq = Math.round(eq * 100);
                 window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
+            });
+
+            // Send ENV
+            // ==================================================
+            console.log(`send MIDI env with this settings: ${JSON.stringify(this.selected.env)}`);
+            const newEnv = [
+                this.selected.env.attack,
+                this.selected.env.decay,
+                this.selected.env.sustain,
+                this.selected.env.release,
+            ];
+            newEnv.map((env, c) => {
+                const cc = 16 + c;
+                env = Math.round(env * 126);
+                window.welle.app.MIDIOutput.sendControlChange(cc, env, chan);
             });
         }
     }
@@ -424,14 +439,15 @@ class WelleApp {
 
                 let settings = selected.eq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
                 settings.name = selected.name;
-                if (index == 0) settings.low = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                if (index == 0) settings.low = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
                 if (index == 1)
-                    settings.lowFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 0, 2000);
-                if (index == 2) settings.mid = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                    settings.lowFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 0, 1000);
+                if (index == 2) settings.mid = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
                 if (index == 3)
-                    settings.highFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 2000, 13000);
-                if (index == 4) settings.high = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                    settings.highFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 1000, 13000);
+                if (index == 4) settings.high = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
                 window.welle.app.setEqToSelected(settings);
+                selected.eq = settings;
             }
 
             // ENVELOPE
@@ -439,6 +455,14 @@ class WelleApp {
                 const index = num - 16;
                 const env = round(val / 126);
                 console.log(`In Envelope[${index}]: ${env}`);
+                let envSettings = selected.env;
+                envSettings.name = selected.name;
+                if (index == 0) envSettings.attack = env;
+                if (index == 1) envSettings.decay = env;
+                if (index == 2) envSettings.sustain = env;
+                if (index == 3) envSettings.release = env;
+                window.welle.app.setEnvToSelected(envSettings);
+                selected.env = envSettings;
             }
         });
     }
