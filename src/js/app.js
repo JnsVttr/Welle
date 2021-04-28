@@ -117,6 +117,8 @@ class WelleApp {
                 this.selectMIDIdevice(c.target.value);
             });
         });
+
+        // TESTS
     }
 
     //
@@ -291,8 +293,13 @@ class WelleApp {
     }
 
     sendMidiSelectedInstState() {
+        // send on midi channel 2, receive on Midi channel 1
+        const chan = 2;
         if (window.welle.app.MIDIInput != undefined) {
-            console.log(`send MIDI status for selected Instr.`);
+            console.log(
+                `send MIDI status for selected Instr. on channel: ${chan} Selected:`,
+                this.selected
+            );
             /*
             CC map, MIDI channel 1
             Controller (max 120): 
@@ -302,36 +309,95 @@ class WelleApp {
                 16-20   = Env 4 values
             */
 
+            // Send Volume
             const vol = this.selected.vol;
-            // volume
             window.welle.app.MIDIOutput.sendControlChange(
                 9, // cc controller
                 window.welle.app.map(vol, 0, 1, 0, 126), // CC value
-                1 // channel
+                chan // channel
             );
+
+            // Send Pattern
+            const pattern = this.selected.pattern;
+            let newPattern = [];
+            // if pattern is less than 8 steps, add up to 8 steps, min length is one
+            if (pattern.length < 8) {
+                // join patterns 8 times, then reduce to 8 entries
+                for (let i = 0; i < 8; i++) {
+                    newPattern = newPattern.concat(pattern);
+                }
+                newPattern = newPattern.slice(0, 8);
+                console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
+            } else {
+                newPattern = pattern.slice(0, 8);
+                console.log(`pattern>=8: pattern: ${pattern}, new pattern: ${newPattern}`);
+            }
+            // send pattern midi messages
+            newPattern.map((e, c) => {
+                console.log(`send MIDI pattern e: ${e}, c: ${c}`);
+                const cc = 1 + c;
+                if (e == null) {
+                    window.welle.app.MIDIOutput.sendControlChange(cc, 0, chan);
+                } else {
+                    window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
+                }
+            });
         }
     }
 
     addMIDIInputListeners() {
-        // Listen to control change message on all channels
-        this.MIDIInput.addListener("controlchange", 2, function (e) {
+        // Listen to control change message
+        this.MIDIInput.addListener("controlchange", 1, function (e) {
             const num = e.controller.number;
             const val = e.value;
             const round = (num) => Math.round(num * 100) / 100;
+            const selected = window.welle.app.selected;
             // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
+
+            // VOLUME
             if (num == 9) {
                 const vol = round(val / 126);
-                console.log(`In Volume: ${vol}`);
+                console.log(`In Volume: ${vol} for inst: ${selected.name}`);
+                window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
             }
+
+            // PATTERN
             if (num >= 1 && num <= 8) {
                 const index = num - 1;
                 console.log(`In Pattern[${index}]: ${val}`);
+                // first calculate long pattern based on existing selected.pattern
+                // if shorter the 8, extend. otherwise just copy
+                const pattern = selected.pattern;
+                let newPattern = [];
+                if (selected.pattern.length < 8) {
+                    // join patterns 8 times, then reduce to 8 entries
+                    for (let i = 0; i < 8; i++) {
+                        newPattern = newPattern.concat(pattern);
+                    }
+                    newPattern = newPattern.slice(0, 8);
+                    console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
+                } else {
+                    newPattern = selected.pattern;
+                }
+                if (val == 0) newPattern[index] = null;
+                else newPattern[index] = 1;
+
+                const message = {
+                    instruments: [selected.name],
+                    pattern: newPattern,
+                    rawPattern: "external via midi",
+                };
+                window.welle.app.assignPattern(message);
             }
+
+            // EQ
             if (num >= 10 && num <= 14) {
                 const index = num - 10;
                 const eq = round(val / 126);
                 console.log(`In Eq[${index}]: ${eq}`);
             }
+
+            // ENVELOPE
             if (num >= 16 && num <= 19) {
                 const index = num - 16;
                 const env = round(val / 126);
@@ -650,6 +716,10 @@ class WelleApp {
     // ============================================
     // Tone - plainStartInstruments
     // ============================================
+    /*
+    whenever interaction with an instrument, set this.selected to this instrument, copying name, eq, env, pattern
+    mark it visually in page, send midi states
+    */
 
     setSelected(inst) {
         this.selected.name = this.#instruments[inst].name;
@@ -716,6 +786,7 @@ class WelleApp {
     // ============================================
 
     setVolume(message) {
+        console.log(`App.setVolume message: `, message);
         // checks for instruments
         const checks = this.checkInstruments(message.instruments);
         if (checks.existingInstruments) {
@@ -842,7 +913,7 @@ class WelleApp {
     // ============================================
 
     assignPattern(message) {
-        // if (this.debug) console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        console.log(`assignPattern. message: ${JSON.stringify(message)}`);
         // checks for instruments
         const checks = this.checkInstruments(message.instruments);
         // if there are new instruments, create them
