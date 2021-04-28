@@ -305,11 +305,12 @@ class WelleApp {
             Controller (max 120): 
                 1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
                 9       = volume (CC map 0.0-1.0 -> 0-127)
-                10-15   = EQ 5 values
-                16-20   = Env 4 values
+                10-14   = EQ 5 values
+                16-19   = Env 4 values
             */
 
             // Send Volume
+            // ==================================================
             const vol = this.selected.vol;
             window.welle.app.MIDIOutput.sendControlChange(
                 9, // cc controller
@@ -318,6 +319,7 @@ class WelleApp {
             );
 
             // Send Pattern
+            // ==================================================
             const pattern = this.selected.pattern;
             let newPattern = [];
             // if pattern is less than 8 steps, add up to 8 steps, min length is one
@@ -341,6 +343,30 @@ class WelleApp {
                 } else {
                     window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
                 }
+            });
+
+            // Send EQ
+            // ==================================================
+            console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
+            /*
+            settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0} 
+            eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
+            map band: -24 / 24 db -> 0.0/1.0
+            map freq low: 0-2000 -> 0.0-0.5
+            map freq high: 2000-8000 -> 0.5-1.0 
+            */
+            const low = this.map(this.selected.eq.low, -24, 24, 0.0, 1.0);
+            const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 2000, 0.0, 0.5);
+            const mid = this.map(this.selected.eq.mid, -24, 24, 0.0, 1.0);
+            const highFreq = this.map(this.selected.eq.highFrequency, 2000, 13000, 0.5, 1.0);
+            const high = this.map(this.selected.eq.high, -24, 24, 0.0, 1.0);
+            console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
+
+            const newEq = [high, highFreq, mid, lowFreq, low];
+            newEq.map((eq, c) => {
+                const cc = 14 - c;
+                eq = Math.round(eq * 100);
+                window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
             });
         }
     }
@@ -393,8 +419,19 @@ class WelleApp {
             // EQ
             if (num >= 10 && num <= 14) {
                 const index = num - 10;
-                const eq = round(val / 126);
-                console.log(`In Eq[${index}]: ${eq}`);
+                const eqVal = round(val / 126);
+                console.log(`In Eq[${index}]: ${eqVal}`);
+
+                let settings = selected.eq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+                settings.name = selected.name;
+                if (index == 0) settings.low = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                if (index == 1)
+                    settings.lowFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 0, 2000);
+                if (index == 2) settings.mid = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                if (index == 3)
+                    settings.highFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 2000, 13000);
+                if (index == 4) settings.high = window.welle.app.map(eqVal, 0.0, 1.0, -24, 24);
+                window.welle.app.setEqToSelected(settings);
             }
 
             // ENVELOPE

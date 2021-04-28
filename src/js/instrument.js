@@ -253,7 +253,7 @@ class Instrument {
         this.#gain.gain.rampTo(this.#volume, 0.1);
     }
     getEq() {
-        return [this.#eqSettings];
+        return this.#eqSettings;
     }
     setEq(message) {
         this.#eqSettings.high = message.high;
