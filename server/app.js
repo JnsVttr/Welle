@@ -171,9 +171,9 @@ io.on("connection", (socket) => {
 
 // start server
 // ================================
-httpServer.listen(port, hostname, () => {
+httpServer.listen(port, () => {
     console.log("");
-    console.log(`Serving running at http://${hostname}:${port}`);
+    console.log(`Serving running at ${hostname}:${port}`);
     console.log("");
 });
 // start OSC
