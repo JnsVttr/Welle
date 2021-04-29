@@ -1,0 +1,23 @@
+WELLE history - date: 2021-04-28
+
+kick #-- 
+hh #- 
+kick #- 
+hh 
+. 
+snare --#- 
+hh  
+kick #--- 
+hh -# 
+kick 0.7 
+kick 0.6 
+. 
+kick 0.6 
+kick #- 
+kick 0.6 
+kick #- 
+hh  
+kick #-- 
+. 
+hh 
+kick #- 
