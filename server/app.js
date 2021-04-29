@@ -24,17 +24,19 @@ const io = new Server(httpServer);
 let hostname = "localhost"; // const hostname = '127.0.0.1';
 let moduleURL = new URL(import.meta.url);
 let __dirname = path.dirname(moduleURL.pathname);
+let clientDir = path.join(__dirname, "../client/");
 
 // LOCAL
 if (path.join(__dirname) != "/var/www/virtual/tangible/html/server") {
     hostname = "localhost";
+    clientDir = path.join(__dirname, "../client/");
 }
 // WEBSITE
 if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
     hostname = "tangible.uber.space";
+    clientDir = path.join(__dirname, "../client_build/");
 }
 
-const clientDir = path.join(__dirname, "../client/");
 const audioPath = path.join(__dirname, "../data/samples");
 const alertsPath = path.join(__dirname, "../data/alerts");
 const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
