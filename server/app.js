@@ -40,7 +40,7 @@ app.use(express.static(clientDir));
 app.use("/audio", express.static(audioPath));
 app.use("/alerts", express.static(alertsPath));
 app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname, clientDir) + "/index.html");
+    res.sendFile("/index.html");
 });
 
 // let baseUrl = "";
