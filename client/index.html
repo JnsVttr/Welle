@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,900&display=swap" rel="stylesheet">
+        <link rel="shortcut icon" href="/favicon.9ba2a6b7.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.9ba2a6b7.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="/main.c52e0fe2.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <title>WELLE</title>
+
+        <script></script>
+    <script src="/main.c52e0fe2.js"></script></head>
+
+    <body class="w3-black">
+        <div id="mainDiv" class="w3-container w3-small w3-black mainCenter">
+            <!-- top line  ==============================  -->
+            <div class="w3-row w3-padding-16">
+                <div class="w3-col m3" style="margin-top: -0.8em">
+                    <a href="https:tangible.uber.space" title="WELLE music app" style="text-decoration: none"><h1 class="w3-xxlarge" style="margin: 0px">WELLE</h1></a>
+
+                    <p style="margin: 0">
+                        <a href="#welle-tutorial">Tutorials</a> / <a href="#welle-info">Info</a>
+                    </p>
+                </div>
+                <div class="w3-col m2">
+                    <p>
+                        <input id="checkAlerts" class="w3-check" type="checkbox"><label>
+                            <span>alerts</span>
+                        </label>
+                    </p>
+                    <p>
+                        <!-- <span style="display: none"> -->
+                        <span>
+                            <input id="checkSound" class="w3-check" type="checkbox"><label>
+                                <span>sound</span>
+                            </label>
+                        </span>
+                    </p>
+                </div>
+                <div class="w3-col m2">
+                    <p>
+                        <select id="midiSelect" class="w3-border w3-round" name="midi" style="width: 110px">
+                            <option value="" disabled="" selected="">select midi</option>
+                        </select>
+                    </p>
+                    <p>BPM: <span id="input_bpm" title="bpm"></span></p>
+                </div>
+
+                <div class="w3-col m2">
+                    <p><span id="session"></span></p>
+                </div>
+                <div class="w3-col m3">
+                    <p>
+                        <input id="rec-button" class="w3-button w3-round-large w3-border" type="button" value="RECORD" title="record audio by clicking the button">
+                    </p>
+                    <p id="file"></p>
+                </div>
+                <div class="w3-col m2">
+                    <p></p>
+                </div>
+            </div>
+            <!-- top line  ==============================  -->
+
+            <div class="w3-row linkRow">
+                <div class="w3-col m2 w3-text-gray">
+                    <h2 class="w3-medium">presets:</h2>
+                </div>
+                <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
+            </div>
+
+            <div class="w3-row linkRow">
+                <div class="w3-col m2 w3-text-gray">
+                    <h2 class="w3-medium">instruments:</h2>
+                </div>
+                <div id="listOfInstruments" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
+            </div>
+
+            <!-- console ==============================  -->
+            <div id="consoleField" title="console" class="w3-container w3-padding w3-black w3-medium">
+                <p id="console"></p>
+
+                <!-- <span class="w3-small w3-text-grey">console</span> -->
+                <h2 class="w3-medium w3-text-grey">console</h2>
+                <!-- console input field ==============================  -->
+                <input id="mainInput" type="text" size="50" title="console" autocomplete="off" value="">
+
+                <!-- parts display ==============================  -->
+                <div id="parts" class="w3-padding-16"></div>
+
+                <!-- instruments display ==============================  -->
+                <div id="instruments" class="w3-text-gray w3-small"></div>
+            </div>
+
+            <!-- tutorial display ==============================  -->
+            <h2 id="welle-tutorial" class="w3-medium">TUTORIAL</h2>
+            <hr>
+            <div id="tutorial" class="w3-medium"></div>
+
+            <!-- info display ==============================  -->
+            <div style="padding-top: 200px; padding-bottom: 10px"></div>
+            <h2 id="welle-info" class="w3-medium">INFO</h2>
+            <hr>
+            <div id="info" class="w3-medium"></div>
+        </div>
+
+        <script type="text/javascript" src="/src.e31bb0bc.js"></script>
+    </body>
+</html>
