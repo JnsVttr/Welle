@@ -32,7 +32,7 @@ if (path.join(__dirname) != "/var/www/virtual/tangible/html/server") {
 }
 // WEBSITE
 if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
-    __dirname = "/home/tangible/html";
+    // __dirname = "/home/tangible/html";
     hostname = "tangible.uber.space";
 }
 
