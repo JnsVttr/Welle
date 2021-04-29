@@ -24,6 +24,7 @@ const io = new Server(httpServer);
 const hostname = "localhost"; // const hostname = '127.0.0.1';
 const moduleURL = new URL(import.meta.url);
 const __dirname = path.dirname(moduleURL.pathname);
+console.log(`__dirname = ${__dirname}. Hostname = ${hostname}`);
 const clientDir = path.join(__dirname, "../client/");
 const audioPath = path.join(__dirname, "../data/samples");
 const alertsPath = path.join(__dirname, "../data/alerts");
