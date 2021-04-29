@@ -27,12 +27,10 @@ let __dirname = path.dirname(moduleURL.pathname);
 
 // LOCAL
 if (path.join(__dirname) != "/var/www/virtual/tangible/html/server") {
-    __dirname = path.dirname(moduleURL.pathname);
     hostname = "localhost";
 }
 // WEBSITE
 if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
-    // __dirname = "/home/tangible/html";
     hostname = "tangible.uber.space";
 }
 
