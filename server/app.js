@@ -23,7 +23,7 @@ const io = new Server(httpServer);
 // ===================
 let hostname = "localhost"; // const hostname = '127.0.0.1';
 let moduleURL = new URL(import.meta.url);
-let __dirname = "";
+let __dirname = path.dirname(moduleURL.pathname);
 
 // LOCAL
 if (path.join(__dirname) != "/var/www/virtual/tangible/html/server") {
