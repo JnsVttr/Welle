@@ -22,8 +22,19 @@ const io = new Server(httpServer);
 // local resources
 // ===================
 let hostname = "localhost"; // const hostname = '127.0.0.1';
-const moduleURL = new URL(import.meta.url);
-const __dirname = path.dirname(moduleURL.pathname);
+let moduleURL = new URL(import.meta.url);
+let __dirname = "";
+
+// LOCAL
+if (path.join(__dirname) != "/var/www/virtual/tangible/html/server") {
+    __dirname = path.dirname(moduleURL.pathname);
+    hostname = "localhost";
+}
+// WEBSITE
+if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
+    __dirname = "/home/tangible/html";
+    hostname = "tangible.uber.space";
+}
 
 const clientDir = path.join(__dirname, "../client/");
 const audioPath = path.join(__dirname, "../data/samples");
@@ -43,14 +54,6 @@ app.get("/", function (req, res) {
     res.sendFile(clientDir + "/index.html");
 });
 
-// let baseUrl = "";
-// // check, if server is local or on tangible.uber.space
-if (path.join(__dirname) != "/var/www/virtual/tangible/html/server")
-    // baseUrl = "http://localhost:3000/";
-    hostname = "localhost";
-if (path.join(__dirname) == "/var/www/virtual/tangible/html/server")
-    // baseUrl = "https://tangible.uber.space/";
-    hostname = "tangible.uber.space";
 console.log(`__dirname = ${__dirname}. Hostname = ${hostname}. port: ${port}`);
 //
 //
