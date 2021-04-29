@@ -12,7 +12,7 @@ import fs from "fs";
 
 // app + server + sockets
 // ===========================
-// create app - will be the app that points to client dir *
+// create app - will be the app that points to client dir
 const app = express();
 const port = process.env.PORT || 3000;
 // create a server with the app
