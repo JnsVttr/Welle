@@ -104,6 +104,13 @@ export const parser = (input) => {
         case "uploadEvent":
             break;
 
+        case "recordEvent":
+            const recordAction = input.phrase;
+            // console.log(`Record action: ${recordAction}`);
+            if (recordAction == "start") App.handleRecord();
+            if (recordAction == "stop") App.handleRecord();
+            break;
+
         case "muteAllEvent":
             break;
 

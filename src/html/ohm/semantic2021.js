@@ -111,6 +111,14 @@ semantics.addOperation("eval", {
             phrase: phrase,
         };
     },
+    Commands_recordEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = "recordEvent";
+        return {
+            event: event,
+            phrase: phrase,
+        };
+    },
     Commands_muteEvent: (_) => {
         let event = "muteAllEvent";
         return {

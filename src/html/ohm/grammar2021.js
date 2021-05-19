@@ -41,6 +41,7 @@ livecode {
         | "store" phrase 			--storeEvent
         | "load" phrase				--loadEvent
         | "upload" phrase 			--uploadEvent
+        | "record" phrase           --recordEvent
         | "mute"             		--muteEvent
         | "unmute"             		--unmuteEvent
         | ">"               		--playAllEvent
