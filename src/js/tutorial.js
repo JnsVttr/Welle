@@ -1,17 +1,10 @@
 export const tutorial = {};
 
 tutorial.start = `
-<h3 class="w3-medium">Overview</h3>
+
 
 <table style="width:100%">
-  <tr>
-    <td>start all:</td>
-    <td>></td>
-  </tr>
-  <tr>
-    <td>stop all:</td>
-    <td>.</td>
-  </tr>
+  
   <tr>
     <td>start instrument by name:</td>
     <td>drum</td>
@@ -24,14 +17,7 @@ tutorial.start = `
     <td>start with pattern: </td>
     <td>drum #-#-#--</td>
   </tr>
-  <tr>
-    <td>save part:   </td>
-    <td>: somepart</td>
-  </tr>
-  <tr>
-    <td>play part:  </td>
-    <td>somepart</td>
-  </tr>
+  
   <tr>
     <td>pattern with melody: </td>
     <td>drum #2 #4 #5 - #4 #3 #2</td>
@@ -57,6 +43,22 @@ tutorial.start = `
     <td>drum 0.5 #-#3#2#3--   %4</td>
   </tr>
   <tr>
+    <td>start all:</td>
+    <td>></td>
+  </tr>
+  <tr>
+    <td>stop all:</td>
+    <td>.</td>
+  </tr>
+  <tr>
+    <td>save part:   </td>
+    <td>: somepart</td>
+  </tr>
+  <tr>
+    <td>play part:  </td>
+    <td>somepart</td>
+  </tr>
+  <tr>
     <td>delete instrument or part: </td>
     <td>/ drum</td>
   </tr>
@@ -69,6 +71,12 @@ tutorial.start = `
     <td>/ </td>
   </tr>
 </table>
+`;
+
+/*
+
+<h3 class="w3-medium">Overview</h3>
+
 
 
 <h3 class="w3-medium">Start</h3>
@@ -118,4 +126,4 @@ tutorial.start = `
         value=""
     />
 </p>
-`;
+*/

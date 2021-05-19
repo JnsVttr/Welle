@@ -9,12 +9,59 @@
             rel="stylesheet"
         />
         <link rel="shortcut icon" href="/html/favicon/favicon.ico" type="image/x-icon" />
-        <link rel="icon" href="/html/favicon/favicon.ico" type="image/x-icon" />
+        <!-- <link rel="icon" href="/html/favicon/favicon.ico" type="image/x-icon" /> -->
         <link rel="stylesheet" type="text/css" href="/css/main.css" />
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-        <title>WELLE</title>
 
-        <script></script>
+        <!-- Primary Meta Tags -->
+        <title>WELLE - a web-based music environment</title>
+        <meta name="title" content="WELLE - a web-based music environment" />
+        <meta
+            name="description"
+            content="WELLE is a web-based music environment for blind and visually impaired musicians and was developed as part of the research project Tangible Signals by Jens Vetter, supervised by Martin Kaltenbrunner at the Tangible Music Lab, University of Art and Design Linz, Austria. The research project is funded with the DOC fellowship by the Austrian Academy of Sciences, starting June 2019."
+        />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tangible.uber.space/" />
+        <meta property="og:title" content="WELLE - a web-based music environment" />
+        <meta
+            property="og:description"
+            content="WELLE is a web-based music environment for blind and visually impaired musicians and was developed as part of the research project Tangible Signals by Jens Vetter, supervised by Martin Kaltenbrunner at the Tangible Music Lab, University of Art and Design Linz, Austria. The research project is funded with the DOC fellowship by the Austrian Academy of Sciences, starting June 2019."
+        />
+        <meta property="og:image" content="/html/favicon/welle.png" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://tangible.uber.space/" />
+        <meta property="twitter:title" content="WELLE - a web-based music environment" />
+        <meta
+            property="twitter:description"
+            content="WELLE is a web-based music environment for blind and visually impaired musicians and was developed as part of the research project Tangible Signals by Jens Vetter, supervised by Martin Kaltenbrunner at the Tangible Music Lab, University of Art and Design Linz, Austria. The research project is funded with the DOC fellowship by the Austrian Academy of Sciences, starting June 2019."
+        />
+        <meta property="twitter:image" content="/html/favicon/welle.png" />
+
+        <link rel="apple-touch-icon" sizes="57x57" href="/html/favicon/apple-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="/html/favicon/apple-icon-60x60.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/html/favicon/apple-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="/html/favicon/apple-icon-76x76.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/html/favicon/apple-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/html/favicon/apple-icon-120x120.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/html/favicon/apple-icon-144x144.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/html/favicon/apple-icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/html/favicon/apple-icon-180x180.png" />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="192x192"
+            href="/html/favicon/android-icon-192x192.png"
+        />
+        <link rel="icon" type="image/png" sizes="32x32" href="/html/favicon/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/html/favicon/favicon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/html/favicon/favicon-16x16.png" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-TileImage" content="/html/favicon/ms-icon-144x144.png" />
+        <meta name="theme-color" content="#ffffff" />
     </head>
 
     <body class="w3-black">
@@ -30,7 +77,7 @@
                     >
 
                     <p style="margin: 0">
-                        <a href="#welle-tutorial">Tutorials</a> / <a href="#welle-info">Info</a>
+                        <a href="#welle-tutorial">Tutorial</a> / <a href="#welle-info">Info</a>
                     </p>
                 </div>
                 <div class="w3-col m2">
@@ -85,20 +132,20 @@
 
             <div class="w3-row linkRow">
                 <div class="w3-col m2 w3-text-gray">
-                    <h2 class="w3-medium">presets:</h2>
-                </div>
-                <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
-            </div>
-
-            <div class="w3-row linkRow">
-                <div class="w3-col m2 w3-text-gray">
-                    <h2 class="w3-medium">instruments:</h2>
+                    <h2 class="w3-medium">sounds:</h2>
                 </div>
                 <div
                     id="listOfInstruments"
                     class="w3-col m10 w3-text-gray"
                     title="list of instruments"
                 ></div>
+            </div>
+
+            <div class="w3-row linkRow">
+                <div class="w3-col m2 w3-text-gray">
+                    <h2 class="w3-medium">presets:</h2>
+                </div>
+                <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
             </div>
 
             <!-- console ==============================  -->
@@ -137,7 +184,42 @@
             <div style="padding-top: 200px; padding-bottom: 10px"></div>
             <h2 id="welle-info" class="w3-medium">INFO</h2>
             <hr />
-            <div id="info" class="w3-medium"></div>
+            <div id="info" class="w3-medium">
+                <p>
+                    WELLE is a web-based music environment and was developed as part of the research
+                    project Tangible Signals by Jens Vetter, supervised by Martin Kaltenbrunner at
+                    the Tangible Music Lab, University of Art and Design Linz, Austria. The research
+                    project is funded with the DOC fellowship by the Austrian Academy of Sciences,
+                    starting June 2019.
+                </p>
+
+                <br />
+
+                <p>(this website works best with the Google Chrome Browser)</p>
+
+                <br />
+
+                <p>
+                    project website:
+                    <a
+                        href="https://tamlab.ufg.at/projects/tangible-signals/"
+                        title="go to Tangible Music Lab's website tamlab.ufg.at"
+                    >
+                        https://tamlab.ufg.at/projects/tangible-signals
+                    </a>
+                </p>
+
+                <p>
+                    source code:
+                    <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code"
+                        >https://github.com/JnsVttr/Welle</a
+                    >
+                </p>
+
+                <br />
+
+                <p>© Jens Vetter, 2021</p>
+            </div>
         </div>
 
         <script type="text/javascript" src="./index.js"></script>

@@ -1369,7 +1369,7 @@ class WelleApp {
 
     renderExternal() {
         // info text
-        document.getElementById(this.#infoDiv).innerHTML = text.info;
+        // document.getElementById(this.#infoDiv).innerHTML = text.info;
         // tutorial
         let html = tutorial.start;
         document.getElementById(this.#tutorialDiv).innerHTML = html;
