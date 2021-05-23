@@ -20,6 +20,7 @@ export const parser = (input) => {
                 instruments: input.phrases,
                 random: input.random,
             });
+            App.sendMidiSelectedInstState();
             break;
 
         case "assignPattern":
@@ -30,6 +31,9 @@ export const parser = (input) => {
                 volume: input.volume[0],
                 random: input.random,
             });
+            setTimeout(() => {
+                App.sendMidiSelectedInstState();
+            }, 100);
             break;
 
         case "copyPattern":
@@ -37,6 +41,7 @@ export const parser = (input) => {
                 source: [input.source],
                 destinations: input.phrases,
             });
+            App.sendMidiSelectedInstState();
             break;
 
         case "playAllEvent":
@@ -58,6 +63,7 @@ export const parser = (input) => {
 
         case "setVolume":
             App.setVolume({ instruments: input.phrases, volume: input.volume });
+            App.sendMidiSelectedInstState();
             break;
 
         case "savePartEvent":

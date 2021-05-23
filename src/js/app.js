@@ -396,74 +396,77 @@ class WelleApp {
             const selected = window.welle.app.selected;
             // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
 
-            // VOLUME
-            if (num == 9) {
-                const vol = round(val / 126);
-                console.log(`In Volume: ${vol} for inst: ${selected.name}`);
-                window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
-            }
-
-            // PATTERN
-            if (num >= 1 && num <= 8) {
-                const index = num - 1;
-                console.log(`In Pattern[${index}]: ${val}`);
-                // first calculate long pattern based on existing selected.pattern
-                // if shorter the 8, extend. otherwise just copy
-                const pattern = selected.pattern;
-                let newPattern = [];
-                if (selected.pattern.length < 8) {
-                    // join patterns 8 times, then reduce to 8 entries
-                    for (let i = 0; i < 8; i++) {
-                        newPattern = newPattern.concat(pattern);
-                    }
-                    newPattern = newPattern.slice(0, 8);
-                    console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
-                } else {
-                    newPattern = selected.pattern;
+            // only assign, if some instrument is selected
+            if (selected.name != "") {
+                // VOLUME
+                if (num == 9) {
+                    const vol = round(val / 126);
+                    console.log(`In Volume: ${vol} for inst: ${selected.name}`);
+                    window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
                 }
-                if (val == 0) newPattern[index] = null;
-                else newPattern[index] = 1;
 
-                const message = {
-                    instruments: [selected.name],
-                    pattern: newPattern,
-                    rawPattern: "external via midi",
-                };
-                window.welle.app.assignPattern(message);
-            }
+                // PATTERN
+                if (num >= 1 && num <= 8) {
+                    const index = num - 1;
+                    console.log(`In Pattern[${index}]: ${val}`);
+                    // first calculate long pattern based on existing selected.pattern
+                    // if shorter the 8, extend. otherwise just copy
+                    const pattern = selected.pattern;
+                    let newPattern = [];
+                    if (selected.pattern.length < 8) {
+                        // join patterns 8 times, then reduce to 8 entries
+                        for (let i = 0; i < 8; i++) {
+                            newPattern = newPattern.concat(pattern);
+                        }
+                        newPattern = newPattern.slice(0, 8);
+                        console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
+                    } else {
+                        newPattern = selected.pattern;
+                    }
+                    if (val == 0) newPattern[index] = null;
+                    else newPattern[index] = 1;
 
-            // EQ
-            if (num >= 10 && num <= 14) {
-                const index = num - 10;
-                const eqVal = round(val / 126);
-                console.log(`In Eq[${index}]: ${eqVal}`);
+                    const message = {
+                        instruments: [selected.name],
+                        pattern: newPattern,
+                        rawPattern: "external via midi",
+                    };
+                    window.welle.app.assignPattern(message);
+                }
 
-                let settings = selected.eq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
-                settings.name = selected.name;
-                if (index == 0) settings.low = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
-                if (index == 1)
-                    settings.lowFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 0, 1000);
-                if (index == 2) settings.mid = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
-                if (index == 3)
-                    settings.highFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 1000, 13000);
-                if (index == 4) settings.high = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
-                window.welle.app.setEqToSelected(settings);
-                selected.eq = settings;
-            }
+                // EQ
+                if (num >= 10 && num <= 14) {
+                    const index = num - 10;
+                    const eqVal = round(val / 126);
+                    console.log(`In Eq[${index}]: ${eqVal}`);
 
-            // ENVELOPE
-            if (num >= 16 && num <= 19) {
-                const index = num - 16;
-                const env = round(val / 126);
-                console.log(`In Envelope[${index}]: ${env}`);
-                let envSettings = selected.env;
-                envSettings.name = selected.name;
-                if (index == 0) envSettings.attack = env;
-                if (index == 1) envSettings.decay = env;
-                if (index == 2) envSettings.sustain = env;
-                if (index == 3) envSettings.release = env;
-                window.welle.app.setEnvToSelected(envSettings);
-                selected.env = envSettings;
+                    let settings = selected.eq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+                    settings.name = selected.name;
+                    if (index == 0) settings.low = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
+                    if (index == 1)
+                        settings.lowFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 0, 1000);
+                    if (index == 2) settings.mid = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
+                    if (index == 3)
+                        settings.highFrequency = window.welle.app.map(eqVal, 0.0, 1.0, 1000, 13000);
+                    if (index == 4) settings.high = window.welle.app.map(eqVal, 0.0, 1.0, -12, 12);
+                    window.welle.app.setEqToSelected(settings);
+                    selected.eq = settings;
+                }
+
+                // ENVELOPE
+                if (num >= 16 && num <= 19) {
+                    const index = num - 16;
+                    const env = round(val / 126);
+                    console.log(`In Envelope[${index}]: ${env}`);
+                    let envSettings = selected.env;
+                    envSettings.name = selected.name;
+                    if (index == 0) envSettings.attack = env;
+                    if (index == 1) envSettings.decay = env;
+                    if (index == 2) envSettings.sustain = env;
+                    if (index == 3) envSettings.release = env;
+                    window.welle.app.setEnvToSelected(envSettings);
+                    selected.env = envSettings;
+                }
             }
         });
     }
@@ -784,6 +787,10 @@ class WelleApp {
     */
 
     setSelected(inst) {
+        // only if inst was not selected before:
+        // if (this.selected.name != this.#instruments[inst].name) {
+
+        // }
         this.selected.name = this.#instruments[inst].name;
         this.selected.vol = this.#instruments[inst].getVolume();
         this.selected.eq = this.#instruments[inst].getEq();
@@ -803,8 +810,9 @@ class WelleApp {
                         .classList.remove("selectedInst");
             });
         }, 300);
-        this.sendMidiSelectedInstState();
+        // this.sendMidiSelectedInstState();
     }
+
     setEqToSelected(message) {
         console.log(`set selected instrument's EQ...`);
         if (message == undefined) {
