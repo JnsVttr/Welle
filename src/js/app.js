@@ -366,7 +366,7 @@ class WelleApp {
             const newEq = [high, highFreq, mid, lowFreq, low];
             newEq.map((eq, c) => {
                 const cc = 14 - c;
-                eq = Math.round(eq * 100);
+                eq = Math.round(eq * 126);
                 window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
             });
 
