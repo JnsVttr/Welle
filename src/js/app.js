@@ -13,22 +13,30 @@ import WebMidi from "webmidi";
 
 /*
 WEBMIDI API https://djipco.github.io/webmidi/latest/classes/Output.html#method_playNote
-*
+
+
+Structure of App:
+grid = main storage array for note events of the sample-based instruments (sampler). 
+        depends on how many samples are loaded. max 14 samples.
+
+
+
+
+
 */
 
 class WelleApp {
     // debug
     debug = true;
+
     // general
     user = "local";
     id = "xxx";
     session = [];
     tutorial = false;
-    #playSound = true;
-    #playAlerts = true;
-    #alerts = {};
+
     #toneStarted = false;
-    #bpm = 120;
+    bpm = 120;
     // console
     #consoleInput = "";
     #consolePointer = 0;
@@ -36,12 +44,15 @@ class WelleApp {
     #consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
     #consoleID = "console";
     // sound
-    #presets = {};
-    #instruments = {};
-    #parts = {};
-    #listOfInstruments = {};
-    #listOfSamples = {};
-    #listOfAllInstruments = {};
+    #playSound = true; // bool html
+    #playAlerts = true; // bool html
+    #alerts = {}; // incoming alerts list from server
+    samples = []; // incoming sample list from server
+    instruments = []; // create instruments based on the samples list
+    grid = undefined;
+    beat = 0;
+    parts = {}; // storage for all the saved parts
+
     // recorder
     recorder = new Tone.Recorder();
     recording = undefined;
@@ -68,7 +79,7 @@ class WelleApp {
     #partDiv = "parts";
     #bpmDiv = "input_bpm";
     #instListDiv = "listOfInstruments";
-    #presetsDiv = "presets";
+    // #presetsDiv = "presets";
     #sessionDiv = "session";
     #infoDiv = "info";
     #tutorialDiv = "tutorial";
@@ -77,7 +88,6 @@ class WelleApp {
     map = (value, x1, y1, x2, y2) =>
         Math.round((((value - x1) * (y2 - x2)) / (y1 - x1) + x2) * 100) / 100;
 
-    // new step sequencer data
     //
     //
     //
@@ -86,19 +96,24 @@ class WelleApp {
     //
     //
     //
+
+    // construct "App" and evaluate functions
 
     constructor() {
         // print some info
         this.printInfo();
+
         // set initial BPM and render to Page
-        this.setBpm({ bpm: this.#bpm });
+        this.setBpm({ bpm: this.bpm });
+
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
         Instrument.masterGain.connect(this.recorder);
-        Instrument.playMidiNote = this.playMidiNote;
+        // Instrument.playMidiNote = this.playMidiNote;
         // render info + tutorial
-        this.renderExternal();
+        // this.renderExternal();
 
+        // window eventlisteners
         window.addEventListener("load", () => {
             console.log(`Document window loaded.`);
             this.renderConsole();
@@ -127,8 +142,6 @@ class WelleApp {
                 this.selectMIDIdevice(c.target.value);
             });
         });
-
-        // TESTS
     }
 
     //
@@ -153,405 +166,1036 @@ class WelleApp {
             alerts: ${JSON.stringify(this.#alerts)}
             muteSound: ${this.#playSound}
             muteAlerts: ${this.#playAlerts}
+            instruments: ${JSON.stringify(this.instruments)}
+            samples: ${JSON.stringify(this.samples)}
 
             Tone:
-            bpm: ${this.#bpm}
+            bpm: ${this.bpm}
 
         `);
     }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // Communication with Server, basic setup
+    // ============================================
+    // get samples and alerts as file paths, and store in local objects (name, file, path, buffer)
+    // add alert players
+    // return number of files for controlling further actions
+    // once all samples are arrived, start instrument creation
+    //
+
     getAlertsNum() {
         if (Object.keys(this.#alerts).length == 0) return 0;
-        else return this.#alerts.length;
+        else return Object.keys(this.#alerts).length;
     }
+
     getSamplesNum() {
-        if (Object.keys(this.#listOfSamples).length == 0) return 0;
-        else return this.#listOfSamples.length;
+        if (Object.keys(this.samples).length == 0) return 0;
+        else return Object.keys(this.samples).length;
     }
-    getInstrumentsNum() {
-        if (Object.keys(this.#listOfInstruments).length == 0) return 0;
-        else return this.#listOfInstruments.length;
-    }
-    createPreset(name) {
-        const preset = { name: name, parts: this.#parts, instruments: this.#instruments };
-        return preset;
-    }
-    storePresets(presets) {
-        presets.map((preset) => {
-            const name = preset.name;
-            this.#presets[name] = preset;
+
+    addSamples(files) {
+        files.map((file) => {
+            const name = file.split(".")[0];
+            const path = `/audio/${file}`;
+            const buffer = new Tone.ToneAudioBuffer(path, () => {});
+            const content = {
+                name: name,
+                file: file,
+                path: path,
+                buffer: buffer,
+            };
+            this.samples.push(content);
         });
-        // console.log(`this.#presets stored: ${JSON.stringify(this.#presets)}`);
-        this.renderPresets();
-    }
-    loadPreset(name) {
-        this.#parts = this.#presets[name].parts;
-        this.renderContent();
-    }
-    updateUsers(users) {
-        if (this.user != "local") {
-            this.session = [];
-            this.session = users;
+        if (this.debug) {
+            console.log(this.samples);
         }
-        this.renderContent();
     }
-    setUser(name) {
-        this.user = name;
-        this.session.push(name);
-        console.log(`new user name: ${name}`);
-        this.renderSession();
+
+    addAlerts(files) {
+        files.map((file) => {
+            const name = file.split(".")[0];
+            const path = `/alerts/${file}`;
+            const content = { name: name, file: file, path: path };
+            this.#alerts[name] = content;
+            this.#alerts[name].player = new Tone.Player(this.#alerts[name].path).toDestination();
+            this.#alerts[name].player.autostart = false;
+        });
+        if (this.debug) {
+            Object.keys(this.#alerts).forEach((key) => {
+                console.log(this.#alerts[key]);
+            });
+            console.log("");
+        }
     }
-    async handleRecord() {
-        const value = window.document.getElementById("rec-button").value;
-        if (value == "RECORD") {
-            console.log(`start recorder`);
-            this.recorder.start();
-            if (window.document.getElementById("file").innerHTML != "") {
-                window.document.getElementById("file").innerHTML = "";
-                console.log(`id file not empty..`);
-                this.recording = undefined;
-            }
 
-            window.document.getElementById("rec-button").value = "STOP";
-            document.getElementById("rec-button").classList.add("w3-red");
-        } else {
-            window.document.getElementById("rec-button").value = "RECORD";
-            document.getElementById("rec-button").classList.remove("w3-red");
-            console.log(`stop recorder`);
+    playAlert(alertName) {
+        if (this.#playAlerts) if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
+    }
 
-            if (this.recorder.state == "started") {
-                // the recorded audio is returned as a blob
-                this.recording = await this.recorder.stop();
-                console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
-                document.getElementById(
-                    "file"
-                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
-                document.getElementById("downloadFile").addEventListener("click", (c) => {
-                    console.log(`file link clicked. date: ${new Date()}`);
-                    const recording = window.welle.app.getRecording();
-                    const url = URL.createObjectURL(recording);
-                    const anchor = document.createElement("a", { href: url });
-                    anchor.download = "welle-record.webm";
-                    anchor.href = url;
-                    document.body.append(anchor);
-                    anchor.click();
-                    anchor.remove();
+    // handle html input alerts/ sounds playmode
+    // if checkboxes are checked, than play alerts or sound
+
+    handleAlerts(checked) {
+        console.log(`Play Alerts. change to: ${checked}`);
+        this.#playAlerts = checked;
+    }
+    handleSound(checked) {
+        console.log(`Play Sound. change to: ${checked}`);
+        this.#playSound = checked;
+        // if (this.#playSound) Instrument.masterGain.gain.rampTo(0.8, 0.1);
+        // else Instrument.masterGain.gain.rampTo(0, 0.1);
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // Instrument creation
+    // ============================================
+    // make one instrument (Sample Player) for each sample, that arrived from server
+    // and is stored in the #samples list
+
+    makeSynths = (data) => {
+        // console.log(JSON.stringify(data));
+        // message contains: count, this.#samples array
+        // here we will create all Instruments at once for the App
+        // count is passed, is the amount of samples we got from server
+        // make temp array to store synths -> this.#instruments
+        const synths = [];
+        const count = data.count;
+        const samples = data.samples;
+
+        for (let i = 0; i < count; i++) {
+            // we will use the Instrument class to create synths
+            const name = samples[i].name;
+            const buffer = samples[i].buffer;
+            const chan = i;
+            const message = { count: count, name: name, buffer: buffer, chan: chan };
+
+            // console.log(JSON.stringify(message));
+            let synth = new Instrument(message);
+            synths.push(synth);
+        }
+        return synths;
+    };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // STEP SEQUENCER 8x8 creation
+    // code taken from https://medium.com/geekculture/creating-a-step-sequencer-with-tone-js-32ea3002aaf5
+    // ============================================
+
+    makeGrid = (instruments) => {
+        // the grid will have as many subarrays as there are instruments
+        // each sub array corresponds to one row in our sequencer grid
+
+        // parent array to hold each row subarray
+        const rows = [];
+
+        for (const instrument of instruments) {
+            // console.log(`makeGrid for ${instrument.name}`);
+            // declare the subarray
+            const row = [];
+            const sequence = instrument.sequence;
+            // each subarray contains multiple objects that have an assigned note
+            // and a boolean to flag whether they are "activated"
+            // each element in the subarray corresponds to one eigth note
+
+            for (let i = 0; i < 8; i++) {
+                let state = false;
+                if (sequence[i] != null) state = true;
+                row.push({
+                    instrument: instrument.name,
+                    note: sequence[i],
+                    isActive: state,
+                    mute: instrument.mute,
                 });
             }
+            rows.push(row);
+        }
+
+        // we now have all rows each containing 16 eighth notes
+        return rows;
+    };
+
+    configLoop = () => {
+        const repeat = (time) => {
+            // console.log(`beat: ${this.beat}`);
+            // update the grid based on changes in the instruments (Sequences, Rand etc.)
+            this.grid = this.makeGrid(this.instruments);
+            // for each step check how many instruments play a note and play it
+            this.grid.forEach((row, index) => {
+                const synth = this.instruments[index].synth;
+                const ampEnv = this.instruments[index].ampEnv;
+                const event = row[this.beat];
+                const mute = this.instruments[index].mute;
+                if (mute == false) {
+                    if (event.isActive) {
+                        ampEnv.triggerAttackRelease("8n", time);
+                        synth.triggerAttackRelease(event.note, "8n", time);
+                    }
+                }
+                // count beats for randomising
+                if (this.beat == 7) {
+                    this.instruments[index].beatCounter = this.instruments[index].beatCounter + 1;
+                    // console.log(this.instruments[index]);
+                }
+
+                this.instruments[index].updateRandomizer();
+            });
+            // update the beat counter
+            this.beat = (this.beat + 1) % 8;
+        };
+        // Tone.Transport.bpm.value = 120;
+        Tone.Transport.scheduleRepeat(repeat, "8n");
+    };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // handle Tone, Start & Stop
+    // ============================================
+    async startTone() {
+        if (this.#toneStarted == false) {
+            await Tone.start();
+            this.#toneStarted = true;
+            // extremly relevant to stability of Tone playback
+            Tone.context.lookAhead = 0.3;
         }
     }
-    getRecording() {
-        return this.recording;
+    startTransport() {
+        // this.beat = 0;
+        if (Tone.Transport.state != "started") Tone.Transport.start();
     }
+    stopTransport() {
+        if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+    }
+
+    playAll() {
+        this.startTransport();
+    }
+
+    stopAll() {
+        // this.renderContent();
+        this.stopTransport();
+        this.beat = 0;
+    }
+
+    setBpm(message) {
+        // message = bpm, factor
+        const bpm = Math.min(440, Math.max(1, message.bpm));
+        // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
+        this.bpm = bpm;
+        // if Transport running
+        if (Tone.Transport.state == "started") {
+            if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
+            else Tone.Transport.bpm.rampTo(bpm, 0.1);
+        }
+        // this.renderContent();
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // console sound input
+    // ============================================
+
+    assignPattern(message) {
+        console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        // checks for instruments
+        console.log(`assign: 
+        number of instruments: ${message.instruments.length}`);
+        // validate message instruments input, can be multiple instruments at once
+        message.instruments.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    entry.mute = false;
+                    entry.updateSequence(message.pattern, message.rawPattern);
+                    if (message.random != undefined) entry.random(message.random);
+                    if (message.volume != undefined) entry.setVolume(message.volume);
+                    // this.setSelected(inst);
+                }
+            });
+            console.log(`${inst} valid is ${valid}`);
+        });
+
+        this.startTransport();
+        // this.renderContent();
+    }
+
+    plainStartInstruments(message) {
+        if (this.debug) console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
+
+        let isPart = false;
+        const partName = message.instruments[0];
+        // check for parts if only one instrument
+        if (message.instruments.length == 1) {
+            if (this.parts[partName]) {
+                // console.log(`part ${partName} detected`);
+                isPart = true;
+            }
+        }
+        if (isPart) {
+            this.startPart(partName);
+        } else {
+            // validate instruments input
+            message.instruments.forEach((inst) => {
+                let valid = false;
+                this.instruments.forEach((entry) => {
+                    if (entry.name == inst) {
+                        valid = true;
+                        // if no sequence assigned, create one
+                        if (entry.patternRaw == "") entry.updateSequence([1], "#");
+                        // in case is muted, unmute
+                        entry.mute = false;
+                        // assign random and volume
+                        if (message.random) entry.rand = message.random;
+                        if (message.volume) entry.setVolume(message.volume);
+                        // this.setSelected(inst);
+                    }
+                });
+                console.log(`${inst} valid is ${valid}`);
+            });
+
+            this.startTransport();
+        }
+        // this.renderContent();
+    }
+
+    stopInstruments(instruments) {
+        // validate message instruments input, can be multiple instruments at once
+        instruments.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    entry.mute = true;
+                    // this.setSelected(inst);
+                }
+            });
+            // console.log(`${inst} valid is ${valid}`);
+        });
+
+        //if (nothingIsPlaying) this.stopTransport();
+        //this.renderContent();
+    }
+
+    setVolume(message) {
+        message.instruments.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    entry.setVolume(message.volume);
+                    // this.setSelected(inst);
+                }
+            });
+            // console.log(`${inst} valid is ${valid}`);
+        });
+        // this.renderContent();
+    }
+
+    copyPattern(message) {
+        console.log(`incoming message: ${JSON.stringify(message)}`);
+        let source = undefined;
+        let sequence = undefined;
+        let patternRaw = undefined;
+        let destinations = [];
+
+        // check if source exists
+        message.source.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    source = entry;
+                    sequence = entry.sequence;
+                    patternRaw = entry.patternRaw;
+                    // this.setSelected(inst);
+                }
+            });
+        });
+
+        if (source != undefined) {
+            // check if destinations exist and copy source pattern
+            message.destinations.forEach((inst) => {
+                let valid = false;
+                // console.log(inst);
+                // compare with list of instruments
+                this.instruments.forEach((entry) => {
+                    if (entry.name == inst) {
+                        valid = true;
+                        // console.log(`${inst} exists`);
+                        destinations.push(inst);
+                        // this.setSelected(inst);
+                    }
+                });
+            });
+        }
+
+        if (source != undefined && destinations.length > 0) {
+            console.log(
+                `success -> copy ${sequence} 
+                from ${source} to ${JSON.stringify(destinations)}`
+            );
+            destinations.forEach((inst) => {
+                this.instruments.forEach((entry) => {
+                    if (entry.name == inst) {
+                        entry.patternRaw = patternRaw;
+                        for (let i = 0; i < 8; i++) {
+                            entry.sequence[i] = sequence[i];
+                        }
+                        // this.setSelected(inst);
+                    }
+                });
+            });
+        } else console.log(`copy error`);
+
+        // this.renderContent();
+    }
+
+    delete(names) {
+        console.log(`delete this: ${names}`);
+        names.map((name) => {
+            // if (this.#parts[name]) {
+            //     delete this.#parts[name];
+            //     // console.log(`delete this part: ${name}`);
+            // }
+            // if this inst exists, reset everything
+            this.instruments.forEach((entry) => {
+                if (entry.name == name) {
+                    entry.sequence = [null, null, null, null, null, null, null, null];
+                    entry.patternRaw = "";
+                    entry.setVolume(0.6);
+                }
+            });
+        });
+        // this.renderContent();
+    }
+
+    deleteAll() {
+        console.log(`App delete all..`);
+        // clear & delete every instrument
+        this.instruments.forEach((entry) => {
+            entry.sequence = [null, null, null, null, null, null, null, null];
+            entry.patternRaw = "";
+            entry.setVolume(0.6);
+        });
+        // delete all parts
+        for (let part in this.parts) {
+            // console.log(`delete this part: ${part}`);
+            delete this.parts[part];
+        }
+        // stop Tone
+        this.stopTransport();
+        // render
+        // this.renderContent();
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // Parts
+    // ============================================
+    // parts are snapshots of current instruments/sequences etc.
+    // parts are stored in an array and can be loaded
+
+    savePart(name) {
+        console.log(`save new part : ${name}`);
+
+        // check if name is reserved as instrument
+        // valid = if a part name is not taken by an instrument
+        let valid = false;
+        this.instruments.forEach((entry) => {
+            if (entry.name == name) {
+                valid = false;
+                this.addToConsole({
+                    valid: false,
+                    string: name,
+                    comment: "name reserved as instrument",
+                    user: this.user,
+                });
+            } else valid = true;
+        });
+        if (valid) {
+            // init new part
+            this.parts[name] = {
+                instrumentCollection: {},
+                bpm: this.bpm,
+            };
+            this.instruments.forEach((entry) => {
+                this.parts[name].instrumentCollection[entry.name] = {
+                    mute: entry.getMute(),
+                    sequence: entry.getSequence(),
+                    patternRaw: entry.getPatternRaw(),
+                    volume: entry.getVolume(),
+                    rand: entry.getRand(),
+                    envSettings: entry.getEnvSettings(),
+                };
+            });
+
+            console.log(`part ${name} saved in parts`, this.parts[name]);
+        }
+        // this.renderContent();
+    }
+
+    startPart(name) {
+        console.log("");
+        console.log(`start part ${name}:`);
+        console.log(this.parts);
+        // STOP - clear all instruments
+        this.instruments.forEach((entry) => {
+            entry.sequence = [null, null, null, null, null, null, null, null];
+            entry.patternRaw = "";
+            entry.setVolume(0.6);
+        });
+
+        // now copy the saved info to each actual instrument
+        this.instruments.forEach((entry) => {
+            const storedInst = this.parts[name].instrumentCollection[entry.name];
+            entry.setSequence(storedInst.sequence, storedInst.patternRaw);
+            entry.setVolume(storedInst.volume);
+
+            entry.setMute(storedInst.mute);
+            entry.setRand(storedInst.rand);
+            entry.setEnvSettings(storedInst.envSettings);
+        });
+
+        // BPM change
+        this.setBpm({ bpm: this.parts[name].bpm });
+        // this.beat = 0;
+        // start Tone Transport
+        this.startTransport();
+        // this.renderContent();
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // console sound helper
+    // ============================================
+
+    // // check instruments
+    // checkInstruments(instruments) {
+    //     let returnMessage = {
+    //         validInstruments: undefined,
+    //         existingInstruments: undefined,
+    //         newInstruments: undefined,
+    //     };
+    //     // check if instruments are valid
+    //     const validInstruments = this.checkValidInstruments(instruments);
+
+    //     if (validInstruments) {
+    //         returnMessage.validInstruments = validInstruments;
+    //         // collect existing instruments
+    //         const existingInstruments = this.checkExistingInstruments(validInstruments);
+    //         if (existingInstruments) returnMessage.existingInstruments = existingInstruments;
+    //         // collect new instruments
+    //         const newInstruments = this.checkNewInstruments(validInstruments);
+    //         if (newInstruments) returnMessage.newInstruments = newInstruments;
+    //         // if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
+    //     }
+    //     // if (this.debug)
+    //     //     console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
+    //     return returnMessage;
+    // }
+
+    // createPreset(name) {
+    //     const preset = { name: name, parts: this.#parts, instruments: this.#instruments };
+    //     return preset;
+    // }
+    // storePresets(presets) {
+    //     presets.map((preset) => {
+    //         const name = preset.name;
+    //         this.#presets[name] = preset;
+    //     });
+    //     // console.log(`this.#presets stored: ${JSON.stringify(this.#presets)}`);
+    //     this.renderPresets();
+    // }
+    // loadPreset(name) {
+    //     this.#parts = this.#presets[name].parts;
+    //     this.renderContent();
+    // }
+    // updateUsers(users) {
+    //     if (this.user != "local") {
+    //         this.session = [];
+    //         this.session = users;
+    //     }
+    //     this.renderContent();
+    // }
+    // setUser(name) {
+    //     this.user = name;
+    //     this.session.push(name);
+    //     console.log(`new user name: ${name}`);
+    //     this.renderSession();
+    // }
+
+    // async handleRecord() {
+    //     const value = window.document.getElementById("rec-button").value;
+    //     if (value == "RECORD") {
+    //         console.log(`start recorder`);
+    //         this.recorder.start();
+    //         if (window.document.getElementById("file").innerHTML != "") {
+    //             window.document.getElementById("file").innerHTML = "";
+    //             console.log(`id file not empty..`);
+    //             this.recording = undefined;
+    //         }
+
+    //         window.document.getElementById("rec-button").value = "STOP";
+    //         document.getElementById("rec-button").classList.add("w3-red");
+    //     } else {
+    //         window.document.getElementById("rec-button").value = "RECORD";
+    //         document.getElementById("rec-button").classList.remove("w3-red");
+    //         console.log(`stop recorder`);
+
+    //         if (this.recorder.state == "started") {
+    //             // the recorded audio is returned as a blob
+    //             this.recording = await this.recorder.stop();
+    //             console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
+    //             document.getElementById(
+    //                 "file"
+    //             ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
+    //             document.getElementById("downloadFile").addEventListener("click", (c) => {
+    //                 console.log(`file link clicked. date: ${new Date()}`);
+    //                 const recording = window.welle.app.getRecording();
+    //                 const url = URL.createObjectURL(recording);
+    //                 const anchor = document.createElement("a", { href: url });
+    //                 anchor.download = "welle-record.webm";
+    //                 anchor.href = url;
+    //                 document.body.append(anchor);
+    //                 anchor.click();
+    //                 anchor.remove();
+    //             });
+    //         }
+    //     }
+    // }
+    // getRecording() {
+    //     return this.recording;
+    // }
 
     // MIDI handling
-    startMIDI() {
-        if (WebMidi.state == undefined) {
-            WebMidi.enable(function (err) {
-                if (err) {
-                    console.log("WebMidi could not be enabled.", err);
-                } else {
-                    console.log("WebMidi enabled!");
-                }
-                const selectBox = window.document.getElementById("midiSelect");
+    // startMIDI() {
+    //     if (WebMidi.state == undefined) {
+    //         WebMidi.enable(function (err) {
+    //             if (err) {
+    //                 console.log("WebMidi could not be enabled.", err);
+    //             } else {
+    //                 console.log("WebMidi enabled!");
+    //             }
+    //             const selectBox = window.document.getElementById("midiSelect");
 
-                WebMidi.outputs.map((output) => {
-                    console.log(`Midi out: ${output.name}`);
-                    let option = document.createElement("option");
-                    option.text = output.name;
-                    selectBox.add(option);
-                });
-            });
-        }
-    }
-    selectMIDIdevice(selectedName) {
-        // "Pro40 MIDI"
-        const midiOutputs = WebMidi.outputs;
-        const midiInputs = WebMidi.inputs;
-        midiOutputs.map((output) => {
-            const name = output.name;
-            if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
-        });
-        if (this.MIDIOutput) console.log(`MIDI Out connected to ${this.MIDIOutput.name}`);
-        // MIDIInput
-        midiInputs.map((input) => {
-            const name = input.name;
-            if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
-        });
-        if (this.MIDIInput) {
-            console.log(`MIDI In connected to ${this.MIDIInput.name}`);
-            this.addMIDIInputListeners();
-        }
-    }
+    //             WebMidi.outputs.map((output) => {
+    //                 console.log(`Midi out: ${output.name}`);
+    //                 let option = document.createElement("option");
+    //                 option.text = output.name;
+    //                 selectBox.add(option);
+    //             });
+    //         });
+    //     }
+    // }
+    // selectMIDIdevice(selectedName) {
+    //     // "Pro40 MIDI"
+    //     const midiOutputs = WebMidi.outputs;
+    //     const midiInputs = WebMidi.inputs;
+    //     midiOutputs.map((output) => {
+    //         const name = output.name;
+    //         if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
+    //     });
+    //     if (this.MIDIOutput) console.log(`MIDI Out connected to ${this.MIDIOutput.name}`);
+    //     // MIDIInput
+    //     midiInputs.map((input) => {
+    //         const name = input.name;
+    //         if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
+    //     });
+    //     if (this.MIDIInput) {
+    //         console.log(`MIDI In connected to ${this.MIDIInput.name}`);
+    //         this.addMIDIInputListeners();
+    //     }
+    // }
 
-    playMidiNote(message) {
-        // message.note, message.channel, message.velocity, message.duration
-        if (!message) message = {}; // if no message send, create empty object
-        const note = message.note || "C3";
-        const chan = message.channel || 5;
-        const vel = message.velocity || 1;
-        const dur = message.duration || 200;
-        const time = message.time || 0;
-        // if MIDI device is connected
-        if (window.welle.app.MIDIOutput != undefined) {
-            // console.log(`play MIDI note ${note}`);
-            window.welle.app.MIDIOutput.playNote(note, chan, {
-                time: time,
-                velocity: vel,
-                duration: dur,
-            });
-        }
-    }
+    // playMidiNote(message) {
+    //     // message.note, message.channel, message.velocity, message.duration
+    //     if (!message) message = {}; // if no message send, create empty object
+    //     const note = message.note || "C3";
+    //     const chan = message.channel || 5;
+    //     const vel = message.velocity || 1;
+    //     const dur = message.duration || 200;
+    //     const time = message.time || 0;
+    //     // if MIDI device is connected
+    //     if (window.welle.app.MIDIOutput != undefined) {
+    //         // console.log(`play MIDI note ${note}`);
+    //         window.welle.app.MIDIOutput.playNote(note, chan, {
+    //             time: time,
+    //             velocity: vel,
+    //             duration: dur,
+    //         });
+    //     }
+    // }
 
-    sendMidiSelectedInstState() {
-        // send on midi channel 2, receive on Midi channel 1
-        const chan = 2;
+    // sendMidiSelectedInstState() {
+    //     // send on midi channel 2, receive on Midi channel 1
+    //     const chan = 2;
 
-        if (window.welle.app.MIDIInput != undefined) {
-            /*
-            CC map, MIDI channel 1
-            Controller (max 120): 
-                1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
-                9       = volume (CC map 0.0-1.0 -> 0-127)
-                10-14   = EQ 5 values
-                16-19   = Env 4 values
-            */
+    //     if (window.welle.app.MIDIInput != undefined) {
+    //         /*
+    //         CC map, MIDI channel 1
+    //         Controller (max 120):
+    //             1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
+    //             9       = volume (CC map 0.0-1.0 -> 0-127)
+    //             10-14   = EQ 5 values
+    //             16-19   = Env 4 values
+    //         */
 
-            // Send Volume
-            // ==================================================
-            let vol = this.selected.vol;
-            vol = window.welle.app.map(vol, 0, 1, 0, 126);
-            window.welle.app.MIDIOutput.sendControlChange(
-                9, // cc controller
-                vol, // CC value
-                chan // channel
-            );
-            //console.log(`MIDI send VOL: ${vol}`);
+    //         // Send Volume
+    //         // ==================================================
+    //         let vol = this.selected.vol;
+    //         vol = window.welle.app.map(vol, 0, 1, 0, 126);
+    //         window.welle.app.MIDIOutput.sendControlChange(
+    //             9, // cc controller
+    //             vol, // CC value
+    //             chan // channel
+    //         );
+    //         //console.log(`MIDI send VOL: ${vol}`);
 
-            // Send Pattern
-            // ==================================================
-            const pattern = this.selected.pattern;
-            let newPattern = [];
-            // if pattern is less than 8 steps, add up to 8 steps, min length is one
-            if (pattern.length < 8) {
-                // join patterns 8 times, then reduce to 8 entries
-                for (let i = 0; i < 8; i++) {
-                    newPattern = newPattern.concat(pattern);
-                }
-                newPattern = newPattern.slice(0, 8);
-                // console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
-            } else {
-                newPattern = pattern.slice(0, 8);
-                // console.log(`pattern>=8: pattern: ${pattern}, new pattern: ${newPattern}`);
-            }
-            // send pattern midi messages
-            newPattern.map((e, c) => {
-                const cc = 1 + c;
-                if (e == null) {
-                    window.welle.app.MIDIOutput.sendControlChange(cc, 0, chan);
-                } else {
-                    window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
-                }
-            });
-            // console.log(`MIDI send pattern: ${newPattern}`);
+    //         // Send Pattern
+    //         // ==================================================
+    //         const pattern = this.selected.pattern;
+    //         let newPattern = [];
+    //         // if pattern is less than 8 steps, add up to 8 steps, min length is one
+    //         if (pattern.length < 8) {
+    //             // join patterns 8 times, then reduce to 8 entries
+    //             for (let i = 0; i < 8; i++) {
+    //                 newPattern = newPattern.concat(pattern);
+    //             }
+    //             newPattern = newPattern.slice(0, 8);
+    //             // console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
+    //         } else {
+    //             newPattern = pattern.slice(0, 8);
+    //             // console.log(`pattern>=8: pattern: ${pattern}, new pattern: ${newPattern}`);
+    //         }
+    //         // send pattern midi messages
+    //         newPattern.map((e, c) => {
+    //             const cc = 1 + c;
+    //             if (e == null) {
+    //                 window.welle.app.MIDIOutput.sendControlChange(cc, 0, chan);
+    //             } else {
+    //                 window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
+    //             }
+    //         });
+    //         // console.log(`MIDI send pattern: ${newPattern}`);
 
-            // Send EQ
-            // ==================================================
-            /*
-            settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0} 
-            eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
-            map band: -24 / 24 db -> 0.0/1.0
-            map freq low: 0-2000 -> 0.0-0.5
-            map freq high: 2000-8000 -> 0.5-1.0 
-            */
-            // console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
-            const low = this.map(this.selected.eq.low, -12, 12, 0.0, 1.0);
-            const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 1000, 0.0, 0.5);
-            const mid = this.map(this.selected.eq.mid, -12, 12, 0.0, 1.0);
-            const highFreq = this.map(this.selected.eq.highFrequency, 1000, 13000, 0.5, 1.0);
-            const high = this.map(this.selected.eq.high, -12, 12, 0.0, 1.0);
-            // console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
+    //         // Send EQ
+    //         // ==================================================
+    //         /*
+    //         settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+    //         eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
+    //         map band: -24 / 24 db -> 0.0/1.0
+    //         map freq low: 0-2000 -> 0.0-0.5
+    //         map freq high: 2000-8000 -> 0.5-1.0
+    //         */
+    //         // console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
+    //         const low = this.map(this.selected.eq.low, -12, 12, 0.0, 1.0);
+    //         const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 1000, 0.0, 0.5);
+    //         const mid = this.map(this.selected.eq.mid, -12, 12, 0.0, 1.0);
+    //         const highFreq = this.map(this.selected.eq.highFrequency, 1000, 13000, 0.5, 1.0);
+    //         const high = this.map(this.selected.eq.high, -12, 12, 0.0, 1.0);
+    //         // console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
 
-            // console.log(`MIDI send EQ (original): ${JSON.stringify(this.selected.eq)}`);
-            // console.log(
-            //    `MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`
-            // );
+    //         // console.log(`MIDI send EQ (original): ${JSON.stringify(this.selected.eq)}`);
+    //         // console.log(
+    //         //    `MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`
+    //         // );
 
-            const newEq = [high, highFreq, mid, lowFreq, low];
-            newEq.map((eq, c) => {
-                const cc = 14 - c;
-                eq = Math.round(eq * 126);
-                window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
-            });
+    //         const newEq = [high, highFreq, mid, lowFreq, low];
+    //         newEq.map((eq, c) => {
+    //             const cc = 14 - c;
+    //             eq = Math.round(eq * 126);
+    //             window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
+    //         });
 
-            // Send ENV
-            // ==================================================
-            // console.log(`send MIDI env with this settings: ${JSON.stringify(this.selected.env)}`);
-            const selEnv = [
-                this.selected.env.attack,
-                this.selected.env.decay,
-                this.selected.env.sustain,
-                this.selected.env.release,
-            ];
-            const newEnv = [
-                Math.round(this.selected.env.attack * 126),
-                Math.round(this.selected.env.decay * 126),
-                Math.round(this.selected.env.sustain * 126),
-                Math.round(this.selected.env.release * 126),
-            ];
-            newEnv.map((env, c) => {
-                const cc = 16 + c;
-                window.welle.app.MIDIOutput.sendControlChange(cc, env, chan);
-            });
-            // console.log(`MIDI send ENV (original): ${JSON.stringify(this.selected.env)}`);
-            // console.log(`MIDI send ENV (mapped): ${JSON.stringify(this.selected.env)}`);
+    //         // Send ENV
+    //         // ==================================================
+    //         // console.log(`send MIDI env with this settings: ${JSON.stringify(this.selected.env)}`);
+    //         const selEnv = [
+    //             this.selected.env.attack,
+    //             this.selected.env.decay,
+    //             this.selected.env.sustain,
+    //             this.selected.env.release,
+    //         ];
+    //         const newEnv = [
+    //             Math.round(this.selected.env.attack * 126),
+    //             Math.round(this.selected.env.decay * 126),
+    //             Math.round(this.selected.env.sustain * 126),
+    //             Math.round(this.selected.env.release * 126),
+    //         ];
+    //         newEnv.map((env, c) => {
+    //             const cc = 16 + c;
+    //             window.welle.app.MIDIOutput.sendControlChange(cc, env, chan);
+    //         });
+    //         // console.log(`MIDI send ENV (original): ${JSON.stringify(this.selected.env)}`);
+    //         // console.log(`MIDI send ENV (mapped): ${JSON.stringify(this.selected.env)}`);
 
-            console.log(
-                `MIDI send selected Instr.(ch.${chan}):`,
-                this.selected,
-                `
-                MIDI send vol: ${vol}
-                MIDI send pattern: ${newPattern}
-                MIDI send EQ (original): 
-                ${JSON.stringify(this.selected.eq)}
-                    map band: -24 / 24 db -> 0.0/1.0
-                    map freq low: 0-1000 -> 0.0-0.5
-                    map freq high: 1000-13000 -> 0.5-1.0 
-                MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]
-                MIDI send ENV (original): ${selEnv}
-                MIDI send ENV (mapped): ${newEnv}
-                `
-            );
-        }
-    }
+    //         console.log(
+    //             `MIDI send selected Instr.(ch.${chan}):`,
+    //             this.selected,
+    //             `
+    //             MIDI send vol: ${vol}
+    //             MIDI send pattern: ${newPattern}
+    //             MIDI send EQ (original):
+    //             ${JSON.stringify(this.selected.eq)}
+    //                 map band: -24 / 24 db -> 0.0/1.0
+    //                 map freq low: 0-1000 -> 0.0-0.5
+    //                 map freq high: 1000-13000 -> 0.5-1.0
+    //             MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]
+    //             MIDI send ENV (original): ${selEnv}
+    //             MIDI send ENV (mapped): ${newEnv}
+    //             `
+    //         );
+    //     }
+    // }
 
-    addMIDIInputListeners() {
-        // Listen to control change message
-        this.MIDIInput.addListener("controlchange", 1, function (e) {
-            /*
-            midiCountPattern = 0;
-            midiCountEq = 0;
-            midiCountEnv = 0;
-            */
-            const num = e.controller.number;
-            const val = e.value;
-            const round = (num) => Math.round(num * 100) / 100;
-            const selected = window.welle.app.selected;
-            let vol = 0;
-            // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
+    // addMIDIInputListeners() {
+    //     // Listen to control change message
+    //     this.MIDIInput.addListener("controlchange", 1, function (e) {
+    //         /*
+    //         midiCountPattern = 0;
+    //         midiCountEq = 0;
+    //         midiCountEnv = 0;
+    //         */
+    //         const num = e.controller.number;
+    //         const val = e.value;
+    //         const round = (num) => Math.round(num * 100) / 100;
+    //         const selected = window.welle.app.selected;
+    //         let vol = 0;
+    //         // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
 
-            // only assign, if some instrument is selected
-            if (selected.name != "") {
-                // VOLUME
-                if (num == 9) {
-                    vol = round(val / 126);
-                    window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
-                    // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
-                    console.log(`MIDI input (${selected.name}) vol: ${vol} `);
-                }
+    //         // only assign, if some instrument is selected
+    //         if (selected.name != "") {
+    //             // VOLUME
+    //             if (num == 9) {
+    //                 vol = round(val / 126);
+    //                 window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
+    //                 // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
+    //                 console.log(`MIDI input (${selected.name}) vol: ${vol} `);
+    //             }
 
-                // PATTERN
-                if (num >= 1 && num <= 8) {
-                    const index = num - 1;
-                    window.welle.app.midiCountPattern = window.welle.app.midiCountPattern + 1;
+    //             // PATTERN
+    //             if (num >= 1 && num <= 8) {
+    //                 const index = num - 1;
+    //                 window.welle.app.midiCountPattern = window.welle.app.midiCountPattern + 1;
 
-                    if (val == 0) window.welle.app.midiPattern[index] = null;
-                    else window.welle.app.midiPattern[index] = 1;
+    //                 if (val == 0) window.welle.app.midiPattern[index] = null;
+    //                 else window.welle.app.midiPattern[index] = 1;
 
-                    const message = {
-                        instruments: [selected.name],
-                        pattern: window.welle.app.midiPattern,
-                        rawPattern: "external via midi",
-                    };
-                    if (window.welle.app.midiCountPattern == 8) {
-                        window.welle.app.assignPattern(message);
-                        window.welle.app.midiCountPattern = 0;
-                        console.log(`MIDI input (${selected.name}) pattern: ${message.pattern} `);
-                    }
-                }
+    //                 const message = {
+    //                     instruments: [selected.name],
+    //                     pattern: window.welle.app.midiPattern,
+    //                     rawPattern: "external via midi",
+    //                 };
+    //                 if (window.welle.app.midiCountPattern == 8) {
+    //                     window.welle.app.assignPattern(message);
+    //                     window.welle.app.midiCountPattern = 0;
+    //                     console.log(`MIDI input (${selected.name}) pattern: ${message.pattern} `);
+    //                 }
+    //             }
 
-                // EQ
-                if (num >= 10 && num <= 14) {
-                    const index = num - 10;
-                    const eqVal = round(val / 126);
-                    window.welle.app.midiCountEq = window.welle.app.midiCountEq + 1;
+    //             // EQ
+    //             if (num >= 10 && num <= 14) {
+    //                 const index = num - 10;
+    //                 const eqVal = round(val / 126);
+    //                 window.welle.app.midiCountEq = window.welle.app.midiCountEq + 1;
 
-                    window.welle.app.midiEq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
-                    window.welle.app.midiEq.name = selected.name;
-                    if (index == 0)
-                        window.welle.app.midiEq.low = window.welle.app.map(
-                            eqVal,
-                            0.0,
-                            1.0,
-                            -12,
-                            12
-                        );
-                    if (index == 1)
-                        window.welle.app.midiEq.lowFrequency = window.welle.app.map(
-                            eqVal,
-                            0.0,
-                            1.0,
-                            0,
-                            1000
-                        );
-                    if (index == 2)
-                        window.welle.app.midiEq.mid = window.welle.app.map(
-                            eqVal,
-                            0.0,
-                            1.0,
-                            -12,
-                            12
-                        );
-                    if (index == 3)
-                        window.welle.app.midiEq.highFrequency = window.welle.app.map(
-                            eqVal,
-                            0.0,
-                            1.0,
-                            1000,
-                            13000
-                        );
-                    if (index == 4)
-                        window.welle.app.midiEq.high = window.welle.app.map(
-                            eqVal,
-                            0.0,
-                            1.0,
-                            -12,
-                            12
-                        );
+    //                 window.welle.app.midiEq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+    //                 window.welle.app.midiEq.name = selected.name;
+    //                 if (index == 0)
+    //                     window.welle.app.midiEq.low = window.welle.app.map(
+    //                         eqVal,
+    //                         0.0,
+    //                         1.0,
+    //                         -12,
+    //                         12
+    //                     );
+    //                 if (index == 1)
+    //                     window.welle.app.midiEq.lowFrequency = window.welle.app.map(
+    //                         eqVal,
+    //                         0.0,
+    //                         1.0,
+    //                         0,
+    //                         1000
+    //                     );
+    //                 if (index == 2)
+    //                     window.welle.app.midiEq.mid = window.welle.app.map(
+    //                         eqVal,
+    //                         0.0,
+    //                         1.0,
+    //                         -12,
+    //                         12
+    //                     );
+    //                 if (index == 3)
+    //                     window.welle.app.midiEq.highFrequency = window.welle.app.map(
+    //                         eqVal,
+    //                         0.0,
+    //                         1.0,
+    //                         1000,
+    //                         13000
+    //                     );
+    //                 if (index == 4)
+    //                     window.welle.app.midiEq.high = window.welle.app.map(
+    //                         eqVal,
+    //                         0.0,
+    //                         1.0,
+    //                         -12,
+    //                         12
+    //                     );
 
-                    if (window.welle.app.midiCountEq == 5) {
-                        window.welle.app.setEqToSelected(window.welle.app.midiEq);
-                        selected.eq = window.welle.app.midiEq;
-                        window.welle.app.midiCountEq = 0;
-                        console.log(
-                            `MIDI input (${selected.name}) eq: ${selected.eq.low}, ${selected.eq.lowFrequency}, ${selected.eq.mid}, ${selected.eq.highFrequency}, ${selected.eq.high} `
-                        );
-                    }
-                }
+    //                 if (window.welle.app.midiCountEq == 5) {
+    //                     window.welle.app.setEqToSelected(window.welle.app.midiEq);
+    //                     selected.eq = window.welle.app.midiEq;
+    //                     window.welle.app.midiCountEq = 0;
+    //                     console.log(
+    //                         `MIDI input (${selected.name}) eq: ${selected.eq.low}, ${selected.eq.lowFrequency}, ${selected.eq.mid}, ${selected.eq.highFrequency}, ${selected.eq.high} `
+    //                     );
+    //                 }
+    //             }
 
-                // ENVELOPE
-                if (num >= 16 && num <= 19) {
-                    const index = num - 16;
-                    const env = round(val / 126);
-                    window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
+    //             // ENVELOPE
+    //             if (num >= 16 && num <= 19) {
+    //                 const index = num - 16;
+    //                 const env = round(val / 126);
+    //                 window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
 
-                    window.welle.app.midiEnv.name = selected.name;
-                    if (index == 0) window.welle.app.midiEnv.attack = env;
-                    if (index == 1) window.welle.app.midiEnv.decay = env;
-                    if (index == 2) window.welle.app.midiEnv.sustain = env;
-                    if (index == 3) window.welle.app.midiEnv.release = env;
+    //                 window.welle.app.midiEnv.name = selected.name;
+    //                 if (index == 0) window.welle.app.midiEnv.attack = env;
+    //                 if (index == 1) window.welle.app.midiEnv.decay = env;
+    //                 if (index == 2) window.welle.app.midiEnv.sustain = env;
+    //                 if (index == 3) window.welle.app.midiEnv.release = env;
 
-                    if (window.welle.app.midiCountEnv == 4) {
-                        window.welle.app.setEnvToSelected(window.welle.app.midiEnv);
-                        selected.env = window.welle.app.midiEnv;
-                        window.welle.app.midiCountEnv = 0;
-                        console.log(
-                            `MIDI input (${selected.name}) env: ${selected.env.attack}, ${selected.env.decay}, ${selected.env.sustain}, ${selected.env.release}`
-                        );
-                    }
-                }
-            }
-        });
-    }
+    //                 if (window.welle.app.midiCountEnv == 4) {
+    //                     window.welle.app.setEnvToSelected(window.welle.app.midiEnv);
+    //                     selected.env = window.welle.app.midiEnv;
+    //                     window.welle.app.midiCountEnv = 0;
+    //                     console.log(
+    //                         `MIDI input (${selected.name}) env: ${selected.env.attack}, ${selected.env.decay}, ${selected.env.sustain}, ${selected.env.release}`
+    //                     );
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
     //
     //
     //
@@ -601,13 +1245,13 @@ class WelleApp {
             return { valid: false, string: inputString, semantic: null };
         }
     };
-    handleRemoteInput(message) {
-        if (this.user != message.user) {
-            const result = this.#inputValidation(message.string);
-            this.addToConsole({ valid: true, string: message.string, user: message.user });
-            parser(result.semantic);
-        }
-    }
+    // handleRemoteInput(message) {
+    //     if (this.user != message.user) {
+    //         const result = this.#inputValidation(message.string);
+    //         this.addToConsole({ valid: true, string: message.string, user: message.user });
+    //         parser(result.semantic);
+    //     }
+    // }
     //
     //
     //
@@ -676,10 +1320,10 @@ class WelleApp {
                         this.#consoleArray.push({ message: `${message.string}` });
                     } else {
                         // here if joined the session
-                        this.#consoleArray.push({ message: `${message.user}: ${message.string}` });
-                        if (message.user == this.user) {
-                            Socket.emit("sessionData", { user: this.user, string: message.string });
-                        }
+                        // this.#consoleArray.push({ message: `${message.user}: ${message.string}` });
+                        // if (message.user == this.user) {
+                        //     Socket.emit("sessionData", { user: this.user, string: message.string });
+                        // }
                     }
                     this.playAlert("return");
                 }
@@ -724,114 +1368,28 @@ class WelleApp {
     // ============================================
     // general
     // ============================================
-    addSamples(files) {
-        files.map((file) => {
-            const name = file.split(".")[0];
-            const path = `/audio/${file}`;
-            const content = { name: name, file: file, path: path };
-            // console.log(`App incoming sample file: ${file}, name: ${name}, path: ${path}`);
-            this.#listOfSamples[name] = content;
-            Instrument.buffers[name] = new Tone.ToneAudioBuffer(path, () => {
-                // console.log(`new Tone Buffer for ${name} loaded..`);
-            });
-            this.#listOfAllInstruments[name] = content;
-        });
-    }
 
-    addInstruments(presets) {
-        for (let preset in presets) {
-            const name = preset;
-            const fullPreset = { name: name, preset: presets[preset] };
-            // if (this.debug)
-            //     console.log(`
-            // incoming preset name:  ${name}
-            // preset: ${JSON.stringify(fullPreset)}
-            // `);
-            this.#listOfInstruments[name] = fullPreset;
-            this.#listOfAllInstruments[name] = fullPreset;
-        }
-    }
-    printAllInstruments() {
-        if (this.debug) {
-            console.log(`App all instruments:`);
-            for (let i in this.#listOfAllInstruments)
-                console.log(`: ${this.#listOfAllInstruments[i].name}`);
-            // console.log(`Details: ${JSON.stringify(this.#listOfAllInstruments, null, 0)}`);
-        }
-    }
-    // ============================================
-    // hande Alerts
-    // ============================================
-    addAlerts(files) {
-        files.map((file) => {
-            const name = file.split(".")[0];
-            const path = `/alerts/${file}`;
-            const content = { name: name, file: file, path: path };
-            // console.log(`App incoming sample file: ${file}, name: ${name}, path: ${path}`);
-            this.#alerts[name] = content;
-            this.#alerts[name].player = new Tone.Player(this.#alerts[name].path).toDestination();
-            this.#alerts[name].player.autostart = false;
-        });
-    }
-    printAlerts() {
-        if (this.debug) {
-            Object.keys(this.#alerts).forEach((alert) => {
-                // console.log(`App stored alerts: ${alert}`);
-            });
-            // let allAlertNames = [];
-            // for (let i in this.#alerts) allAlertNames.push(this.#alerts[i].name);
-            // console.log(`App stored alerts: ${allAlertNames}`);
-        }
-    }
-    playAlert(alertName) {
-        if (this.#playAlerts) if (this.#alerts[alertName]) this.#alerts[alertName].player.start();
-    }
-    handleAlerts(checked) {
-        console.log(`Play Alerts. change to: ${checked}`);
-        this.#playAlerts = checked;
-    }
-    handleSound(checked) {
-        console.log(`Play Sound. change to: ${checked}`);
-        this.#playSound = checked;
-        if (this.#playSound) Instrument.masterGain.gain.rampTo(0.8, 0.1);
-        else Instrument.masterGain.gain.rampTo(0, 0.1);
-    }
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    // ============================================
-    // handle first Tone start on keydown
-    // ============================================
-    async startTone() {
-        if (this.#toneStarted == false) {
-            await Tone.start();
-            this.#toneStarted = true;
-            console.log(">> App started Tone on first Keydown");
-
-            // extremly relevant to stability of Tone playback
-            Tone.context.lookAhead = 0.3;
-        }
-    }
-    startTransport(time) {
-        if (time) {
-            if (Tone.Transport.state != "started") Tone.Transport.start(time);
-        } else {
-            if (Tone.Transport.state != "started") Tone.Transport.start();
-        }
-    }
-    stopTransport(time) {
-        if (time) {
-            if (Tone.Transport.state != "stopped") Tone.Transport.stop(time);
-        } else {
-            if (Tone.Transport.state != "stopped") Tone.Transport.stop();
-        }
-    }
+    // addInstruments(presets) {
+    //     for (let preset in presets) {
+    //         const name = preset;
+    //         const fullPreset = { name: name, preset: presets[preset] };
+    //         // if (this.debug)
+    //         //     console.log(`
+    //         // incoming preset name:  ${name}
+    //         // preset: ${JSON.stringify(fullPreset)}
+    //         // `);
+    //         this.#listOfInstruments[name] = fullPreset;
+    //         this.#listOfAllInstruments[name] = fullPreset;
+    //     }
+    // }
+    // printAllInstruments() {
+    //     if (this.debug) {
+    //         console.log(`App all instruments:`);
+    //         for (let i in this.#listOfAllInstruments)
+    //             console.log(`: ${this.#listOfAllInstruments[i].name}`);
+    //         // console.log(`Details: ${JSON.stringify(this.#listOfAllInstruments, null, 0)}`);
+    //     }
+    // }
 
     //
     //
@@ -868,788 +1426,481 @@ class WelleApp {
     mark it visually in page, send midi states
     */
 
-    setSelected(inst) {
-        // only if inst was not selected before:
-        // if (this.selected.name != this.#instruments[inst].name) {
+    // setSelected(inst) {
+    //     // only if inst was not selected before:
+    //     // if (this.selected.name != this.#instruments[inst].name) {
 
-        // }
-        this.selected.name = this.#instruments[inst].name;
-        this.selected.vol = this.#instruments[inst].getVolume();
-        this.selected.eq = this.#instruments[inst].getEq();
-        this.selected.env = this.#instruments[inst].getEnv();
-        this.selected.pattern = this.#instruments[inst].getPattern();
-        // console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
-        // <div id="inst_${inst}"
-        setTimeout(() => {
-            Object.keys(this.#instruments).forEach((instrument) => {
-                if (instrument == inst)
-                    window.document
-                        .getElementById(`inst_${instrument}`)
-                        .classList.add("selectedInst");
-                else
-                    window.document
-                        .getElementById(`inst_${instrument}`)
-                        .classList.remove("selectedInst");
-            });
-        }, 300);
-        // this.sendMidiSelectedInstState();
-    }
+    //     // }
+    //     this.selected.name = this.#instruments[inst].name;
+    //     this.selected.vol = this.#instruments[inst].getVolume();
+    //     this.selected.eq = this.#instruments[inst].getEq();
+    //     this.selected.env = this.#instruments[inst].getEnv();
+    //     this.selected.pattern = this.#instruments[inst].getPattern();
+    //     // console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
+    //     // <div id="inst_${inst}"
+    //     setTimeout(() => {
+    //         Object.keys(this.#instruments).forEach((instrument) => {
+    //             if (instrument == inst)
+    //                 window.document
+    //                     .getElementById(`inst_${instrument}`)
+    //                     .classList.add("selectedInst");
+    //             else
+    //                 window.document
+    //                     .getElementById(`inst_${instrument}`)
+    //                     .classList.remove("selectedInst");
+    //         });
+    //     }, 300);
+    //     // this.sendMidiSelectedInstState();
+    // }
 
-    setEqToSelected(message) {
-        // console.log(`set selected instrument's EQ...`);
-        if (message == undefined) {
-            message = {
-                name: this.selected.name,
-                high: 0,
-                highFrequency: 5000,
-                mid: 0,
-                lowFrequency: 300,
-                low: -42,
-            };
-        }
-        this.#instruments[message.name].setEq(message);
-    }
-    setEnvToSelected(message) {
-        // console.log(`set selected instrument's EQ...`);
-        if (message == undefined) {
-            message = {
-                name: this.selected.name,
-                atk: 0.01,
-                dec: 0.3,
-                sus: 0.2,
-                rel: 1.1,
-            };
-        }
-        this.#instruments[message.name].setEnv(message);
-    }
+    // setEqToSelected(message) {
+    //     // console.log(`set selected instrument's EQ...`);
+    //     if (message == undefined) {
+    //         message = {
+    //             name: this.selected.name,
+    //             high: 0,
+    //             highFrequency: 5000,
+    //             mid: 0,
+    //             lowFrequency: 300,
+    //             low: -42,
+    //         };
+    //     }
+    //     this.#instruments[message.name].setEq(message);
+    // }
+    // setEnvToSelected(message) {
+    //     // console.log(`set selected instrument's EQ...`);
+    //     if (message == undefined) {
+    //         message = {
+    //             name: this.selected.name,
+    //             atk: 0.01,
+    //             dec: 0.3,
+    //             sus: 0.2,
+    //             rel: 1.1,
+    //         };
+    //     }
+    //     this.#instruments[message.name].setEnv(message);
+    // }
 
-    setBpm(message) {
-        const bpm = Math.min(240, Math.max(1, message.bpm));
-        // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
-        this.#bpm = bpm;
-        // if Transport running
-        if (Tone.Transport.state == "started") {
-            if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
-            else Tone.Transport.bpm.rampTo(bpm, 0.1);
-        }
-        this.renderContent();
-    }
+    // // ============================================
 
-    // ============================================
+    // // ============================================
 
-    setVolume(message) {
-        // console.log(`App.setVolume message: `, message);
-        // checks for instruments
-        const checks = this.checkInstruments(message.instruments);
-        if (checks.existingInstruments) {
-            checks.existingInstruments.map((instrument) => {
-                this.#instruments[instrument].setVolume(message.volume);
-                this.setSelected(instrument);
-            });
-        }
-        this.renderContent();
-    }
+    // // ============================================
 
-    // ============================================
+    // playOnce(inst) {
+    //     // if inst is sample
+    //     if (this.#listOfSamples[inst]) {
+    //         console.log(`playOnce is sample.. `);
+    //         // Instrument.buffers[inst].play;
+    //         const player = new Tone.Player().toDestination();
+    //         // play one of the samples when they all load
+    //         player.buffer = Instrument.buffers[inst].get("C3");
+    //         player.volume.value = -12;
+    //         player.start();
+    //     }
+    //     if (this.#listOfInstruments[inst]) {
+    //         console.log(`playOnce is instrument .. `);
+    //         const preset = this.#listOfInstruments[inst].preset;
+    //         const type = preset.synthType;
+    //         const baseNote = preset.baseNote;
+    //         const settings = preset.settings;
+    //         const synth = new Tone[type](settings).toDestination();
+    //         synth.volume.value = -12;
+    //         synth.triggerAttackRelease(baseNote, "8n");
+    //     }
+    // }
 
-    stopInstruments(instruments) {
-        // checks for instruments
-        const checks = this.checkInstruments(instruments);
-        if (checks.existingInstruments) {
-            checks.existingInstruments.map((instrument) => {
-                this.#instruments[instrument].stop();
-                // console.log(
-                //     `show stopped instruments: ${instrument}, isPlaying: ${
-                //         this.#instruments[instrument].isPlaying
-                //     }`
-                // );
-                this.setSelected(instrument);
-            });
-        }
-        // stop Tone if nothing is playing anymore
-        let nothingIsPlaying = true;
-        Object.keys(this.#instruments).forEach((instrument) => {
-            if (this.#instruments[instrument].isPlaying) nothingIsPlaying = false;
-        });
-        if (nothingIsPlaying) this.stopTransport();
-        this.renderContent();
-    }
+    // // ============================================
 
-    // ============================================
+    // // ============================================
 
-    playOnce(inst) {
-        // if inst is sample
-        if (this.#listOfSamples[inst]) {
-            console.log(`playOnce is sample.. `);
-            // Instrument.buffers[inst].play;
-            const player = new Tone.Player().toDestination();
-            // play one of the samples when they all load
-            player.buffer = Instrument.buffers[inst].get("C3");
-            player.volume.value = -12;
-            player.start();
-        }
-        if (this.#listOfInstruments[inst]) {
-            console.log(`playOnce is instrument .. `);
-            const preset = this.#listOfInstruments[inst].preset;
-            const type = preset.synthType;
-            const baseNote = preset.baseNote;
-            const settings = preset.settings;
-            const synth = new Tone[type](settings).toDestination();
-            synth.volume.value = -12;
-            synth.triggerAttackRelease(baseNote, "8n");
-        }
-    }
+    // // ============================================
 
-    playAll() {
-        // store quant time
-        const timeDiff = this.toneQuant() * 1000;
-        // set timeout for restart in sync (more or less)
-        setTimeout(() => {
-            // cancel all future jobs, clear Tone transport, stop it & start it in quant time
-            Tone.Transport.cancel();
-            Tone.Transport.clear();
-            // stop if started
-            this.stopTransport();
-            // restart all instruments in sync
-            Object.keys(this.#instruments).forEach((instrument) => {
-                this.#instruments[instrument].restart();
-            });
-            // start
-            this.startTransport();
-            this.renderContent();
-        }, timeDiff);
-    }
+    // // ============================================
 
-    // ============================================
+    // // ============================================
 
-    stopAll() {
-        Object.keys(this.#instruments).forEach((instrument) => {
-            this.#instruments[instrument].stop();
-        });
-        this.renderContent();
-    }
+    // // check instruments
+    // checkInstruments(instruments) {
+    //     let returnMessage = {
+    //         validInstruments: undefined,
+    //         existingInstruments: undefined,
+    //         newInstruments: undefined,
+    //     };
+    //     // check if instruments are valid
+    //     const validInstruments = this.checkValidInstruments(instruments);
 
-    // ============================================
+    //     if (validInstruments) {
+    //         returnMessage.validInstruments = validInstruments;
+    //         // collect existing instruments
+    //         const existingInstruments = this.checkExistingInstruments(validInstruments);
+    //         if (existingInstruments) returnMessage.existingInstruments = existingInstruments;
+    //         // collect new instruments
+    //         const newInstruments = this.checkNewInstruments(validInstruments);
+    //         if (newInstruments) returnMessage.newInstruments = newInstruments;
+    //         // if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
+    //     }
+    //     // if (this.debug)
+    //     //     console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
+    //     return returnMessage;
+    // }
 
-    copyPattern(message) {
-        // checks for instruments - extract source
-        const checks = this.checkInstruments(message.source);
-        let source = undefined;
-        if (checks.existingInstruments) source = checks.existingInstruments[0];
+    // checkValidInstruments(instruments) {
+    //     // check if internal instrument list contains the instruments
+    //     const validInstruments = instruments.map((inst) => {
+    //         // if (this.debug)
+    //         //     console.log(
+    //         //         `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
+    //         //     );
+    //         if (this.#listOfAllInstruments[inst]) return inst;
+    //         else
+    //             this.addToConsole({
+    //                 valid: false,
+    //                 string: inst,
+    //                 comment: "no such instrument",
+    //                 user: this.user,
+    //             });
+    //     });
+    //     // if (this.debug)
+    //     //     console.log(
+    //     //         `vaild instruments: ${validInstruments}. Count: ${validInstruments.length}`
+    //     //     );
+    //     // filter null entries
+    //     const result = validInstruments.filter((x) => x);
+    //     if (result.length > 0) return result;
+    //     else return undefined;
+    // }
 
-        // if source exists
-        if (source) {
-            // checks for destinations
-            const destChecks = this.checkInstruments(message.destinations);
-            const pattern = this.#instruments[source].getPattern();
-            const rawPattern = this.#instruments[source].getRawPattern();
-            if (destChecks.existingInstruments)
-                destChecks.existingInstruments.map((instrument) => {
-                    this.#instruments[instrument].setPattern(pattern, rawPattern);
-                    // this.#instruments[source].restart();
-                });
-            if (destChecks.newInstruments)
-                destChecks.newInstruments.map((instrument) => {
-                    message.name = instrument;
-                    message.pattern = pattern;
-                    message.rawPattern = rawPattern;
-                    this.createNewInstrument(message);
-                    // this.#instruments[source].restart();
-                });
-        }
-        // restart all with quant
-        this.playAll();
-        this.renderContent();
-    }
+    // checkExistingInstruments(instruments) {
+    //     const existingInstruments = instruments.map((inst) => {
+    //         if (this.#instruments[inst]) return inst;
+    //     });
+    //     // filter null entries
+    //     const result = existingInstruments.filter((x) => x);
+    //     if (result.length > 0) return result;
+    //     else return undefined;
+    // }
 
-    // ============================================
+    // checkNewInstruments(instruments) {
+    //     const newInstruments = instruments.map((inst) => {
+    //         if (!this.#instruments[inst]) return inst;
+    //     });
+    //     // filter null entries
+    //     const result = newInstruments.filter((x) => x);
+    //     if (result.length > 0) return result;
+    //     else return undefined;
+    // }
 
-    assignPattern(message) {
-        // console.log(`assignPattern. message: ${JSON.stringify(message)}`);
-        // checks for instruments
-        const checks = this.checkInstruments(message.instruments);
-        // if there are new instruments, create them
-        if (checks.newInstruments)
-            checks.newInstruments.map((inst) => {
-                message.name = inst;
-                this.createNewInstrument(message);
-                this.setSelected(inst);
-            });
-        if (checks.existingInstruments)
-            checks.existingInstruments.map((inst) => {
-                this.#instruments[inst].setPattern(message.pattern, message.rawPattern);
-                if (message.random) this.#instruments[inst].random = message.random;
-                if (message.volume) this.#instruments[inst].setVolume(message.volume);
-                this.setSelected(inst);
-            });
-        this.startTransport();
-        this.renderContent();
-    }
+    // createNewInstrument(message) {
+    //     if (this.#listOfSamples[message.name]) {
+    //         message.type = "sampler";
+    //         message.sample = this.#listOfSamples[message.name];
+    //     }
+    //     if (this.#listOfInstruments[message.name]) {
+    //         message.type = "preset";
+    //         message.preset = this.#listOfInstruments[message.name].preset;
+    //     }
+    //     if (this.debug) console.log(`create new inst ${message.name} as '${message.type}'`);
+    //     this.#instruments[message.name] = new Instrument(message);
+    // }
 
-    // ============================================
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
 
-    plainStartInstruments(message) {
-        // if (this.debug) console.log(`plainStartInstruments. message: ${JSON.stringify(message)}`);
+    // // ============================================
+    // // Tone - delete things
+    // // ============================================
 
-        let isPart = false;
-        const partName = message.instruments[0];
-        // check for parts if only one instrument
-        if (message.instruments.length == 1) {
-            if (this.#parts[partName]) {
-                // console.log(`part ${partName} detected`);
-                isPart = true;
-            }
-        }
-        if (isPart) {
-            this.startPart(partName);
-        } else {
-            // checks for instruments
-            const checks = this.checkInstruments(message.instruments);
-            // if there are new instruments, create them
-            if (checks.newInstruments)
-                checks.newInstruments.map((inst) => {
-                    message.name = inst;
-                    this.createNewInstrument(message);
-                    this.setSelected(inst);
-                });
-            // if existing, start them
-            if (checks.existingInstruments)
-                checks.existingInstruments.map((inst) => {
-                    this.#instruments[inst].restart();
-                    if (message.random != null) this.#instruments[inst].random = message.random;
-                    this.setSelected(inst);
-                });
+    // // deletePreset(name) {
+    // //     if (this.#presets[name]) {
+    // //         console.log(`delete this preset: ${name}`);
+    // //         delete this.#presets[name];
+    // //         Socket.emit("deletePreset", { name: name });
+    // //     }
+    // // }
 
-            this.startTransport();
-        }
-        this.renderContent();
-    }
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
 
-    // ============================================
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
 
-    startPart(name) {
-        // STOP - clear all instruments
-        for (let instrument in this.#instruments) {
-            this.#instruments[instrument].clear();
-        }
-        // TONE - handle tone. is best to restart tone
-        // store quant time
-        let timeDiff = this.toneQuant() * 1000;
-        // set timeout for restart in sync (more or less)
-        setTimeout(() => {
-            // cancel all future jobs, clear Tone transport, stop it & start it in quant time
-            Tone.Transport.cancel();
-            Tone.Transport.clear();
-            // stop if started
-            this.stopTransport();
+    // // ============================================
+    // // Tone - helper QUANT
+    // // ============================================
+    // toneQuant = () => {
+    //     // get time
+    //     const now = Tone.TransportTime().valueOf();
+    //     // set quantize factor
+    //     let factor = 1;
+    //     let factorOffset = 0.5;
+    //     // get quant time
+    //     const quant = Tone.Time(now).quantize(factor);
+    //     let playTime = quant;
+    //     let timeDifference = 0;
+    //     // if (this.debug) console.log(`Tone.now(): ${now}. quant: ${quant}`);
+    //     // if transport starts, set quant to 0
+    //     if (quant < now) {
+    //         playTime = now + factorOffset;
+    //         playTime = Tone.Time(playTime).quantize(factor);
+    //         timeDifference = playTime - now;
+    //         // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
+    //     } else timeDifference = quant - now;
 
-            // CHECK & RESTART
-            for (let instrument in this.#parts[name].instrumentCollection) {
-                // console.log(`check & restart process for instrument ${instrument}`);
-                const pattern = this.#parts[name].instrumentCollection[instrument].pattern;
-                const rawPattern = this.#parts[name].instrumentCollection[instrument].rawPattern;
-                const volume = this.#parts[name].instrumentCollection[instrument].volume;
-                const random = this.#parts[name].instrumentCollection[instrument].random;
+    //     if (now == 0) {
+    //         playTime = 0;
+    //         timeDifference = 0;
+    //     } else if (now >= 0 && now <= 0.01) {
+    //         playTime = 0.01;
+    //         timeDifference = playTime;
+    //     }
+    //     // safety: if below 0 than playTime is zero
+    //     if (playTime < 0) playTime = 0;
+    //     if (timeDifference < 0) timeDifference = 0;
+    //     //     console.log(`
+    //     // quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} -
+    //     // play at: ${playTime}
+    //     // timeDifference playTime - now() : ${timeDifference}
+    //     // `);
+    //     // return quant playTime
+    //     return timeDifference;
+    // };
 
-                // console.log(`
-                //         Part ${name} restart instrument ${instrument}
-                //         with:
-                //         pattern ${pattern}
-                //         rawPattern ${rawPattern}
-                //         volume: ${volume}
-                //         random: ${random}
-                //         `);
-                // check if saved part instrument exists in instruments
-                if (this.#instruments[instrument]) {
-                    // console.log(`instrument ${instrument} exists in 'instruments'`);
-                    // restart instrument, if it was playing in part
-                    if (this.#parts[name].instrumentCollection[instrument].isPlaying) {
-                        // prepare instrument:
-                        this.#instruments[instrument].random = random;
-                        this.#instruments[instrument].setPattern(pattern, rawPattern);
-                        this.#instruments[instrument].setVolume(volume);
-                        this.#instruments[instrument].restart();
-                    }
-                } else {
-                    // if saved instrument does not exists (e.g. deleted or not initialized)
-                    // then restart?
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
 
-                    // check if instrument is availible
-                    if (this.#listOfAllInstruments[instrument]) {
-                        this.createNewInstrument({
-                            name: instrument,
-                            pattern: pattern,
-                            rawPattern: rawPattern,
-                            random: random,
-                            volume: volume,
-                        });
-                    }
-                }
-            }
+    // // ============================================
+    // // HTML - renderer
+    // // ============================================
 
-            // start Tone Transport
-            this.startTransport();
-            this.renderContent();
+    // renderContent() {
+    //     // add a delay to catch changes
+    //     setTimeout(() => {
+    //         this.renderInstruments();
+    //         this.renderParts();
+    //         this.renderInstrumentsOverview();
+    //         this.renderSession();
+    //         document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
+    //     }, 200);
+    // }
 
-            // console.log(`now Tone.now ${Tone.now()} started after offset: ${timeDiff}`);
-        }, timeDiff);
+    // renderExternal() {
+    //     // info text
+    //     // document.getElementById(this.#infoDiv).innerHTML = text.info;
+    //     // tutorial
+    //     let html = tutorial.start;
+    //     document.getElementById(this.#tutorialDiv).innerHTML = html;
+    //     // const checks = document.getElementsByTagName("input");
+    //     // console.log("these are the inputs: ", checks);
+    //     document.querySelectorAll(".tutorialInput").forEach((item) => {
+    //         item.addEventListener("keydown", (e) => {
+    //             if (e.code == "Enter") {
+    //                 window.welle.app.tutorial = true;
+    //                 const input = item.value.toLowerCase();
+    //                 console.log(`message from tutorial input: ${input}`);
+    //                 window.welle.app.handleMainInput(input);
+    //                 item.value = "";
+    //                 setTimeout(() => {
+    //                     window.welle.app.handleMainInput("/");
+    //                 }, 3000);
+    //             }
+    //         });
+    //     });
+    // }
 
-        // BPM change
-        this.setBpm({ bpm: this.#parts[name].bpm });
-    }
+    // renderSession() {
+    //     if (this.user != "local") {
+    //         let html = "group: ";
+    //         this.session.map((entry) => {
+    //             html += `${entry} `;
+    //         });
+    //         document.getElementById(this.#sessionDiv).innerHTML = html;
+    //     }
+    // }
+    // // renderPresets() {
+    // //     let html = `<p>`;
+    // //     Object.keys(this.#presets).forEach((preset) => {
+    // //         html += `
+    // //         <a id="preset_${this.#presets[preset].name}" class="links"
+    // //         title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a>
+    // //         `;
+    // //     });
+    // //     html += "</p>";
+    // //     // replace html content
+    // //     document.getElementById(this.#presetsDiv).innerHTML = "";
+    // //     document.getElementById(this.#presetsDiv).innerHTML += html;
 
-    savePart(name) {
-        // console.log(`save new part : ${name}`);
-        // check if name is reserved as instrument
-        if (this.#listOfAllInstruments[name]) {
-            // if (this.debug) console.log(`part name ${name} is reserved as instrument`);
-            this.addToConsole({
-                valid: false,
-                string: name,
-                comment: "name reserved as instrument",
-                user: this.user,
-            });
-        } else {
-            // init new part
-            this.#parts[name] = {
-                instrumentCollection: {},
-                bpm: this.#bpm,
-            };
-            // store instruments and their playState in the part
-            Object.keys(this.#instruments).forEach((instrument) => {
-                this.#parts[name].instrumentCollection[instrument] = {
-                    isPlaying: this.#instruments[instrument].isPlaying,
-                    pattern: this.#instruments[instrument].getPattern(),
-                    rawPattern: this.#instruments[instrument].getRawPattern(),
-                    volume: this.#instruments[instrument].getVolume(),
-                    random: this.#instruments[instrument].random,
-                };
-            });
-            console.log(`part ${name} saved in parts`, this.#parts[name]);
-        }
-        this.renderContent();
-    }
+    // //     // add event listener
+    // //     Object.keys(this.#presets).forEach((preset) => {
+    // //         document.getElementById(`preset_${preset}`).addEventListener("click", () => {
+    // //             console.log(`load preset: ${preset}  ...`);
+    // //             window.welle.app.loadPreset(preset);
+    // //         });
+    // //     });
+    // // }
 
-    // ============================================
+    // renderInstrumentsOverview() {
+    //     let html = `<p>`;
+    //     Object.keys(this.#listOfAllInstruments).forEach((inst) => {
+    //         // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
+    //         html += `
+    //         <a id="play_${this.#listOfAllInstruments[inst].name}" class="links"
+    //             title="click to play sound: ${inst}" href='#'>${
+    //             this.#listOfAllInstruments[inst].name
+    //         }</a>
+    //         `;
+    //     });
+    //     html += "</p>";
+    //     // replace html content
+    //     document.getElementById(this.#instListDiv).innerHTML = "";
+    //     document.getElementById(this.#instListDiv).innerHTML += html;
 
-    // check instruments
-    checkInstruments(instruments) {
-        let returnMessage = {
-            validInstruments: undefined,
-            existingInstruments: undefined,
-            newInstruments: undefined,
-        };
-        // check if instruments are valid
-        const validInstruments = this.checkValidInstruments(instruments);
+    //     // add event listener
+    //     Object.keys(this.#listOfAllInstruments).forEach((inst) => {
+    //         document.getElementById(`play_${inst}`).addEventListener("click", () => {
+    //             console.log(`play inst: ${inst} once ...`);
+    //             window.welle.app.playOnce(inst);
+    //         });
+    //     });
+    // }
 
-        if (validInstruments) {
-            returnMessage.validInstruments = validInstruments;
-            // collect existing instruments
-            const existingInstruments = this.checkExistingInstruments(validInstruments);
-            if (existingInstruments) returnMessage.existingInstruments = existingInstruments;
-            // collect new instruments
-            const newInstruments = this.checkNewInstruments(validInstruments);
-            if (newInstruments) returnMessage.newInstruments = newInstruments;
-            // if (this.debug) console.log(`Existing: ${existingInstruments}  New: ${newInstruments}`);
-        }
-        // if (this.debug)
-        //     console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
-        return returnMessage;
-    }
+    // renderParts() {
+    //     let html = "";
+    //     // iterate through parts collection
+    //     Object.keys(this.#parts).forEach((part) => {
+    //         this.#parts[part].html = `
+    //             <input
+    //                 type = "button"
+    //                 class = "w3-button w3-round-large w3-border w3-black w3-small"
+    //                 value = "${part}"
+    //                 title = "part: ${part}"
+    //                 id = "${part}">
+    //             </input> `;
+    //         html += this.#parts[part].html;
+    //     });
 
-    checkValidInstruments(instruments) {
-        // check if internal instrument list contains the instruments
-        const validInstruments = instruments.map((inst) => {
-            // if (this.debug)
-            //     console.log(
-            //         `Valid? check inst: ${inst} in list ${this.#listOfAllInstruments[inst]}`
-            //     );
-            if (this.#listOfAllInstruments[inst]) return inst;
-            else
-                this.addToConsole({
-                    valid: false,
-                    string: inst,
-                    comment: "no such instrument",
-                    user: this.user,
-                });
-        });
-        // if (this.debug)
-        //     console.log(
-        //         `vaild instruments: ${validInstruments}. Count: ${validInstruments.length}`
-        //     );
-        // filter null entries
-        const result = validInstruments.filter((x) => x);
-        if (result.length > 0) return result;
-        else return undefined;
-    }
+    //     document.getElementById(this.#partDiv).innerHTML = "";
+    //     document.getElementById(this.#partDiv).innerHTML = html;
 
-    checkExistingInstruments(instruments) {
-        const existingInstruments = instruments.map((inst) => {
-            if (this.#instruments[inst]) return inst;
-        });
-        // filter null entries
-        const result = existingInstruments.filter((x) => x);
-        if (result.length > 0) return result;
-        else return undefined;
-    }
+    //     // first create html, then event listener
+    //     Object.keys(this.#parts).forEach((part) => {
+    //         document.getElementById(part).addEventListener("click", () => {
+    //             // console.log(`happy button part: ${part}`);
+    //             window.welle.app.startPart(part);
+    //         });
+    //     });
+    // }
 
-    checkNewInstruments(instruments) {
-        const newInstruments = instruments.map((inst) => {
-            if (!this.#instruments[inst]) return inst;
-        });
-        // filter null entries
-        const result = newInstruments.filter((x) => x);
-        if (result.length > 0) return result;
-        else return undefined;
-    }
+    // renderInstruments() {
+    //     let html = ``;
+    //     // iterate through instruments collection
+    //     Object.keys(this.#instruments).forEach((inst) => {
+    //         // if not yet rendered, init rendering
+    //         if (this.#instruments[inst].rendered == undefined)
+    //             this.#instruments[inst].rendered = false;
 
-    createNewInstrument(message) {
-        if (this.#listOfSamples[message.name]) {
-            message.type = "sampler";
-            message.sample = this.#listOfSamples[message.name];
-        }
-        if (this.#listOfInstruments[message.name]) {
-            message.type = "preset";
-            message.preset = this.#listOfInstruments[message.name].preset;
-        }
-        if (this.debug) console.log(`create new inst ${message.name} as '${message.type}'`);
-        this.#instruments[message.name] = new Instrument(message);
-    }
+    //         if (!this.#instruments[inst].rendered) {
+    //             // round volume
+    //             const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
+    //             // create HTML elements for appending
+    //             this.#instruments[inst].html = `
+    //             <div id="inst_${inst}" class="w3-row"
+    //             style="padding-top: 3px; padding-left: 3px;">
+    //                 <div class="w3-col" style="width:120px;">
+    //                     <input
+    //                     id="check_${this.#instruments[inst].name}"
+    //                     class="w3-check"
+    //                     type="checkbox"
+    //                     title = "check: ${inst}"
+    //                     checked="true">
+    //                     <label> <b>${this.#instruments[inst].name}</b> </label>
+    //                 </div>
+    //                 <div id="vol_${inst}" class="w3-col" style="width:70px">
+    //                     vol: ${volume}
+    //                 </div>
+    //                 <div id="rand_${inst}" class="w3-col" style="width:70px">
+    //                     % ${this.#instruments[inst].random}
+    //                 </div>
+    //                 <div id="pattern_${inst}" class="w3-half">
+    //                     pattern: ${this.#instruments[inst].getRawPattern()}
+    //                 </div>
+    //             </div>`;
+    //             html += this.#instruments[inst].html;
+    //         }
+    //     });
 
-    // ============================================
-    // Tone - delete things
-    // ============================================
+    //     // add html content
+    //     document.getElementById(this.#instDiv).insertAdjacentHTML("beforeend", html);
 
-    delete(names) {
-        console.log(`delete this: ${names}`);
-        names.map((name) => {
-            if (this.#parts[name]) {
-                delete this.#parts[name];
-                // console.log(`delete this part: ${name}`);
-            }
-            if (this.#instruments[name]) {
-                // console.log(`delete this instrument: ${name}`);
-                this.#instruments[name].clear();
-                delete this.#instruments[name];
-                window.document.getElementById(`inst_${name}`).remove();
-            }
-        });
-        this.renderContent();
-    }
-    deletePreset(name) {
-        if (this.#presets[name]) {
-            console.log(`delete this preset: ${name}`);
-            delete this.#presets[name];
-            Socket.emit("deletePreset", { name: name });
-        }
-    }
+    //     // update checkboxes with isPlaying, vol, pattern
+    //     Object.keys(this.#instruments).forEach((inst) => {
+    //         // checkboxes
+    //         if (this.#instruments[inst].isPlaying)
+    //             window.document.getElementById(`check_${inst}`).checked = true;
+    //         else window.document.getElementById(`check_${inst}`).checked = false;
+    //         // update volume . round volume
+    //         const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
+    //         window.document.getElementById(`vol_${inst}`).innerHTML = `vol: ${volume}`;
+    //         // update random
+    //         window.document.getElementById(`rand_${inst}`).innerHTML = `% ${
+    //             this.#instruments[inst].random
+    //         }`;
+    //         // update pattern
+    //         window.document.getElementById(
+    //             `pattern_${inst}`
+    //         ).innerHTML = `pattern: ${this.#instruments[inst].getRawPattern()}`;
+    //     });
+    //     //
 
-    deleteAll() {
-        console.log(`App delete all..`);
-        // clear & delete every instrument
-        for (let instrument in this.#instruments) {
-            // console.log(`delete this instrument: ${instrument}`);
-            this.#instruments[instrument].clear();
-            delete this.#instruments[instrument];
-            window.document.getElementById(`inst_${instrument}`).remove();
-        }
-        // delete all parts
-        for (let part in this.#parts) {
-            // console.log(`delete this part: ${part}`);
-            delete this.#parts[part];
-        }
-        // stop Tone
-        this.stopTransport();
-        Tone.Transport.cancel();
-        Tone.Transport.clear();
-        this.renderContent();
-    }
+    //     // first create html, then event listener
+    //     Object.keys(this.#instruments).forEach((inst) => {
+    //         if (!this.#instruments[inst].rendered) {
+    //             // console.log(`assign event listener to checkbox for ${inst}`);
+    //             // add checkbox update
+    //             window.document.getElementById(`check_${inst}`).addEventListener("click", (c) => {
+    //                 if (c.target.checked) {
+    //                     // console.log(`check checkbox: ${inst}. Start instrument. `);
+    //                     // console.log(`Window: this is the window: ${window.welle.name}`);
+    //                     window.welle.app.plainStartInstruments({
+    //                         instruments: [inst],
+    //                         random: null,
+    //                     });
+    //                 }
+    //                 if (!c.target.checked) {
+    //                     // console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
+    //                     window.welle.app.stopInstruments([inst]);
+    //                 }
+    //             });
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    // ============================================
-    // Tone - helper QUANT
-    // ============================================
-    toneQuant = () => {
-        // get time
-        const now = Tone.TransportTime().valueOf();
-        // set quantize factor
-        let factor = 1;
-        let factorOffset = 0.5;
-        // get quant time
-        const quant = Tone.Time(now).quantize(factor);
-        let playTime = quant;
-        let timeDifference = 0;
-        // if (this.debug) console.log(`Tone.now(): ${now}. quant: ${quant}`);
-        // if transport starts, set quant to 0
-        if (quant < now) {
-            playTime = now + factorOffset;
-            playTime = Tone.Time(playTime).quantize(factor);
-            timeDifference = playTime - now;
-            // console.log("quant < now. new calc: ", `now: ${now}, playTime: ${playTime}. quant factor: ${factor}. quant: ${quant}`)
-        } else timeDifference = quant - now;
-
-        if (now == 0) {
-            playTime = 0;
-            timeDifference = 0;
-        } else if (now >= 0 && now <= 0.01) {
-            playTime = 0.01;
-            timeDifference = playTime;
-        }
-        // safety: if below 0 than playTime is zero
-        if (playTime < 0) playTime = 0;
-        if (timeDifference < 0) timeDifference = 0;
-        //     console.log(`
-        // quant Tone.TransportTime().valueOf() +${factorOffset}-> now: ${now}/ Tone.now: ${Tone.now()} -
-        // play at: ${playTime}
-        // timeDifference playTime - now() : ${timeDifference}
-        // `);
-        // return quant playTime
-        return timeDifference;
-    };
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    // ============================================
-    // HTML - renderer
-    // ============================================
-
-    renderContent() {
-        // add a delay to catch changes
-        setTimeout(() => {
-            this.renderInstruments();
-            this.renderParts();
-            this.renderInstrumentsOverview();
-            this.renderSession();
-            document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
-        }, 200);
-    }
-
-    renderExternal() {
-        // info text
-        // document.getElementById(this.#infoDiv).innerHTML = text.info;
-        // tutorial
-        let html = tutorial.start;
-        document.getElementById(this.#tutorialDiv).innerHTML = html;
-        // const checks = document.getElementsByTagName("input");
-        // console.log("these are the inputs: ", checks);
-        document.querySelectorAll(".tutorialInput").forEach((item) => {
-            item.addEventListener("keydown", (e) => {
-                if (e.code == "Enter") {
-                    window.welle.app.tutorial = true;
-                    const input = item.value.toLowerCase();
-                    console.log(`message from tutorial input: ${input}`);
-                    window.welle.app.handleMainInput(input);
-                    item.value = "";
-                    setTimeout(() => {
-                        window.welle.app.handleMainInput("/");
-                    }, 3000);
-                }
-            });
-        });
-    }
-
-    renderSession() {
-        if (this.user != "local") {
-            let html = "group: ";
-            this.session.map((entry) => {
-                html += `${entry} `;
-            });
-            document.getElementById(this.#sessionDiv).innerHTML = html;
-        }
-    }
-    renderPresets() {
-        let html = `<p>`;
-        Object.keys(this.#presets).forEach((preset) => {
-            html += `
-            <a id="preset_${this.#presets[preset].name}" class="links" 
-            title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a> 
-            `;
-        });
-        html += "</p>";
-        // replace html content
-        document.getElementById(this.#presetsDiv).innerHTML = "";
-        document.getElementById(this.#presetsDiv).innerHTML += html;
-
-        // add event listener
-        Object.keys(this.#presets).forEach((preset) => {
-            document.getElementById(`preset_${preset}`).addEventListener("click", () => {
-                console.log(`load preset: ${preset}  ...`);
-                window.welle.app.loadPreset(preset);
-            });
-        });
-    }
-
-    renderInstrumentsOverview() {
-        let html = `<p>`;
-        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
-            // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
-            html += `
-            <a id="play_${this.#listOfAllInstruments[inst].name}" class="links" 
-                title="click to play sound: ${inst}" href='#'>${
-                this.#listOfAllInstruments[inst].name
-            }</a> 
-            `;
-        });
-        html += "</p>";
-        // replace html content
-        document.getElementById(this.#instListDiv).innerHTML = "";
-        document.getElementById(this.#instListDiv).innerHTML += html;
-
-        // add event listener
-        Object.keys(this.#listOfAllInstruments).forEach((inst) => {
-            document.getElementById(`play_${inst}`).addEventListener("click", () => {
-                console.log(`play inst: ${inst} once ...`);
-                window.welle.app.playOnce(inst);
-            });
-        });
-    }
-
-    renderParts() {
-        let html = "";
-        // iterate through parts collection
-        Object.keys(this.#parts).forEach((part) => {
-            this.#parts[part].html = `
-                <input 
-                    type = "button" 
-                    class = "w3-button w3-round-large w3-border w3-black w3-small" 
-                    value = "${part}"
-                    title = "part: ${part}"
-                    id = "${part}">
-                </input> `;
-            html += this.#parts[part].html;
-        });
-
-        document.getElementById(this.#partDiv).innerHTML = "";
-        document.getElementById(this.#partDiv).innerHTML = html;
-
-        // first create html, then event listener
-        Object.keys(this.#parts).forEach((part) => {
-            document.getElementById(part).addEventListener("click", () => {
-                // console.log(`happy button part: ${part}`);
-                window.welle.app.startPart(part);
-            });
-        });
-    }
-
-    renderInstruments() {
-        let html = ``;
-        // iterate through instruments collection
-        Object.keys(this.#instruments).forEach((inst) => {
-            // if not yet rendered, init rendering
-            if (this.#instruments[inst].rendered == undefined)
-                this.#instruments[inst].rendered = false;
-
-            if (!this.#instruments[inst].rendered) {
-                // round volume
-                const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
-
-                // create HTML elements for appending
-                this.#instruments[inst].html = `
-                <div id="inst_${inst}" class="w3-row" 
-                style="padding-top: 3px; padding-left: 3px;">
-                    <div class="w3-col" style="width:120px;">
-                        <input 
-                        id="check_${this.#instruments[inst].name}" 
-                        class="w3-check" 
-                        type="checkbox" 
-                        title = "check: ${inst}"
-                        checked="true">
-                        <label> <b>${this.#instruments[inst].name}</b> </label>
-                    </div>
-                    <div id="vol_${inst}" class="w3-col" style="width:70px">
-                        vol: ${volume}
-                    </div>
-                    <div id="rand_${inst}" class="w3-col" style="width:70px">
-                        % ${this.#instruments[inst].random}
-                    </div>
-                    <div id="pattern_${inst}" class="w3-half">
-                        pattern: ${this.#instruments[inst].getRawPattern()}
-                    </div>
-                </div>`;
-                html += this.#instruments[inst].html;
-            }
-        });
-
-        // add html content
-        document.getElementById(this.#instDiv).insertAdjacentHTML("beforeend", html);
-
-        // update checkboxes with isPlaying, vol, pattern
-        Object.keys(this.#instruments).forEach((inst) => {
-            // checkboxes
-            if (this.#instruments[inst].isPlaying)
-                window.document.getElementById(`check_${inst}`).checked = true;
-            else window.document.getElementById(`check_${inst}`).checked = false;
-            // update volume . round volume
-            const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
-            window.document.getElementById(`vol_${inst}`).innerHTML = `vol: ${volume}`;
-            // update random
-            window.document.getElementById(`rand_${inst}`).innerHTML = `% ${
-                this.#instruments[inst].random
-            }`;
-            // update pattern
-            window.document.getElementById(
-                `pattern_${inst}`
-            ).innerHTML = `pattern: ${this.#instruments[inst].getRawPattern()}`;
-        });
-        //
-
-        // first create html, then event listener
-        Object.keys(this.#instruments).forEach((inst) => {
-            if (!this.#instruments[inst].rendered) {
-                // console.log(`assign event listener to checkbox for ${inst}`);
-                // add checkbox update
-                window.document.getElementById(`check_${inst}`).addEventListener("click", (c) => {
-                    if (c.target.checked) {
-                        // console.log(`check checkbox: ${inst}. Start instrument. `);
-                        // console.log(`Window: this is the window: ${window.welle.name}`);
-                        window.welle.app.plainStartInstruments({
-                            instruments: [inst],
-                            random: null,
-                        });
-                    }
-                    if (!c.target.checked) {
-                        // console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
-                        window.welle.app.stopInstruments([inst]);
-                    }
-                });
-
-                this.#instruments[inst].rendered = true;
-            }
-        });
-    }
+    //             this.#instruments[inst].rendered = true;
+    //         }
+    //     });
+    // }
 }
 
 export { WelleApp };

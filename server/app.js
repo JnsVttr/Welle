@@ -39,11 +39,11 @@ if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
 
 const audioPath = path.join(__dirname, "../data/samples");
 const alertsPath = path.join(__dirname, "../data/alerts");
-const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
 const historyURL = path.join(__dirname, "../data/history");
-const presetsURL = path.join(__dirname, "../data/presets");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
-let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
+// const presetsURL = path.join(__dirname, "../data/presets");
+// const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
+// let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 
 // app folders + startpage
 // ================================
@@ -64,7 +64,7 @@ console.log(`__dirname = ${__dirname}. Hostname = ${hostname}. port: ${port}`);
 // ======================================================================
 
 const clients = {};
-const users = [];
+// const users = [];
 
 io.on("connection", (socket) => {
     const date = new Date().toISOString().slice(0, 10);
@@ -72,44 +72,44 @@ io.on("connection", (socket) => {
 
     clients[socket.id] = { history: [] };
     socket.emit({ message: "new connection", clients: clients });
-    const presets = getPresets({ path: presetsURL });
-    socket.emit("presets", presets);
+    // const presets = getPresets({ path: presetsURL });
+    // socket.emit("presets", presets);
 
     // OSC tests
 
     // HELLO MESSAGE
-    socket.on("message", (message) => {
-        // if (debug) console.log(`socket on message: ${message.string}`);
-        io.sockets.emit("allUsers", { users: users });
-    });
+    // socket.on("message", (message) => {
+    //     // if (debug) console.log(`socket on message: ${message.string}`);
+    //     io.sockets.emit("allUsers", { users: users });
+    // });
 
     // new user
-    socket.on("newUser", (message) => {
-        clients[socket.id].user = message.user;
-        if (!users[message.user]) users.push(message.user);
-        io.sockets.emit("allUsers", { users: users });
-    });
+    // socket.on("newUser", (message) => {
+    //     clients[socket.id].user = message.user;
+    //     if (!users[message.user]) users.push(message.user);
+    //     io.sockets.emit("allUsers", { users: users });
+    // });
 
     // session data
-    socket.on("sessionData", (message) => {
-        console.log(
-            `>> received session data from ${message.user}: ${message.string}. users: ${users}`
-        );
-        io.sockets.emit("sessionData", message);
-    });
+    // socket.on("sessionData", (message) => {
+    //     console.log(
+    //         `>> received session data from ${message.user}: ${message.string}. users: ${users}`
+    //     );
+    //     io.sockets.emit("sessionData", message);
+    // });
 
     // console input
-    socket.on("consoleInput", (message) => {
-        // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
-        clients[socket.id].history.push(message.input);
-    });
+    // socket.on("consoleInput", (message) => {
+    //     // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
+    //     clients[socket.id].history.push(message.input);
+    // });
 
     // TONE PRESETS
-    socket.on("requestTonePresets", () => {
-        // if (debug) console.log(`requestTonePresets for Client`);
-        tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
-        io.sockets.emit("tonePresets", tonePresetsJSON);
-    });
+    // socket.on("requestTonePresets", () => {
+    //     // if (debug) console.log(`requestTonePresets for Client`);
+    //     tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
+    //     io.sockets.emit("tonePresets", tonePresetsJSON);
+    // });
 
     // AUDIO FILES
     socket.on("requestSampleFiles", () => {
@@ -128,24 +128,24 @@ io.on("connection", (socket) => {
     });
 
     // store preset
-    socket.on("storePreset", (preset) => {
-        const file = path.join(presetsURL, `${preset.name}.json`);
-        fs.writeFile(file, JSON.stringify(preset, null, 4), (err) => {
-            if (err) throw err;
-            const presets = getPresets({ path: presetsURL });
-            socket.emit("presets", presets);
-        });
-    });
+    // socket.on("storePreset", (preset) => {
+    //     const file = path.join(presetsURL, `${preset.name}.json`);
+    //     fs.writeFile(file, JSON.stringify(preset, null, 4), (err) => {
+    //         if (err) throw err;
+    //         const presets = getPresets({ path: presetsURL });
+    //         socket.emit("presets", presets);
+    //     });
+    // });
     // socket on delete Preset
-    socket.on("deletePreset", (message) => {
-        const file = path.join(presetsURL, `${message.name}.json`);
-        fs.unlink(file, function (err) {
-            if (err) throw err;
-            console.log(`File ${message.name}.json deleted!`);
-            const presets = getPresets({ path: presetsURL });
-            socket.emit("presets", presets);
-        });
-    });
+    // socket.on("deletePreset", (message) => {
+    //     const file = path.join(presetsURL, `${message.name}.json`);
+    //     fs.unlink(file, function (err) {
+    //         if (err) throw err;
+    //         console.log(`File ${message.name}.json deleted!`);
+    //         const presets = getPresets({ path: presetsURL });
+    //         socket.emit("presets", presets);
+    //     });
+    // });
 
     // on disconnect
     socket.on("disconnect", () => {
@@ -160,15 +160,15 @@ io.on("connection", (socket) => {
                 if (err) throw err;
             });
         }
-        if (clients[socket.id].user) {
-            const index = users.indexOf(clients[socket.id].user);
-            if (index > -1) {
-                users.splice(index, 1);
-            }
-        }
-        io.sockets.emit("allUsers", { users: users });
-        delete clients[socket.id];
-        console.log(`deleted. client from clients: ${socket.id}`);
+        // if (clients[socket.id].user) {
+        //     const index = users.indexOf(clients[socket.id].user);
+        //     if (index > -1) {
+        //         users.splice(index, 1);
+        //     }
+        // }
+        // io.sockets.emit("allUsers", { users: users });
+        // delete clients[socket.id];
+        // console.log(`deleted. client from clients: ${socket.id}`);
     });
 });
 
@@ -183,28 +183,33 @@ httpServer.listen(port, () => {
 
 // functions
 const getSamples = (message) => {
+    let count = 0;
     // read sample entries
     const entries = fs.readdirSync(message.path, (err) => {
         if (err) return console.log("Unable to scan directory: " + err);
     });
     const samples = entries.filter((entry) => {
-        if (!entry.startsWith(".")) return entry;
+        if (!entry.startsWith(".")) {
+            count = count + 1;
+            return entry;
+        }
     });
-    return samples;
+    // console.log(`samples count: ${count}`);
+    return { samples: samples, count: count };
 };
 
-const getPresets = (message) => {
-    const entries = fs.readdirSync(message.path, (err) => {
-        if (err) return console.log("Unable to scan directory: " + err);
-    });
-    const presets = entries.filter((entry) => {
-        if (!entry.startsWith(".")) return entry;
-    });
-    const presetsData = presets.map((preset) => {
-        const rawdata = fs.readFileSync(path.join(message.path, preset), (err) => {
-            if (err) throw err;
-        });
-        return JSON.parse(rawdata);
-    });
-    return presetsData;
-};
+// const getPresets = (message) => {
+//     const entries = fs.readdirSync(message.path, (err) => {
+//         if (err) return console.log("Unable to scan directory: " + err);
+//     });
+//     const presets = entries.filter((entry) => {
+//         if (!entry.startsWith(".")) return entry;
+//     });
+//     const presetsData = presets.map((preset) => {
+//         const rawdata = fs.readFileSync(path.join(message.path, preset), (err) => {
+//             if (err) throw err;
+//         });
+//         return JSON.parse(rawdata);
+//     });
+//     return presetsData;
+// };

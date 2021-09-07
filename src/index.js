@@ -35,7 +35,7 @@ window.welle = { name: "welle", app: App, instruments: {} };
 
 // focus on main input field: - maybe not to explore the whole site before..
 // for development
-// document.getElementById("mainInput").focus();
+document.getElementById("mainInput").focus();
 
 // start Tone.js on keydown
 document.getElementById("mainDiv").addEventListener("keydown", (e) => {
@@ -78,46 +78,63 @@ Socket.on("connect", function (data) {
     console.log(`Socket Connected! Id: ${App.id}, user: ${App.user}`);
     if (App.getAlertsNum() == 0) Socket.emit("requestAlerts");
     if (App.getSamplesNum() == 0) Socket.emit("requestSampleFiles");
-    if (App.getInstrumentsNum() == 0) Socket.emit("requestTonePresets");
+    // if (App.getInstrumentsNum() == 0) Socket.emit("requestTonePresets");
 });
 
 // SOCKET on receiving audioFile Paths
-Socket.on("audioFiles", (files) => {
+Socket.on("audioFiles", (message) => {
+    console.log(`Socket: get (${message.count}) samples. `);
+    // console.log(`#samples num ... (${App.getSamplesNum()})`);
     if (App.getSamplesNum() == 0) {
-        App.addSamples(files);
+        App.addSamples(message.samples);
     }
-});
-
-// SOCKET receive tonePresets
-Socket.on("tonePresets", (presets) => {
-    if (App.getInstrumentsNum() == 0) {
-        App.addInstruments(presets);
-        App.printAllInstruments();
-        App.renderInstrumentsOverview();
+    // create all Instruments + Grid, when loading finished
+    if (App.getSamplesNum() == message.count) {
+        console.log(`start instrument creation with ${App.getSamplesNum()} samples`);
+        App.instruments = App.makeSynths({ count: App.getSamplesNum(), samples: App.samples });
+        console.log(`new instruments: `);
+        console.log(App.instruments);
+        App.grid = App.makeGrid(App.instruments);
+        console.log(App.grid);
+        App.configLoop();
+        // App.instruments[1].sequence[0] = "C3";
+        // App.instruments[0].sequence[6] = "C3";
+        // console.log(`App.instruments .. ${App.instruments[1].sequence}`);
+        // App.startTransport();
     }
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
-Socket.on("alerts", (files) => {
+Socket.on("alerts", (message) => {
+    console.log(`Socket: get (${message.count}) alerts. `);
     if (App.getAlertsNum() == 0) {
-        App.addAlerts(files);
-        App.printAlerts();
+        App.addAlerts(message.samples);
     }
 });
 
+// SOCKET receive tonePresets
+// Socket.on("tonePresets", (presets) => {
+//     if (App.getInstrumentsNum() == 0) {
+//         App.addInstruments(presets);
+//         App.printAllInstruments();
+//         App.renderInstrumentsOverview();
+//     }
+// });
+
 // SOCKET presets
-Socket.on("presets", (presets) => {
-    console.log(`incoming presets: `, presets);
-    App.storePresets(presets);
-});
+// Socket.on("presets", (presets) => {
+//     console.log(`incoming presets: `, presets);
+//     App.storePresets(presets);
+// });
 
 // SOCKET new User
-Socket.on("allUsers", (message) => {
-    console.log(`incoming all users: ${message.users}`);
-    App.updateUsers(message.users);
-});
+// Socket.on("allUsers", (message) => {
+//     console.log(`incoming all users: ${message.users}`);
+//     App.updateUsers(message.users);
+// });
+
 // SOCKET session data
-Socket.on("sessionData", (message) => {
-    console.log(`incoming session data: ${JSON.stringify(message)}`);
-    App.handleRemoteInput(message);
-});
+// Socket.on("sessionData", (message) => {
+//     console.log(`incoming session data: ${JSON.stringify(message)}`);
+//     App.handleRemoteInput(message);
+// });

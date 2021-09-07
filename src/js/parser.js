@@ -12,7 +12,7 @@ import { App, Socket } from "/index";
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
     // show parser input
-    // if (App.debug) console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
+    if (App.debug) console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
 
     switch (input.event) {
         case "plainStartEvent":
@@ -20,7 +20,7 @@ export const parser = (input) => {
                 instruments: input.phrases,
                 random: input.random,
             });
-            App.sendMidiSelectedInstState();
+            // App.sendMidiSelectedInstState();
             break;
 
         case "assignPattern":
@@ -32,7 +32,7 @@ export const parser = (input) => {
                 random: input.random,
             });
             setTimeout(() => {
-                App.sendMidiSelectedInstState();
+                // App.sendMidiSelectedInstState();
             }, 100);
             break;
 
@@ -41,7 +41,7 @@ export const parser = (input) => {
                 source: [input.source],
                 destinations: input.phrases,
             });
-            App.sendMidiSelectedInstState();
+            // App.sendMidiSelectedInstState();
             break;
 
         case "playAllEvent":
@@ -63,7 +63,7 @@ export const parser = (input) => {
 
         case "setVolume":
             App.setVolume({ instruments: input.phrases, volume: input.volume });
-            App.sendMidiSelectedInstState();
+            // App.sendMidiSelectedInstState();
             break;
 
         case "savePartEvent":
@@ -78,7 +78,7 @@ export const parser = (input) => {
             App.delete(input.phrases);
             break;
         case "deleteWordEvent":
-            App.deletePreset(input.phrase);
+            // App.deletePreset(input.phrase);
             break;
 
         case "deleteAllEvent":
@@ -97,14 +97,14 @@ export const parser = (input) => {
             break;
 
         case "storeEvent":
-            const preset = App.createPreset(input.phrase);
+            // const preset = App.createPreset(input.phrase);
             // console.log(`preset ${preset.name}: ${JSON.stringify(preset, null, 0)}`);
-            if (preset) Socket.emit("storePreset", preset);
+            // if (preset) Socket.emit("storePreset", preset);
             break;
 
         case "loadEvent":
-            const name = input.phrase;
-            App.loadPreset(name);
+            // const name = input.phrase;
+            // App.loadPreset(name);
             break;
 
         case "uploadEvent":

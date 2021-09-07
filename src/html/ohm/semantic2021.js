@@ -270,7 +270,7 @@ semantics.addOperation("eval", {
         if (note.sourceString != "") {
             return parseInt(note.sourceString);
         } else {
-            return 1;
+            return 0;
         }
     },
     Events_soundPause: function (_) {
