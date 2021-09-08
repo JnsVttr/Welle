@@ -18,12 +18,18 @@ WEBMIDI API https://djipco.github.io/webmidi/latest/classes/Output.html#method_p
 Structure of App:
 grid = main storage array for note events of the sample-based instruments (sampler). 
         depends on how many samples are loaded. max 14 samples.
-
-
-
-
-
 */
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+// ===========================================================================
 
 class WelleApp {
     // debug
@@ -49,6 +55,7 @@ class WelleApp {
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
     instruments = []; // create instruments based on the samples list
+    activeInstruments = []; // store acivated instruments
     grid = undefined;
     beat = 0;
     parts = {}; // storage for all the saved parts
@@ -75,10 +82,10 @@ class WelleApp {
         pattern: [1, null, 1, null],
     };
     // html
-    #instDiv = "instruments";
-    #partDiv = "parts";
-    #bpmDiv = "input_bpm";
-    #instListDiv = "listOfInstruments";
+    instDiv = "instruments";
+    partDiv = "parts";
+    bpmDiv = "input_bpm";
+    instListDiv = "listOfInstruments";
     // #presetsDiv = "presets";
     #sessionDiv = "session";
     #infoDiv = "info";
@@ -89,14 +96,6 @@ class WelleApp {
         Math.round((((value - x1) * (y2 - x2)) / (y1 - x1) + x2) * 100) / 100;
 
     //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
     // construct "App" and evaluate functions
 
     constructor() {
@@ -144,7 +143,7 @@ class WelleApp {
         });
     }
 
-    //
+    // ===========================================================================
     //
     //
     //
@@ -407,7 +406,7 @@ class WelleApp {
     }
 
     stopAll() {
-        // this.renderContent();
+        this.renderContent();
         this.stopTransport();
         this.beat = 0;
     }
@@ -422,7 +421,7 @@ class WelleApp {
             if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
             else Tone.Transport.bpm.rampTo(bpm, 0.1);
         }
-        // this.renderContent();
+        this.renderContent();
     }
 
     //
@@ -454,14 +453,15 @@ class WelleApp {
                     entry.updateSequence(message.pattern, message.rawPattern);
                     if (message.random != undefined) entry.random(message.random);
                     if (message.volume != undefined) entry.setVolume(message.volume);
-                    // this.setSelected(inst);
+                    this.setSelected(entry);
+                    entry.activate();
                 }
             });
             console.log(`${inst} valid is ${valid}`);
         });
 
         this.startTransport();
-        // this.renderContent();
+        this.renderContent();
     }
 
     plainStartInstruments(message) {
@@ -492,7 +492,8 @@ class WelleApp {
                         // assign random and volume
                         if (message.random) entry.rand = message.random;
                         if (message.volume) entry.setVolume(message.volume);
-                        // this.setSelected(inst);
+                        this.setSelected(entry);
+                        entry.activate();
                     }
                 });
                 console.log(`${inst} valid is ${valid}`);
@@ -500,7 +501,7 @@ class WelleApp {
 
             this.startTransport();
         }
-        // this.renderContent();
+        this.renderContent();
     }
 
     stopInstruments(instruments) {
@@ -512,14 +513,19 @@ class WelleApp {
                 if (entry.name == inst) {
                     valid = true;
                     entry.mute = true;
-                    // this.setSelected(inst);
+                    this.setSelected(entry);
                 }
             });
             // console.log(`${inst} valid is ${valid}`);
         });
 
         //if (nothingIsPlaying) this.stopTransport();
-        //this.renderContent();
+        let running = false;
+        this.instruments.forEach((entry) => {
+            if (entry.getStatus() == true) running = true;
+        });
+        if (!running) this.stopTransport();
+        this.renderContent();
     }
 
     setVolume(message) {
@@ -530,12 +536,13 @@ class WelleApp {
                 if (entry.name == inst) {
                     valid = true;
                     entry.setVolume(message.volume);
-                    // this.setSelected(inst);
+                    this.setSelected(entry);
+                    entry.activate();
                 }
             });
             // console.log(`${inst} valid is ${valid}`);
         });
-        // this.renderContent();
+        this.renderContent();
     }
 
     copyPattern(message) {
@@ -555,7 +562,8 @@ class WelleApp {
                     source = entry;
                     sequence = entry.sequence;
                     patternRaw = entry.patternRaw;
-                    // this.setSelected(inst);
+                    this.setSelected(entry);
+                    entry.activate();
                 }
             });
         });
@@ -571,7 +579,6 @@ class WelleApp {
                         valid = true;
                         // console.log(`${inst} exists`);
                         destinations.push(inst);
-                        // this.setSelected(inst);
                     }
                 });
             });
@@ -590,31 +597,36 @@ class WelleApp {
                             entry.sequence[i] = sequence[i];
                         }
                         // this.setSelected(inst);
+                        entry.activate();
                     }
                 });
             });
         } else console.log(`copy error`);
 
-        // this.renderContent();
+        this.renderContent();
     }
 
     delete(names) {
         console.log(`delete this: ${names}`);
         names.map((name) => {
-            // if (this.#parts[name]) {
-            //     delete this.#parts[name];
-            //     // console.log(`delete this part: ${name}`);
-            // }
+            if (this.parts[name]) {
+                delete this.parts[name];
+                // console.log(`delete this part: ${name}`);
+            }
             // if this inst exists, reset everything
             this.instruments.forEach((entry) => {
                 if (entry.name == name) {
                     entry.sequence = [null, null, null, null, null, null, null, null];
                     entry.patternRaw = "";
                     entry.setVolume(0.6);
+                    entry.deactivate();
+                    this.activeInstruments = this.activeInstruments.filter(
+                        (item) => item !== entry.name
+                    );
                 }
             });
         });
-        // this.renderContent();
+        this.renderContent();
     }
 
     deleteAll() {
@@ -624,6 +636,8 @@ class WelleApp {
             entry.sequence = [null, null, null, null, null, null, null, null];
             entry.patternRaw = "";
             entry.setVolume(0.6);
+            entry.deactivate();
+            this.activeInstruments = this.activeInstruments.filter((item) => item !== entry.name);
         });
         // delete all parts
         for (let part in this.parts) {
@@ -633,7 +647,19 @@ class WelleApp {
         // stop Tone
         this.stopTransport();
         // render
-        // this.renderContent();
+        this.renderContent();
+    }
+
+    playOnce(inst) {
+        const player = new Tone.Player().toDestination();
+        // play one of the samples when they all load
+        this.instruments.forEach((entry) => {
+            if (entry.name == inst) {
+                player.buffer = entry.buffer;
+                player.volume.value = -12;
+                player.start();
+            }
+        });
     }
 
     //
@@ -687,7 +713,7 @@ class WelleApp {
 
             console.log(`part ${name} saved in parts`, this.parts[name]);
         }
-        // this.renderContent();
+        this.renderContent();
     }
 
     startPart(name) {
@@ -717,10 +743,478 @@ class WelleApp {
         // this.beat = 0;
         // start Tone Transport
         this.startTransport();
-        // this.renderContent();
+        this.renderContent();
     }
 
     //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // Selected
+    // ============================================
+    // set last instrument as selected, for HTML display and MIDI interaction
+
+    setSelected(inst) {
+        // set selected instrument and save settings
+        this.selected.name = inst.name;
+        this.selected.vol = inst.getVolume();
+        this.selected.env = inst.getEnvSettings();
+        this.selected.sequence = inst.getSequence();
+        console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
+
+        // <div id="inst_${inst}"
+        // setTimeout(() => {
+        //     Object.keys(this.#instruments).forEach((instrument) => {
+        //         if (instrument == inst)
+        //             window.document
+        //                 .getElementById(`inst_${instrument}`)
+        //                 .classList.add("selectedInst");
+        //         else
+        //             window.document
+        //                 .getElementById(`inst_${instrument}`)
+        //                 .classList.remove("selectedInst");
+        //     });
+        // }, 300);
+        // this.sendMidiSelectedInstState();
+
+        // activate instrument
+        inst.activate();
+        // store all active instruments in an array
+        this.instruments.forEach((entry) => {
+            const status = entry.getStatus();
+            console.log(`Status inst ${entry.name}: ${status}`);
+            // if inst not already stored, than push in array
+            if (status == true) {
+                let isStored = false;
+                this.activeInstruments.forEach((stored) => {
+                    if (stored == entry.name) isStored = true;
+                });
+                if (isStored == false) this.activeInstruments.push(entry.name);
+            }
+        });
+        console.log(JSON.stringify(this.activeInstruments));
+    }
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // handle main string input
+    // ============================================
+    //
+    //
+
+    handleMainInput(inputString) {
+        // reset console pointer for arrow navigation
+        this.#consolePointer = 0;
+        this.#consoleInput = inputString;
+        // GRAMMAR - send string to validate using semantics & grammar
+        const result = this.#inputValidation(inputString);
+        // console.log(`app handleMainInput Grammar result: ${JSON.stringify(result, null, 4)}`);
+
+        // if Grammar valid:
+        if (result.valid) {
+            // check if result matches instruments and parts
+            // ...
+            // return semantic to parser
+            this.addToConsole({ valid: true, string: inputString, user: this.user });
+            parser(result.semantic);
+        } else this.addToConsole({ valid: false, string: inputString, user: this.user });
+
+        if (!this.tutorial) {
+            // clear Input
+            document.getElementById("mainInput").value = "";
+            // FOCUS - focus back on textfield
+            document.getElementById("mainInput").focus();
+        }
+    }
+    #inputValidation = (inputString) => {
+        // if input is valid
+        if (livecode.match(inputString).succeeded()) {
+            // evaluate input through semantics
+            const result = semantics(livecode.match(inputString)).eval();
+            // if result valid in grammar, return result
+            return { valid: true, string: inputString, semantic: result };
+        }
+        // if input is not valid:
+        if (livecode.match(inputString).failed()) {
+            return { valid: false, string: inputString, semantic: null };
+        }
+    };
+    // handleRemoteInput(message) {
+    //     if (this.user != message.user) {
+    //         const result = this.#inputValidation(message.string);
+    //         this.addToConsole({ valid: true, string: message.string, user: message.user });
+    //         parser(result.semantic);
+    //     }
+    // }
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // console
+    // ============================================
+    arrowUp() {
+        // increment pointer, render html
+        this.renderArrows("up");
+        this.playAlert("return");
+    }
+    arrowDown() {
+        // decrement pointer, render html
+        this.renderArrows("down");
+        this.playAlert("return");
+    }
+    renderArrows(dir) {
+        const length = this.#consoleArray.length;
+        // console.log(`App render arrows on array length ${length} with dir '${dir}'.
+        // pointer: ${this.#consolePointer}
+        // pos length - pointer: ${parseInt(length - this.#consolePointer)}
+        // array: ${JSON.stringify(this.#consoleArray)}`);
+        switch (dir) {
+            case "up":
+                if (length > 0 && this.#consolePointer < length) {
+                    // set HTML
+                    document.getElementById("mainInput").value = "";
+                    const element = this.#consoleArray[length - 1 - this.#consolePointer].message;
+                    if (element != "&nbsp;") document.getElementById("mainInput").value = element;
+
+                    // update pointer
+                    if (this.#consolePointer < length) {
+                        this.#consolePointer += 1;
+                    }
+                }
+                break;
+            case "down":
+                if (this.#consolePointer > 0) {
+                    // update pointer
+                    this.#consolePointer -= 1;
+                    // set HTML
+                    document.getElementById("mainInput").value = "";
+                    if (this.#consolePointer != 0) {
+                        const element = this.#consoleArray[length - this.#consolePointer].message;
+                        if (element != "&nbsp;")
+                            document.getElementById("mainInput").value = element;
+                    } else {
+                        document.getElementById("mainInput").value = "";
+                    }
+                }
+                break;
+        }
+    }
+    addToConsole(message) {
+        switch (message.valid) {
+            case true:
+                if (message.string == "") this.playAlert("return");
+                else {
+                    if (message.user == "local") {
+                        this.#consoleArray.push({ message: `${message.string}` });
+                    } else {
+                        // here if joined the session
+                        // this.#consoleArray.push({ message: `${message.user}: ${message.string}` });
+                        // if (message.user == this.user) {
+                        //     Socket.emit("sessionData", { user: this.user, string: message.string });
+                        // }
+                    }
+                    this.playAlert("return");
+                }
+                break;
+            case false:
+                // if string is already false, play error, else render string
+                if (message.string.charAt(0) == "!") this.playAlert("error");
+                else {
+                    // if not valid, prepend a '!' to string, store in console string array
+                    let string = `! not valid: ${message.string}`;
+                    if (message.comment) string = `! ${message.comment}: ${message.string}`;
+                    this.#consoleArray.push({ message: string });
+                    this.playAlert("error");
+                }
+                break;
+        }
+        // render to Console
+        this.renderConsole();
+    }
+    renderConsole = () => {
+        const length = this.#consoleArray.length;
+        let html = "";
+        let pointer = 0;
+        if (length > this.#consoleMaxLength) pointer = length - this.#consoleMaxLength;
+        for (let i = pointer; i < length; i++) {
+            html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
+        }
+        // render array to div
+        document.getElementById(this.#consoleID).innerHTML = "";
+        document.getElementById(this.#consoleID).innerHTML += html;
+    };
+
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+
+    // ============================================
+    // HTML - renderer
+    // ============================================
+
+    renderContent() {
+        // add a delay to catch changes
+        setTimeout(() => {
+            this.renderInstrumentsOverview();
+            this.renderInstruments();
+            this.renderParts();
+
+            // this.renderSession();
+            document.getElementById(this.bpmDiv).innerHTML = Math.floor(this.bpm);
+        }, 200);
+    }
+
+    renderInstrumentsOverview() {
+        let html = `<p>`;
+        this.instruments.forEach((entry) => {
+            html += `
+            <a id="play_${entry.name}" class="links"
+                title="click to play sound: ${entry.name}" href='#'>${entry.name}</a>
+            `;
+        });
+
+        html += "</p>";
+        // replace html content
+        document.getElementById(this.instListDiv).innerHTML = "";
+        document.getElementById(this.instListDiv).innerHTML += html;
+
+        // add event listener to play sound
+        this.instruments.forEach((entry) => {
+            document.getElementById(`play_${entry.name}`).addEventListener("click", () => {
+                console.log(`play inst: ${entry.name} once ...`);
+                window.welle.app.playOnce(entry.name);
+            });
+        });
+    }
+
+    renderInstruments() {
+        // create empty html content
+        let html = ``;
+        document.getElementById(this.instDiv).innerHTML = "";
+
+        // iterate through storedInstruments collection
+        this.activeInstruments.forEach((inst) => {
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    // round volume
+                    const volume = Math.round(entry.getVolume() * 10) / 10;
+                    // checkboxes
+                    const isPlaying = !entry.getMute();
+                    let checkHtml = "";
+                    if (isPlaying) checkHtml = 'checked="checked"';
+
+                    // create HTML elements for appending
+                    const instHtml = `
+                    <div id="inst_${entry.name}" class="w3-row"
+                    style="padding-top: 3px; padding-left: 3px;">
+                        <div class="w3-col" style="width:120px;">
+                            <input
+                            id="check_${entry.name}"
+                            class="w3-check"
+                            type="checkbox"
+                            title = "check: ${entry.name}"
+                            ${checkHtml}>
+                            <label> <b>${entry.name}</b> </label>
+                        </div>
+                        <div id="vol_${entry.name}" class="w3-col" style="width:70px">
+                            vol: ${volume}
+                        </div>
+                        <div id="rand_${entry.name}" class="w3-col" style="width:70px">
+                            % ${entry.getRand()}
+                        </div>
+                        <div id="pattern_${entry.name}" class="w3-half">
+                            pattern: ${entry.getPatternRaw()}
+                        </div>
+                    </div>`;
+                    html += instHtml;
+                }
+            });
+        });
+        // add html content
+        document.getElementById(this.instDiv).insertAdjacentHTML("beforeend", html);
+
+        // first create html, then event listener
+        this.activeInstruments.forEach((inst) => {
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    // add checkbox update
+                    window.document
+                        .getElementById(`check_${entry.name}`)
+                        .addEventListener("click", (c) => {
+                            if (c.target.checked) {
+                                window.welle.app.plainStartInstruments({
+                                    instruments: [entry.name],
+                                    random: null,
+                                });
+                            }
+                            if (!c.target.checked) {
+                                window.welle.app.stopInstruments([entry.name]);
+                            }
+                        });
+                }
+            });
+        });
+    }
+
+    renderParts() {
+        // empty var to store html
+        let html = "";
+
+        // iterate through parts collection
+        Object.keys(this.parts).forEach((part) => {
+            const partHtml = `
+                <input
+                    type = "button"
+                    class = "w3-button w3-round-large w3-border w3-black w3-small"
+                    value = "${part}"
+                    title = "part: ${part}"
+                    id = "${part}">
+                </input> `;
+            html += partHtml;
+        });
+
+        // update document
+        document.getElementById(this.partDiv).innerHTML = "";
+        document.getElementById(this.partDiv).innerHTML = html;
+
+        // first create html, then event listener
+        Object.keys(this.parts).forEach((part) => {
+            document.getElementById(part).addEventListener("click", () => {
+                window.welle.app.startPart(part);
+            });
+        });
+    }
+
+    // renderExternal() {
+    //     // info text
+    //     // document.getElementById(this.#infoDiv).innerHTML = text.info;
+    //     // tutorial
+    //     let html = tutorial.start;
+    //     document.getElementById(this.#tutorialDiv).innerHTML = html;
+    //     // const checks = document.getElementsByTagName("input");
+    //     // console.log("these are the inputs: ", checks);
+    //     document.querySelectorAll(".tutorialInput").forEach((item) => {
+    //         item.addEventListener("keydown", (e) => {
+    //             if (e.code == "Enter") {
+    //                 window.welle.app.tutorial = true;
+    //                 const input = item.value.toLowerCase();
+    //                 console.log(`message from tutorial input: ${input}`);
+    //                 window.welle.app.handleMainInput(input);
+    //                 item.value = "";
+    //                 setTimeout(() => {
+    //                     window.welle.app.handleMainInput("/");
+    //                 }, 3000);
+    //             }
+    //         });
+    //     });
+    // }
+
+    // renderSession() {
+    //     if (this.user != "local") {
+    //         let html = "group: ";
+    //         this.session.map((entry) => {
+    //             html += `${entry} `;
+    //         });
+    //         document.getElementById(this.#sessionDiv).innerHTML = html;
+    //     }
+    // }
+    // renderPresets() {
+    //     let html = `<p>`;
+    //     Object.keys(this.#presets).forEach((preset) => {
+    //         html += `
+    //         <a id="preset_${this.#presets[preset].name}" class="links"
+    //         title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a>
+    //         `;
+    //     });
+    //     html += "</p>";
+    //     // replace html content
+    //     document.getElementById(this.#presetsDiv).innerHTML = "";
+    //     document.getElementById(this.#presetsDiv).innerHTML += html;
+
+    //     // add event listener
+    //     Object.keys(this.#presets).forEach((preset) => {
+    //         document.getElementById(`preset_${preset}`).addEventListener("click", () => {
+    //             console.log(`load preset: ${preset}  ...`);
+    //             window.welle.app.loadPreset(preset);
+    //         });
+    //     });
+    // }
+
     //
     //
     //
@@ -1196,165 +1690,6 @@ class WelleApp {
     //         }
     //     });
     // }
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    // ============================================
-    // handle main string input
-    // ============================================
-    handleMainInput(inputString) {
-        // reset console pointer for arrow navigation
-        this.#consolePointer = 0;
-        this.#consoleInput = inputString;
-        // GRAMMAR - send string to validate using semantics & grammar
-        const result = this.#inputValidation(inputString);
-        // console.log(`app handleMainInput Grammar result: ${JSON.stringify(result, null, 4)}`);
-
-        // if Grammar valid:
-        if (result.valid) {
-            // check if result matches instruments and parts
-            // ...
-            // return semantic to parser
-            this.addToConsole({ valid: true, string: inputString, user: this.user });
-            parser(result.semantic);
-        } else this.addToConsole({ valid: false, string: inputString, user: this.user });
-
-        if (!this.tutorial) {
-            // clear Input
-            document.getElementById("mainInput").value = "";
-            // FOCUS - focus back on textfield
-            document.getElementById("mainInput").focus();
-        }
-    }
-    #inputValidation = (inputString) => {
-        // if input is valid
-        if (livecode.match(inputString).succeeded()) {
-            // evaluate input through semantics
-            const result = semantics(livecode.match(inputString)).eval();
-            // if result valid in grammar, return result
-            return { valid: true, string: inputString, semantic: result };
-        }
-        // if input is not valid:
-        if (livecode.match(inputString).failed()) {
-            return { valid: false, string: inputString, semantic: null };
-        }
-    };
-    // handleRemoteInput(message) {
-    //     if (this.user != message.user) {
-    //         const result = this.#inputValidation(message.string);
-    //         this.addToConsole({ valid: true, string: message.string, user: message.user });
-    //         parser(result.semantic);
-    //     }
-    // }
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-
-    // ============================================
-    // console
-    // ============================================
-    arrowUp() {
-        // increment pointer, render html
-        this.renderArrows("up");
-        this.playAlert("return");
-    }
-    arrowDown() {
-        // decrement pointer, render html
-        this.renderArrows("down");
-        this.playAlert("return");
-    }
-    renderArrows(dir) {
-        const length = this.#consoleArray.length;
-        // console.log(`App render arrows on array length ${length} with dir '${dir}'.
-        // pointer: ${this.#consolePointer}
-        // pos length - pointer: ${parseInt(length - this.#consolePointer)}
-        // array: ${JSON.stringify(this.#consoleArray)}`);
-        switch (dir) {
-            case "up":
-                if (length > 0 && this.#consolePointer < length) {
-                    // set HTML
-                    document.getElementById("mainInput").value = "";
-                    const element = this.#consoleArray[length - 1 - this.#consolePointer].message;
-                    if (element != "&nbsp;") document.getElementById("mainInput").value = element;
-
-                    // update pointer
-                    if (this.#consolePointer < length) {
-                        this.#consolePointer += 1;
-                    }
-                }
-                break;
-            case "down":
-                if (this.#consolePointer > 0) {
-                    // update pointer
-                    this.#consolePointer -= 1;
-                    // set HTML
-                    document.getElementById("mainInput").value = "";
-                    if (this.#consolePointer != 0) {
-                        const element = this.#consoleArray[length - this.#consolePointer].message;
-                        if (element != "&nbsp;")
-                            document.getElementById("mainInput").value = element;
-                    } else {
-                        document.getElementById("mainInput").value = "";
-                    }
-                }
-                break;
-        }
-    }
-    addToConsole(message) {
-        switch (message.valid) {
-            case true:
-                if (message.string == "") this.playAlert("return");
-                else {
-                    if (message.user == "local") {
-                        this.#consoleArray.push({ message: `${message.string}` });
-                    } else {
-                        // here if joined the session
-                        // this.#consoleArray.push({ message: `${message.user}: ${message.string}` });
-                        // if (message.user == this.user) {
-                        //     Socket.emit("sessionData", { user: this.user, string: message.string });
-                        // }
-                    }
-                    this.playAlert("return");
-                }
-                break;
-            case false:
-                // if string is already false, play error, else render string
-                if (message.string.charAt(0) == "!") this.playAlert("error");
-                else {
-                    // if not valid, prepend a '!' to string, store in console string array
-                    let string = `! not valid: ${message.string}`;
-                    if (message.comment) string = `! ${message.comment}: ${message.string}`;
-                    this.#consoleArray.push({ message: string });
-                    this.playAlert("error");
-                }
-                break;
-        }
-        // render to Console
-        this.renderConsole();
-    }
-    renderConsole = () => {
-        const length = this.#consoleArray.length;
-        let html = "";
-        let pointer = 0;
-        if (length > this.#consoleMaxLength) pointer = length - this.#consoleMaxLength;
-        for (let i = pointer; i < length; i++) {
-            html += `<p id="consoleLine">${this.#consoleArray[i].message}</p>`;
-        }
-        // render array to div
-        document.getElementById(this.#consoleID).innerHTML = "";
-        document.getElementById(this.#consoleID).innerHTML += html;
-    };
 
     //
     //
@@ -1426,33 +1761,6 @@ class WelleApp {
     mark it visually in page, send midi states
     */
 
-    // setSelected(inst) {
-    //     // only if inst was not selected before:
-    //     // if (this.selected.name != this.#instruments[inst].name) {
-
-    //     // }
-    //     this.selected.name = this.#instruments[inst].name;
-    //     this.selected.vol = this.#instruments[inst].getVolume();
-    //     this.selected.eq = this.#instruments[inst].getEq();
-    //     this.selected.env = this.#instruments[inst].getEnv();
-    //     this.selected.pattern = this.#instruments[inst].getPattern();
-    //     // console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
-    //     // <div id="inst_${inst}"
-    //     setTimeout(() => {
-    //         Object.keys(this.#instruments).forEach((instrument) => {
-    //             if (instrument == inst)
-    //                 window.document
-    //                     .getElementById(`inst_${instrument}`)
-    //                     .classList.add("selectedInst");
-    //             else
-    //                 window.document
-    //                     .getElementById(`inst_${instrument}`)
-    //                     .classList.remove("selectedInst");
-    //         });
-    //     }, 300);
-    //     // this.sendMidiSelectedInstState();
-    // }
-
     // setEqToSelected(message) {
     //     // console.log(`set selected instrument's EQ...`);
     //     if (message == undefined) {
@@ -1486,29 +1794,6 @@ class WelleApp {
     // // ============================================
 
     // // ============================================
-
-    // playOnce(inst) {
-    //     // if inst is sample
-    //     if (this.#listOfSamples[inst]) {
-    //         console.log(`playOnce is sample.. `);
-    //         // Instrument.buffers[inst].play;
-    //         const player = new Tone.Player().toDestination();
-    //         // play one of the samples when they all load
-    //         player.buffer = Instrument.buffers[inst].get("C3");
-    //         player.volume.value = -12;
-    //         player.start();
-    //     }
-    //     if (this.#listOfInstruments[inst]) {
-    //         console.log(`playOnce is instrument .. `);
-    //         const preset = this.#listOfInstruments[inst].preset;
-    //         const type = preset.synthType;
-    //         const baseNote = preset.baseNote;
-    //         const settings = preset.settings;
-    //         const synth = new Tone[type](settings).toDestination();
-    //         synth.volume.value = -12;
-    //         synth.triggerAttackRelease(baseNote, "8n");
-    //     }
-    // }
 
     // // ============================================
 
@@ -1683,224 +1968,6 @@ class WelleApp {
     //     // return quant playTime
     //     return timeDifference;
     // };
-
-    // //
-    // //
-    // //
-    // //
-    // //
-    // //
-    // //
-    // //
-
-    // // ============================================
-    // // HTML - renderer
-    // // ============================================
-
-    // renderContent() {
-    //     // add a delay to catch changes
-    //     setTimeout(() => {
-    //         this.renderInstruments();
-    //         this.renderParts();
-    //         this.renderInstrumentsOverview();
-    //         this.renderSession();
-    //         document.getElementById(this.#bpmDiv).innerHTML = Math.floor(this.#bpm);
-    //     }, 200);
-    // }
-
-    // renderExternal() {
-    //     // info text
-    //     // document.getElementById(this.#infoDiv).innerHTML = text.info;
-    //     // tutorial
-    //     let html = tutorial.start;
-    //     document.getElementById(this.#tutorialDiv).innerHTML = html;
-    //     // const checks = document.getElementsByTagName("input");
-    //     // console.log("these are the inputs: ", checks);
-    //     document.querySelectorAll(".tutorialInput").forEach((item) => {
-    //         item.addEventListener("keydown", (e) => {
-    //             if (e.code == "Enter") {
-    //                 window.welle.app.tutorial = true;
-    //                 const input = item.value.toLowerCase();
-    //                 console.log(`message from tutorial input: ${input}`);
-    //                 window.welle.app.handleMainInput(input);
-    //                 item.value = "";
-    //                 setTimeout(() => {
-    //                     window.welle.app.handleMainInput("/");
-    //                 }, 3000);
-    //             }
-    //         });
-    //     });
-    // }
-
-    // renderSession() {
-    //     if (this.user != "local") {
-    //         let html = "group: ";
-    //         this.session.map((entry) => {
-    //             html += `${entry} `;
-    //         });
-    //         document.getElementById(this.#sessionDiv).innerHTML = html;
-    //     }
-    // }
-    // // renderPresets() {
-    // //     let html = `<p>`;
-    // //     Object.keys(this.#presets).forEach((preset) => {
-    // //         html += `
-    // //         <a id="preset_${this.#presets[preset].name}" class="links"
-    // //         title="click to load preset: ${preset}" href='#'>${this.#presets[preset].name}</a>
-    // //         `;
-    // //     });
-    // //     html += "</p>";
-    // //     // replace html content
-    // //     document.getElementById(this.#presetsDiv).innerHTML = "";
-    // //     document.getElementById(this.#presetsDiv).innerHTML += html;
-
-    // //     // add event listener
-    // //     Object.keys(this.#presets).forEach((preset) => {
-    // //         document.getElementById(`preset_${preset}`).addEventListener("click", () => {
-    // //             console.log(`load preset: ${preset}  ...`);
-    // //             window.welle.app.loadPreset(preset);
-    // //         });
-    // //     });
-    // // }
-
-    // renderInstrumentsOverview() {
-    //     let html = `<p>`;
-    //     Object.keys(this.#listOfAllInstruments).forEach((inst) => {
-    //         // console.log(`render these: ${this.#listOfAllInstruments[inst].name}`);
-    //         html += `
-    //         <a id="play_${this.#listOfAllInstruments[inst].name}" class="links"
-    //             title="click to play sound: ${inst}" href='#'>${
-    //             this.#listOfAllInstruments[inst].name
-    //         }</a>
-    //         `;
-    //     });
-    //     html += "</p>";
-    //     // replace html content
-    //     document.getElementById(this.#instListDiv).innerHTML = "";
-    //     document.getElementById(this.#instListDiv).innerHTML += html;
-
-    //     // add event listener
-    //     Object.keys(this.#listOfAllInstruments).forEach((inst) => {
-    //         document.getElementById(`play_${inst}`).addEventListener("click", () => {
-    //             console.log(`play inst: ${inst} once ...`);
-    //             window.welle.app.playOnce(inst);
-    //         });
-    //     });
-    // }
-
-    // renderParts() {
-    //     let html = "";
-    //     // iterate through parts collection
-    //     Object.keys(this.#parts).forEach((part) => {
-    //         this.#parts[part].html = `
-    //             <input
-    //                 type = "button"
-    //                 class = "w3-button w3-round-large w3-border w3-black w3-small"
-    //                 value = "${part}"
-    //                 title = "part: ${part}"
-    //                 id = "${part}">
-    //             </input> `;
-    //         html += this.#parts[part].html;
-    //     });
-
-    //     document.getElementById(this.#partDiv).innerHTML = "";
-    //     document.getElementById(this.#partDiv).innerHTML = html;
-
-    //     // first create html, then event listener
-    //     Object.keys(this.#parts).forEach((part) => {
-    //         document.getElementById(part).addEventListener("click", () => {
-    //             // console.log(`happy button part: ${part}`);
-    //             window.welle.app.startPart(part);
-    //         });
-    //     });
-    // }
-
-    // renderInstruments() {
-    //     let html = ``;
-    //     // iterate through instruments collection
-    //     Object.keys(this.#instruments).forEach((inst) => {
-    //         // if not yet rendered, init rendering
-    //         if (this.#instruments[inst].rendered == undefined)
-    //             this.#instruments[inst].rendered = false;
-
-    //         if (!this.#instruments[inst].rendered) {
-    //             // round volume
-    //             const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
-
-    //             // create HTML elements for appending
-    //             this.#instruments[inst].html = `
-    //             <div id="inst_${inst}" class="w3-row"
-    //             style="padding-top: 3px; padding-left: 3px;">
-    //                 <div class="w3-col" style="width:120px;">
-    //                     <input
-    //                     id="check_${this.#instruments[inst].name}"
-    //                     class="w3-check"
-    //                     type="checkbox"
-    //                     title = "check: ${inst}"
-    //                     checked="true">
-    //                     <label> <b>${this.#instruments[inst].name}</b> </label>
-    //                 </div>
-    //                 <div id="vol_${inst}" class="w3-col" style="width:70px">
-    //                     vol: ${volume}
-    //                 </div>
-    //                 <div id="rand_${inst}" class="w3-col" style="width:70px">
-    //                     % ${this.#instruments[inst].random}
-    //                 </div>
-    //                 <div id="pattern_${inst}" class="w3-half">
-    //                     pattern: ${this.#instruments[inst].getRawPattern()}
-    //                 </div>
-    //             </div>`;
-    //             html += this.#instruments[inst].html;
-    //         }
-    //     });
-
-    //     // add html content
-    //     document.getElementById(this.#instDiv).insertAdjacentHTML("beforeend", html);
-
-    //     // update checkboxes with isPlaying, vol, pattern
-    //     Object.keys(this.#instruments).forEach((inst) => {
-    //         // checkboxes
-    //         if (this.#instruments[inst].isPlaying)
-    //             window.document.getElementById(`check_${inst}`).checked = true;
-    //         else window.document.getElementById(`check_${inst}`).checked = false;
-    //         // update volume . round volume
-    //         const volume = Math.round(this.#instruments[inst].getVolume() * 10) / 10;
-    //         window.document.getElementById(`vol_${inst}`).innerHTML = `vol: ${volume}`;
-    //         // update random
-    //         window.document.getElementById(`rand_${inst}`).innerHTML = `% ${
-    //             this.#instruments[inst].random
-    //         }`;
-    //         // update pattern
-    //         window.document.getElementById(
-    //             `pattern_${inst}`
-    //         ).innerHTML = `pattern: ${this.#instruments[inst].getRawPattern()}`;
-    //     });
-    //     //
-
-    //     // first create html, then event listener
-    //     Object.keys(this.#instruments).forEach((inst) => {
-    //         if (!this.#instruments[inst].rendered) {
-    //             // console.log(`assign event listener to checkbox for ${inst}`);
-    //             // add checkbox update
-    //             window.document.getElementById(`check_${inst}`).addEventListener("click", (c) => {
-    //                 if (c.target.checked) {
-    //                     // console.log(`check checkbox: ${inst}. Start instrument. `);
-    //                     // console.log(`Window: this is the window: ${window.welle.name}`);
-    //                     window.welle.app.plainStartInstruments({
-    //                         instruments: [inst],
-    //                         random: null,
-    //                     });
-    //                 }
-    //                 if (!c.target.checked) {
-    //                     // console.log(`uncheck checkbox: ${inst}. Stop instrument. `);
-    //                     window.welle.app.stopInstruments([inst]);
-    //                 }
-    //             });
-
-    //             this.#instruments[inst].rendered = true;
-    //         }
-    //     });
-    // }
 }
 
 export { WelleApp };

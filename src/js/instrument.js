@@ -48,6 +48,7 @@ class Instrument {
         this.baseNote = 48;
         this.beatCounter = 0;
         this.randomized = false;
+        this.active = false;
 
         this.gain = new Tone.Gain(1).connect(Instrument.masterGain);
         this.setVolume(this.volume);
@@ -187,6 +188,16 @@ class Instrument {
     }
     getPatternRaw() {
         return this.patternRaw;
+    }
+
+    activate() {
+        this.active = true;
+    }
+    deactivate() {
+        this.active = false;
+    }
+    getStatus() {
+        return this.active;
     }
 
     // get isPlaying() {
