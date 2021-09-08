@@ -33,9 +33,15 @@ class Instrument {
         this.chan = message.chan + 1;
         this.envSettings = {
             attack: 0.01,
-            decay: 0.11,
+            decay: 0.31,
+            sustain: 0.99,
+            release: 2.86,
+        }; // attk, dec, sus, rel
+        this.samplerEnvSettings = {
+            attack: 0.01,
+            decay: 0.3,
             sustain: 0.71,
-            release: 0.06,
+            release: 0.8,
         }; // attk, dec, sus, rel
         this.eqSettings = {
             high: 0,
@@ -51,10 +57,14 @@ class Instrument {
         this.active = false;
 
         this.gain = new Tone.Gain(1).connect(Instrument.masterGain);
-        this.setVolume(this.volume);
         this.ampEnv = new Tone.AmplitudeEnvelope(this.envSettings);
         this.ampEnv.connect(this.gain);
+        this.setVolume(this.volume);
+
         this.synth.connect(this.ampEnv);
+        this.synth.attack = 0.01;
+        this.synth.sustain = 1;
+        this.synth.release = 2.5;
     }
 
     // HELPER

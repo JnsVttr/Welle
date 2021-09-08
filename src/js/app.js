@@ -363,17 +363,20 @@ class WelleApp {
                     if (event.isActive) {
                         ampEnv.triggerAttackRelease("8n", time);
                         synth.triggerAttackRelease(event.note, "8n", time);
-                        // MIDI
+                        // MIDI - playnote in time
                         if (window.welle.app.MIDIOutput != undefined) {
-                            const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
-                            const diffTime = nextEventTime - WebMidi.time;
-                            this.playMidiNote({
-                                note: event.note,
-                                channel: midiChan,
-                                velocity: this.instruments[index].getVolume(),
-                                duration: 10,
-                                time: diffTime, // midiChan short delay for MIDI connection
-                            });
+                            // if midiTransmit = true eg. Midi channel < 14
+                            if (midiTransmit) {
+                                const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+                                const diffTime = nextEventTime - WebMidi.time;
+                                this.playMidiNote({
+                                    note: event.note,
+                                    channel: midiChan,
+                                    velocity: this.instruments[index].getVolume(),
+                                    duration: 10,
+                                    time: diffTime, // midiChan short delay for MIDI connection
+                                });
+                            }
                         }
                     }
                 }
@@ -387,6 +390,7 @@ class WelleApp {
             });
             // update the beat counter
             this.beat = (this.beat + 1) % 8;
+            // send MIDI Clock
             const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
             const diffTime = nextEventTime - WebMidi.time;
             if (window.welle.app.MIDIOutput != undefined) {
@@ -420,6 +424,7 @@ class WelleApp {
     startTransport() {
         // this.beat = 0;
         if (Tone.Transport.state != "started") Tone.Transport.start();
+        // send MIDI start
         const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
         const diffTime = nextEventTime - WebMidi.time;
         if (window.welle.app.MIDIOutput != undefined) {
@@ -428,6 +433,7 @@ class WelleApp {
     }
     stopTransport() {
         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+        // send MIDI stop
         const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
         const diffTime = nextEventTime - WebMidi.time;
         if (window.welle.app.MIDIOutput != undefined) {
