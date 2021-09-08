@@ -387,6 +387,11 @@ class WelleApp {
             });
             // update the beat counter
             this.beat = (this.beat + 1) % 8;
+            const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+            const diffTime = nextEventTime - WebMidi.time;
+            if (window.welle.app.MIDIOutput != undefined) {
+                window.welle.app.MIDIOutput.sendClock({ time: WebMidi.time + diffTime });
+            }
         };
         // Tone.Transport.bpm.value = 120;
         Tone.Transport.scheduleRepeat(repeat, "8n");
@@ -415,9 +420,19 @@ class WelleApp {
     startTransport() {
         // this.beat = 0;
         if (Tone.Transport.state != "started") Tone.Transport.start();
+        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+        const diffTime = nextEventTime - WebMidi.time;
+        if (window.welle.app.MIDIOutput != undefined) {
+            window.welle.app.MIDIOutput.sendStart({ time: WebMidi.time + diffTime });
+        }
     }
     stopTransport() {
         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
+        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+        const diffTime = nextEventTime - WebMidi.time;
+        if (window.welle.app.MIDIOutput != undefined) {
+            window.welle.app.MIDIOutput.sendStop({ time: WebMidi.time + diffTime });
+        }
     }
 
     playAll() {
