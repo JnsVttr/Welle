@@ -354,10 +354,27 @@ class WelleApp {
                 const ampEnv = this.instruments[index].ampEnv;
                 const event = row[this.beat];
                 const mute = this.instruments[index].mute;
+                let midiChan = 0;
+                let midiTransmit = true;
+                if (index < 14) midiChan = index;
+                else midiTransmit = false;
+
                 if (mute == false) {
                     if (event.isActive) {
                         ampEnv.triggerAttackRelease("8n", time);
                         synth.triggerAttackRelease(event.note, "8n", time);
+                        // MIDI
+                        if (window.welle.app.MIDIOutput != undefined) {
+                            const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+                            const diffTime = nextEventTime - WebMidi.time;
+                            this.playMidiNote({
+                                note: event.note,
+                                channel: midiChan,
+                                velocity: this.instruments[index].getVolume(),
+                                duration: 10,
+                                time: diffTime, // midiChan short delay for MIDI connection
+                            });
+                        }
                     }
                 }
                 // count beats for randomising
@@ -496,7 +513,7 @@ class WelleApp {
                     if (entry.name == inst) {
                         valid = true;
                         // if no sequence assigned, create one
-                        if (entry.patternRaw == "") entry.updateSequence([1], "#");
+                        if (entry.patternRaw == "") entry.updateSequence([0], "#");
                         // in case is muted, unmute
                         entry.mute = false;
                         // assign random and volume
@@ -1355,6 +1372,361 @@ class WelleApp {
     //
     //
     //
+
+    // ============================================
+    // MIDI
+    // ============================================
+
+    // MIDI handling
+    startMIDI() {
+        if (WebMidi.state == undefined) {
+            WebMidi.enable(function (err) {
+                if (err) {
+                    console.log("WebMidi could not be enabled.", err);
+                } else {
+                    console.log("WebMidi enabled!");
+                }
+                const selectBox = window.document.getElementById("midiSelect");
+
+                WebMidi.outputs.map((output) => {
+                    console.log(`Midi out: ${output.name}`);
+                    let option = document.createElement("option");
+                    option.text = output.name;
+                    selectBox.add(option);
+                });
+            });
+        }
+    }
+
+    selectMIDIdevice(selectedName) {
+        // "Pro40 MIDI"
+        const midiOutputs = WebMidi.outputs;
+        const midiInputs = WebMidi.inputs;
+        midiOutputs.map((output) => {
+            const name = output.name;
+            if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
+        });
+        if (this.MIDIOutput) console.log(`MIDI Out connected to ${this.MIDIOutput.name}`);
+        // MIDIInput
+        midiInputs.map((input) => {
+            const name = input.name;
+            if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
+        });
+        if (this.MIDIInput) {
+            console.log(`MIDI In connected to ${this.MIDIInput.name}`);
+            this.addMIDIInputListeners();
+        }
+    }
+
+    playMidiNote(message) {
+        // message.note, message.channel, message.velocity, message.duration
+        // console.log(`MIDI message: `, message);
+        if (message == undefined) message = {}; // if no message send, create empty object
+        const note = message.note || "C3";
+        let chan = 0;
+        if (message.channel != undefined) chan = message.channel + 1;
+        const vel = message.velocity || 1;
+        const dur = message.duration || 200;
+        let midiTime = 0;
+        if (message.time != undefined) midiTime = message.time;
+        // console.log([note, chan, vel, dur, midiTime]);
+
+        // if MIDI device is connected
+        if (window.welle.app.MIDIOutput != undefined) {
+            // console.log(`play MIDI note ${note}`);
+            window.welle.app.MIDIOutput.playNote(note, chan, {
+                time: WebMidi.time + midiTime,
+                velocity: vel,
+                duration: dur,
+            });
+        }
+    }
+
+    sendMidiSelectedInstState() {
+        // send on midi channel 2, receive on Midi channel 1
+        const chan = 2;
+
+        if (window.welle.app.MIDIInput != undefined) {
+            /*
+            CC map, MIDI channel 1
+            Controller (max 120):
+                1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
+                9       = volume (CC map 0.0-1.0 -> 0-127)
+                10-14   = EQ 5 values
+                16-19   = Env 4 values
+            */
+
+            // Send Volume
+            // ==================================================
+            let vol = this.selected.vol;
+            vol = window.welle.app.map(vol, 0, 1, 0, 126);
+            window.welle.app.MIDIOutput.sendControlChange(
+                9, // cc controller
+                vol, // CC value
+                chan // channel
+            );
+            //console.log(`MIDI send VOL: ${vol}`);
+
+            // Send Pattern
+            // ==================================================
+            const pattern = this.selected.pattern;
+            let newPattern = [];
+            // if pattern is less than 8 steps, add up to 8 steps, min length is one
+            if (pattern.length < 8) {
+                // join patterns 8 times, then reduce to 8 entries
+                for (let i = 0; i < 8; i++) {
+                    newPattern = newPattern.concat(pattern);
+                }
+                newPattern = newPattern.slice(0, 8);
+                // console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
+            } else {
+                newPattern = pattern.slice(0, 8);
+                // console.log(`pattern>=8: pattern: ${pattern}, new pattern: ${newPattern}`);
+            }
+            // send pattern midi messages
+            newPattern.map((e, c) => {
+                const cc = 1 + c;
+                if (e == null) {
+                    window.welle.app.MIDIOutput.sendControlChange(cc, 0, chan);
+                } else {
+                    window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
+                }
+            });
+            // console.log(`MIDI send pattern: ${newPattern}`);
+
+            // Send EQ
+            // ==================================================
+            /*
+            settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+            eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
+            map band: -24 / 24 db -> 0.0/1.0
+            map freq low: 0-2000 -> 0.0-0.5
+            map freq high: 2000-8000 -> 0.5-1.0
+            */
+            // console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
+            const low = this.map(this.selected.eq.low, -12, 12, 0.0, 1.0);
+            const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 1000, 0.0, 0.5);
+            const mid = this.map(this.selected.eq.mid, -12, 12, 0.0, 1.0);
+            const highFreq = this.map(this.selected.eq.highFrequency, 1000, 13000, 0.5, 1.0);
+            const high = this.map(this.selected.eq.high, -12, 12, 0.0, 1.0);
+            // console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
+
+            // console.log(`MIDI send EQ (original): ${JSON.stringify(this.selected.eq)}`);
+            // console.log(
+            //    `MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`
+            // );
+
+            const newEq = [high, highFreq, mid, lowFreq, low];
+            newEq.map((eq, c) => {
+                const cc = 14 - c;
+                eq = Math.round(eq * 126);
+                window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
+            });
+
+            // Send ENV
+            // ==================================================
+            // console.log(`send MIDI env with this settings: ${JSON.stringify(this.selected.env)}`);
+            const selEnv = [
+                this.selected.env.attack,
+                this.selected.env.decay,
+                this.selected.env.sustain,
+                this.selected.env.release,
+            ];
+            const newEnv = [
+                Math.round(this.selected.env.attack * 126),
+                Math.round(this.selected.env.decay * 126),
+                Math.round(this.selected.env.sustain * 126),
+                Math.round(this.selected.env.release * 126),
+            ];
+            newEnv.map((env, c) => {
+                const cc = 16 + c;
+                window.welle.app.MIDIOutput.sendControlChange(cc, env, chan);
+            });
+            // console.log(`MIDI send ENV (original): ${JSON.stringify(this.selected.env)}`);
+            // console.log(`MIDI send ENV (mapped): ${JSON.stringify(this.selected.env)}`);
+
+            console.log(
+                `MIDI send selected Instr.(ch.${chan}):`,
+                this.selected,
+                `
+                MIDI send vol: ${vol}
+                MIDI send pattern: ${newPattern}
+                MIDI send EQ (original):
+                ${JSON.stringify(this.selected.eq)}
+                    map band: -24 / 24 db -> 0.0/1.0
+                    map freq low: 0-1000 -> 0.0-0.5
+                    map freq high: 1000-13000 -> 0.5-1.0
+                MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]
+                MIDI send ENV (original): ${selEnv}
+                MIDI send ENV (mapped): ${newEnv}
+                `
+            );
+        }
+    }
+
+    addMIDIInputListeners() {
+        // Listen to control change message
+        this.MIDIInput.addListener("controlchange", 1, function (e) {
+            /*
+            midiCountPattern = 0;
+            midiCountEq = 0;
+            midiCountEnv = 0;
+            */
+            const num = e.controller.number;
+            const val = e.value;
+            const round = (num) => Math.round(num * 100) / 100;
+            const selected = window.welle.app.selected;
+            let vol = 0;
+            // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
+
+            // only assign, if some instrument is selected
+            if (selected.name != "") {
+                // VOLUME
+                if (num == 9) {
+                    vol = round(val / 126);
+                    window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
+                    // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
+                    console.log(`MIDI input (${selected.name}) vol: ${vol} `);
+                }
+
+                // PATTERN
+                if (num >= 1 && num <= 8) {
+                    const index = num - 1;
+                    window.welle.app.midiCountPattern = window.welle.app.midiCountPattern + 1;
+
+                    if (val == 0) window.welle.app.midiPattern[index] = null;
+                    else window.welle.app.midiPattern[index] = 1;
+
+                    const message = {
+                        instruments: [selected.name],
+                        pattern: window.welle.app.midiPattern,
+                        rawPattern: "external via midi",
+                    };
+                    if (window.welle.app.midiCountPattern == 8) {
+                        window.welle.app.assignPattern(message);
+                        window.welle.app.midiCountPattern = 0;
+                        console.log(`MIDI input (${selected.name}) pattern: ${message.pattern} `);
+                    }
+                }
+
+                // EQ
+                if (num >= 10 && num <= 14) {
+                    const index = num - 10;
+                    const eqVal = round(val / 126);
+                    window.welle.app.midiCountEq = window.welle.app.midiCountEq + 1;
+
+                    window.welle.app.midiEq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
+                    window.welle.app.midiEq.name = selected.name;
+                    if (index == 0)
+                        window.welle.app.midiEq.low = window.welle.app.map(
+                            eqVal,
+                            0.0,
+                            1.0,
+                            -12,
+                            12
+                        );
+                    if (index == 1)
+                        window.welle.app.midiEq.lowFrequency = window.welle.app.map(
+                            eqVal,
+                            0.0,
+                            1.0,
+                            0,
+                            1000
+                        );
+                    if (index == 2)
+                        window.welle.app.midiEq.mid = window.welle.app.map(
+                            eqVal,
+                            0.0,
+                            1.0,
+                            -12,
+                            12
+                        );
+                    if (index == 3)
+                        window.welle.app.midiEq.highFrequency = window.welle.app.map(
+                            eqVal,
+                            0.0,
+                            1.0,
+                            1000,
+                            13000
+                        );
+                    if (index == 4)
+                        window.welle.app.midiEq.high = window.welle.app.map(
+                            eqVal,
+                            0.0,
+                            1.0,
+                            -12,
+                            12
+                        );
+
+                    if (window.welle.app.midiCountEq == 5) {
+                        window.welle.app.setEqToSelected(window.welle.app.midiEq);
+                        selected.eq = window.welle.app.midiEq;
+                        window.welle.app.midiCountEq = 0;
+                        console.log(
+                            `MIDI input (${selected.name}) eq: ${selected.eq.low}, ${selected.eq.lowFrequency}, ${selected.eq.mid}, ${selected.eq.highFrequency}, ${selected.eq.high} `
+                        );
+                    }
+                }
+
+                // ENVELOPE
+                if (num >= 16 && num <= 19) {
+                    const index = num - 16;
+                    const env = round(val / 126);
+                    window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
+
+                    window.welle.app.midiEnv.name = selected.name;
+                    if (index == 0) window.welle.app.midiEnv.attack = env;
+                    if (index == 1) window.welle.app.midiEnv.decay = env;
+                    if (index == 2) window.welle.app.midiEnv.sustain = env;
+                    if (index == 3) window.welle.app.midiEnv.release = env;
+
+                    if (window.welle.app.midiCountEnv == 4) {
+                        window.welle.app.setEnvToSelected(window.welle.app.midiEnv);
+                        selected.env = window.welle.app.midiEnv;
+                        window.welle.app.midiCountEnv = 0;
+                        console.log(
+                            `MIDI input (${selected.name}) env: ${selected.env.attack}, ${selected.env.decay}, ${selected.env.sustain}, ${selected.env.release}`
+                        );
+                    }
+                }
+            }
+        });
+    }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
     //
     //
     //
@@ -1430,316 +1802,6 @@ class WelleApp {
     //     this.session.push(name);
     //     console.log(`new user name: ${name}`);
     //     this.renderSession();
-    // }
-
-    // MIDI handling
-    // startMIDI() {
-    //     if (WebMidi.state == undefined) {
-    //         WebMidi.enable(function (err) {
-    //             if (err) {
-    //                 console.log("WebMidi could not be enabled.", err);
-    //             } else {
-    //                 console.log("WebMidi enabled!");
-    //             }
-    //             const selectBox = window.document.getElementById("midiSelect");
-
-    //             WebMidi.outputs.map((output) => {
-    //                 console.log(`Midi out: ${output.name}`);
-    //                 let option = document.createElement("option");
-    //                 option.text = output.name;
-    //                 selectBox.add(option);
-    //             });
-    //         });
-    //     }
-    // }
-    // selectMIDIdevice(selectedName) {
-    //     // "Pro40 MIDI"
-    //     const midiOutputs = WebMidi.outputs;
-    //     const midiInputs = WebMidi.inputs;
-    //     midiOutputs.map((output) => {
-    //         const name = output.name;
-    //         if (name == selectedName) this.MIDIOutput = WebMidi.getOutputByName(name);
-    //     });
-    //     if (this.MIDIOutput) console.log(`MIDI Out connected to ${this.MIDIOutput.name}`);
-    //     // MIDIInput
-    //     midiInputs.map((input) => {
-    //         const name = input.name;
-    //         if (name == selectedName) this.MIDIInput = WebMidi.getInputByName(name);
-    //     });
-    //     if (this.MIDIInput) {
-    //         console.log(`MIDI In connected to ${this.MIDIInput.name}`);
-    //         this.addMIDIInputListeners();
-    //     }
-    // }
-
-    // playMidiNote(message) {
-    //     // message.note, message.channel, message.velocity, message.duration
-    //     if (!message) message = {}; // if no message send, create empty object
-    //     const note = message.note || "C3";
-    //     const chan = message.channel || 5;
-    //     const vel = message.velocity || 1;
-    //     const dur = message.duration || 200;
-    //     const time = message.time || 0;
-    //     // if MIDI device is connected
-    //     if (window.welle.app.MIDIOutput != undefined) {
-    //         // console.log(`play MIDI note ${note}`);
-    //         window.welle.app.MIDIOutput.playNote(note, chan, {
-    //             time: time,
-    //             velocity: vel,
-    //             duration: dur,
-    //         });
-    //     }
-    // }
-
-    // sendMidiSelectedInstState() {
-    //     // send on midi channel 2, receive on Midi channel 1
-    //     const chan = 2;
-
-    //     if (window.welle.app.MIDIInput != undefined) {
-    //         /*
-    //         CC map, MIDI channel 1
-    //         Controller (max 120):
-    //             1-8     = pattern steps of tangible pins (CC0 off, CC>0 on)
-    //             9       = volume (CC map 0.0-1.0 -> 0-127)
-    //             10-14   = EQ 5 values
-    //             16-19   = Env 4 values
-    //         */
-
-    //         // Send Volume
-    //         // ==================================================
-    //         let vol = this.selected.vol;
-    //         vol = window.welle.app.map(vol, 0, 1, 0, 126);
-    //         window.welle.app.MIDIOutput.sendControlChange(
-    //             9, // cc controller
-    //             vol, // CC value
-    //             chan // channel
-    //         );
-    //         //console.log(`MIDI send VOL: ${vol}`);
-
-    //         // Send Pattern
-    //         // ==================================================
-    //         const pattern = this.selected.pattern;
-    //         let newPattern = [];
-    //         // if pattern is less than 8 steps, add up to 8 steps, min length is one
-    //         if (pattern.length < 8) {
-    //             // join patterns 8 times, then reduce to 8 entries
-    //             for (let i = 0; i < 8; i++) {
-    //                 newPattern = newPattern.concat(pattern);
-    //             }
-    //             newPattern = newPattern.slice(0, 8);
-    //             // console.log(`pattern<8: pattern: ${pattern}, new pattern: ${newPattern}`);
-    //         } else {
-    //             newPattern = pattern.slice(0, 8);
-    //             // console.log(`pattern>=8: pattern: ${pattern}, new pattern: ${newPattern}`);
-    //         }
-    //         // send pattern midi messages
-    //         newPattern.map((e, c) => {
-    //             const cc = 1 + c;
-    //             if (e == null) {
-    //                 window.welle.app.MIDIOutput.sendControlChange(cc, 0, chan);
-    //             } else {
-    //                 window.welle.app.MIDIOutput.sendControlChange(cc, 1, chan);
-    //             }
-    //         });
-    //         // console.log(`MIDI send pattern: ${newPattern}`);
-
-    //         // Send EQ
-    //         // ==================================================
-    //         /*
-    //         settings: {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
-    //         eq SC: [0.5, 0.3, 0.5, 0.7, 0.5]
-    //         map band: -24 / 24 db -> 0.0/1.0
-    //         map freq low: 0-2000 -> 0.0-0.5
-    //         map freq high: 2000-8000 -> 0.5-1.0
-    //         */
-    //         // console.log(`send MIDI eq with this settings: ${JSON.stringify(this.selected.eq)}`);
-    //         const low = this.map(this.selected.eq.low, -12, 12, 0.0, 1.0);
-    //         const lowFreq = this.map(this.selected.eq.lowFrequency, 0, 1000, 0.0, 0.5);
-    //         const mid = this.map(this.selected.eq.mid, -12, 12, 0.0, 1.0);
-    //         const highFreq = this.map(this.selected.eq.highFrequency, 1000, 13000, 0.5, 1.0);
-    //         const high = this.map(this.selected.eq.high, -12, 12, 0.0, 1.0);
-    //         // console.log(`map: [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`);
-
-    //         // console.log(`MIDI send EQ (original): ${JSON.stringify(this.selected.eq)}`);
-    //         // console.log(
-    //         //    `MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]`
-    //         // );
-
-    //         const newEq = [high, highFreq, mid, lowFreq, low];
-    //         newEq.map((eq, c) => {
-    //             const cc = 14 - c;
-    //             eq = Math.round(eq * 126);
-    //             window.welle.app.MIDIOutput.sendControlChange(cc, eq, chan);
-    //         });
-
-    //         // Send ENV
-    //         // ==================================================
-    //         // console.log(`send MIDI env with this settings: ${JSON.stringify(this.selected.env)}`);
-    //         const selEnv = [
-    //             this.selected.env.attack,
-    //             this.selected.env.decay,
-    //             this.selected.env.sustain,
-    //             this.selected.env.release,
-    //         ];
-    //         const newEnv = [
-    //             Math.round(this.selected.env.attack * 126),
-    //             Math.round(this.selected.env.decay * 126),
-    //             Math.round(this.selected.env.sustain * 126),
-    //             Math.round(this.selected.env.release * 126),
-    //         ];
-    //         newEnv.map((env, c) => {
-    //             const cc = 16 + c;
-    //             window.welle.app.MIDIOutput.sendControlChange(cc, env, chan);
-    //         });
-    //         // console.log(`MIDI send ENV (original): ${JSON.stringify(this.selected.env)}`);
-    //         // console.log(`MIDI send ENV (mapped): ${JSON.stringify(this.selected.env)}`);
-
-    //         console.log(
-    //             `MIDI send selected Instr.(ch.${chan}):`,
-    //             this.selected,
-    //             `
-    //             MIDI send vol: ${vol}
-    //             MIDI send pattern: ${newPattern}
-    //             MIDI send EQ (original):
-    //             ${JSON.stringify(this.selected.eq)}
-    //                 map band: -24 / 24 db -> 0.0/1.0
-    //                 map freq low: 0-1000 -> 0.0-0.5
-    //                 map freq high: 1000-13000 -> 0.5-1.0
-    //             MIDI send EQ (mapped): [${high}, ${highFreq}, ${mid}, ${lowFreq}, ${low}]
-    //             MIDI send ENV (original): ${selEnv}
-    //             MIDI send ENV (mapped): ${newEnv}
-    //             `
-    //         );
-    //     }
-    // }
-
-    // addMIDIInputListeners() {
-    //     // Listen to control change message
-    //     this.MIDIInput.addListener("controlchange", 1, function (e) {
-    //         /*
-    //         midiCountPattern = 0;
-    //         midiCountEq = 0;
-    //         midiCountEnv = 0;
-    //         */
-    //         const num = e.controller.number;
-    //         const val = e.value;
-    //         const round = (num) => Math.round(num * 100) / 100;
-    //         const selected = window.welle.app.selected;
-    //         let vol = 0;
-    //         // console.log(`Received 'controlchange' message. C: ${num}, CC: ${val}`);
-
-    //         // only assign, if some instrument is selected
-    //         if (selected.name != "") {
-    //             // VOLUME
-    //             if (num == 9) {
-    //                 vol = round(val / 126);
-    //                 window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
-    //                 // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
-    //                 console.log(`MIDI input (${selected.name}) vol: ${vol} `);
-    //             }
-
-    //             // PATTERN
-    //             if (num >= 1 && num <= 8) {
-    //                 const index = num - 1;
-    //                 window.welle.app.midiCountPattern = window.welle.app.midiCountPattern + 1;
-
-    //                 if (val == 0) window.welle.app.midiPattern[index] = null;
-    //                 else window.welle.app.midiPattern[index] = 1;
-
-    //                 const message = {
-    //                     instruments: [selected.name],
-    //                     pattern: window.welle.app.midiPattern,
-    //                     rawPattern: "external via midi",
-    //                 };
-    //                 if (window.welle.app.midiCountPattern == 8) {
-    //                     window.welle.app.assignPattern(message);
-    //                     window.welle.app.midiCountPattern = 0;
-    //                     console.log(`MIDI input (${selected.name}) pattern: ${message.pattern} `);
-    //                 }
-    //             }
-
-    //             // EQ
-    //             if (num >= 10 && num <= 14) {
-    //                 const index = num - 10;
-    //                 const eqVal = round(val / 126);
-    //                 window.welle.app.midiCountEq = window.welle.app.midiCountEq + 1;
-
-    //                 window.welle.app.midiEq; // {"high":0,"highFrequency":5000,"mid":0,"lowFrequency":400,"low":0}
-    //                 window.welle.app.midiEq.name = selected.name;
-    //                 if (index == 0)
-    //                     window.welle.app.midiEq.low = window.welle.app.map(
-    //                         eqVal,
-    //                         0.0,
-    //                         1.0,
-    //                         -12,
-    //                         12
-    //                     );
-    //                 if (index == 1)
-    //                     window.welle.app.midiEq.lowFrequency = window.welle.app.map(
-    //                         eqVal,
-    //                         0.0,
-    //                         1.0,
-    //                         0,
-    //                         1000
-    //                     );
-    //                 if (index == 2)
-    //                     window.welle.app.midiEq.mid = window.welle.app.map(
-    //                         eqVal,
-    //                         0.0,
-    //                         1.0,
-    //                         -12,
-    //                         12
-    //                     );
-    //                 if (index == 3)
-    //                     window.welle.app.midiEq.highFrequency = window.welle.app.map(
-    //                         eqVal,
-    //                         0.0,
-    //                         1.0,
-    //                         1000,
-    //                         13000
-    //                     );
-    //                 if (index == 4)
-    //                     window.welle.app.midiEq.high = window.welle.app.map(
-    //                         eqVal,
-    //                         0.0,
-    //                         1.0,
-    //                         -12,
-    //                         12
-    //                     );
-
-    //                 if (window.welle.app.midiCountEq == 5) {
-    //                     window.welle.app.setEqToSelected(window.welle.app.midiEq);
-    //                     selected.eq = window.welle.app.midiEq;
-    //                     window.welle.app.midiCountEq = 0;
-    //                     console.log(
-    //                         `MIDI input (${selected.name}) eq: ${selected.eq.low}, ${selected.eq.lowFrequency}, ${selected.eq.mid}, ${selected.eq.highFrequency}, ${selected.eq.high} `
-    //                     );
-    //                 }
-    //             }
-
-    //             // ENVELOPE
-    //             if (num >= 16 && num <= 19) {
-    //                 const index = num - 16;
-    //                 const env = round(val / 126);
-    //                 window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
-
-    //                 window.welle.app.midiEnv.name = selected.name;
-    //                 if (index == 0) window.welle.app.midiEnv.attack = env;
-    //                 if (index == 1) window.welle.app.midiEnv.decay = env;
-    //                 if (index == 2) window.welle.app.midiEnv.sustain = env;
-    //                 if (index == 3) window.welle.app.midiEnv.release = env;
-
-    //                 if (window.welle.app.midiCountEnv == 4) {
-    //                     window.welle.app.setEnvToSelected(window.welle.app.midiEnv);
-    //                     selected.env = window.welle.app.midiEnv;
-    //                     window.welle.app.midiCountEnv = 0;
-    //                     console.log(
-    //                         `MIDI input (${selected.name}) env: ${selected.env.attack}, ${selected.env.decay}, ${selected.env.sustain}, ${selected.env.release}`
-    //                     );
-    //                 }
-    //             }
-    //         }
-    //     });
     // }
 
     //
