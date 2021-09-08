@@ -198,18 +198,18 @@ const getSamples = (message) => {
     return { samples: samples, count: count };
 };
 
-// const getPresets = (message) => {
-//     const entries = fs.readdirSync(message.path, (err) => {
-//         if (err) return console.log("Unable to scan directory: " + err);
-//     });
-//     const presets = entries.filter((entry) => {
-//         if (!entry.startsWith(".")) return entry;
-//     });
-//     const presetsData = presets.map((preset) => {
-//         const rawdata = fs.readFileSync(path.join(message.path, preset), (err) => {
-//             if (err) throw err;
-//         });
-//         return JSON.parse(rawdata);
-//     });
-//     return presetsData;
-// };
+const getPresets = (message) => {
+    const entries = fs.readdirSync(message.path, (err) => {
+        if (err) return console.log("Unable to scan directory: " + err);
+    });
+    const presets = entries.filter((entry) => {
+        if (!entry.startsWith(".")) return entry;
+    });
+    const presetsData = presets.map((preset) => {
+        const rawdata = fs.readFileSync(path.join(message.path, preset), (err) => {
+            if (err) throw err;
+        });
+        return JSON.parse(rawdata);
+    });
+    return presetsData;
+};
