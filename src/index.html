@@ -64,21 +64,21 @@
         <meta name="theme-color" content="#ffffff" />
     </head>
 
-    <body class="w3-black">
-        <div id="mainDiv" class="w3-container w3-small w3-black mainCenter">
+    <body class="">
+        <div id="mainDiv" class="w3-container w3-medium mainCenter">
             <!-- top line  ==============================  -->
             <div class="w3-row w3-padding-16">
-                <div class="w3-col m3" style="margin-top: -0.8em">
+                <div class="w3-col m4" style="margin-top: 0.5em">
                     <a
                         href="https:tangible.uber.space"
                         title="WELLE music app"
                         style="text-decoration: none"
-                        ><h1 class="w3-xxlarge" style="margin: 0px">WELLE</h1></a
+                        ><h1 class="w3-xxxlarge" style="margin: 0px">WELLE</h1></a
                     >
 
-                    <p style="margin: 0">
+                    <!-- <p style="margin: 0">
                         <a href="#welle-tutorial">Tutorial</a> / <a href="#welle-info">Info</a>
-                    </p>
+                    </p> -->
                 </div>
                 <div class="w3-col m2">
                     <p>
@@ -112,7 +112,7 @@
                 <div class="w3-col m2">
                     <p><span id="session"></span></p>
                 </div>
-                <div class="w3-col m3">
+                <div class="w3-col m2">
                     <p>
                         <input
                             id="rec-button"
@@ -124,22 +124,25 @@
                     </p>
                     <p id="file"></p>
                 </div>
-                <div class="w3-col m2">
-                    <p></p>
-                </div>
+                <!-- <div class="w3-col m2">
+                    <p>...</p>
+                </div> -->
             </div>
             <!-- top line  ==============================  -->
 
-            <div class="w3-row linkRow">
-                <div class="w3-col m2 w3-text-gray">
-                    <h2 class="w3-medium">sounds:</h2>
+            <!-- <div class="w3-row w3-medium">
+                <div class="w3-col m2">
+                    <h2 class="w3-large">sounds:</h2>
                 </div>
-                <div
-                    id="listOfInstruments"
-                    class="w3-col m10 w3-text-gray"
-                    title="list of instruments"
-                ></div>
-            </div>
+                
+            </div> -->
+
+            <div
+                id="listOfInstruments"
+                class="w3-medium"
+                style="padding-left: 0.2em; padding-right: 0.2em"
+                title="list of instruments"
+            ></div>
 
             <!-- <div class="w3-row linkRow">
                 <div class="w3-col m2 w3-text-gray">
@@ -148,16 +151,23 @@
                 <div id="presets" class="w3-col m10 w3-text-gray" title="list of instruments"></div>
             </div> -->
 
+            <hr
+                style="
+                    height: 1px;
+                    border: none;
+                    color: rgb(0, 0, 0);
+                    background-color: rgb(0, 0, 0);
+                    padding-left: 0.2em;
+                    padding-right: 0.2em;
+                "
+            />
+
             <!-- console ==============================  -->
-            <div
-                id="consoleField"
-                title="console"
-                class="w3-container w3-padding w3-black w3-medium"
-            >
+            <div id="consoleField" title="console" class="w3-container w3-padding w3-large">
                 <p id="console"></p>
 
                 <!-- <span class="w3-small w3-text-grey">console</span> -->
-                <h2 class="w3-medium w3-text-grey">console</h2>
+                <!-- <h2 class="w3-large">console</h2> -->
                 <!-- console input field ==============================  -->
                 <input
                     id="mainInput"
@@ -172,17 +182,17 @@
                 <div id="parts" class="w3-padding-16"></div>
 
                 <!-- instruments display ==============================  -->
-                <div id="instruments" class="w3-text-gray w3-small"></div>
+                <div id="instruments" class="w3-medium"></div>
             </div>
 
             <!-- tutorial display ==============================  -->
-            <h2 id="welle-tutorial" class="w3-medium">TUTORIAL</h2>
+            <h2 id="welle-tutorial" class="w3-xxlarge">TUTORIAL</h2>
             <hr />
             <div id="tutorial" class="w3-medium"></div>
 
             <!-- info display ==============================  -->
             <div style="padding-top: 200px; padding-bottom: 10px"></div>
-            <h2 id="welle-info" class="w3-medium">INFO</h2>
+            <h2 id="welle-info" class="w3-xxlarge">INFO</h2>
             <hr />
             <div id="info" class="w3-medium">
                 <p>
@@ -195,29 +205,40 @@
 
                 <br />
 
-                <p>(this website works best with the Google Chrome Browser)</p>
+                <p>
+                    WELLE works best on desktop computer in the
+                    <a
+                        href="https://www.google.com/intl/de_at/chrome/"
+                        title="download Google Chrome Browser"
+                    >
+                        Google Chrome Browser</a
+                    >
+                    !
+                </p>
 
                 <br />
 
                 <p>
-                    project website:
                     <a
                         href="https://tamlab.ufg.at/projects/tangible-signals/"
-                        title="go to Tangible Music Lab's website tamlab.ufg.at"
+                        title="go to Tangible Music Lab's project website tamlab.ufg.at"
                     >
-                        https://tamlab.ufg.at/projects/tangible-signals
+                        project website
                     </a>
                 </p>
 
                 <p>
-                    source code:
                     <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code"
-                        >https://github.com/JnsVttr/Welle</a
+                        >source code</a
                     >
                 </p>
 
                 <br />
 
+                <br />
+                <br />
+                <br />
+                <hr />
                 <p>© Jens Vetter, 2021</p>
             </div>
         </div>

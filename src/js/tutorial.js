@@ -2,45 +2,65 @@ export const tutorial = {};
 
 tutorial.start = `
 
+Get to know WELLE. It is basically a text-based 8-step sequencer with predefined sample sounds. 
+You can input commands in the input field (console) to make music. 
+You can save and recall snapshots of your music on-the-fly.
+Also you can record your music. Or send it as MIDI messages to your preferred DAW 
+(the MIDI channels correspond to the order of the samples).
+<br>
+<br>
+In WELLE a pattern is a combination from a note "#" and a pause "-". 
+A note can have a number behind it, e.g. "#3" or "#-12", 
+so it is higher or lower than the default "#".
+If you enter a pattern shorter than 8 notes, it will be repeated to fill 8 steps.
+If your pattern is longer than 8 notes, it will be reduced to 8 steps.
+
+
+<br>
+<br>
+Use the arrow keys (up & down)  to recall and modify  previous input.
+<br>
+<br>
+HAVE FUN !
+<br>
+<br>
+<br>
 
 <table style="width:100%">
   
   <tr>
     <td>start instrument by name:</td>
-    <td>drum</td>
+    <td>kick</td>
   </tr>
   <tr>
     <td>stop instrument by name: </td>
-    <td>. drum</td>
+    <td>. kick</td>
   </tr>
   <tr>
     <td>start with pattern: </td>
-    <td>drum #-#-#--</td>
+    <td>kick #-#-#--</td>
   </tr>
   
   <tr>
     <td>pattern with melody: </td>
-    <td>drum #2 #4 #5 - #4 #3 #2</td>
+    <td>kick #2 #4 #5 - #4 #3 #2</td>
   </tr>
-  <tr>
-    <td>nested pattern: </td>
-    <td>drum (#2#3#4)2 -#- (#12-)4</td>
-  </tr>
+  
   <tr>
     <td>start multiple instruments:</td>
-    <td>drum hh string #----#---</td>
+    <td>kick hh string #----#---</td>
   </tr>
   <tr>
     <td>set volume (0.0 - 1.0): </td>
-    <td>drum 0.3</td>
+    <td>kick 0.3</td>
   </tr>
   <tr>
-    <td>set random (new random pattern after 3 plays):</td>
-    <td>drum %3</td>
+    <td>set random (new random <br>pattern after 3 plays):</td>
+    <td>kick %3</td>
   </tr>
   <tr>
-    <td>set multiple values (name, volume, pattern, random):</td>
-    <td>drum 0.5 #-#3#2#3--   %4</td>
+    <td>set multiple values (name, <br> volume, pattern, random):</td>
+    <td>kick 0.5 #-#3#2#3--   %4</td>
   </tr>
   <tr>
     <td>start all:</td>
@@ -51,7 +71,7 @@ tutorial.start = `
     <td>.</td>
   </tr>
   <tr>
-    <td>save part:   </td>
+    <td>save part (choose your on name,<br>  as long as its not an instrument name):   </td>
     <td>: somepart</td>
   </tr>
   <tr>
@@ -60,15 +80,23 @@ tutorial.start = `
   </tr>
   <tr>
     <td>delete instrument or part: </td>
-    <td>/ drum</td>
+    <td>/ kick</td>
   </tr>
   <tr>
     <td>delete multiple instruments or parts: </td>
-    <td>/ drum part string</td>
+    <td>/ kick somepart hh</td>
   </tr>
   <tr>
     <td>delete all: </td>
     <td>/ </td>
+  </tr>
+  <tr>
+    <td>start recording: </td>
+    <td>record start</td>
+  </tr>
+  <tr>
+    <td>stop recording (download file <br> below record button): </td>
+    <td>record stop</td>
   </tr>
 </table>
 `;

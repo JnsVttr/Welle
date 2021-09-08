@@ -6,6 +6,14 @@ body {
     /* color: white; */
 }
 
+.mainCenter {
+    margin: auto;
+    max-width: 800px;
+    /* border: 3px solid green; */
+    padding: 10px;
+    padding-bottom: 200px !important;
+}
+
 h3 {
     padding-top: 3em;
     padding-bottom: 1em;
@@ -28,10 +36,9 @@ h3 {
     /* color: white; */
     outline: none;
     box-sizing: border-box;
-    border: 0px solid black;
     border: 1px solid black;
     border-radius: 1px;
-    border-color: #bfbfbf;
+    border-color: #0e0e0e;
     padding: 5px 2px;
     /* font-size: 0.8em; */
     width: 100%;
@@ -44,7 +51,8 @@ h3 {
 }
 #consoleField {
     margin-top: 15px;
-    border: 1px solid rgb(112, 112, 112);
+    /* border: 1px solid rgb(0, 0, 0); */
+    /* background-color: rgb(189, 189, 189); */
     margin-bottom: 300px !important;
 }
 
@@ -60,7 +68,7 @@ h3 {
 
 .selectedInst {
     margin-left: -4px;
-    border-left: 4px solid white;
+    border-left: 4px solid rgb(7, 7, 7);
 }
 
 input[type="checkbox"] {
@@ -72,21 +80,13 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    filter: invert(1) hue-rotate(210deg) brightness(2.5);
+    filter: invert(1) hue-rotate(210deg) brightness(2.7);
     /*  */
 }
 
 label {
     padding-left: 0.4rem;
     padding-right: 1rem;
-}
-
-.mainCenter {
-    margin: auto;
-    max-width: 800px;
-    /* border: 3px solid green; */
-    padding: 10px;
-    padding-bottom: 200px !important;
 }
 
 /* Extra small devices (phones, 600px and down) */

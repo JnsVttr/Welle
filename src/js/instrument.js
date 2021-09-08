@@ -71,13 +71,13 @@ class Instrument {
         for (let i = 0; i < 8; i++) {
             this.sequence[i] = slicedArray[i];
         }
-        console.log(
-            `finished midiPattern: ${midiPattern}, 
-            slice: ${slicedArray}
-            sequence: ${this.sequence}
-            patternRaw: ${patternRaw}
-            `
-        );
+        // console.log(
+        //     `finished midiPattern: ${midiPattern},
+        //     slice: ${slicedArray}
+        //     sequence: ${this.sequence}
+        //     patternRaw: ${patternRaw}
+        //     `
+        // );
     }
 
     // translate pattern [0, 1, 2, -4] to midi pattern ['C1', 'A2']. based on basenote/ transpose

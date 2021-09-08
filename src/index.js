@@ -83,30 +83,31 @@ Socket.on("connect", function (data) {
 
 // SOCKET on receiving audioFile Paths
 Socket.on("audioFiles", (message) => {
-    console.log(`Socket: get (${message.count}) samples. `);
+    // console.log(`Socket: get (${message.count}) samples. `);
     // console.log(`#samples num ... (${App.getSamplesNum()})`);
     if (App.getSamplesNum() == 0) {
         App.addSamples(message.samples);
     }
     // create all Instruments + Grid, when loading finished
     if (App.getSamplesNum() == message.count) {
-        console.log(`start instrument creation with ${App.getSamplesNum()} samples`);
+        // console.log(`start instrument creation with ${App.getSamplesNum()} samples`);
         App.instruments = App.makeSynths({ count: App.getSamplesNum(), samples: App.samples });
-        console.log(`new instruments: `);
-        console.log(App.instruments);
+        // console.log(`new instruments: `);
+        // console.log(App.instruments);
         App.grid = App.makeGrid(App.instruments);
-        console.log(App.grid);
+        // console.log(App.grid);
         App.configLoop();
         // App.instruments[1].sequence[0] = "C3";
         // App.instruments[0].sequence[6] = "C3";
         // console.log(`App.instruments .. ${App.instruments[1].sequence}`);
         // App.startTransport();
+        App.renderContent();
     }
 });
 
 // SOCKET receive alerts - createAlerts(alerts);
 Socket.on("alerts", (message) => {
-    console.log(`Socket: get (${message.count}) alerts. `);
+    // console.log(`Socket: get (${message.count}) alerts. `);
     if (App.getAlertsNum() == 0) {
         App.addAlerts(message.samples);
     }

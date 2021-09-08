@@ -89,7 +89,7 @@ class WelleApp {
     // #presetsDiv = "presets";
     #sessionDiv = "session";
     #infoDiv = "info";
-    #tutorialDiv = "tutorial";
+    tutorialDiv = "tutorial";
     // functions
     // map function
     map = (value, x1, y1, x2, y2) =>
@@ -109,8 +109,9 @@ class WelleApp {
         Instrument.masterGain.connect(Tone.getDestination());
         Instrument.masterGain.connect(this.recorder);
         // Instrument.playMidiNote = this.playMidiNote;
+
         // render info + tutorial
-        // this.renderExternal();
+        this.renderExternal();
 
         // window eventlisteners
         window.addEventListener("load", () => {
@@ -162,13 +163,8 @@ class WelleApp {
             ==
             debug state: ${this.debug}
             user: ${this.user}
-            alerts: ${JSON.stringify(this.#alerts)}
-            muteSound: ${this.#playSound}
-            muteAlerts: ${this.#playAlerts}
-            instruments: ${JSON.stringify(this.instruments)}
-            samples: ${JSON.stringify(this.samples)}
-
-            Tone:
+            muteSound: ${!this.#playSound}
+            muteAlerts: ${!this.#playAlerts}
             bpm: ${this.bpm}
 
         `);
@@ -216,7 +212,11 @@ class WelleApp {
             this.samples.push(content);
         });
         if (this.debug) {
-            console.log(this.samples);
+            let names = [];
+            this.samples.forEach((sample) => {
+                names.push(sample.name);
+            });
+            console.log(`incoming samples: `, names);
         }
     }
 
@@ -230,10 +230,12 @@ class WelleApp {
             this.#alerts[name].player.autostart = false;
         });
         if (this.debug) {
+            let names = [];
             Object.keys(this.#alerts).forEach((key) => {
-                console.log(this.#alerts[key]);
+                // console.log(this.#alerts[key]);
+                names.push(key);
             });
-            console.log("");
+            console.log("incoming alerts: ", names);
         }
     }
 
@@ -245,14 +247,14 @@ class WelleApp {
     // if checkboxes are checked, than play alerts or sound
 
     handleAlerts(checked) {
-        console.log(`Play Alerts. change to: ${checked}`);
+        // console.log(`Play Alerts. change to: ${checked}`);
         this.#playAlerts = checked;
     }
     handleSound(checked) {
-        console.log(`Play Sound. change to: ${checked}`);
+        // console.log(`Play Sound. change to: ${checked}`);
         this.#playSound = checked;
-        // if (this.#playSound) Instrument.masterGain.gain.rampTo(0.8, 0.1);
-        // else Instrument.masterGain.gain.rampTo(0, 0.1);
+        if (this.#playSound) Instrument.masterGain.gain.rampTo(0.9, 0.1);
+        else Instrument.masterGain.gain.rampTo(0, 0.1);
     }
 
     //
@@ -406,7 +408,7 @@ class WelleApp {
     }
 
     stopAll() {
-        this.renderContent();
+        // this.renderContent();
         this.stopTransport();
         this.beat = 0;
     }
@@ -421,7 +423,8 @@ class WelleApp {
             if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
             else Tone.Transport.bpm.rampTo(bpm, 0.1);
         }
-        this.renderContent();
+        // this.renderContent();
+        this.renderBpm();
     }
 
     //
@@ -438,10 +441,10 @@ class WelleApp {
     // ============================================
 
     assignPattern(message) {
-        console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        // console.log(`assignPattern. message: ${JSON.stringify(message)}`);
         // checks for instruments
-        console.log(`assign: 
-        number of instruments: ${message.instruments.length}`);
+        // console.log(`assign:
+        // number of instruments: ${message.instruments.length}`);
         // validate message instruments input, can be multiple instruments at once
         message.instruments.forEach((inst) => {
             let valid = false;
@@ -457,7 +460,14 @@ class WelleApp {
                     entry.activate();
                 }
             });
-            console.log(`${inst} valid is ${valid}`);
+            // console.log(`${inst} valid is ${valid}`);
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
         });
 
         this.startTransport();
@@ -490,13 +500,20 @@ class WelleApp {
                         // in case is muted, unmute
                         entry.mute = false;
                         // assign random and volume
-                        if (message.random) entry.rand = message.random;
-                        if (message.volume) entry.setVolume(message.volume);
+                        if (message.random != undefined) entry.rand = message.random;
+                        if (message.volume != undefined) entry.setVolume(message.volume);
                         this.setSelected(entry);
                         entry.activate();
                     }
                 });
                 console.log(`${inst} valid is ${valid}`);
+                if (valid == false) {
+                    this.addToConsole({
+                        valid: false,
+                        string: inst,
+                        comment: "no such instrument",
+                    });
+                }
             });
 
             this.startTransport();
@@ -517,6 +534,13 @@ class WelleApp {
                 }
             });
             // console.log(`${inst} valid is ${valid}`);
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
         });
 
         //if (nothingIsPlaying) this.stopTransport();
@@ -541,6 +565,13 @@ class WelleApp {
                 }
             });
             // console.log(`${inst} valid is ${valid}`);
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
         });
         this.renderContent();
     }
@@ -566,6 +597,13 @@ class WelleApp {
                     entry.activate();
                 }
             });
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
         });
 
         if (source != undefined) {
@@ -581,6 +619,13 @@ class WelleApp {
                         destinations.push(inst);
                     }
                 });
+                if (valid == false) {
+                    this.addToConsole({
+                        valid: false,
+                        string: inst,
+                        comment: "no such instrument",
+                    });
+                }
             });
         }
 
@@ -694,6 +739,7 @@ class WelleApp {
                 });
             } else valid = true;
         });
+
         if (valid) {
             // init new part
             this.parts[name] = {
@@ -713,7 +759,7 @@ class WelleApp {
 
             console.log(`part ${name} saved in parts`, this.parts[name]);
         }
-        this.renderContent();
+        this.renderParts();
     }
 
     startPart(name) {
@@ -732,7 +778,6 @@ class WelleApp {
             const storedInst = this.parts[name].instrumentCollection[entry.name];
             entry.setSequence(storedInst.sequence, storedInst.patternRaw);
             entry.setVolume(storedInst.volume);
-
             entry.setMute(storedInst.mute);
             entry.setRand(storedInst.rand);
             entry.setEnvSettings(storedInst.envSettings);
@@ -743,7 +788,7 @@ class WelleApp {
         // this.beat = 0;
         // start Tone Transport
         this.startTransport();
-        this.renderContent();
+        // this.renderParts();
     }
 
     //
@@ -765,21 +810,17 @@ class WelleApp {
         this.selected.vol = inst.getVolume();
         this.selected.env = inst.getEnvSettings();
         this.selected.sequence = inst.getSequence();
-        console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
+        // console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
 
-        // <div id="inst_${inst}"
-        // setTimeout(() => {
-        //     Object.keys(this.#instruments).forEach((instrument) => {
-        //         if (instrument == inst)
-        //             window.document
-        //                 .getElementById(`inst_${instrument}`)
-        //                 .classList.add("selectedInst");
-        //         else
-        //             window.document
-        //                 .getElementById(`inst_${instrument}`)
-        //                 .classList.remove("selectedInst");
-        //     });
-        // }, 300);
+        //
+        setTimeout(() => {
+            this.activeInstruments.forEach((inst) => {
+                if (inst == this.selected.name)
+                    window.document.getElementById(`inst_${inst}`).classList.add("selectedInst");
+                else
+                    window.document.getElementById(`inst_${inst}`).classList.remove("selectedInst");
+            });
+        }, 300);
         // this.sendMidiSelectedInstState();
 
         // activate instrument
@@ -787,7 +828,7 @@ class WelleApp {
         // store all active instruments in an array
         this.instruments.forEach((entry) => {
             const status = entry.getStatus();
-            console.log(`Status inst ${entry.name}: ${status}`);
+            // console.log(`Status inst ${entry.name}: ${status}`);
             // if inst not already stored, than push in array
             if (status == true) {
                 let isStored = false;
@@ -797,7 +838,7 @@ class WelleApp {
                 if (isStored == false) this.activeInstruments.push(entry.name);
             }
         });
-        console.log(JSON.stringify(this.activeInstruments));
+        // console.log(JSON.stringify(this.activeInstruments));
     }
 
     //
@@ -1035,8 +1076,12 @@ class WelleApp {
             this.renderParts();
 
             // this.renderSession();
-            document.getElementById(this.bpmDiv).innerHTML = Math.floor(this.bpm);
+            this.renderBpm();
         }, 200);
+    }
+
+    renderBpm() {
+        document.getElementById(this.bpmDiv).innerHTML = Math.floor(this.bpm);
     }
 
     renderInstrumentsOverview() {
@@ -1140,7 +1185,7 @@ class WelleApp {
             const partHtml = `
                 <input
                     type = "button"
-                    class = "w3-button w3-round-large w3-border w3-black w3-small"
+                    class = "w3-button w3-round w3-border w3-border-black"
                     value = "${part}"
                     title = "part: ${part}"
                     id = "${part}">
@@ -1160,29 +1205,29 @@ class WelleApp {
         });
     }
 
-    // renderExternal() {
-    //     // info text
-    //     // document.getElementById(this.#infoDiv).innerHTML = text.info;
-    //     // tutorial
-    //     let html = tutorial.start;
-    //     document.getElementById(this.#tutorialDiv).innerHTML = html;
-    //     // const checks = document.getElementsByTagName("input");
-    //     // console.log("these are the inputs: ", checks);
-    //     document.querySelectorAll(".tutorialInput").forEach((item) => {
-    //         item.addEventListener("keydown", (e) => {
-    //             if (e.code == "Enter") {
-    //                 window.welle.app.tutorial = true;
-    //                 const input = item.value.toLowerCase();
-    //                 console.log(`message from tutorial input: ${input}`);
-    //                 window.welle.app.handleMainInput(input);
-    //                 item.value = "";
-    //                 setTimeout(() => {
-    //                     window.welle.app.handleMainInput("/");
-    //                 }, 3000);
-    //             }
-    //         });
-    //     });
-    // }
+    renderExternal() {
+        // info text
+        // document.getElementById(this.#infoDiv).innerHTML = text.info;
+        // tutorial
+        let html = tutorial.start;
+        document.getElementById(this.tutorialDiv).innerHTML = html;
+        // const checks = document.getElementsByTagName("input");
+        // console.log("these are the inputs: ", checks);
+        document.querySelectorAll(".tutorialInput").forEach((item) => {
+            item.addEventListener("keydown", (e) => {
+                if (e.code == "Enter") {
+                    window.welle.app.tutorial = true;
+                    const input = item.value.toLowerCase();
+                    console.log(`message from tutorial input: ${input}`);
+                    window.welle.app.handleMainInput(input);
+                    item.value = "";
+                    setTimeout(() => {
+                        window.welle.app.handleMainInput("/");
+                    }, 3000);
+                }
+            });
+        });
+    }
 
     // renderSession() {
     //     if (this.user != "local") {
@@ -1225,7 +1270,56 @@ class WelleApp {
     //
     //
     //
-    //
+
+    // ============================================
+    // RECORDER
+    // ============================================
+
+    async handleRecord() {
+        const value = window.document.getElementById("rec-button").value;
+
+        // if (Tone.Transport.state != "started") Tone.Transport.start();
+        if (value == "RECORD") {
+            console.log(`start recorder`);
+            this.recorder.start();
+            if (window.document.getElementById("file").innerHTML != "") {
+                window.document.getElementById("file").innerHTML = "";
+                console.log(`id file not empty..`);
+                this.recording = undefined;
+            }
+
+            window.document.getElementById("rec-button").value = "STOP";
+            document.getElementById("rec-button").classList.add("w3-red");
+        } else {
+            window.document.getElementById("rec-button").value = "RECORD";
+            document.getElementById("rec-button").classList.remove("w3-red");
+            console.log(`stop recorder`);
+
+            if (this.recorder.state == "started") {
+                // the recorded audio is returned as a blob
+                this.recording = await this.recorder.stop();
+                console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
+                document.getElementById(
+                    "file"
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
+                document.getElementById("downloadFile").addEventListener("click", (c) => {
+                    console.log(`file link clicked. date: ${new Date()}`);
+                    const recording = window.welle.app.getRecording();
+                    const url = URL.createObjectURL(recording);
+                    const anchor = document.createElement("a", { href: url });
+                    anchor.download = "welle-record.webm";
+                    anchor.href = url;
+                    document.body.append(anchor);
+                    anchor.click();
+                    anchor.remove();
+                });
+            }
+        }
+    }
+    getRecording() {
+        return this.recording;
+    }
+
     //
     //
     //
@@ -1336,49 +1430,6 @@ class WelleApp {
     //     this.session.push(name);
     //     console.log(`new user name: ${name}`);
     //     this.renderSession();
-    // }
-
-    // async handleRecord() {
-    //     const value = window.document.getElementById("rec-button").value;
-    //     if (value == "RECORD") {
-    //         console.log(`start recorder`);
-    //         this.recorder.start();
-    //         if (window.document.getElementById("file").innerHTML != "") {
-    //             window.document.getElementById("file").innerHTML = "";
-    //             console.log(`id file not empty..`);
-    //             this.recording = undefined;
-    //         }
-
-    //         window.document.getElementById("rec-button").value = "STOP";
-    //         document.getElementById("rec-button").classList.add("w3-red");
-    //     } else {
-    //         window.document.getElementById("rec-button").value = "RECORD";
-    //         document.getElementById("rec-button").classList.remove("w3-red");
-    //         console.log(`stop recorder`);
-
-    //         if (this.recorder.state == "started") {
-    //             // the recorded audio is returned as a blob
-    //             this.recording = await this.recorder.stop();
-    //             console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
-    //             document.getElementById(
-    //                 "file"
-    //             ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
-    //             document.getElementById("downloadFile").addEventListener("click", (c) => {
-    //                 console.log(`file link clicked. date: ${new Date()}`);
-    //                 const recording = window.welle.app.getRecording();
-    //                 const url = URL.createObjectURL(recording);
-    //                 const anchor = document.createElement("a", { href: url });
-    //                 anchor.download = "welle-record.webm";
-    //                 anchor.href = url;
-    //                 document.body.append(anchor);
-    //                 anchor.click();
-    //                 anchor.remove();
-    //             });
-    //         }
-    //     }
-    // }
-    // getRecording() {
-    //     return this.recording;
     // }
 
     // MIDI handling
