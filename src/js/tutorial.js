@@ -29,7 +29,15 @@ HAVE FUN !
 <table style="width:100%">
   
   <tr>
-    <td>start instrument by name:</td>
+    <td>start the sequencer:</td>
+    <td>></td>
+  </tr>
+  <tr>
+    <td>stop the sequencer:</td>
+    <td>.</td>
+  </tr>
+  <tr>
+    <td>play instrument by name:</td>
     <td>kick</td>
   </tr>
   <tr>
@@ -37,17 +45,17 @@ HAVE FUN !
     <td>. kick</td>
   </tr>
   <tr>
-    <td>start with pattern: </td>
+    <td>play with a pattern: </td>
     <td>kick #-#-#--</td>
   </tr>
   
   <tr>
-    <td>pattern with melody: </td>
+    <td>play a pattern with melody: </td>
     <td>kick #2 #4 #5 - #4 #3 #2</td>
   </tr>
   
   <tr>
-    <td>start multiple instruments:</td>
+    <td>assign pattern to multiple instruments:</td>
     <td>kick hh string #----#---</td>
   </tr>
   <tr>
@@ -55,29 +63,14 @@ HAVE FUN !
     <td>kick 0.3</td>
   </tr>
   <tr>
-    <td>set random (new random <br>pattern after 3 plays):</td>
+    <td>set random (new random <br>pattern after 3 repeats):</td>
     <td>kick %3</td>
   </tr>
   <tr>
-    <td>set multiple values (name, <br> volume, pattern, random):</td>
+    <td>set multiple values (instrument, <br> volume, pattern, random):</td>
     <td>kick 0.5 #-#3#2#3--   %4</td>
   </tr>
-  <tr>
-    <td>start all:</td>
-    <td>></td>
-  </tr>
-  <tr>
-    <td>stop all:</td>
-    <td>.</td>
-  </tr>
-  <tr>
-    <td>save part (choose your on name,<br>  as long as its not an instrument name):   </td>
-    <td>: somepart</td>
-  </tr>
-  <tr>
-    <td>play part:  </td>
-    <td>somepart</td>
-  </tr>
+  
   <tr>
     <td>change BPM: </td>
     <td>bpm 80</td>
@@ -98,6 +91,20 @@ HAVE FUN !
     <td>delete all: </td>
     <td>/ </td>
   </tr>
+  <tr>
+    <td><b>snapshots</b> are great to compose.<br> they save the current instruments and Bpm. <br> choose any name, as long as its <br> not an instrument name:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>save a snapshot:   </td>
+    <td>: someName</td>
+  </tr>
+  <tr>
+    <td>play snapshot:  </td>
+    <td>someName</td>
+  </tr>
+  
+  
   <tr>
     <td>start recording: </td>
     <td>record start</td>
