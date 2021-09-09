@@ -245,23 +245,28 @@ semantics.addOperation("eval", {
         //console.log('new at Pattern all: ', newPattern)
         return newPattern;
     },
-    NestedEvents: function (_, pattern, __, int) {
-        pattern = pattern.asIteration().eval();
-        var newPattern = [];
-        int = int.eval();
-        if (int.length != 0) {
-            // if muliplier, then repeat to push each entry to newPattern
-            for (let i = 0; i < int; i++) {
-                for (let j = 0; j < pattern.length; j++) {
-                    newPattern.push(pattern[j]);
-                }
-            }
-        } else {
-            newPattern = pattern;
-        }
-        //console.log('NestedEvents, pattern + newPattern + int: ', pattern, newPattern, int);
-        return newPattern;
-    },
+
+    // Nested Events in Grammar:
+    // EventPattern =  | Event | NestedEvent
+    // NestedEvents = "(" NonemptyListOf<Events, ""> ")" intPos?
+
+    // NestedEvents: function (_, pattern, __, int) {
+    //     pattern = pattern.asIteration().eval();
+    //     var newPattern = [];
+    //     int = int.eval();
+    //     if (int.length != 0) {
+    //         // if muliplier, then repeat to push each entry to newPattern
+    //         for (let i = 0; i < int; i++) {
+    //             for (let j = 0; j < pattern.length; j++) {
+    //                 newPattern.push(pattern[j]);
+    //             }
+    //         }
+    //     } else {
+    //         newPattern = pattern;
+    //     }
+    //     //console.log('NestedEvents, pattern + newPattern + int: ', pattern, newPattern, int);
+    //     return newPattern;
+    // },
 
     Events: function (event) {
         return event.eval();

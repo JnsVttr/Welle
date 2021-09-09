@@ -42,6 +42,15 @@ document.getElementById("mainDiv").addEventListener("keydown", (e) => {
     App.startTone();
 });
 
+// Eventlistener for Start/ Stop Button
+document.getElementById("play-button").addEventListener("click", () => {
+    App.startTransport();
+});
+document.getElementById("stop-button").addEventListener("click", () => {
+    App.stopTransport();
+});
+
+// Eventlistener for Input field
 document.getElementById("mainInput").addEventListener("keydown", (e) => {
     // ENTER - in main input field
     if (e.code == "Enter") {

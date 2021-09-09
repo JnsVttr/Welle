@@ -422,7 +422,7 @@ class WelleApp {
         }
     }
     startTransport() {
-        // this.beat = 0;
+        this.beat = 0;
         if (Tone.Transport.state != "started") Tone.Transport.start();
         // send MIDI start
         const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
@@ -430,6 +430,9 @@ class WelleApp {
         if (window.welle.app.MIDIOutput != undefined) {
             window.welle.app.MIDIOutput.sendStart({ time: WebMidi.time + diffTime });
         }
+        // change play button
+        document.getElementById("play-button").classList.add("w3-green");
+        document.getElementById("play-button").classList.add("w3-hover-green");
     }
     stopTransport() {
         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
@@ -439,6 +442,9 @@ class WelleApp {
         if (window.welle.app.MIDIOutput != undefined) {
             window.welle.app.MIDIOutput.sendStop({ time: WebMidi.time + diffTime });
         }
+        // change play button
+        document.getElementById("play-button").classList.remove("w3-green");
+        document.getElementById("play-button").classList.remove("w3-hover-green");
     }
 
     playAll() {
@@ -1155,7 +1161,7 @@ class WelleApp {
             this.instruments.forEach((entry) => {
                 if (entry.name == inst) {
                     // round volume
-                    const volume = Math.round(entry.getVolume() * 10) / 10;
+                    const volume = Math.round(entry.getVolume() * 100) / 100;
                     // checkboxes
                     const isPlaying = !entry.getMute();
                     let checkHtml = "";
@@ -1174,7 +1180,7 @@ class WelleApp {
                             ${checkHtml}>
                             <label> <b>${entry.name}</b> </label>
                         </div>
-                        <div id="vol_${entry.name}" class="w3-col" style="width:70px">
+                        <div id="vol_${entry.name}" class="w3-col" style="width:90px">
                             vol: ${volume}
                         </div>
                         <div id="rand_${entry.name}" class="w3-col" style="width:70px">
@@ -1328,9 +1334,11 @@ class WelleApp {
 
             window.document.getElementById("rec-button").value = "STOP";
             document.getElementById("rec-button").classList.add("w3-red");
+            document.getElementById("rec-button").classList.add("w3-hover-red");
         } else {
             window.document.getElementById("rec-button").value = "RECORD";
             document.getElementById("rec-button").classList.remove("w3-red");
+            document.getElementById("rec-button").classList.remove("w3-hover-red");
             console.log(`stop recorder`);
 
             if (this.recorder.state == "started") {

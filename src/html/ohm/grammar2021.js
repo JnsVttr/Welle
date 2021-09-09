@@ -72,9 +72,7 @@ livecode {
 
     EventPattern = 
         | Events 
-        | NestedEvents 
-    
-    NestedEvents = "(" NonemptyListOf<Events, ""> ")" intPos? 
+        
     
     Events =
         | "#" int?	                --soundNote
