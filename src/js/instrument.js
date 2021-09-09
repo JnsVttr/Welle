@@ -71,6 +71,7 @@ class Instrument {
     // =========================================
 
     updateSequence(pattern, patternRaw) {
+        console.log(`incoming updateSequence pattern:`, pattern);
         this.patternRaw = patternRaw || "";
         this.pattern = pattern;
         const midiPattern = this.#translatePatternToMidi(this.pattern);
@@ -139,6 +140,7 @@ class Instrument {
                     // console.log(`Randomized for ${this.name}, new: ${this.sequence}`);
                     this.randomized = true;
                     this.beatCounter = 0;
+                    return true;
                 }
             } else this.randomized = false;
         }

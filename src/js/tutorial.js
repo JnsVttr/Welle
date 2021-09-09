@@ -79,6 +79,14 @@ HAVE FUN !
     <td>somepart</td>
   </tr>
   <tr>
+    <td>change BPM: </td>
+    <td>bpm 80</td>
+  </tr>
+  <tr>
+    <td>change BPM over 2 seconds: </td>
+    <td>bpm 80 2</td>
+  </tr>
+  <tr>
     <td>delete instrument or part: </td>
     <td>/ kick</td>
   </tr>
