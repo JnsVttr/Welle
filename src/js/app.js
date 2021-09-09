@@ -714,14 +714,17 @@ class WelleApp {
 
     delete(names) {
         console.log(`delete this: ${names}`);
+        let valid = false;
         names.map((name) => {
             if (this.parts[name]) {
                 delete this.parts[name];
+                valid = true;
                 // console.log(`delete this part: ${name}`);
             }
             // if this inst exists, reset everything
             this.instruments.forEach((entry) => {
                 if (entry.name == name) {
+                    valid = true;
                     entry.sequence = [null, null, null, null, null, null, null, null];
                     entry.patternRaw = "";
                     entry.setVolume(0.6);
@@ -732,11 +735,20 @@ class WelleApp {
                 }
             });
         });
+        if (valid == false) {
+            this.addToConsole({
+                valid: false,
+                string: "",
+                comment: "no such instrument or part",
+            });
+        }
         this.renderContent();
     }
 
     deleteAll() {
         console.log(`App delete all..`);
+        this.#consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
+        this.renderConsole();
         // clear & delete every instrument
         this.instruments.forEach((entry) => {
             entry.sequence = [null, null, null, null, null, null, null, null];
