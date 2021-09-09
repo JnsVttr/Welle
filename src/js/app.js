@@ -1171,7 +1171,7 @@ class WelleApp {
                     const instHtml = `
                     <div id="inst_${entry.name}" class="w3-row"
                     style="padding-top: 3px; padding-left: 3px;">
-                        <div class="w3-col" style="width:120px;">
+                        <div class="w3-col w3-black" style="width:120px; padding-left: 0.4em; margin-right:1.5em">
                             <input
                             id="check_${entry.name}"
                             class="w3-check"
@@ -1231,7 +1231,7 @@ class WelleApp {
                     type = "button"
                     class = "w3-button w3-round w3-border w3-border-black"
                     value = "${part}"
-                    title = "part: ${part}"
+                    title = "snapshot: ${part}"
                     id = "${part}">
                 </input> `;
             html += partHtml;
