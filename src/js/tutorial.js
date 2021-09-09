@@ -2,23 +2,24 @@ export const tutorial = {};
 
 tutorial.start = `
 
-Get to know WELLE. It is basically a text-based 8-step sequencer with predefined sample sounds. 
+Get to know WELLE. It is basically a <b>text-based 8-step sequencer</b> with predefined sample sounds.
+The samples are displayed at the top of the page, click on them to hear what they sound like. 
 You can input commands in the input field (console) to make music. 
 You can save and recall snapshots of your music on-the-fly.
 Also you can record your music. Or send it as MIDI messages to your preferred DAW 
-(the MIDI channels correspond to the order of the samples).
+(the MIDI channels 1-14 correspond to the order of the samples).
 <br>
 <br>
 In WELLE a pattern is a combination from a note "#" and a pause "-". 
 A note can have a number behind it, e.g. "#3" or "#-12", 
-so it is higher or lower than the default "#".
+so it is higher or lower than the default "#". The numbers correspond to keys on a keyboard.
 If you enter a pattern shorter than 8 notes, it will be repeated to fill 8 steps.
 If your pattern is longer than 8 notes, it will be reduced to 8 steps.
 
 
 <br>
 <br>
-Use the arrow keys (up & down)  to recall and modify  previous input.
+While in the input field you can use the arrow keys (up & down)  to recall and modify  previous input.
 <br>
 <br>
 HAVE FUN !
@@ -51,7 +52,7 @@ HAVE FUN !
   
   <tr>
     <td>play a pattern with melody: </td>
-    <td>kick #2 #4 #5 - #4 #3 #2</td>
+    <td>fatbass  #2 #4 #5 - #4 #3 #2</td>
   </tr>
   
   <tr>
@@ -63,21 +64,20 @@ HAVE FUN !
     <td>kick 0.3</td>
   </tr>
   <tr>
-    <td>set random (new random <br>pattern after 3 repeats):</td>
+    <td><b>randomizing</b> a pattern is a great way <br> 
+    to get movement in the sound. You can randomize <br> 
+    positions of notes in a pattern.<br>
+    corresponding to the number, the pattern will be <br>
+    freshly randomized after that number of cycles:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>set random:</td>
     <td>kick %3</td>
   </tr>
   <tr>
     <td>set multiple values (instrument, <br> volume, pattern, random):</td>
     <td>kick 0.5 #-#3#2#3--   %4</td>
-  </tr>
-  
-  <tr>
-    <td>change BPM: </td>
-    <td>bpm 80</td>
-  </tr>
-  <tr>
-    <td>change BPM over 2 seconds: </td>
-    <td>bpm 80 2</td>
   </tr>
   <tr>
     <td>delete instrument or part: </td>
@@ -91,6 +91,7 @@ HAVE FUN !
     <td>delete all: </td>
     <td>/ </td>
   </tr>
+  
   <tr>
     <td><b>snapshots</b> are great to compose.<br> they save the current instruments and Bpm. <br> choose any name, as long as its <br> not an instrument name:</td>
     <td></td>
@@ -104,13 +105,35 @@ HAVE FUN !
     <td>someName</td>
   </tr>
   
-  
+  <tr>
+    <td><b>BPM</b> - the BPM is stored in the snapshots<br> 
+    so that you can play with different speeds.<br>
+    if you apply a number to the command, it <br>
+    will take some seconds to smoothly change the BPM:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>change BPM: </td>
+    <td>bpm 80</td>
+  </tr>
+  <tr>
+    <td>change BPM over 2 seconds: </td>
+    <td>bpm 80 2</td>
+  </tr>
+
+  <tr>
+    <td><b>recording</b> - you can always hit the record button<br>
+    (or type the command) to record what you hear <br>
+    and once you stopped it you can download the file (webm) <br>
+    appearing below the record button: </td>
+    <td></td>
+  </tr>
   <tr>
     <td>start recording: </td>
     <td>record start</td>
   </tr>
   <tr>
-    <td>stop recording (download file <br> below record button): </td>
+    <td>stop recording: </td>
     <td>record stop</td>
   </tr>
 </table>
