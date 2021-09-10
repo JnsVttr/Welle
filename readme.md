@@ -28,6 +28,8 @@ bass > drums
 string %2
 ```
 
+![Screenshot](screenshot.png)
+
 ## Info
 
 WELLE is a web-based music environment and was developed as part
