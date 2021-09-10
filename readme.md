@@ -37,7 +37,7 @@ of the research project Tangible Signals by Jens Vetter,
 supervised by Martin Kaltenbrunner at the Tangible Music Lab,
 University of Art and Design Linz, Austria.
 
-[https://tamlab.ufg.at/projects/tangible-signals/](research project 'Tangible Signals')
+[https://tamlab.ufg.at/projects/tangible-signals/](research project Tangible Signals)
 
 ## Live Demo
 
