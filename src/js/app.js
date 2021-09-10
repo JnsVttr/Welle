@@ -621,8 +621,10 @@ class WelleApp {
                 if (entry.name == inst) {
                     valid = true;
                     entry.setVolume(message.volume);
-                    this.setSelected(entry);
-                    entry.activate();
+                    if (message.midi == undefined) {
+                        this.setSelected(entry);
+                        entry.activate();
+                    }
                 }
             });
             // console.log(`${inst} valid is ${valid}`);
@@ -903,17 +905,6 @@ class WelleApp {
         this.selected.sequence = inst.getSequence();
         // console.log(`selected inst: ${inst}. Set selected: ${JSON.stringify(this.selected)}`);
 
-        //
-        setTimeout(() => {
-            this.activeInstruments.forEach((inst) => {
-                if (inst == this.selected.name)
-                    window.document.getElementById(`inst_${inst}`).classList.add("selectedInst");
-                else
-                    window.document.getElementById(`inst_${inst}`).classList.remove("selectedInst");
-            });
-        }, 300);
-        // this.sendMidiSelectedInstState();
-
         // activate instrument
         inst.activate();
         // store all active instruments in an array
@@ -930,6 +921,17 @@ class WelleApp {
             }
         });
         // console.log(JSON.stringify(this.activeInstruments));
+
+        //
+        setTimeout(() => {
+            this.activeInstruments.forEach((inst) => {
+                if (inst == this.selected.name)
+                    window.document.getElementById(`inst_${inst}`).classList.add("selectedInst");
+                else
+                    window.document.getElementById(`inst_${inst}`).classList.remove("selectedInst");
+            });
+        }, 350);
+        // this.sendMidiSelectedInstState();
 
         // midi transfer ongoing is a delay for send midi, and not receiving in the same time
         if (this.midiTransferOngoing == false) {
@@ -1580,6 +1582,9 @@ class WelleApp {
             // ==================================================
             // env problem: how to scale numbers? 0.01 - 3.00
             // solution: multiple of 10, if 0 => 0.01
+            //
+            // wait: in SuperCollider, Envelope values are always 0.0 - 1.0
+            // so maybe I should adapt this to Tonejs
             const env = [
                 message.env.attack,
                 message.env.decay,
@@ -1668,7 +1673,7 @@ class WelleApp {
             window.welle.app.midiTransferOngoing = true;
             setTimeout(() => {
                 window.welle.app.midiTransferOngoing = false;
-            }, 30);
+            }, 5);
 
             // only assign, if some instrument is selected
             if (selected.name != "") {
@@ -1676,7 +1681,11 @@ class WelleApp {
                 if (cc == 9) {
                     vol = roundFunc(val / 126);
 
-                    window.welle.app.setVolume({ instruments: [selected.name], volume: vol });
+                    window.welle.app.setVolume({
+                        instruments: [selected.name],
+                        volume: vol,
+                        midi: true,
+                    });
                     // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
                     console.log(`MIDI input (${selected.name}) vol: ${vol} `);
                 }
