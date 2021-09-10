@@ -1,40 +1,51 @@
-# Welle - simplified Live Coding
+# Welle - text-based 8-step sequencer
 
-*this project is currently work-in-progress..*
+_this project is currently work-in-progress.._
 
-Welle is an simplified web-based live-coding tool for visually impaired and blind musicians. It can be used for collaborative music-making. It aims to help visually-impaired and blind musicians to use the computer as music machine.
+Welle is basically a text-based 8-step sequencer with predefined sample sounds.
+The samples are displayed at the top of the page, click on them to hear what they sound like.
+You can input commands in the input field (console) to make music.
+You can save and recall snapshots of your music on-the-fly.
+Also you can record your music. Or send it as MIDI messages to your
+preferred DAW (the MIDI channels 1-14 correspond to the order of the samples).
 
+In WELLE a pattern is a combination from a note "#" and a pause "-".
+A note can have a number behind it, e.g. "#3" or "#-12", so it is higher or
+lower than the default "#". The numbers correspond to keys on a keyboard.
+If you enter a pattern shorter than 8 notes, it will be repeated to fill 8 steps.
+If your pattern is longer than 8 notes, it will be reduced to 8 steps.
+
+While in the input field you can use the arrow keys (up & down) to recall and modify previous input.
 
 Example Code:
+
 ```
-> bass  
-bass #-#-##  
-> drums #-#23-
-save beat
-vol 0.8 bass
+kick
+kick #-#-##
+string #-#23-
+: beat
+vol 0.8 kick
 bpm 110
 bass > drums
-: beat
-drums (#2#)2 - (#23-#45)4
-rand drums
+string %2
 ```
 
+## Info
+
+WELLE is a web-based music environment and was developed as part
+of the research project Tangible Signals by Jens Vetter,
+supervised by Martin Kaltenbrunner at the Tangible Music Lab,
+University of Art and Design Linz, Austria.
+
+[https://tamlab.ufg.at/projects/tangible-signals/](research project 'Tangible Signals')
 
 ## Live Demo
 
-
-Please check the Live Demo (old demo from 2019) at: [https://tangible.uber.space](https://tangible.uber.space).
-
-For help, commands, examples etc. (options displayed below input field), type :
-```
-help examples
-help commands
-```
-
+Please check the live version at:
+[https://tangible.uber.space](https://tangible.uber.space).
 
 ## Built With
 
-* [Parcel](https://parceljs.org/) - The web application bundler
-* [Ohm](https://ohmlang.github.io) - A library and language for building parsers, interpreters, compilers, etc.
-* [Tone.js](https://tonejs.github.io/) - Tone.js is a framework for creating interactive music in the browser
-
+-   [Parcel](https://parceljs.org/) - The web application bundler
+-   [Ohm](https://ohmlang.github.io) - A library and language for building parsers, interpreters, compilers, etc.
+-   [Tone.js](https://tonejs.github.io/) - Tone.js is a framework for creating interactive music in the browser

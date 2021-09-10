@@ -60,6 +60,10 @@ HAVE FUN !
     <td>kick hh string #----#---</td>
   </tr>
   <tr>
+    <td>copy a pattern to another instrument:</td>
+    <td>string > hh</td>
+  </tr>
+  <tr>
     <td>set volume (0.0 - 1.0): </td>
     <td>kick 0.3</td>
   </tr>
