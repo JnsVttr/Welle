@@ -28,7 +28,7 @@ bass > drums
 string %2
 ```
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.png?v=4&s=200)
 
 ## Info
 
