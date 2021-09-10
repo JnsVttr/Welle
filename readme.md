@@ -1,8 +1,6 @@
-# Welle - text-based 8-step sequencer
+# Welle
 
-_this project is currently work-in-progress.._
-
-Welle is basically a text-based 8-step sequencer with predefined sample sounds.
+Welle is a text-based 8-step sequencer with predefined sample sounds.
 The samples are displayed at the top of the page, click on them to hear what they sound like.
 You can input commands in the input field (console) to make music.
 You can save and recall snapshots of your music on-the-fly.
@@ -33,11 +31,9 @@ string %2
 ## Info
 
 WELLE is a web-based music environment and was developed as part
-of the research project Tangible Signals by Jens Vetter,
+of the [Tangible Signals research project](https://tamlab.ufg.at/projects/tangible-signals/) by Jens Vetter,
 supervised by Martin Kaltenbrunner at the Tangible Music Lab,
 University of Art and Design Linz, Austria.
-
-[Tangible Signals - research project](https://tamlab.ufg.at/projects/tangible-signals/)
 
 ## Live Demo
 
