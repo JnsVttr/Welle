@@ -339,7 +339,7 @@ class WelleApp {
                     instrument: instrument.name,
                     note: sequence[i],
                     isActive: state,
-                    mute: instrument.mute,
+                    mute: instrument.getMute(),
                 });
             }
             rows.push(row);
@@ -360,7 +360,7 @@ class WelleApp {
                 const name = this.instruments[index].name;
                 const ampEnv = this.instruments[index].ampEnv;
                 const event = row[this.beat];
-                const mute = this.instruments[index].mute;
+                const mute = this.instruments[index].getMute();
                 let midiChan = 0;
                 let midiTransmit = true;
                 if (index < 14) midiChan = index;
@@ -513,7 +513,7 @@ class WelleApp {
             this.instruments.forEach((entry) => {
                 if (entry.name == inst) {
                     valid = true;
-                    entry.mute = false;
+                    entry.setMute(false);
                     entry.updateSequence(message.pattern, message.rawPattern);
                     if (message.random != undefined) entry.random(message.random);
                     if (message.volume != undefined) entry.setVolume(message.volume);
@@ -559,7 +559,7 @@ class WelleApp {
                         // if no sequence assigned, create one
                         if (entry.patternRaw == "") entry.updateSequence([0], "#");
                         // in case is muted, unmute
-                        entry.mute = false;
+                        entry.setMute(false);
                         // assign random and volume
                         if (message.random != undefined) entry.rand = message.random;
                         if (message.volume != undefined) entry.setVolume(message.volume);
@@ -567,7 +567,7 @@ class WelleApp {
                         entry.activate();
                     }
                 });
-                console.log(`${inst} valid is ${valid}`);
+                // console.log(`${inst} valid is ${valid}`);
                 if (valid == false) {
                     this.addToConsole({
                         valid: false,
@@ -590,7 +590,7 @@ class WelleApp {
             this.instruments.forEach((entry) => {
                 if (entry.name == inst) {
                     valid = true;
-                    entry.mute = true;
+                    entry.setMute(true);
                     this.setSelected(entry);
                 }
             });
@@ -864,14 +864,15 @@ class WelleApp {
             // only if instrument stored:
             if (storedInst != undefined) {
                 if (entry.name == storedInst.name) {
-                    console.log(`recall inst ${entry.name}`);
+                    console.log(`recall inst ${entry.name}, mute: ${storedInst.mute}`);
                     entry.setSequence(storedInst.sequence, storedInst.patternRaw);
                     entry.setVolume(storedInst.volume);
                     entry.setMute(storedInst.mute);
                     entry.setRand(storedInst.rand);
                     entry.setEnvSettings(storedInst.envSettings);
                     const id = "check_" + entry.name;
-                    window.document.getElementById(id).click();
+                    // if the instrument is not stored as muted, click the checkbox
+                    if (entry.getMute() == false) window.document.getElementById(id).click();
                 }
             }
         });
@@ -1275,12 +1276,14 @@ class WelleApp {
                         .getElementById(`check_${entry.name}`)
                         .addEventListener("click", (c) => {
                             if (c.target.checked) {
+                                entry.setMute(false);
                                 window.welle.app.plainStartInstruments({
                                     instruments: [entry.name],
                                     random: null,
                                 });
                             }
                             if (!c.target.checked) {
+                                entry.setMute(true);
                                 window.welle.app.stopInstruments([entry.name]);
                             }
                         });

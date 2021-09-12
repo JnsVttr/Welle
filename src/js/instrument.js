@@ -192,16 +192,20 @@ class Instrument {
     setRand(value) {
         this.rand = value;
     }
+
+    getPatternRaw() {
+        return this.patternRaw;
+    }
+
+    // mute describes the checkbox value, if the instrument is playing or not
     getMute() {
         return this.mute;
     }
     setMute(value) {
         this.mute = value;
     }
-    getPatternRaw() {
-        return this.patternRaw;
-    }
 
+    // activate describes if the instrument is shown on the page
     activate() {
         this.active = true;
     }
