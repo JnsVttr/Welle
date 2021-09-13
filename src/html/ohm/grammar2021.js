@@ -32,7 +32,7 @@ livecode {
         | "?" PhraseList?           --questionEvent
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
-        | ":" phrase           	    --savePartEvent
+        | "=" phrase           	    --savePartEvent
         | "/" PhraseList		    --deleteEvent
         | "save" phrase         	--saveEvent
         | "delete" phrase         	--deleteWordEvent

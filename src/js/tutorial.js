@@ -102,7 +102,7 @@ HAVE FUN !
   </tr>
   <tr>
     <td>save a snapshot:   </td>
-    <td>: someName</td>
+    <td>= someName</td>
   </tr>
   <tr>
     <td>play snapshot:  </td>
