@@ -1237,7 +1237,7 @@ class WelleApp {
                     const instHtml = `
                     <div id="inst_${entry.name}" class="w3-row ${selHtml}"
                     style="padding-top: 3px; padding-left: 3px;">
-                        <div class="w3-col w3-black" style="width:120px; padding-left: 0.4em; margin-right:1.5em">
+                        <div class="w3-col w3-black" style="width:120px; padding-left: 0.4em; margin-right:1em">
                             <input
                             id="check_${entry.name}"
                             class="w3-check"
@@ -1246,10 +1246,10 @@ class WelleApp {
                             ${checkHtml}>
                             <label> <b>${entry.name}</b> </label>
                         </div>
-                        <div id="vol_${entry.name}" class="w3-col m1" style="width:70px">
+                        <div id="vol_${entry.name}" class="w3-col m1" style="width:50px">
                             ${volume}
                         </div>
-                        <div id="rand_${entry.name}" class="w3-col m1" style="width:70px">
+                        <div id="rand_${entry.name}" class="w3-col m1" style="width:50px">
                             %${entry.getRand()}
                         </div>
                         <div id="pattern_${entry.name}" class="w3-col m4">
