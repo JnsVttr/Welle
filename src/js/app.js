@@ -1246,11 +1246,11 @@ class WelleApp {
                             ${checkHtml}>
                             <label> <b>${entry.name}</b> </label>
                         </div>
-                        <div id="vol_${entry.name}" class="w3-col m1" style="width:90px">
-                            vol: ${volume}
+                        <div id="vol_${entry.name}" class="w3-col m1" style="width:70px">
+                            ${volume}
                         </div>
                         <div id="rand_${entry.name}" class="w3-col m1" style="width:70px">
-                            % ${entry.getRand()}
+                            %${entry.getRand()}
                         </div>
                         <div id="pattern_${entry.name}" class="w3-col m4">
                             ${entry.getPatternRaw()}

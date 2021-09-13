@@ -126,10 +126,11 @@ HAVE FUN !
   </tr>
 
   <tr>
-    <td><b>recording</b> - you can always hit the record button<br>
-    (or type the command) to record what you hear <br>
-    and once you stopped it you can download the file (webm) <br>
-    appearing below the record button: </td>
+    <td><b>recording</b> (on desktop, not on smartphone): <br>
+    hit the record button (or type the command) to <br> 
+    record what you hear. <br>
+    and once you stopped it you can download the <br>
+    .webm file webm appearing below the record button. </td>
     <td></td>
   </tr>
   <tr>
