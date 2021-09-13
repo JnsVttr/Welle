@@ -166,7 +166,7 @@ semantics.addOperation("eval", {
         // console.log("semantics - assignPattern, randomSourceString: ", random.sourceString);
         if (random.sourceString == "") random = null;
         else {
-            random = random.sourceString.replace("%", ""); // '%2'
+            random = random.sourceString.replace("&", ""); // '%2'
             random = parseInt(random);
         }
         let patternString = pattern.sourceString;

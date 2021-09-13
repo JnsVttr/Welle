@@ -704,7 +704,8 @@ class WelleApp {
                         for (let i = 0; i < 8; i++) {
                             entry.sequence[i] = sequence[i];
                         }
-                        // this.setSelected(inst);
+                        this.setSelected(entry);
+                        entry.setMute(false);
                         entry.activate();
                     }
                 });
@@ -1250,7 +1251,7 @@ class WelleApp {
                             ${volume}
                         </div>
                         <div id="rand_${entry.name}" class="w3-col m1" style="width:50px">
-                            %${entry.getRand()}
+                            &${entry.getRand()}
                         </div>
                         <div id="pattern_${entry.name}" class="w3-col m4">
                             ${entry.getPatternRaw()}

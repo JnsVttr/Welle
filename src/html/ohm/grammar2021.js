@@ -52,7 +52,7 @@ livecode {
                 
 
     Assignments =
-        | phrase ">" PhraseList                     --copyPattern
+        | phrase "+" PhraseList                     --copyPattern
         | PhraseList floatPos? Pattern random?      --assignPattern
         | "bpm" intPos floatPos?                    --setBPM
         | PhraseList floatPos 		                --setVolume
@@ -66,7 +66,7 @@ livecode {
     
     phrase 		= letter+ "_"? (letter+)? intPos?   --phrase
 
-    random 	    = "%" " "? intPos 	                --random
+    random 	    = "&" " "? intPos 	                --random
     
     Pattern = NonemptyListOf<EventPattern, ""> 		--extractPattern
 

@@ -61,7 +61,7 @@ HAVE FUN !
   </tr>
   <tr>
     <td>copy a pattern to another instrument:</td>
-    <td>string > hh</td>
+    <td>string + hh</td>
   </tr>
   <tr>
     <td>set volume (0.0 - 1.0): </td>
@@ -77,11 +77,11 @@ HAVE FUN !
   </tr>
   <tr>
     <td>set random:</td>
-    <td>kick %3</td>
+    <td>kick &3</td>
   </tr>
   <tr>
     <td>set multiple values (instrument, <br> volume, pattern, random):</td>
-    <td>kick 0.5 #-#3#2#3--   %4</td>
+    <td>kick 0.5 #-#3#2#3--   &4</td>
   </tr>
   <tr>
     <td>delete instrument or part: </td>
