@@ -82,7 +82,10 @@
                     </p> -->
                 </div>
                 <div class="w3-col m2">
-                    <p class="w3-black" style="padding-left: 0.4em; margin-right: 1.7em">
+                    <p
+                        class="w3-black"
+                        style="padding-left: 0.4em; margin-right: 1.7em; margin-top: 0.3em"
+                    >
                         <input id="checkAlerts" class="w3-check" type="checkbox" /><label>
                             <span>alerts</span>
                         </label>
@@ -98,20 +101,23 @@
                             </label>
                         </span>
                     </p>
-                </div>
-                <div class="w3-col m2">
                     <p
-                        class="w3-black"
+                        class=""
                         style="
-                            padding-left: 0.2em;
-                            margin-right: 1.1em;
-                            margin-top: 1em;
-                            padding-bottom: 0.05em;
+                            padding-left: 0.4em;
+                            margin-right: 1.7em;
+                            margin-top: -0.8em;
+                            padding-bottom: -1em;
                         "
                     >
                         BPM - <span id="input_bpm" title="bpm"></span>
                     </p>
-                    <p style="padding-left: 0em; margin-right: 1.7em; margin-top: -0.8em">
+                </div>
+                <div class="w3-col m2">
+                    <p
+                        class="w3-hide-small"
+                        style="padding-left: 0em; margin-right: 1.7em; margin-top: 1.9em"
+                    >
                         <select
                             id="midiSelect"
                             class="w3-border w3-round"
@@ -123,10 +129,10 @@
                     </p>
                 </div>
 
-                <div class="w3-col m2">
+                <!-- <div class="w3-col m2">
                     <p><span id="session"></span></p>
-                </div>
-                <div class="w3-col m2">
+                </div> -->
+                <div class="w3-col m2 w3-hide-small" style="margin-top: 0.2em">
                     <p>
                         <input
                             id="rec-button"
@@ -197,7 +203,7 @@
                 <!-- console input field ==============================  -->
                 <input
                     id="mainInput"
-                    type="text"
+                    type="email"
                     size="50"
                     title="console"
                     autocomplete="off"

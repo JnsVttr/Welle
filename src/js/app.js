@@ -1424,7 +1424,7 @@ class WelleApp {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();
                     const url = URL.createObjectURL(recording);
-                    const anchor = document.createElement("a", { href: url });
+                    const anchor = document.createElement("a", { href: url, type: "audio/mp3" });
                     anchor.download = "welle-record.webm";
                     anchor.href = url;
                     document.body.append(anchor);
