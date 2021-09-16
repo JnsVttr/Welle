@@ -207,7 +207,7 @@ semantics.addOperation("eval", {
     Assignments_plainStartEvent: (phrases, random) => {
         if (random.sourceString == "") random = null;
         else {
-            random = random.sourceString.replace("%", ""); // '%2'
+            random = random.sourceString.replace("&", ""); // '%2'
             random = parseInt(random);
         }
         phrases = phrasesToArray(phrases);
