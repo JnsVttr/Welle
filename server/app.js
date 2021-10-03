@@ -64,7 +64,7 @@ console.log(`__dirname = ${__dirname}. Hostname = ${hostname}. port: ${port}`);
 // ======================================================================
 
 const clients = {};
-// const users = [];
+const users = [];
 
 io.on("connection", (socket) => {
     const date = new Date().toISOString().slice(0, 10);
@@ -78,17 +78,18 @@ io.on("connection", (socket) => {
     // OSC tests
 
     // HELLO MESSAGE
-    // socket.on("message", (message) => {
-    //     // if (debug) console.log(`socket on message: ${message.string}`);
-    //     io.sockets.emit("allUsers", { users: users });
-    // });
+    socket.on("message", (message) => {
+        // if (debug) console.log(`socket on message: ${message.string}`);
+        io.sockets.emit("allUsers", { users: users });
+    });
 
     // new user
-    // socket.on("newUser", (message) => {
-    //     clients[socket.id].user = message.user;
-    //     if (!users[message.user]) users.push(message.user);
-    //     io.sockets.emit("allUsers", { users: users });
-    // });
+    socket.on("newUser", (message) => {
+        clients[socket.id].user = message.user;
+        if (!users[message.user]) users.push(message.user);
+        console.log(`added new user: ${message.user}`);
+        io.sockets.emit("allUsers", { users: users });
+    });
 
     // session data
     // socket.on("sessionData", (message) => {
@@ -99,10 +100,10 @@ io.on("connection", (socket) => {
     // });
 
     // console input
-    // socket.on("consoleInput", (message) => {
-    //     // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
-    //     clients[socket.id].history.push(message.input);
-    // });
+    socket.on("consoleInput", (message) => {
+        // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
+        clients[socket.id].history.push(message.input);
+    });
 
     // TONE PRESETS
     // socket.on("requestTonePresets", () => {

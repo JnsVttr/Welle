@@ -122,6 +122,31 @@ Socket.on("alerts", (message) => {
     }
 });
 
+// SOCKET new User
+Socket.on("allUsers", (message) => {
+    console.log(`incoming all users: ${message.users}`);
+    App.updateUsers(message.users);
+});
+
+// SOCKET session data
+Socket.on("sessionData", (message) => {
+    console.log(`incoming session data: ${JSON.stringify(message)}`);
+    App.handleRemoteInput(message);
+});
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 // SOCKET receive tonePresets
 // Socket.on("tonePresets", (presets) => {
 //     if (App.getInstrumentsNum() == 0) {
@@ -135,16 +160,4 @@ Socket.on("alerts", (message) => {
 // Socket.on("presets", (presets) => {
 //     console.log(`incoming presets: `, presets);
 //     App.storePresets(presets);
-// });
-
-// SOCKET new User
-// Socket.on("allUsers", (message) => {
-//     console.log(`incoming all users: ${message.users}`);
-//     App.updateUsers(message.users);
-// });
-
-// SOCKET session data
-// Socket.on("sessionData", (message) => {
-//     console.log(`incoming session data: ${JSON.stringify(message)}`);
-//     App.handleRemoteInput(message);
 // });

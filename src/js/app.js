@@ -1853,6 +1853,48 @@ class WelleApp {
     //
     //
     //
+
+    // ============================================
+    // MULTI USER SESSION
+    // ============================================
+
+    updateUsers(users) {
+        if (this.user != "local") {
+            this.session = [];
+            this.session = users;
+        }
+        this.renderContent();
+    }
+    setUser(name) {
+        this.user = name;
+        this.session.push(name);
+        console.log(`new user name: ${name}`);
+        // this.renderSession();
+    }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
     //
     //
     //
@@ -1909,19 +1951,6 @@ class WelleApp {
     // loadPreset(name) {
     //     this.#parts = this.#presets[name].parts;
     //     this.renderContent();
-    // }
-    // updateUsers(users) {
-    //     if (this.user != "local") {
-    //         this.session = [];
-    //         this.session = users;
-    //     }
-    //     this.renderContent();
-    // }
-    // setUser(name) {
-    //     this.user = name;
-    //     this.session.push(name);
-    //     console.log(`new user name: ${name}`);
-    //     this.renderSession();
     // }
 
     //
