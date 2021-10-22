@@ -51,7 +51,7 @@ class WelleApp {
     #consoleID = "console";
     // sound
     #playSound = true; // bool html
-    #playAlerts = true; // bool html
+    #playAlerts = false; // bool html
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
     instruments = []; // create instruments based on the samples list
@@ -59,6 +59,9 @@ class WelleApp {
     grid = undefined;
     beat = 0;
     parts = {}; // storage for all the saved parts
+    // metronom
+    metronom1 = new Tone.PluckSynth().toDestination();
+    metronom2 = new Tone.PluckSynth().toDestination();
 
     // recorder
     recorder = new Tone.Recorder();
@@ -110,6 +113,10 @@ class WelleApp {
 
         // set initial BPM and render to Page
         this.setBpm({ bpm: this.bpm });
+
+        // set metronom volume
+        this.metronom1.volume.value = -20;
+        this.metronom2.volume.value = -30;
 
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
@@ -403,6 +410,12 @@ class WelleApp {
                     this.renderInstruments();
                 }
             });
+            // play alerts metronom
+            if (this.#playAlerts == true) {
+                if (this.beat == 0) this.metronom1.triggerAttackRelease("C3", "8n", time);
+                else this.metronom2.triggerAttackRelease("C5", "8n", time);
+            }
+
             // update the beat counter
             this.beat = (this.beat + 1) % 8;
             // send MIDI Clock
