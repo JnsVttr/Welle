@@ -47,7 +47,7 @@ class WelleApp {
     #consoleInput = "";
     #consolePointer = 0;
     #consoleMaxLength = 10;
-    #consoleArray = Array(this.#consoleMaxLength).fill({ message: "&nbsp;" });
+    #consoleArray = Array(2).fill({ message: "&nbsp;" });
     #consoleID = "console";
     // sound
     #playSound = true; // bool html
