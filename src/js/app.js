@@ -115,8 +115,8 @@ class WelleApp {
         this.setBpm({ bpm: this.bpm });
 
         // set metronom volume
-        this.metronom1.volume.value = -20;
-        this.metronom2.volume.value = -30;
+        this.metronom1.volume.value = -10;
+        this.metronom2.volume.value = -20;
 
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         Instrument.masterGain.connect(Tone.getDestination());
