@@ -34,7 +34,7 @@ h3 {
 
 .menuTitle {
     margin-top: 0.5em;
-    padding-right: 2em;
+    padding-right: 3em;
 }
 .menuTitle a {
     text-decoration: none;
@@ -44,6 +44,7 @@ h3 {
 }
 .menuSelection p {
     padding-left: 0.6em;
+    padding-bottom: 0.1em;
     margin-right: 1.7em;
     margin-top: 0.3em;
     margin-bottom: 0.3em;
