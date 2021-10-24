@@ -38,7 +38,7 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // document.getElementById("mainInput").focus();
 
 // start Tone.js on keydown
-document.getElementById("mainDiv").addEventListener("keydown", (e) => {
+document.getElementById("mainDiv").addEventListener("click", (e) => {
     App.startTone();
 });
 
