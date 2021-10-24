@@ -101,8 +101,7 @@ class WelleApp {
     tutorialDiv = "tutorial";
     // functions
     // map function
-    map = (value, x1, y1, x2, y2) =>
-        Math.round((((value - x1) * (y2 - x2)) / (y1 - x1) + x2) * 100) / 100;
+    map = (value, x1, y1, x2, y2) => Math.round((((value - x1) * (y2 - x2)) / (y1 - x1) + x2) * 100) / 100;
 
     //
     // construct "App" and evaluate functions
@@ -745,9 +744,7 @@ class WelleApp {
                     entry.patternRaw = "";
                     entry.setVolume(0.6);
                     entry.deactivate();
-                    this.activeInstruments = this.activeInstruments.filter(
-                        (item) => item !== entry.name
-                    );
+                    this.activeInstruments = this.activeInstruments.filter((item) => item !== entry.name);
                 }
             });
         });
@@ -866,8 +863,7 @@ class WelleApp {
                 if (entry.name == name) {
                     const id = "check_" + entry.name;
                     // console.log(`check status ${id}: `, window.document.getElementById(id).checked);
-                    if (window.document.getElementById(id).checked == true)
-                        window.document.getElementById(id).click();
+                    if (window.document.getElementById(id).checked == true) window.document.getElementById(id).click();
                 }
             });
         });
@@ -942,16 +938,14 @@ class WelleApp {
             this.activeInstruments.forEach((inst) => {
                 if (inst == this.selected.name)
                     window.document.getElementById(`inst_${inst}`).classList.add("selectedInst");
-                else
-                    window.document.getElementById(`inst_${inst}`).classList.remove("selectedInst");
+                else window.document.getElementById(`inst_${inst}`).classList.remove("selectedInst");
             });
         }, 350);
         // this.sendMidiSelectedInstState();
 
         // midi transfer ongoing is a delay for send midi, and not receiving in the same time
         if (this.midiTransferOngoing == false) {
-            if (window.welle.app.MIDIOutput != undefined)
-                this.sendMidiSelectedInstState(this.selected);
+            if (window.welle.app.MIDIOutput != undefined) this.sendMidiSelectedInstState(this.selected);
         }
     }
 
@@ -1072,8 +1066,7 @@ class WelleApp {
                     document.getElementById("mainInput").value = "";
                     if (this.#consolePointer != 0) {
                         const element = this.#consoleArray[length - this.#consolePointer].message;
-                        if (element != "&nbsp;")
-                            document.getElementById("mainInput").value = element;
+                        if (element != "&nbsp;") document.getElementById("mainInput").value = element;
                     } else {
                         document.getElementById("mainInput").value = "";
                     }
@@ -1202,7 +1195,7 @@ class WelleApp {
         let html = `<p>`;
         this.instruments.forEach((entry) => {
             html += `
-            <a id="play_${entry.name}" class="links"
+            <a id="play_${entry.name}"
                 title="click to play sound: ${entry.name}" href='#'>${entry.name}</a>
             `;
         });
@@ -1249,9 +1242,8 @@ class WelleApp {
 
                     // create HTML elements for appending
                     const instHtml = `
-                    <div id="inst_${entry.name}" class="w3-row ${selHtml}"
-                    style="padding-top: 3px; padding-left: 3px;">
-                        <div class="w3-col w3-black" style="width:120px; padding-left: 0.4em; margin-right:1em">
+                    <div id="inst_${entry.name}" class="${selHtml} instLine">
+                        <div class="w3-black instName">
                             <input
                             id="check_${entry.name}"
                             class="w3-check"
@@ -1260,20 +1252,17 @@ class WelleApp {
                             ${checkHtml}>
                             <label> <b>${entry.name}</b> </label>
                         </div>
-                        <div id="vol_${entry.name}" class="w3-col m1" style="width:50px">
+                        <div id="vol_${entry.name}" class="instVol">
                             ${volume}
                         </div>
-                        <div id="rand_${entry.name}" class="w3-col m1" style="width:50px">
+                        <div id="rand_${entry.name}" class="instRand w3-black">
                             &${entry.getRand()}
                         </div>
-                        <div id="pattern_${entry.name}" class="w3-col m4">
+                        <div id="pattern_${entry.name}" class="instPattern">
                             ${entry.getPatternRaw()}
                         </div>
                         
                     </div>`;
-                    // <div id="sequence_${entry.name}" class="w3-col m4">
-                    //     ${sequenceRender}
-                    // </div>
                     html += instHtml;
                 }
             });
@@ -1286,21 +1275,19 @@ class WelleApp {
             this.instruments.forEach((entry) => {
                 if (entry.name == inst) {
                     // add checkbox update
-                    window.document
-                        .getElementById(`check_${entry.name}`)
-                        .addEventListener("click", (c) => {
-                            if (c.target.checked) {
-                                entry.setMute(false);
-                                window.welle.app.plainStartInstruments({
-                                    instruments: [entry.name],
-                                    random: null,
-                                });
-                            }
-                            if (!c.target.checked) {
-                                entry.setMute(true);
-                                window.welle.app.stopInstruments([entry.name]);
-                            }
-                        });
+                    window.document.getElementById(`check_${entry.name}`).addEventListener("click", (c) => {
+                        if (c.target.checked) {
+                            entry.setMute(false);
+                            window.welle.app.plainStartInstruments({
+                                instruments: [entry.name],
+                                random: null,
+                            });
+                        }
+                        if (!c.target.checked) {
+                            entry.setMute(true);
+                            window.welle.app.stopInstruments([entry.name]);
+                        }
+                    });
                 }
             });
         });
@@ -1433,13 +1420,13 @@ class WelleApp {
                 console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
                 document.getElementById(
                     "file"
-                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file (webm)</a>`;
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file: welle.webm</a>`;
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();
                     const url = URL.createObjectURL(recording);
                     const anchor = document.createElement("a", { href: url, type: "audio/mp3" });
-                    anchor.download = "welle-record.webm";
+                    anchor.download = "welle.webm";
                     anchor.href = url;
                     document.body.append(anchor);
                     anchor.click();
@@ -1602,12 +1589,7 @@ class WelleApp {
             //
             // wait: in SuperCollider, Envelope values are always 0.0 - 1.0
             // so maybe I should adapt this to Tonejs
-            const env = [
-                message.env.attack,
-                message.env.decay,
-                message.env.sustain,
-                message.env.release,
-            ];
+            const env = [message.env.attack, message.env.decay, message.env.sustain, message.env.release];
             const newEnv = [];
 
             env.forEach((e) => {
