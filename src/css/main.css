@@ -34,7 +34,7 @@ h3 {
 
 .menuTitle {
     margin-top: 0.5em;
-    padding-right: 2em;
+    padding-right: 4em;
 }
 .menuTitle a {
     text-decoration: none;
@@ -169,6 +169,11 @@ label {
 /* Extra small devices (phones, 600px and down) */
 
 @media only screen and (max-width: 600px) {
+    .menuTitle {
+        margin-top: 0.5em;
+        padding-right: 1.5em;
+    }
+
     .instName {
         min-width: 120px;
         max-width: 120px;
