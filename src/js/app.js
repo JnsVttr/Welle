@@ -447,6 +447,9 @@ class WelleApp {
             // extremly relevant to stability of Tone playback
             Tone.context.lookAhead = 0.3;
         }
+        if (Tone.Transport.context.state != "running") Tone.resume();
+        console.log("Tone debug", Tone.Transport.context.state);
+        if (Tone.Transport.context.state != "running") Tone.start();
     }
     startTransport() {
         this.beat = 0;
