@@ -68,11 +68,11 @@ class WelleApp {
         },
         muteHelper: {
             state: true,
-            valueENoff: "mute helper",
+            valueENoff: "mute helper sounds",
             valueDEoff: "Hilfsklänge aus",
             titleENoff: "mute helper sounds",
             titleDEoff: "Hilfsklänge ausschalten",
-            valueENon: "unmute helper",
+            valueENon: "unmute helper sounds",
             valueDEon: "Hilfklänge an",
             titleENon: "unmute helper sounds",
             titleDEon: "Hilfsklänge anschalten",
@@ -342,11 +342,16 @@ class WelleApp {
             document.documentElement.setAttribute("lang", "en");
             document.getElementById("language-button").value = "deutsch";
             document.getElementById("language-button").title = this.buttons.language.titleDE;
-            // change texts and headings
+            // change headings
             document.getElementById("h.settings").innerHTML = this.english.headings.settings;
             document.getElementById("h.transport").innerHTML = this.english.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.english.headings.instruments;
-            document.getElementById("c.overview").innerHTML = this.english.overview;
+            document.getElementById("h.console").innerHTML = this.english.headings.console;
+            // document.getElementById("h.packs").innerHTML = this.english.headings.packs;
+            document.getElementById("h.tutorial").innerHTML = this.english.headings.tutorial;
+            // change texts
+            document.getElementById("c.tutorial").innerHTML = this.english.tutorial;
+
             // change buttons
             if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueENoff;
             else document.getElementById("mute-button").value = this.buttons.mute.valueENon;
@@ -363,11 +368,16 @@ class WelleApp {
             document.documentElement.setAttribute("lang", "de");
             document.getElementById("language-button").value = "english";
             document.getElementById("language-button").title = this.buttons.language.titleEN;
-            // change texts and headings
+            // change headings
             document.getElementById("h.settings").innerHTML = this.german.headings.settings;
             document.getElementById("h.transport").innerHTML = this.german.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.german.headings.instruments;
-            document.getElementById("c.overview").innerHTML = this.german.overview;
+            document.getElementById("h.console").innerHTML = this.german.headings.console;
+            // document.getElementById("h.packs").innerHTML = this.german.headings.packs;
+            document.getElementById("h.tutorial").innerHTML = this.german.headings.tutorial;
+            // change texts
+            document.getElementById("c.tutorial").innerHTML = this.german.tutorial;
+
             // change buttons
             if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueDEoff;
             else document.getElementById("mute-button").value = this.buttons.mute.valueDEon;
@@ -1439,7 +1449,13 @@ class WelleApp {
                     // checkboxes
                     const isPlaying = !entry.getMute();
                     let checkHtml = "";
-                    if (isPlaying) checkHtml = 'checked="checked"';
+                    let stateHtml = ">";
+                    if (isPlaying) {
+                        checkHtml = 'checked="checked"';
+                        stateHtml = ">";
+                    } else {
+                        stateHtml = ".";
+                    }
                     // selected
                     let selHtml = "";
                     if (entry.name == this.selected.name) selHtml += "selectedInst";
@@ -1447,23 +1463,25 @@ class WelleApp {
                     // create HTML elements for appending
                     const instHtml = `
                     <div id="inst_${entry.name}" class="${selHtml} instLine">
-                        <div class="w3-black instName">
+                        <div class="stateHtml">${stateHtml}</div>
+                        <div class="instName">
                             <input
                             id="check_${entry.name}"
                             class="w3-check"
                             type="checkbox"
+                            style="display:none"
                             title = "check: ${entry.name}"
                             ${checkHtml}>
                             <label> <b>${entry.name}</b> </label>
                         </div>
                         <div id="vol_${entry.name}" class="instVol">
-                            ${volume}
+                            | ${volume}
                         </div>
-                        <div id="rand_${entry.name}" class="instRand w3-black">
-                            &${entry.getRand()}
+                        <div id="rand_${entry.name}" class="instRand">
+                            | & ${entry.getRand()}
                         </div>
                         <div id="pattern_${entry.name}" class="instPattern">
-                            ${entry.getPatternRaw()}
+                            | ${entry.getPatternRaw()}
                         </div>
                         
                     </div>`;
@@ -1486,10 +1504,12 @@ class WelleApp {
                                 instruments: [entry.name],
                                 random: null,
                             });
+                            window.document.getElementById(`state_${entry.name}`).innerHTML = ">";
                         }
                         if (!c.target.checked) {
                             entry.setMute(true);
                             window.welle.app.stopInstruments([entry.name]);
+                            window.document.getElementById(`state_${entry.name}`).innerHTML = ".";
                         }
                     });
                 }
@@ -1506,7 +1526,7 @@ class WelleApp {
             const partHtml = `
                 <input
                     type = "button"
-                    class = "w3-button w3-round w3-border w3-border-black"
+                    class = "w3-button w3-round w3-border w3-border-black buttonSmall"
                     value = "${part}"
                     title = "snapshot: ${part}"
                     id = "${part}">

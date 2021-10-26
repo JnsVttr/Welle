@@ -33,10 +33,6 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // INPUT - manage text input & key interactions
 // ============================================
 
-// display text from file:
-document.getElementById("c.overview").innerHTML = App.english.overview;
-document.getElementById("c.info").innerHTML = App.english.info;
-
 // display eventlistener
 document.getElementById("language-button").addEventListener("click", (e) => {
     const val = document.getElementById("language-button").value;

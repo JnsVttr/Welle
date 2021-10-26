@@ -6,15 +6,22 @@ de.headings = {
     transport: "Transport",
     instruments: "Instrumente",
     console: "Konsole",
+    packs: "Klang Kollektionen",
+    tutorial: "Anleitung",
+    overview: "Überblick",
 };
 en.headings = {
     settings: "settings",
     transport: "transport",
     instruments: "instruments",
     console: "console",
+    packs: "sample packs",
+    tutorial: "tutorial",
+    overview: "overview",
 };
 
-en.overview = `
+en.tutorial = `
+<h3>overview</h3>
 <p>
 Get to know WELLE. It is basically a <b>text-based 8-step sequencer</b> with predefined sample sounds.
 The samples are displayed at the top of the page, click on them to hear what they sound like. 
@@ -37,7 +44,8 @@ While in the input field you can use the arrow keys (up & down)  to recall and m
 HAVE FUN !
 </p>
 `;
-de.overview = `
+de.tutorial = `
+<h3>Überblick</h3>
 <p>
 Lerne WELLE kennen..!
 </p>
