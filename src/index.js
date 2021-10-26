@@ -33,6 +33,23 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // INPUT - manage text input & key interactions
 // ============================================
 
+// display text from file:
+document.getElementById("c.overview").innerHTML = App.english.overview;
+document.getElementById("c.info").innerHTML = App.english.info;
+
+// display eventlistener
+document.getElementById("language-button").addEventListener("click", (e) => {
+    const val = document.getElementById("language-button").value;
+    console.log("change texts and language", val);
+
+    if (val == "deutsch") {
+        App.setLanguage("deutsch");
+    }
+    if (val == "english") {
+        App.setLanguage("english");
+    }
+});
+
 // focus on main input field: - maybe not to explore the whole site before..
 // for development
 // document.getElementById("mainInput").focus();
@@ -43,11 +60,14 @@ document.getElementById("mainDiv").addEventListener("click", (e) => {
 });
 
 // Eventlistener for Start/ Stop Button
-document.getElementById("play-button").addEventListener("click", () => {
-    App.startTransport();
-});
-document.getElementById("stop-button").addEventListener("click", () => {
-    App.stopTransport();
+document.getElementById("transport-button").addEventListener("click", () => {
+    const val = document.getElementById("transport-button").value;
+    if (val == "PLAY") {
+        App.startTransport();
+    }
+    if (val == "STOP") {
+        App.stopTransport();
+    }
 });
 
 // Eventlistener for Input field

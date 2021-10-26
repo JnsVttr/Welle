@@ -3,7 +3,7 @@ import { livecode, semantics } from "/html/ohm/semantic2021";
 import { Instrument } from "/js/instrument";
 import { parser } from "/js/parser";
 import { Socket } from "/index";
-import { text } from "/js/text";
+import { en, de } from "/js/text";
 import { tutorial } from "/js/tutorial";
 import WebMidi from "webmidi";
 
@@ -40,18 +40,79 @@ class WelleApp {
     id = "xxx";
     session = [];
     tutorial = false;
+    // assign text from file
+    english = en;
+    german = de;
+    language = "en";
 
     #toneStarted = false;
     bpm = 120;
+    // buttons
+    buttons = {
+        language: {
+            valueEN: "english",
+            valueDE: "deutsch",
+            titleEN: "change language to english",
+            titleDE: "ändere Sprache zu deutsch",
+        },
+        mute: {
+            state: true,
+            valueENoff: "mute all",
+            valueDEoff: "Audio aus",
+            titleENoff: "mute all audio output",
+            titleDEoff: "Audio stumm",
+            valueENon: "unmute all",
+            valueDEon: "Audio an",
+            titleENon: "unmute all audio output",
+            titleDEon: "Audio anschalten",
+        },
+        muteHelper: {
+            state: true,
+            valueENoff: "mute helper",
+            valueDEoff: "Hilfsklänge aus",
+            titleENoff: "mute helper sounds",
+            titleDEoff: "Hilfsklänge ausschalten",
+            valueENon: "unmute helper",
+            valueDEon: "Hilfklänge an",
+            titleENon: "unmute helper sounds",
+            titleDEon: "Hilfsklänge anschalten",
+        },
+        muteMetronom: {
+            state: true,
+            valueENoff: "mute metronom",
+            valueDEoff: "Metronom aus",
+            titleENoff: "mute metronom",
+            titleDEoff: "Metronom ausschalten",
+            valueENon: "unmute metronom",
+            valueDEon: "Metronom an",
+            titleENon: "unmute metronom",
+            titleDEon: "Metronom anschalten",
+        },
+        play: {
+            state: false,
+            valueoff: "PLAY",
+            valueon: "STOP",
+            titleoff: "start transport",
+            titleon: "stop transport",
+        },
+        record: {
+            state: false,
+            valueoff: "RECORD",
+            valueon: "STOP RECORD",
+            titleoff: "record",
+            titleon: "stop record",
+        },
+    };
     // console
     #consoleInput = "";
     #consolePointer = 0;
-    #consoleMaxLength = 10;
-    #consoleArray = Array(2).fill({ message: "&nbsp;" });
+    #consoleMaxLength = 1;
+    #consoleArray = Array(1).fill({ message: "&nbsp;" });
     #consoleID = "console";
     // sound
     #playSound = true; // bool html
-    #playAlerts = false; // bool html
+    #playAlerts = true; // bool html
+    #playMetronom = false; // bool html
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
     instruments = []; // create instruments based on the samples list
@@ -98,7 +159,7 @@ class WelleApp {
     // #presetsDiv = "presets";
     #sessionDiv = "session";
     #infoDiv = "info";
-    tutorialDiv = "tutorial";
+    tutorialDiv = "c.tutorial";
     // functions
     // map function
     map = (value, x1, y1, x2, y2) => Math.round((((value - x1) * (y2 - x2)) / (y1 - x1) + x2) * 100) / 100;
@@ -123,23 +184,110 @@ class WelleApp {
         // Instrument.playMidiNote = this.playMidiNote;
 
         // render info + tutorial
-        this.renderExternal();
+        // this.renderExternal();
 
         // window eventlisteners
         window.addEventListener("load", () => {
             console.log(`Document window loaded.`);
             this.renderConsole();
-            // alerts
-            window.document.getElementById("checkAlerts").checked = this.#playAlerts;
-            window.document.getElementById(`checkAlerts`).addEventListener("click", (c) => {
-                this.handleAlerts(c.target.checked);
-            });
+
             // sound
-            window.document.getElementById("checkSound").checked = this.#playSound;
             this.handleSound(this.#playSound);
-            window.document.getElementById(`checkSound`).addEventListener("click", (c) => {
-                this.handleSound(c.target.checked);
+            window.document.getElementById(`mute-button`).addEventListener("click", (c) => {
+                const val = c.target.value;
+                console.log(`mute-button value: ${val}, 
+                language: ${this.language}, state: ${this.buttons.mute.state}`);
+
+                if (this.#playSound == true) {
+                    this.#playSound = false;
+                    this.buttons.mute.state = false;
+                    this.handleSound(this.#playSound);
+                } else {
+                    this.#playSound = true;
+                    this.buttons.mute.state = true;
+                    this.handleSound(this.#playSound);
+                }
+                if (this.language == "en") {
+                    if (this.#playSound) {
+                        window.document.getElementById(`mute-button`).value = this.buttons.mute.valueENoff;
+                    } else {
+                        window.document.getElementById(`mute-button`).value = this.buttons.mute.valueENon;
+                    }
+                }
+                if (this.language == "de") {
+                    if (this.#playSound) {
+                        window.document.getElementById(`mute-button`).value = this.buttons.mute.valueDEoff;
+                    } else {
+                        window.document.getElementById(`mute-button`).value = this.buttons.mute.valueDEon;
+                    }
+                }
             });
+
+            // alerts
+            this.handleAlerts(this.#playAlerts);
+            window.document.getElementById(`muteHelper-button`).addEventListener("click", (c) => {
+                const val = c.target.value;
+                console.log(`muteHelper-button value: ${val}, 
+                language: ${this.language}, state: ${this.buttons.mute.state}`);
+
+                if (this.#playAlerts == true) {
+                    this.#playAlerts = false;
+                    this.buttons.muteHelper.state = false;
+                    this.handleAlerts(this.#playAlerts);
+                } else {
+                    this.#playAlerts = true;
+                    this.buttons.muteHelper.state = true;
+                    this.handleAlerts(this.#playAlerts);
+                }
+                if (this.language == "en") {
+                    if (this.#playAlerts) {
+                        window.document.getElementById(`muteHelper-button`).value = this.buttons.muteHelper.valueENoff;
+                    } else {
+                        window.document.getElementById(`muteHelper-button`).value = this.buttons.muteHelper.valueENon;
+                    }
+                }
+                if (this.language == "de") {
+                    if (this.#playAlerts) {
+                        window.document.getElementById(`muteHelper-button`).value = this.buttons.muteHelper.valueDEoff;
+                    } else {
+                        window.document.getElementById(`muteHelper-button`).value = this.buttons.muteHelper.valueDEon;
+                    }
+                }
+            });
+
+            // metronom
+            window.document.getElementById(`muteMetronom-button`).addEventListener("click", (c) => {
+                const val = c.target.value;
+                console.log(`muteMetronom-button value: ${val}, 
+                language: ${this.language}, state: ${this.buttons.muteMetronom.state}`);
+
+                if (this.#playMetronom == true) {
+                    this.#playMetronom = false;
+                    this.buttons.muteMetronom.state = false;
+                } else {
+                    this.#playMetronom = true;
+                    this.buttons.muteMetronom.state = true;
+                }
+                if (this.language == "en") {
+                    if (this.#playMetronom) {
+                        window.document.getElementById(`muteMetronom-button`).value =
+                            this.buttons.muteMetronom.valueENoff;
+                    } else {
+                        window.document.getElementById(`muteMetronom-button`).value =
+                            this.buttons.muteMetronom.valueENon;
+                    }
+                }
+                if (this.language == "de") {
+                    if (this.#playMetronom) {
+                        window.document.getElementById(`muteMetronom-button`).value =
+                            this.buttons.muteMetronom.valueDEoff;
+                    } else {
+                        window.document.getElementById(`muteMetronom-button`).value =
+                            this.buttons.muteMetronom.valueDEon;
+                    }
+                }
+            });
+
             // record button
             window.document.getElementById(`rec-button`).addEventListener("click", (c) => {
                 this.handleRecord();
@@ -154,6 +302,8 @@ class WelleApp {
                 this.selectMIDIdevice(c.target.value);
             });
         });
+
+        this.setLanguage("english");
     }
 
     // ===========================================================================
@@ -182,6 +332,53 @@ class WelleApp {
         `);
     }
 
+    // ============================================
+    // set language
+    // ============================================
+    setLanguage(lang) {
+        if (lang == "english") {
+            this.language = "en";
+            // set document
+            document.documentElement.setAttribute("lang", "en");
+            document.getElementById("language-button").value = "deutsch";
+            document.getElementById("language-button").title = this.buttons.language.titleDE;
+            // change texts and headings
+            document.getElementById("h.settings").innerHTML = this.english.headings.settings;
+            document.getElementById("h.transport").innerHTML = this.english.headings.transport;
+            document.getElementById("h.instruments").innerHTML = this.english.headings.instruments;
+            document.getElementById("c.overview").innerHTML = this.english.overview;
+            // change buttons
+            if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueENoff;
+            else document.getElementById("mute-button").value = this.buttons.mute.valueENon;
+            if (this.#playAlerts)
+                document.getElementById("muteHelper-button").value = this.buttons.muteHelper.valueENoff;
+            else document.getElementById("muteHelper-button").value = this.buttons.muteHelper.valueENon;
+            if (this.#playMetronom)
+                document.getElementById("muteMetronom-button").value = this.buttons.muteMetronom.valueENoff;
+            else document.getElementById("muteMetronom-button").value = this.buttons.muteMetronom.valueENon;
+        }
+        if (lang == "deutsch") {
+            this.language = "de";
+            // set document
+            document.documentElement.setAttribute("lang", "de");
+            document.getElementById("language-button").value = "english";
+            document.getElementById("language-button").title = this.buttons.language.titleEN;
+            // change texts and headings
+            document.getElementById("h.settings").innerHTML = this.german.headings.settings;
+            document.getElementById("h.transport").innerHTML = this.german.headings.transport;
+            document.getElementById("h.instruments").innerHTML = this.german.headings.instruments;
+            document.getElementById("c.overview").innerHTML = this.german.overview;
+            // change buttons
+            if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueDEoff;
+            else document.getElementById("mute-button").value = this.buttons.mute.valueDEon;
+            if (this.#playAlerts)
+                document.getElementById("muteHelper-button").value = this.buttons.muteHelper.valueDEoff;
+            else document.getElementById("muteHelper-button").value = this.buttons.muteHelper.valueDEon;
+            if (this.#playMetronom)
+                document.getElementById("muteMetronom-button").value = this.buttons.muteMetronom.valueDEoff;
+            else document.getElementById("muteMetronom-button").value = this.buttons.muteMetronom.valueDEon;
+        }
+    }
     //
     //
     //
@@ -262,9 +459,9 @@ class WelleApp {
         // console.log(`Play Alerts. change to: ${checked}`);
         this.#playAlerts = checked;
     }
-    handleSound(checked) {
+    handleSound(state) {
         // console.log(`Play Sound. change to: ${checked}`);
-        this.#playSound = checked;
+        this.#playSound = state;
         if (this.#playSound) Instrument.masterGain.gain.rampTo(0.9, 0.1);
         else Instrument.masterGain.gain.rampTo(0, 0.1);
     }
@@ -463,8 +660,9 @@ class WelleApp {
             window.welle.app.MIDIOutput.sendStart({ time: WebMidi.time + diffTime });
         }
         // change play button
-        document.getElementById("play-button").classList.add("w3-green");
-        document.getElementById("play-button").classList.add("w3-hover-green");
+        document.getElementById("transport-button").value = "STOP";
+        document.getElementById("transport-button").classList.add("w3-green");
+        document.getElementById("transport-button").classList.add("w3-hover-green");
     }
     stopTransport() {
         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
@@ -475,8 +673,9 @@ class WelleApp {
             window.welle.app.MIDIOutput.sendStop({ time: WebMidi.time + diffTime });
         }
         // change play button
-        document.getElementById("play-button").classList.remove("w3-green");
-        document.getElementById("play-button").classList.remove("w3-hover-green");
+        document.getElementById("transport-button").value = "PLAY";
+        document.getElementById("transport-button").classList.remove("w3-green");
+        document.getElementById("transport-button").classList.remove("w3-hover-green");
     }
 
     playAll() {
@@ -1327,29 +1526,29 @@ class WelleApp {
         });
     }
 
-    renderExternal() {
-        // info text
-        // document.getElementById(this.#infoDiv).innerHTML = text.info;
-        // tutorial
-        let html = tutorial.start;
-        document.getElementById(this.tutorialDiv).innerHTML = html;
-        // const checks = document.getElementsByTagName("input");
-        // console.log("these are the inputs: ", checks);
-        document.querySelectorAll(".tutorialInput").forEach((item) => {
-            item.addEventListener("keydown", (e) => {
-                if (e.code == "Enter") {
-                    window.welle.app.tutorial = true;
-                    const input = item.value.toLowerCase();
-                    console.log(`message from tutorial input: ${input}`);
-                    window.welle.app.handleMainInput(input);
-                    item.value = "";
-                    setTimeout(() => {
-                        window.welle.app.handleMainInput("/");
-                    }, 3000);
-                }
-            });
-        });
-    }
+    // renderExternal() {
+    //     // info text
+    //     // document.getElementById(this.#infoDiv).innerHTML = text.info;
+    //     // tutorial
+    //     let html = tutorial.start;
+    //     document.getElementById(this.tutorialDiv).innerHTML = html;
+    //     // const checks = document.getElementsByTagName("input");
+    //     // console.log("these are the inputs: ", checks);
+    //     document.querySelectorAll(".tutorialInput").forEach((item) => {
+    //         item.addEventListener("keydown", (e) => {
+    //             if (e.code == "Enter") {
+    //                 window.welle.app.tutorial = true;
+    //                 const input = item.value.toLowerCase();
+    //                 console.log(`message from tutorial input: ${input}`);
+    //                 window.welle.app.handleMainInput(input);
+    //                 item.value = "";
+    //                 setTimeout(() => {
+    //                     window.welle.app.handleMainInput("/");
+    //                 }, 3000);
+    //             }
+    //         });
+    //     });
+    // }
 
     // renderSession() {
     //     if (this.user != "local") {
@@ -1410,7 +1609,7 @@ class WelleApp {
                 this.recording = undefined;
             }
 
-            window.document.getElementById("rec-button").value = "STOP";
+            window.document.getElementById("rec-button").value = "RECORD STOP";
             document.getElementById("rec-button").classList.add("w3-red");
             document.getElementById("rec-button").classList.add("w3-hover-red");
         } else {
@@ -1425,7 +1624,7 @@ class WelleApp {
                 console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
                 document.getElementById(
                     "file"
-                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download audio file: welle.webm</a>`;
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">welle.webm</a>`;
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();
