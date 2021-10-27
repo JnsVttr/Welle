@@ -271,6 +271,12 @@ label {
         word-wrap: break-word;
         max-width: 10em;
     }
+    .commands {
+        min-width: 2em;
+        display: inline-block;
+        padding-right: 1em;
+        font-weight: bold;
+    }
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
