@@ -129,7 +129,6 @@ Socket.on("audioFiles", (message) => {
         App.renderContent();
         console.log(`App files loaded`);
         document.getElementById("loaderDiv").style.display = "none";
-        document.getElementById("mainDiv").style.display = "block";
     }
 });
 

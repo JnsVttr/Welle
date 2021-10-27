@@ -121,8 +121,8 @@ class WelleApp {
     beat = 0;
     parts = {}; // storage for all the saved parts
     // metronom
-    metronom1 = new Tone.PluckSynth().toDestination();
-    metronom2 = new Tone.PluckSynth().toDestination();
+    metronom1 = new Tone.PluckSynth().connect(Instrument.audioOutput);
+    metronom2 = new Tone.PluckSynth().connect(Instrument.audioOutput);
 
     // recorder
     recorder = new Tone.Recorder();
@@ -179,7 +179,9 @@ class WelleApp {
         this.metronom2.volume.value = -20;
 
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
-        Instrument.masterGain.connect(Tone.getDestination());
+        // Instrument.masterGain.connect(Tone.getDestination());
+        Instrument.masterGain.connect(Instrument.audioOutput);
+        Instrument.audioOutput.connect(Tone.getDestination());
         Instrument.masterGain.connect(this.recorder);
         // Instrument.playMidiNote = this.playMidiNote;
 
@@ -351,6 +353,7 @@ class WelleApp {
             document.getElementById("h.tutorial").innerHTML = this.english.headings.tutorial;
             // change texts
             document.getElementById("c.tutorial").innerHTML = this.english.tutorial;
+            document.getElementById("c.info").innerHTML = this.english.info;
 
             // change buttons
             if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueENoff;
@@ -377,6 +380,7 @@ class WelleApp {
             document.getElementById("h.tutorial").innerHTML = this.german.headings.tutorial;
             // change texts
             document.getElementById("c.tutorial").innerHTML = this.german.tutorial;
+            document.getElementById("c.info").innerHTML = this.german.info;
 
             // change buttons
             if (this.#playSound) document.getElementById("mute-button").value = this.buttons.mute.valueDEoff;
@@ -445,7 +449,7 @@ class WelleApp {
             const path = `/alerts/${file}`;
             const content = { name: name, file: file, path: path };
             this.#alerts[name] = content;
-            this.#alerts[name].player = new Tone.Player(this.#alerts[name].path).toDestination();
+            this.#alerts[name].player = new Tone.Player(this.#alerts[name].path).connect(Instrument.audioOutput);
             this.#alerts[name].player.autostart = false;
         });
         if (this.debug) {
@@ -472,8 +476,13 @@ class WelleApp {
     handleSound(state) {
         // console.log(`Play Sound. change to: ${checked}`);
         this.#playSound = state;
-        if (this.#playSound) Instrument.masterGain.gain.rampTo(0.9, 0.1);
-        else Instrument.masterGain.gain.rampTo(0, 0.1);
+        if (this.#playSound) {
+            Instrument.audioOutput.gain.rampTo(0.9, 0.03);
+            Instrument.masterGain.gain.rampTo(0.9, 0.03);
+        } else {
+            Instrument.audioOutput.gain.rampTo(0, 0.03);
+            Instrument.masterGain.gain.rampTo(0, 0.03);
+        }
     }
 
     //
@@ -617,7 +626,7 @@ class WelleApp {
                 }
             });
             // play alerts metronom
-            if (this.#playAlerts == true) {
+            if (this.#playMetronom == true) {
                 if (this.beat == 0) this.metronom1.triggerAttackRelease("C3", "8n", time);
                 else this.metronom2.triggerAttackRelease("C5", "8n", time);
             }
@@ -1075,30 +1084,36 @@ class WelleApp {
         this.instruments.forEach((entry) => {
             this.activeInstruments.forEach((name) => {
                 if (entry.name == name) {
-                    const id = "check_" + entry.name;
-                    // console.log(`check status ${id}: `, window.document.getElementById(id).checked);
-                    if (window.document.getElementById(id).checked == true) window.document.getElementById(id).click();
+                    window.welle.app.stopInstruments([entry.name]);
                 }
             });
         });
 
         // now copy the saved info to each actual instrument
         this.instruments.forEach((entry) => {
-            const storedInst = this.parts[name].instrumentCollection[entry.name];
-            // only if instrument stored:
-            if (storedInst != undefined) {
-                if (entry.name == storedInst.name) {
-                    console.log(`recall inst ${entry.name}, mute: ${storedInst.mute}`);
-                    entry.setSequence(storedInst.sequence, storedInst.patternRaw);
-                    entry.setVolume(storedInst.volume);
-                    entry.setMute(storedInst.mute);
-                    entry.setRand(storedInst.rand);
-                    entry.setEnvSettings(storedInst.envSettings);
-                    const id = "check_" + entry.name;
-                    // if the instrument is not stored as muted, click the checkbox
-                    if (entry.getMute() == false) window.document.getElementById(id).click();
+            this.activeInstruments.forEach((activeName) => {
+                if (entry.name == activeName) {
+                    const storedInst = this.parts[name].instrumentCollection[entry.name];
+                    // only if instrument stored:
+                    if (storedInst != undefined) {
+                        if (entry.name == storedInst.name) {
+                            console.log(`recall inst ${entry.name}, mute: ${storedInst.mute}`);
+                            entry.setSequence(storedInst.sequence, storedInst.patternRaw);
+                            entry.setVolume(storedInst.volume);
+                            entry.setMute(storedInst.mute);
+                            entry.setRand(storedInst.rand);
+                            entry.setEnvSettings(storedInst.envSettings);
+
+                            if (entry.getMute() == false) {
+                                window.welle.app.plainStartInstruments({
+                                    instruments: [entry.name],
+                                    random: null,
+                                });
+                            }
+                        }
+                    }
                 }
-            }
+            });
         });
 
         // BPM change
@@ -1463,27 +1478,11 @@ class WelleApp {
                     // create HTML elements for appending
                     const instHtml = `
                     <div id="inst_${entry.name}" class="${selHtml} instLine">
-                        <div class="stateHtml">${stateHtml}</div>
-                        <div class="instName">
-                            <input
-                            id="check_${entry.name}"
-                            class="w3-check"
-                            type="checkbox"
-                            style="display:none"
-                            title = "check: ${entry.name}"
-                            ${checkHtml}>
-                            <label> <b>${entry.name}</b> </label>
-                        </div>
-                        <div id="vol_${entry.name}" class="instVol">
-                            | ${volume}
-                        </div>
-                        <div id="rand_${entry.name}" class="instRand">
-                            | & ${entry.getRand()}
-                        </div>
-                        <div id="pattern_${entry.name}" class="instPattern">
-                            | ${entry.getPatternRaw()}
-                        </div>
-                        
+                        <span class="stateHtml">${stateHtml}</span>
+                        <span class="instName">| ${entry.name}</span>
+                        <span id="vol_${entry.name}" class="instVol">| ${volume}</span>
+                        <span id="rand_${entry.name}" class="instRand">| & ${entry.getRand()}</span>
+                        <span id="pattern_${entry.name}" class="instPattern">| ${entry.getPatternRaw()}</span>
                     </div>`;
                     html += instHtml;
                 }
@@ -1491,30 +1490,6 @@ class WelleApp {
         });
         // add html content
         document.getElementById(this.instDiv).insertAdjacentHTML("beforeend", html);
-
-        // first create html, then event listener
-        this.activeInstruments.forEach((inst) => {
-            this.instruments.forEach((entry) => {
-                if (entry.name == inst) {
-                    // add checkbox update
-                    window.document.getElementById(`check_${entry.name}`).addEventListener("click", (c) => {
-                        if (c.target.checked) {
-                            entry.setMute(false);
-                            window.welle.app.plainStartInstruments({
-                                instruments: [entry.name],
-                                random: null,
-                            });
-                            window.document.getElementById(`state_${entry.name}`).innerHTML = ">";
-                        }
-                        if (!c.target.checked) {
-                            entry.setMute(true);
-                            window.welle.app.stopInstruments([entry.name]);
-                            window.document.getElementById(`state_${entry.name}`).innerHTML = ".";
-                        }
-                    });
-                }
-            });
-        });
     }
 
     renderParts() {
@@ -1644,7 +1619,7 @@ class WelleApp {
                 console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
                 document.getElementById(
                     "file"
-                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">welle.webm</a>`;
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#" download>download welle.webm</a>`;
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();

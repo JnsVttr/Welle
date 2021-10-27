@@ -8,7 +8,8 @@ import { App } from "/index";
 
 class Instrument {
     // global class variables
-    static masterGain = new Tone.Gain(0.9); // master output for Tone -> Speaker
+    static audioOutput = new Tone.Gain(0.9); // master output for Tone -> Speaker
+    static masterGain = new Tone.Gain(0.9);
 
     constructor(message) {
         // construct Instrument

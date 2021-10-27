@@ -71,6 +71,10 @@ link to Jens Vetter's website: <a href="https://jensvetter.de" title="go to Jens
 <p>
 The source code is published on <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a>.
 </p>
+`;
 
-
+de.info = `
+<p>
+WELLE ist ein Webbrowser-basiertes Musikprogramm. 
+</p>
 `;
