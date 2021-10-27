@@ -22,13 +22,15 @@ h2 {
     font-size: 18px !important;
     /* font-weight: bold !important; */
     letter-spacing: 0.2em;
+    /* text-transform: uppercase; */
 }
 h3 {
     font-family: "Roboto", sans-serif !important;
     font-size: 15px !important;
-    font-weight: bold !important;
+    /* font-weight: bold !important; */
     letter-spacing: 0.2em;
-    padding-top: 1.5em;
+    padding-top: 3.5em;
+    padding-bottom: 2em;
 }
 /* w3 css button overwrite */
 .buttonSmall {
@@ -166,6 +168,7 @@ h3 {
 .mainConsole h3 {
     margin: 0.3em 0em !important;
     padding-top: 0em !important;
+    padding-bottom: 0em !important;
     font-weight: normal !important;
 }
 
@@ -242,9 +245,10 @@ label {
 
 /* tutorial styling */
 .commands {
-    min-width: 4em;
+    min-width: 6em;
     display: inline-block;
     padding-right: 1em;
+    font-weight: bold;
 }
 
 /* Extra small devices (phones, 600px and down) */
