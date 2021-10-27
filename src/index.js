@@ -127,6 +127,9 @@ Socket.on("audioFiles", (message) => {
         // console.log(`App.instruments .. ${App.instruments[1].sequence}`);
         // App.startTransport();
         App.renderContent();
+        console.log(`App files loaded`);
+        document.getElementById("loaderDiv").style.display = "none";
+        document.getElementById("mainDiv").style.display = "block";
     }
 });
 
