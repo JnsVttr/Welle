@@ -29,6 +29,25 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // Window: this is the document window's name: ${window.welle.name}.
 // And this is the App: ${JSON.stringify(window.welle.app)}`);
 
+function checkDevice() {
+    let device = "else";
+    var isMac = /(Mac)/i.test(navigator.platform);
+    var isWindows = /(Windows)/i.test(navigator.platform);
+    var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
+    var isAndroid = /(Android)/i.test(navigator.platform);
+
+    if (isMac) device = "mac";
+    if (isWindows) device = "windows";
+    if (isIOS) device = "ios";
+    if (isAndroid) device = "android";
+    return device;
+}
+console.log("checkdevice: ", checkDevice());
+if (checkDevice() == "ios") {
+    document.getElementById("rec-button").style.display = "none";
+    document.getElementById("file").style.display = "none";
+}
+
 // ============================================
 // INPUT - manage text input & key interactions
 // ============================================
