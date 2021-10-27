@@ -67,6 +67,9 @@ h3 {
     margin-top: 0.1em !important;
     margin-bottom: 0.1em !important;
 }
+.recFile {
+    margin-left: 0.3em;
+}
 .menuSettings select {
     width: 100% !important;
 }
@@ -154,11 +157,16 @@ h3 {
     margin-top: 1.4em;
     margin-bottom: 0.3em;
 }
-#consoleField {
+.mainConsole {
     /* margin-top: 15px; */
     /* border: 1px solid rgb(0, 0, 0); */
     /* background-color: rgb(189, 189, 189); */
     margin-bottom: 13em !important;
+}
+.mainConsole h3 {
+    margin: 0.3em 0em !important;
+    padding-top: 0em !important;
+    font-weight: normal !important;
 }
 
 #consoleLine {
@@ -230,6 +238,13 @@ label {
     100% {
         transform: rotate(360deg);
     }
+}
+
+/* tutorial styling */
+.commands {
+    min-width: 4em;
+    display: inline-block;
+    padding-right: 1em;
 }
 
 /* Extra small devices (phones, 600px and down) */

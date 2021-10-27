@@ -349,6 +349,8 @@ class WelleApp {
             document.getElementById("h.transport").innerHTML = this.english.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.english.headings.instruments;
             document.getElementById("h.console").innerHTML = this.english.headings.console;
+            document.getElementById("h.parts").innerHTML = this.english.headings.parts;
+            document.getElementById("h.instList").innerHTML = this.english.headings.instList;
             // document.getElementById("h.packs").innerHTML = this.english.headings.packs;
             document.getElementById("h.tutorial").innerHTML = this.english.headings.tutorial;
             // change texts
@@ -376,6 +378,8 @@ class WelleApp {
             document.getElementById("h.transport").innerHTML = this.german.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.german.headings.instruments;
             document.getElementById("h.console").innerHTML = this.german.headings.console;
+            document.getElementById("h.parts").innerHTML = this.german.headings.parts;
+            document.getElementById("h.instList").innerHTML = this.german.headings.instList;
             // document.getElementById("h.packs").innerHTML = this.german.headings.packs;
             document.getElementById("h.tutorial").innerHTML = this.german.headings.tutorial;
             // change texts
@@ -1599,7 +1603,7 @@ class WelleApp {
             console.log(`start recorder`);
             this.recorder.start();
             if (window.document.getElementById("file").innerHTML != "") {
-                window.document.getElementById("file").innerHTML = "";
+                window.document.getElementById("file").innerHTML = "recording ...";
                 console.log(`id file not empty..`);
                 this.recording = undefined;
             }
@@ -1620,6 +1624,7 @@ class WelleApp {
                 document.getElementById(
                     "file"
                 ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#" download>download welle.webm</a>`;
+                document.getElementById("file").classList.add("w3-text-green");
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();

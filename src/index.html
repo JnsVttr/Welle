@@ -152,7 +152,7 @@
                                 title="record audio by clicking the button"
                             />
                         </p>
-                        <p id="file" class="w3-small w3-text-green"></p>
+                        <p id="file" class="w3-small recFile">no recorded file</p>
                     </div>
                 </div>
 
@@ -174,15 +174,11 @@
                 <input id="mainInput" type="email" size="50" title="console" autocomplete="off" value="" />
 
                 <!-- parts display ==============================  -->
-                <div id="parts" class="w3-padding-16"></div>
+                <h3 id="h.parts">snapshots</h3>
+                <div id="parts" class="parts"></div>
 
                 <!-- instruments display ==============================  -->
-                <!-- <div class="w3-medium instLine w3-text-grey w3-opacity">
-                    <div class="instName">name</div>
-                    <div class="instVol">vol</div>
-                    <div class="instRand">rand</div>
-                    <div class="instPattern">pattern</div>
-                </div> -->
+                <h3 id="h.instList">active instruments</h3>
                 <div id="instruments" class="w3-medium"></div>
             </div>
 
