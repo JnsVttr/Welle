@@ -115,6 +115,7 @@ class WelleApp {
     #playMetronom = false; // bool html
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
+    samplePacks = [];
     instruments = []; // create instruments based on the samples list
     activeInstruments = []; // store acivated instruments
     grid = undefined;
@@ -308,6 +309,12 @@ class WelleApp {
             window.document.getElementById(`compositionSave-button`).addEventListener("click", (c) => {
                 this.createPreset("composition");
             });
+
+            // select samplePack
+            window.document.getElementById(`selectInstruments`).addEventListener("change", (c) => {
+                // console.log(`select samplePack.. ${c.target.value}`);
+                this.selectSamplePack(c.target.value);
+            });
         });
 
         this.setLanguage("english");
@@ -343,6 +350,53 @@ class WelleApp {
         console.log("mute app", state);
         if (state) this.#playSound = false;
         else this.#playSound = true;
+    }
+
+    addSamplePacks(message) {
+        let packs = undefined;
+        if (message != undefined) {
+            if (message.packs != undefined) {
+                packs = message.packs;
+                packs.forEach((pack) => {
+                    this.samplePacks.push(pack);
+                });
+            }
+        }
+        if (this.samplePacks.length == packs.length) {
+            console.log(`App samplePacks: ${this.samplePacks}`);
+            const selectBox = window.document.getElementById("selectInstruments");
+
+            this.samplePacks.map((singlePack) => {
+                // console.log(`samplePack: ${singlePack}`);
+                let option = document.createElement("option");
+                option.text = singlePack;
+                selectBox.add(option);
+            });
+        }
+    }
+    selectSamplePack(pack) {
+        console.log(`okay, select this samplePack: ${pack}`);
+        this.clearSamplePlayer();
+        Socket.emit("requestSampleFiles", { samplePack: pack });
+    }
+
+    clearSamplePlayer() {
+        console.log("clear samplePlayer");
+        Tone.Transport.clear();
+        Object.keys(this.instruments).forEach((key) => {
+            delete this.instruments[key];
+        });
+        this.instruments = [];
+        Object.keys(this.grid).forEach((key) => {
+            delete this.grid[key];
+        });
+        this.grid = undefined;
+        this.parts = {};
+        this.samples = []; // incoming sample list from server
+        this.activeInstruments = []; // store acivated instruments
+        this.beat = 0;
+        console.log(`clear samplePlayer, this.instruments: ${this.instruments}`);
+        this.renderContent();
     }
 
     // ============================================

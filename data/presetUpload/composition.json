@@ -2,22 +2,22 @@
     "name": "composition",
     "bpm": 120,
     "parts": {
-        "me": {
+        "more": {
             "instrumentCollection": {
-                "deep": {
-                    "name": "deep",
+                "loop": {
+                    "name": "loop",
                     "mute": false,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
-                        "C3",
-                        null
+                        "D#3"
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "#----#-#3#2",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -27,20 +27,20 @@
                         "release": 2.86
                     }
                 },
-                "hh": {
-                    "name": "hh",
-                    "mute": true,
+                "mix": {
+                    "name": "mix",
+                    "mute": false,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
-                        "C3",
-                        null
+                        "D#3"
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "#----#-#3#2",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -50,20 +50,20 @@
                         "release": 2.86
                     }
                 },
-                "kick": {
-                    "name": "kick",
+                "move": {
+                    "name": "move",
                     "mute": false,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
-                        "C3",
-                        null
+                        "D#3"
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "#----#-#3#2",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -76,22 +76,22 @@
             },
             "bpm": 120
         },
-        "you": {
+        "now": {
             "instrumentCollection": {
-                "deep": {
-                    "name": "deep",
+                "loop": {
+                    "name": "loop",
                     "mute": false,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
-                        "C3",
-                        null
+                        "D#3"
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "#----#-#3#2",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -101,20 +101,20 @@
                         "release": 2.86
                     }
                 },
-                "hh": {
-                    "name": "hh",
-                    "mute": false,
+                "mix": {
+                    "name": "mix",
+                    "mute": true,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
-                        "C3",
-                        null
+                        "D#3"
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "#----#-#3#2",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -124,20 +124,43 @@
                         "release": 2.86
                     }
                 },
-                "kick": {
-                    "name": "kick",
+                "move": {
+                    "name": "move",
                     "mute": false,
                     "sequence": [
                         "C3",
                         null,
+                        null,
+                        null,
+                        null,
                         "C3",
                         null,
-                        "D#3",
-                        "D3",
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "perc": {
+                    "name": "perc",
+                    "mute": false,
+                    "sequence": [
+                        null,
                         "C3",
+                        "C3",
+                        "C3",
+                        null,
+                        null,
+                        null,
                         null
                     ],
-                    "patternRaw": "#-#-#3#2",
+                    "patternRaw": "-###----#12-",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -153,79 +176,117 @@
     },
     "activeInstruments": [
         {
-            "name": "kick",
+            "name": "loop",
             "mute": false,
             "rand": 0,
             "volume": 0.6,
             "sequence": [
                 "C3",
                 null,
+                null,
+                null,
+                null,
                 "C3",
                 null,
-                "D#3",
-                "D3",
-                "C3",
-                null
+                "D#3"
             ],
             "pattern": [
                 0,
+                null,
+                null,
+                null,
                 null,
                 0,
                 null,
                 3,
                 2
             ],
-            "rawPattern": "#-#-#3#2"
+            "rawPattern": "#----#-#3#2"
         },
         {
-            "name": "hh",
+            "name": "mix",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                "C3",
+                null,
+                "D#3"
+            ],
+            "pattern": [
+                0,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                3,
+                2
+            ],
+            "rawPattern": "#----#-#3#2"
+        },
+        {
+            "name": "move",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                "C3",
+                null,
+                "D#3"
+            ],
+            "pattern": [
+                0,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                3,
+                2
+            ],
+            "rawPattern": "#----#-#3#2"
+        },
+        {
+            "name": "perc",
             "mute": true,
             "rand": 0,
             "volume": 0.6,
             "sequence": [
-                "C3",
                 null,
                 "C3",
-                null,
-                "D#3",
-                "D3",
                 "C3",
+                "C3",
+                null,
+                null,
+                null,
                 null
             ],
             "pattern": [
-                0,
                 null,
                 0,
+                0,
+                0,
                 null,
-                3,
-                2
-            ],
-            "rawPattern": "#-#-#3#2"
-        },
-        {
-            "name": "deep",
-            "mute": false,
-            "rand": 0,
-            "volume": 0.6,
-            "sequence": [
-                "C3",
                 null,
-                "C3",
                 null,
-                "D#3",
-                "D3",
-                "C3",
+                null,
+                12,
                 null
             ],
-            "pattern": [
-                0,
-                null,
-                0,
-                null,
-                3,
-                2
-            ],
-            "rawPattern": "#-#-#3#2"
+            "rawPattern": "-###----#12-"
         }
     ]
 }

@@ -1,25 +1,292 @@
 {
     "name": "composition",
     "bpm": 120,
-    "parts": {},
+    "parts": {
+        "more": {
+            "instrumentCollection": {
+                "loop": {
+                    "name": "loop",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "mix": {
+                    "name": "mix",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "move": {
+                    "name": "move",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                }
+            },
+            "bpm": 120
+        },
+        "now": {
+            "instrumentCollection": {
+                "loop": {
+                    "name": "loop",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "mix": {
+                    "name": "mix",
+                    "mute": true,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "move": {
+                    "name": "move",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        "D#3"
+                    ],
+                    "patternRaw": "#----#-#3#2",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                },
+                "perc": {
+                    "name": "perc",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "C3",
+                        "C3",
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "-###----#12-",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.31,
+                        "sustain": 0.99,
+                        "release": 2.86
+                    }
+                }
+            },
+            "bpm": 120
+        }
+    },
     "activeInstruments": [
         {
-            "name": "deep",
+            "name": "loop",
             "mute": false,
             "rand": 0,
             "volume": 0.6,
             "sequence": [
+                "C3",
                 null,
                 null,
                 null,
                 null,
+                "C3",
+                null,
+                "D#3"
+            ],
+            "pattern": [
+                0,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                3,
+                2
+            ],
+            "rawPattern": "#----#-#3#2"
+        },
+        {
+            "name": "mix",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                "C3",
+                null,
+                "D#3"
+            ],
+            "pattern": [
+                0,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                3,
+                2
+            ],
+            "rawPattern": "#----#-#3#2"
+        },
+        {
+            "name": "move",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                "C3",
+                null,
+                "D#3"
+            ],
+            "pattern": [
+                0,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                3,
+                2
+            ],
+            "rawPattern": "#----#-#3#2"
+        },
+        {
+            "name": "perc",
+            "mute": true,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                null,
+                "C3",
+                "C3",
+                "C3",
                 null,
                 null,
                 null,
                 null
             ],
-            "pattern": "",
-            "rawPattern": ""
+            "pattern": [
+                null,
+                0,
+                0,
+                0,
+                null,
+                null,
+                null,
+                null,
+                12,
+                null
+            ],
+            "rawPattern": "-###----#12-"
         }
     ]
 }

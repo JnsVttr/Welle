@@ -127,12 +127,15 @@ Socket.on("connect", function (data) {
     if (App.getAlertsNum() == 0) Socket.emit("requestAlerts");
     if (App.getSamplesNum() == 0) Socket.emit("requestSampleFiles");
     // if (App.getInstrumentsNum() == 0) Socket.emit("requestTonePresets");
+    Socket.emit("requestSamplePacks");
 });
 
 // SOCKET on receiving audioFile Paths
-Socket.on("audioFiles", (message) => {
+Socket.on("sampleFiles", (message) => {
     // console.log(`Socket: get (${message.count}) samples. `);
     // console.log(`#samples num ... (${App.getSamplesNum()})`);
+    if (App.instruments.length != 0) App.clearSamplePlayer();
+
     if (App.getSamplesNum() == 0) {
         App.addSamples(message.samples);
     }
@@ -153,6 +156,19 @@ Socket.on("audioFiles", (message) => {
         console.log(`App files loaded`);
         document.getElementById("loaderDiv").style.display = "none";
     }
+});
+
+Socket.on("samplePacks", (message) => {
+    let packs = undefined;
+    let numPacks = undefined;
+    if (message != undefined) {
+        if (message.samplePacks != undefined) {
+            packs = message.samplePacks;
+            numPacks = packs.length;
+        }
+    }
+    console.log(`incoming smaplePacks (${numPacks}): ${packs}`);
+    App.addSamplePacks({ packs: packs });
 });
 
 // SOCKET receive alerts - createAlerts(alerts);

@@ -44,6 +44,7 @@ const historyURL = path.join(__dirname, "../data/history");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
 const downloadPresetURL = path.join(__dirname, "../data/presetDownload");
 const uploadPresetURL = path.join(__dirname, "../data/presetUpload");
+const samplePacksURL = path.join(__dirname, "../data/samplePacks");
 const presetsURL = path.join(__dirname, "../data/preset");
 // const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
 // let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
@@ -240,13 +241,29 @@ io.on("connection", (socket) => {
     //         socket.emit("presets", presets);
     //     });
     // });
+    socket.on("requestSamplePacks", () => {
+        console.log(`request samplePacks for client`);
+        // let samplePacks = JSON.parse(fs.readFileSync(samplePacksURL, "utf8"));
+        const samplePacks = getSamplePacks({ path: samplePacksURL });
+        console.log(samplePacks);
+        io.sockets.emit("samplePacks", { samplePacks: samplePacks });
+    });
 
     // AUDIO FILES
-    socket.on("requestSampleFiles", () => {
-        // if (debug) console.log(`requestSampleFiles for Client`);
-        // read & print files 'samples'
-        const samples = getSamples({ path: audioPath });
-        io.sockets.emit("audioFiles", samples);
+    socket.on("requestSampleFiles", (message) => {
+        console.log(`request sample files..`);
+        // get samplePacks and if no message, than deliver defaults
+        // const samplePacks = getSamplePacks({ path: samplePacksURL });
+        let samples = undefined;
+        let packUrl = "default";
+        if (message != undefined) {
+            if (message.samplePack != undefined) {
+                packUrl = message.samplePack;
+                console.log(`for "${packUrl}"`);
+            }
+        }
+        samples = getSamples({ path: path.join(samplePacksURL, packUrl) });
+        io.sockets.emit("sampleFiles", samples);
     });
 
     // ALERTS FILES
@@ -306,6 +323,17 @@ const getSamples = (message) => {
     });
     // console.log(`samples count: ${count}`);
     return { samples: samples, count: count };
+};
+
+const getSamplePacks = (message) => {
+    const entries = fs.readdirSync(message.path, (err) => {
+        if (err) return console.log("Unable to scan directory: " + err);
+    });
+    // console.log("samplePack entries: ", entries);
+    const packs = entries.filter((entry) => {
+        if (!entry.startsWith(".")) return entry;
+    });
+    return packs;
 };
 
 const getPresets = (message) => {
