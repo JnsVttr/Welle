@@ -2,6 +2,7 @@ export const en = {};
 export const de = {};
 
 de.headings = {
+    files: "Dateien",
     settings: "Einstellungen",
     transport: "Transport",
     instruments: "Instrumente",
@@ -13,6 +14,7 @@ de.headings = {
     instList: "Aktive Instrumente",
 };
 en.headings = {
+    files: "files",
     settings: "settings",
     transport: "transport",
     instruments: "instruments",

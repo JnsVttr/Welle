@@ -350,6 +350,7 @@ class WelleApp {
             document.getElementById("language-button").value = "deutsch";
             document.getElementById("language-button").title = this.buttons.language.titleDE;
             // change headings
+            document.getElementById("h.files").innerHTML = this.english.headings.files;
             document.getElementById("h.settings").innerHTML = this.english.headings.settings;
             document.getElementById("h.transport").innerHTML = this.english.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.english.headings.instruments;
@@ -379,6 +380,7 @@ class WelleApp {
             document.getElementById("language-button").value = "english";
             document.getElementById("language-button").title = this.buttons.language.titleEN;
             // change headings
+            document.getElementById("h.files").innerHTML = this.german.headings.files;
             document.getElementById("h.settings").innerHTML = this.german.headings.settings;
             document.getElementById("h.transport").innerHTML = this.german.headings.transport;
             document.getElementById("h.instruments").innerHTML = this.german.headings.instruments;
