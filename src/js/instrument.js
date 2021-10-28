@@ -193,7 +193,9 @@ class Instrument {
     setRand(value) {
         this.rand = value;
     }
-
+    getPattern() {
+        return this.pattern;
+    }
     getPatternRaw() {
         return this.patternRaw;
     }
@@ -224,9 +226,6 @@ class Instrument {
     //     this.isPlaying = state;
     // }
 
-    // getPattern() {
-    //     return this.#pattern;
-    // }
     // getRawPattern() {
     //     return this.#rawPattern;
     // }

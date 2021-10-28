@@ -7,7 +7,7 @@ body {
 }
 .mainBody {
     margin: auto;
-    max-width: 800px;
+    max-width: 900px;
     /* border: 3px solid green; */
     padding-left: 0.6em !important;
     padding-right: 0.6em !important;
@@ -45,7 +45,9 @@ h3 {
     display: flex;
     justify-content: left;
 }
-
+.titleDiv {
+    padding-bottom: 2em;
+}
 .menuTitle {
     margin-top: 0.5em;
     padding-right: 2em;
@@ -54,7 +56,19 @@ h3 {
 .menuTitle a {
     text-decoration: none;
 }
-
+.fileManagement {
+}
+.fileManagement p {
+    padding-left: 0em !important;
+    padding-bottom: 0em !important;
+    margin-right: 2.7em !important;
+    margin-top: 0.1em !important;
+    margin-bottom: 0.1em !important;
+}
+.serverFeedback {
+    padding-left: 0.3em;
+    font-size: 12px;
+}
 .menu {
     padding-bottom: 3em;
 }
@@ -163,7 +177,7 @@ h3 {
     /* margin-top: 15px; */
     /* border: 1px solid rgb(0, 0, 0); */
     /* background-color: rgb(189, 189, 189); */
-    margin-bottom: 13em !important;
+    margin-bottom: 30em !important;
 }
 .mainConsole h3 {
     margin: 0.5em 0em !important;
@@ -255,6 +269,9 @@ label {
 
 @media only screen and (max-width: 600px) {
     .flexDivMenu {
+        display: block;
+    }
+    .titleDiv {
         display: block;
     }
     .menuTitle {

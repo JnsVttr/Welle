@@ -303,6 +303,11 @@ class WelleApp {
                 console.log(`select change.. ${c.target.value}`);
                 this.selectMIDIdevice(c.target.value);
             });
+
+            // save composition
+            window.document.getElementById(`compositionSave-button`).addEventListener("click", (c) => {
+                this.createPreset("composition");
+            });
         });
 
         this.setLanguage("english");
@@ -742,6 +747,7 @@ class WelleApp {
 
     assignPattern(message) {
         // console.log(`assignPattern. message: ${JSON.stringify(message)}`);
+        console.log(`assignPattern. message:`, message);
         // checks for instruments
         // console.log(`assign:
         // number of instruments: ${message.instruments.length}`);
@@ -2107,8 +2113,114 @@ class WelleApp {
     //
 
     // ============================================
-    // console sound helper
+    // presets
     // ============================================
+
+    createPreset(name) {
+        const preset = {
+            name: name,
+            bpm: this.bpm,
+            parts: this.parts,
+            activeInstruments: [],
+        };
+        // iterate through storedInstruments collection
+        // mute, name, volume, pattern, patternRaw, sequence, random
+        this.activeInstruments.forEach((inst) => {
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    const name = entry.name;
+                    const mute = entry.getMute();
+                    const volume = Math.round(entry.getVolume() * 100) / 100;
+                    const rand = entry.getRand();
+                    const sequence = entry.getSequence();
+                    const pattern = entry.getPattern();
+                    const patternRaw = entry.getPatternRaw();
+
+                    const content = {
+                        name: name,
+                        mute: mute,
+                        rand: rand,
+                        volume: volume,
+                        sequence: sequence,
+                        pattern: pattern,
+                        patternRaw: patternRaw,
+                    };
+                    preset.activeInstruments.push(content);
+                }
+            });
+        });
+        console.log(`preset >${name}: `, preset);
+        Socket.emit("storePreset", { name: name, preset: preset });
+    }
+
+    //
+    //
+    //
+
+    loadPreset(message) {
+        console.log(`App load preset`, message);
+        // first delete all:
+        this.deleteAll();
+        // assign parts:
+        this.parts = message.parts;
+
+        let initMessage = {};
+
+        // console.log("loadPrest for", message.activeInstruments);
+        // Object.entries(message.activeInstruments).forEach((inst) => {
+        //     console.log("loadPrest for", inst);
+        // });
+        // compare with current instruments
+        message.activeInstruments.forEach((inst) => {
+            console.log("loadPrest for", inst, inst.name);
+            this.instruments.forEach((entry) => {
+                if (inst.name == entry.name) {
+                    initMessage.instruments = [inst.name];
+                    initMessage.pattern = inst.pattern;
+                    initMessage.random = inst.random;
+                    initMessage.volume = inst.volume;
+                    initMessage.rawPattern = inst.rawPattern;
+                    console.log("loadPrest initMessage: ", initMessage);
+                    this.assignPattern(initMessage);
+                    if (inst.mute) entry.setMute(true);
+                    this.stopAll();
+                }
+            });
+        });
+        this.stopAll();
+        this.renderContent();
+    }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     // // check instruments
     // checkInstruments(instruments) {
@@ -2133,23 +2245,6 @@ class WelleApp {
     //     // if (this.debug)
     //     //     console.log(`returnMessage checkInstruments: ${JSON.stringify(returnMessage)}`);
     //     return returnMessage;
-    // }
-
-    // createPreset(name) {
-    //     const preset = { name: name, parts: this.#parts, instruments: this.#instruments };
-    //     return preset;
-    // }
-    // storePresets(presets) {
-    //     presets.map((preset) => {
-    //         const name = preset.name;
-    //         this.#presets[name] = preset;
-    //     });
-    //     // console.log(`this.#presets stored: ${JSON.stringify(this.#presets)}`);
-    //     this.renderPresets();
-    // }
-    // loadPreset(name) {
-    //     this.#parts = this.#presets[name].parts;
-    //     this.renderContent();
     // }
 
     //

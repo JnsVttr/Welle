@@ -1,0 +1,9 @@
+{
+    "name": "composition",
+    "preset": {
+        "name": "composition",
+        "bpm": 120,
+        "parts": {},
+        "instruments": []
+    }
+}

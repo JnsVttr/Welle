@@ -63,22 +63,91 @@
     <body class="">
         <div id="mainDiv" class="w3-container w3-medium mainBody">
             <!-- ====================================  -->
-            <div class="flexDiv">
+            <div class="flexDiv titleDiv">
                 <div class="menuTitle">
                     <a href="https://welle.live" title="WELLE music app"
                         ><h1><b>WELLE</b></h1></a
                     >
+                    <!-- <a href="/download">download</a> -->
                 </div>
                 <div id="loaderDiv" class="flexDiv">
                     <div class="w3-hide-small"><p>loading the website</p></div>
                     <div class="loader"></div>
                 </div>
+                
             </div>
 
             <!-- menu  ==============================  -->
 
             <div class="flexDivMenu menu">
                 <div id="menuFirst" class="flexDiv">
+                    <!-- ===== FILES ===============================  -->
+                <div id="filesDiv" class="fileManagement">
+                    <h2 id="h.files">files</h2>
+                    <!-- <p>
+                        <select id="selectInstruments" class="w3-border w3-round" name="selectInstruments">
+                            <option value="" disabled selected>select instruments</option>
+                        </select>
+                    </p> -->
+                    <p>
+                        <input
+                            id="compositionSave-button"
+                            class="w3-button w3-round-large w3-border buttonSmall"
+                            type="button"
+                            value="save composition"
+                            title="save composition"
+                        />
+                    </p>
+                    <p>
+                        
+                        <input
+                            id="compositionLoad-button"
+                            class="w3-button w3-round-large w3-border buttonSmall"
+                            type="button"
+                            value="load composition"
+                            title="load composition"
+                            onclick="document.getElementById('compositionLoad').click();"
+                            
+                        />
+                        <form id="compositionForm" method="POST" action="/upload-preset" enctype="multipart/form-data" style="display: flex">
+                            <input
+                                id="compositionLoad"
+                                type="file"
+                                name="composition"
+                                style="display: none"
+                            />
+                        </form>
+                        
+                        <span id="jsonFeedbackText" style="display: none;">feedback text</span>
+                    </p>
+
+                    <!-- <p>
+                        <input
+                            id="instrumentsDownload-button"
+                            class="w3-button w3-round-large w3-border buttonSmall"
+                            type="button"
+                            value="download instruments"
+                            title="download instruments"
+                        />
+                        
+                    </p>
+                    <p>
+                        <input
+                            id="instrumentsUpload-button"
+                            class="w3-button w3-round-large w3-border buttonSmall"
+                            type="button"
+                            value="upload instruments"
+                            title="upload instruments"
+                        />
+                    </p>
+                    <input
+                            id="help-button"
+                            class="w3-button w3-round-large w3-border buttonSmall"
+                            type="button"
+                            value="?"
+                            title="help"
+                        /> -->
+                </div>
                     <!-- ===== SETTINGS ===============================  -->
                     <div class="menuSettings">
                         <h2 id="h.settings">settings</h2>

@@ -20,6 +20,7 @@ import { WelleApp } from "/js/app";
 export const App = new WelleApp();
 export const Socket = io.connect(); // socket var - server connect, also for exports
 const debug = true;
+let presetRequest = false;
 //
 
 // IMPORTANT: teleport functions to document scope by creating
@@ -35,17 +36,20 @@ function checkDevice() {
     var isWindows = /(Windows)/i.test(navigator.platform);
     var isIOS = /(iPhone|iPod|iPad)/i.test(navigator.platform);
     var isAndroid = /(Android)/i.test(navigator.platform);
+    var isWindowsPhone = /(Windows Phone)/i.test(navigator.platform);
 
     if (isMac) device = "mac";
     if (isWindows) device = "windows";
     if (isIOS) device = "ios";
     if (isAndroid) device = "android";
+    if (isWindowsPhone) device = "windowsPhone";
     return device;
 }
 console.log("checkdevice: ", checkDevice());
-if (checkDevice() == "ios") {
+if (checkDevice() == "ios" || checkDevice() == "android" || checkDevice() == "windowsPhone") {
     document.getElementById("rec-button").style.display = "none";
     document.getElementById("file").style.display = "none";
+    document.getElementById("filesDiv").style.display = "none";
 }
 
 // ============================================
@@ -169,6 +173,56 @@ Socket.on("allUsers", (message) => {
 Socket.on("sessionData", (message) => {
     console.log(`incoming session data: ${JSON.stringify(message)}`);
     App.handleRemoteInput(message);
+});
+
+// SOCKET preset URL
+Socket.on("presetURL", (message) => {
+    console.log(`message.url: ${message.url}, file: ${message.file}`);
+    const anchor = document.createElement("a", { href: message.url });
+    anchor.download = "composition.json";
+    anchor.href = message.url;
+    anchor.setAttribute("visibility", "hidden");
+    anchor.setAttribute("display", "none");
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+});
+
+const submitComposition = (e) => {
+    e.preventDefault();
+    let message = "";
+    let formData = new FormData(document.getElementById("compositionForm"));
+    let options = { body: formData, method: "POST" };
+    fetch("/upload-preset", options)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            // have the JSON response from the POST operation here
+            console.log(data);
+            message = data.message;
+            document.getElementById("jsonFeedbackText").style.display = "block";
+            document.getElementById(
+                "jsonFeedbackText"
+            ).innerHTML = `<p><span class="serverFeedback">${message}</span></p>`;
+            if (data.success) {
+                console.log("load composition from server : )");
+                presetRequest = true;
+                Socket.emit("requestPreset");
+            }
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+};
+document.getElementById("compositionLoad").addEventListener("change", submitComposition);
+
+Socket.on("presetData", (message) => {
+    if (presetRequest) {
+        // console.log("preset:", message);
+        presetRequest = false;
+        App.loadPreset(message);
+    }
 });
 
 //

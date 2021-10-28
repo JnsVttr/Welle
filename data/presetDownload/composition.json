@@ -1,0 +1,49 @@
+{
+    "name": "composition",
+    "bpm": 120,
+    "parts": {},
+    "activeInstruments": [
+        {
+            "name": "hh",
+            "mute": true,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                "C3",
+                null,
+                "C3",
+                null,
+                "C3",
+                null
+            ],
+            "pattern": [
+                0,
+                null
+            ],
+            "patternRaw": "#-"
+        },
+        {
+            "name": "kick",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C3",
+                null,
+                "C3",
+                null,
+                "C3",
+                null,
+                "C3",
+                null
+            ],
+            "pattern": [
+                0,
+                null
+            ],
+            "patternRaw": "#-"
+        }
+    ]
+}

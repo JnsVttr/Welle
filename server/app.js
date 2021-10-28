@@ -9,6 +9,7 @@ import { Server } from "socket.io";
 import express from "express";
 import path from "path";
 import fs from "fs";
+import multer from "multer";
 
 // app + server + sockets
 // ===========================
@@ -41,20 +42,124 @@ const audioPath = path.join(__dirname, "../data/samples");
 const alertsPath = path.join(__dirname, "../data/alerts");
 const historyURL = path.join(__dirname, "../data/history");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
-// const presetsURL = path.join(__dirname, "../data/presets");
+const downloadPresetURL = path.join(__dirname, "../data/presetDownload");
+const uploadPresetURL = path.join(__dirname, "../data/presetUpload");
+const presetsURL = path.join(__dirname, "../data/preset");
 // const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
 // let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 // app folders + startpage
 // ================================
 app.use(express.static(clientDir));
 app.use("/audio", express.static(audioPath));
 app.use("/alerts", express.static(alertsPath));
+app.use("/uploadPresets", express.static(uploadPresetURL));
 app.get("/", function (req, res) {
     res.sendFile(clientDir + "/index.html");
 });
+// download files (presets, instruments)
+app.get("/downloadPreset", function (req, res) {
+    const file = path.join(downloadPresetURL, "composition.json");
+    res.download(file); // Set disposition and send it.
+});
 
 console.log(`__dirname = ${__dirname}. Hostname = ${hostname}. port: ${port}`);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// MULTER FILE UPLOAD
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadPresetURL);
+    },
+    // By default, multer removes file extensions so let's add them back
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + path.extname(file.originalname));
+    },
+});
+// const imageFilter = function (req, file, cb) {
+//     // Accept images only
+//     if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+//         req.fileValidationError = "Only image files are allowed!";
+//         return cb(new Error("Only image files are allowed!"), false);
+//     }
+//     cb(null, true);
+// };
+const jsonFilter = function (req, file, cb) {
+    // Accept  only json files
+    if (!file.originalname.match(/\.(json)$/)) {
+        req.fileValidationError = "Only json files are allowed!";
+        return cb(new Error("Only json files are allowed!"), false);
+    }
+    cb(null, true);
+};
+app.post("/upload-preset", (req, res, next) => {
+    console.log("incoming composition file..");
+
+    let upload = multer({ storage: storage, fileFilter: jsonFilter }).single("composition");
+
+    upload(req, res, function (err) {
+        // req.file contains information of uploaded file
+        // req.body contains information of text fields, if there were any
+
+        if (req.fileValidationError) {
+            return res.json({
+                success: false,
+                message: "error: no json file",
+                data: "",
+            });
+        } else if (!req.file) {
+            return res.json({
+                success: false,
+                message: "error: no json file",
+                data: "",
+            });
+        } else if (err instanceof multer.MulterError) {
+            return res.json({
+                success: false,
+                message: "upload error",
+                data: "",
+            });
+        } else if (err) {
+            return res.json({
+                success: false,
+                message: "upload error",
+                data: "",
+            });
+        }
+        // success feedback
+        res.json({
+            success: true,
+            message: "upload success",
+            data: "",
+        });
+    });
+});
+//
+////
+//
+//
+//
+//
+//
 //
 //
 //
@@ -106,10 +211,34 @@ io.on("connection", (socket) => {
     });
 
     // TONE PRESETS
-    // socket.on("requestTonePresets", () => {
-    //     // if (debug) console.log(`requestTonePresets for Client`);
-    //     tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
-    //     io.sockets.emit("tonePresets", tonePresetsJSON);
+    // STORE PRESET
+    socket.on("storePreset", (message) => {
+        console.log(`receive preset ${message.name}`);
+        const fileName = `${message.name}.json`;
+        const fileURL = path.join(downloadPresetURL, fileName);
+        fs.writeFile(fileURL, JSON.stringify(message.preset, null, 4), (err) => {
+            if (err) throw err;
+            //const presets = getPresets({ path: presetsURL });
+            socket.emit("presetURL", { url: "/downloadPreset", file: fileName });
+        });
+    });
+    // REQUEST PRESET
+    socket.on("requestPreset", () => {
+        console.log(`request presets for client`);
+        let preset = JSON.parse(fs.readFileSync(path.join(uploadPresetURL, "composition.json"), "utf8"));
+        io.sockets.emit("presetData", preset);
+    });
+
+    // });
+    // socket on delete Preset
+    // socket.on("deletePreset", (message) => {
+    //     const file = path.join(presetsURL, `${message.name}.json`);
+    //     fs.unlink(file, function (err) {
+    //         if (err) throw err;
+    //         console.log(`File ${message.name}.json deleted!`);
+    //         const presets = getPresets({ path: presetsURL });
+    //         socket.emit("presets", presets);
+    //     });
     // });
 
     // AUDIO FILES
@@ -127,26 +256,6 @@ io.on("connection", (socket) => {
         const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
         io.sockets.emit("alerts", samples);
     });
-
-    // store preset
-    // socket.on("storePreset", (preset) => {
-    //     const file = path.join(presetsURL, `${preset.name}.json`);
-    //     fs.writeFile(file, JSON.stringify(preset, null, 4), (err) => {
-    //         if (err) throw err;
-    //         const presets = getPresets({ path: presetsURL });
-    //         socket.emit("presets", presets);
-    //     });
-    // });
-    // socket on delete Preset
-    // socket.on("deletePreset", (message) => {
-    //     const file = path.join(presetsURL, `${message.name}.json`);
-    //     fs.unlink(file, function (err) {
-    //         if (err) throw err;
-    //         console.log(`File ${message.name}.json deleted!`);
-    //         const presets = getPresets({ path: presetsURL });
-    //         socket.emit("presets", presets);
-    //     });
-    // });
 
     // on disconnect
     socket.on("disconnect", () => {
