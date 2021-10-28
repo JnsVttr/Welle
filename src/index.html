@@ -106,7 +106,7 @@
                             type="button"
                             value="load composition"
                             title="load composition"
-                            onclick="document.getElementById('compositionLoad').click();"
+                            onclick="document.getElementById('compositionLoad').click(); document.getElementById('jsonFeedbackText').style.display = 'none';"
                             
                         />
                         <form id="compositionForm" method="POST" action="/upload-preset" enctype="multipart/form-data" style="display: flex">

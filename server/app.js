@@ -129,7 +129,7 @@ app.post("/upload-preset", (req, res, next) => {
         } else if (!req.file) {
             return res.json({
                 success: false,
-                message: "error: no json file",
+                message: "...",
                 data: "",
             });
         } else if (err instanceof multer.MulterError) {
