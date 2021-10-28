@@ -1616,8 +1616,9 @@ class WelleApp {
         if (value == "RECORD") {
             console.log(`start recorder`);
             this.recorder.start();
+            if (document.getElementById("downloadFile") != null) document.getElementById("downloadFile").remove();
+            window.document.getElementById("file").innerHTML = "recording ...";
             if (window.document.getElementById("file").innerHTML != "") {
-                window.document.getElementById("file").innerHTML = "recording ...";
                 console.log(`id file not empty..`);
                 this.recording = undefined;
             }
@@ -1637,18 +1638,18 @@ class WelleApp {
                 console.log(`recording: ${JSON.stringify(this.recording, null, 2)}`);
                 document.getElementById(
                     "file"
-                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#" download>download welle.webm</a>`;
+                ).innerHTML = `<a id="downloadFile" title="click to download recorded audio file" href="#">download welle.webm</a>`;
                 document.getElementById("file").classList.add("w3-text-green");
                 document.getElementById("downloadFile").addEventListener("click", (c) => {
                     console.log(`file link clicked. date: ${new Date()}`);
                     const recording = window.welle.app.getRecording();
                     const url = URL.createObjectURL(recording);
-                    const anchor = document.createElement("a", { href: url, type: "audio/mp3" });
-                    anchor.download = "welle.webm";
-                    anchor.href = url;
-                    document.body.append(anchor);
-                    anchor.click();
-                    anchor.remove();
+                    const anchorSound = document.createElement("a", { href: url, type: "audio/mp3" });
+                    anchorSound.download = "welle.webm";
+                    anchorSound.href = url;
+                    document.body.append(anchorSound);
+                    anchorSound.click();
+                    anchorSound.remove();
                 });
             }
         }
