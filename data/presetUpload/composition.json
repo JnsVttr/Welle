@@ -175,11 +175,11 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         },
         {
             "name": "hh",
-            "mute": false,
+            "mute": true,
             "rand": 0,
             "volume": 0.6,
             "sequence": [
@@ -200,7 +200,7 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         },
         {
             "name": "deep",
@@ -225,7 +225,7 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         }
     ]
 }

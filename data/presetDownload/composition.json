@@ -175,7 +175,7 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         },
         {
             "name": "hh",
@@ -200,7 +200,7 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         },
         {
             "name": "deep",
@@ -225,7 +225,7 @@
                 3,
                 2
             ],
-            "patternRaw": "#-#-#3#2"
+            "rawPattern": "#-#-#3#2"
         }
     ]
 }

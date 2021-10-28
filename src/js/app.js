@@ -339,6 +339,12 @@ class WelleApp {
         `);
     }
 
+    muteApp(state) {
+        console.log("mute app", state);
+        if (state) this.#playSound = false;
+        else this.#playSound = true;
+    }
+
     // ============================================
     // set language
     // ============================================
@@ -2136,7 +2142,7 @@ class WelleApp {
                     const rand = entry.getRand();
                     const sequence = entry.getSequence();
                     const pattern = entry.getPattern();
-                    const patternRaw = entry.getPatternRaw();
+                    const rawPattern = entry.getPatternRaw();
 
                     const content = {
                         name: name,
@@ -2145,7 +2151,7 @@ class WelleApp {
                         volume: volume,
                         sequence: sequence,
                         pattern: pattern,
-                        patternRaw: patternRaw,
+                        rawPattern: rawPattern,
                     };
                     preset.activeInstruments.push(content);
                 }
@@ -2185,7 +2191,6 @@ class WelleApp {
                     console.log("loadPrest initMessage: ", initMessage);
                     this.assignPattern(initMessage);
                     if (inst.mute) entry.setMute(true);
-                    this.stopAll();
                 }
             });
         });

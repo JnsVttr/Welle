@@ -209,7 +209,14 @@ const submitComposition = (e) => {
                 console.log("load composition from server : )");
                 presetRequest = true;
                 Socket.emit("requestPreset");
+                // mute app temporarily
+                App.handleSound(false);
+                setTimeout(() => {
+                    App.handleSound(true);
+                    App.playAlert("enter");
+                }, 200);
             }
+            if (data.success == false) App.playAlert("error");
         })
         .catch(function (err) {
             console.log(err);
