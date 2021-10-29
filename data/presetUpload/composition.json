@@ -1,11 +1,11 @@
 {
     "name": "composition",
     "bpm": 120,
-    "samplePack": "ambient",
+    "samplePack": "snares",
     "parts": {},
     "activeInstruments": [
         {
-            "name": "res1",
+            "name": "peng",
             "mute": false,
             "rand": 0,
             "volume": 0.6,

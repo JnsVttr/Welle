@@ -390,6 +390,7 @@ class WelleApp {
         // document.getElementById("selectInstruments").value = this.samplePacks.indexOf(pack);
         document.getElementById("selectInstruments").value = pack;
         setTimeout(() => {
+            this.currentSamplePack = pack;
             console.log(`current samplePack: ${this.currentSamplePack}, socket request files`);
             if (pack == "default") Socket.emit("requestSampleFiles");
             else Socket.emit("requestSampleFiles", { samplePack: pack });
