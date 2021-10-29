@@ -385,6 +385,7 @@ class WelleApp {
         console.log(`okay, select this samplePack: ${pack} at index ${this.samplePacks.indexOf(pack)}`);
         this.deleteAll();
         this.clearSamplePlayer();
+        Tone.context.resume();
         console.log("selectSamplePack, check Tone: Tone.Transport.context.state", Tone.Transport.context.state);
 
         // document.getElementById("selectInstruments").value = this.samplePacks.indexOf(pack);
