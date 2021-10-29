@@ -38,7 +38,7 @@ if (path.join(__dirname) == "/var/www/virtual/tangible/html/server") {
     clientDir = path.join(__dirname, "../client_build/");
 }
 
-const audioPath = path.join(__dirname, "../data/samples");
+let audioPath = path.join(__dirname, "../data/samplePacks/default");
 const alertsPath = path.join(__dirname, "../data/alerts");
 const historyURL = path.join(__dirname, "../data/history");
 const restartServerScript = ". /home/tangible/bin/restart_app.sh ";
@@ -256,13 +256,20 @@ io.on("connection", (socket) => {
         // const samplePacks = getSamplePacks({ path: samplePacksURL });
         let samples = undefined;
         let packUrl = "default";
+        let packPath = path.join(samplePacksURL, packUrl);
         if (message != undefined) {
             if (message.samplePack != undefined) {
                 packUrl = message.samplePack;
+                audioPath = path.join(samplePacksURL, packUrl);
+                app.use("/audio", express.static(audioPath));
                 console.log(`for "${packUrl}"`);
             }
+        } else {
+            audioPath = packPath;
+            app.use("/audio", express.static(audioPath));
         }
-        samples = getSamples({ path: path.join(samplePacksURL, packUrl) });
+        samples = getSamples({ path: audioPath });
+        console.log(`app audioPath: ${audioPath}`);
         io.sockets.emit("sampleFiles", samples);
     });
 

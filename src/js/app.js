@@ -6,6 +6,7 @@ import { Socket } from "/index";
 import { en, de } from "/js/text";
 import { tutorial } from "/js/tutorial";
 import WebMidi from "webmidi";
+import { App } from "..";
 
 // ============================================
 // WELLE APP
@@ -116,14 +117,29 @@ class WelleApp {
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
     samplePacks = [];
+    currentSamplePack = "default";
+    presetData = undefined;
     instruments = []; // create instruments based on the samples list
     activeInstruments = []; // store acivated instruments
     grid = undefined;
     beat = 0;
     parts = {}; // storage for all the saved parts
+    toneID = 0;
+    configLoopStarted = false;
     // metronom
-    metronom1 = new Tone.PluckSynth().connect(Instrument.audioOutput);
-    metronom2 = new Tone.PluckSynth().connect(Instrument.audioOutput);
+    metronom1 = undefined;
+    metronom2 = undefined;
+    createMetronom() {
+        this.metronom1 = new Tone.PluckSynth().connect(Instrument.audioOutput);
+        this.metronom2 = new Tone.PluckSynth().connect(Instrument.audioOutput);
+        // set metronom volume
+        this.metronom1.volume.value = -10;
+        this.metronom2.volume.value = -20;
+    }
+    disposeMetronom() {
+        this.metronom1.dispose();
+        this.metronom2.dispose();
+    }
 
     // recorder
     recorder = new Tone.Recorder();
@@ -171,13 +187,10 @@ class WelleApp {
     constructor() {
         // print some info
         this.printInfo();
+        this.createMetronom();
 
         // set initial BPM and render to Page
         this.setBpm({ bpm: this.bpm });
-
-        // set metronom volume
-        this.metronom1.volume.value = -10;
-        this.metronom2.volume.value = -20;
 
         // connect audio to Tone master - assign Instrument class masterOut to Tone master
         // Instrument.masterGain.connect(Tone.getDestination());
@@ -195,7 +208,7 @@ class WelleApp {
             this.renderConsole();
 
             // sound
-            this.handleSound(this.#playSound);
+            this.muteApp(!this.#playSound);
             window.document.getElementById(`mute-button`).addEventListener("click", (c) => {
                 const val = c.target.value;
                 console.log(`mute-button value: ${val}, 
@@ -204,11 +217,11 @@ class WelleApp {
                 if (this.#playSound == true) {
                     this.#playSound = false;
                     this.buttons.mute.state = false;
-                    this.handleSound(this.#playSound);
+                    this.muteApp(!this.#playSound);
                 } else {
                     this.#playSound = true;
                     this.buttons.mute.state = true;
-                    this.handleSound(this.#playSound);
+                    this.muteApp(!this.#playSound);
                 }
                 if (this.language == "en") {
                     if (this.#playSound) {
@@ -346,12 +359,6 @@ class WelleApp {
         `);
     }
 
-    muteApp(state) {
-        console.log("mute app", state);
-        if (state) this.#playSound = false;
-        else this.#playSound = true;
-    }
-
     addSamplePacks(message) {
         let packs = undefined;
         if (message != undefined) {
@@ -375,28 +382,81 @@ class WelleApp {
         }
     }
     selectSamplePack(pack) {
-        console.log(`okay, select this samplePack: ${pack}`);
+        console.log(`okay, select this samplePack: ${pack} at index ${this.samplePacks.indexOf(pack)}`);
+        this.deleteAll();
         this.clearSamplePlayer();
-        Socket.emit("requestSampleFiles", { samplePack: pack });
+        console.log("selectSamplePack, check Tone: Tone.Transport.context.state", Tone.Transport.context.state);
+
+        // document.getElementById("selectInstruments").value = this.samplePacks.indexOf(pack);
+        document.getElementById("selectInstruments").value = pack;
+        setTimeout(() => {
+            console.log(`current samplePack: ${this.currentSamplePack}, socket request files`);
+            if (pack == "default") Socket.emit("requestSampleFiles");
+            else Socket.emit("requestSampleFiles", { samplePack: pack });
+            // this.currentSamplePack = pack;
+        }, 100);
     }
 
     clearSamplePlayer() {
         console.log("clear samplePlayer");
-        Tone.Transport.clear();
-        Object.keys(this.instruments).forEach((key) => {
-            delete this.instruments[key];
-        });
-        this.instruments = [];
-        Object.keys(this.grid).forEach((key) => {
-            delete this.grid[key];
-        });
-        this.grid = undefined;
-        this.parts = {};
-        this.samples = []; // incoming sample list from server
-        this.activeInstruments = []; // store acivated instruments
-        this.beat = 0;
-        console.log(`clear samplePlayer, this.instruments: ${this.instruments}`);
-        this.renderContent();
+        console.log("clear Tone.Transport");
+        // Tone.Transport.stop();
+        // Tone.Transport.cancel(0);
+        // Tone.Transport.clear();
+        // Tone.Transport.scheduleRepeat(() => {
+        //     // console.log("empty transport");
+        // }, "8n");
+        // // clear Metronom
+        // this.disposeMetronom();
+
+        console.log("clear instruments (buffer, gain, synth)");
+        setTimeout(() => {
+            Object.keys(this.instruments).forEach((key) => {
+                // console.log(`check instrument for reset: `, this.instruments[key]);
+                this.instruments[key].buffer.dispose();
+                this.instruments[key].gain.dispose();
+                this.instruments[key].ampEnv.dispose();
+                this.instruments[key].synth.dispose();
+                // console.log(`check instrument for reset again: `, this.instruments[key]);
+                delete this.instruments[key];
+            });
+            this.instruments = [];
+            console.log("delete, check grid: ", this.grid);
+            // this.grid.forEach((key) => {
+            //     console.log("delete, check grid[key]: ", this.grid[key], key);
+            //     // delete key;
+            // });
+            for (let i = 0; i < this.grid.length; i++) {
+                // console.log("delete, check grid[key]: ", this.grid[i]);
+                delete this.grid[i];
+            }
+            this.grid = undefined;
+            console.log("delete, check grid deleted: ", this.grid);
+            this.parts = {};
+            this.samples = []; // incoming sample list from server
+            this.activeInstruments = []; // store acivated instruments
+            this.beat = 0;
+            console.log(
+                `clear samplePlayer, this.instruments: ${this.instruments}. Instrument class audio: `,
+                Instrument.audioOutput
+            );
+            // Instrument.audioOutput.dispose();
+            // Instrument.masterGain.dispose();
+            // Instrument.audioOutput = new Tone.Gain(0.9); // master output for Tone -> Speaker
+            // Instrument.masterGain = new Tone.Gain(0.9);
+            Tone.Transport.stop();
+            Tone.Transport.cancel(0);
+            console.log(`clear by Tone ID ${this.toneID}`);
+            Tone.Transport.clear(this.toneID);
+            Tone.Transport.scheduleRepeat(() => {
+                // console.log("empty transport");
+            }, "8n");
+            this.configLoopStarted = false;
+            // clear Metronom
+            this.disposeMetronom();
+            this.createMetronom();
+            this.renderContent();
+        }, 50);
     }
 
     // ============================================
@@ -544,9 +604,11 @@ class WelleApp {
         // console.log(`Play Alerts. change to: ${checked}`);
         this.#playAlerts = checked;
     }
-    handleSound(state) {
-        // console.log(`Play Sound. change to: ${checked}`);
-        this.#playSound = state;
+    muteApp(state) {
+        // handleSound
+        console.log(`mute App change to: ${state}`);
+        // if mute, than var is false:
+        this.#playSound = !state;
         if (this.#playSound) {
             Instrument.audioOutput.gain.rampTo(0.9, 0.03);
             Instrument.masterGain.gain.rampTo(0.9, 0.03);
@@ -643,6 +705,7 @@ class WelleApp {
     };
 
     configLoop = () => {
+        this.configLoopStarted = true;
         const repeat = (time) => {
             // console.log(`beat: ${this.beat}`);
             // update the grid based on changes in the instruments (Sequences, Rand etc.)
@@ -712,7 +775,9 @@ class WelleApp {
             }
         };
         // Tone.Transport.bpm.value = 120;
-        Tone.Transport.scheduleRepeat(repeat, "8n");
+        this.toneID = Tone.Transport.scheduleRepeat(repeat, "8n");
+        console.log("get Tone.Transport ID: ", this.toneID);
+        // Tone.Transport.state;
     };
 
     //
@@ -1819,9 +1884,8 @@ class WelleApp {
 
     sendMidiSelectedInstState(message) {
         // send message to MIDI, channels defined in class variables midiChanInput 15, midiChanOutput 16
-        console.log(`Send MIDI Message: `, message);
-
         if (window.welle.app.MIDIInput != undefined) {
+            console.log(`Send MIDI Message: `, message);
             /*
             CC map, MIDI channel 1
             Controller (max 120):
@@ -2183,6 +2247,7 @@ class WelleApp {
         const preset = {
             name: name,
             bpm: this.bpm,
+            samplePack: this.currentSamplePack,
             parts: this.parts,
             activeInstruments: [],
         };
@@ -2222,18 +2287,30 @@ class WelleApp {
 
     loadPreset(message) {
         console.log(`App load preset`, message);
-        // first delete all:
-        this.deleteAll();
+        this.presetData = message;
+        this.muteApp(true);
+        setTimeout(() => {
+            this.muteApp(false);
+        }, 800);
+        // // first delete all:
+        // // this.deleteAll();
+
+        if (message.samplePack) {
+            console.log(`sample pack assigned in preset: ${message.samplePack}`);
+            this.selectSamplePack(message.samplePack);
+        } else {
+            console.log(`no sample pack assigned in preset`);
+        }
+
+        // clear screen
+        // this.renderContent();
+    }
+
+    initPresetData(message) {
         // assign parts:
         this.parts = message.parts;
-
+        // init message for sample creation
         let initMessage = {};
-
-        // console.log("loadPrest for", message.activeInstruments);
-        // Object.entries(message.activeInstruments).forEach((inst) => {
-        //     console.log("loadPrest for", inst);
-        // });
-        // compare with current instruments
         message.activeInstruments.forEach((inst) => {
             console.log("loadPrest for", inst, inst.name);
             this.instruments.forEach((entry) => {
@@ -2251,6 +2328,8 @@ class WelleApp {
         });
         this.stopAll();
         this.renderContent();
+        // reset presetData var
+        this.presetData = undefined;
     }
     //
     //

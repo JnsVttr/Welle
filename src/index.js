@@ -14,6 +14,7 @@ global var naming: GlobalVar
 import io from "socket.io-client";
 import "regenerator-runtime/runtime"; // for async functions with parcel bundler
 import { WelleApp } from "/js/app";
+import { Tone } from "tone/build/esm/core/Tone";
 
 // global variables
 // ===================================
@@ -134,8 +135,11 @@ Socket.on("connect", function (data) {
 Socket.on("sampleFiles", (message) => {
     // console.log(`Socket: get (${message.count}) samples. `);
     // console.log(`#samples num ... (${App.getSamplesNum()})`);
-    if (App.instruments.length != 0) App.clearSamplePlayer();
 
+    // check Transport state:
+    console.log(`configLoop started? ${App.configLoopStarted}`);
+
+    // if (Tone.Transport != undefined) Tone.Transport.get();
     if (App.getSamplesNum() == 0) {
         App.addSamples(message.samples);
     }
@@ -147,7 +151,7 @@ Socket.on("sampleFiles", (message) => {
         // console.log(App.instruments);
         App.grid = App.makeGrid(App.instruments);
         // console.log(App.grid);
-        App.configLoop();
+        if (!App.configLoopStarted) App.configLoop();
         // App.instruments[1].sequence[0] = "C3";
         // App.instruments[0].sequence[6] = "C3";
         // console.log(`App.instruments .. ${App.instruments[1].sequence}`);
@@ -155,6 +159,14 @@ Socket.on("sampleFiles", (message) => {
         App.renderContent();
         console.log(`App files loaded`);
         document.getElementById("loaderDiv").style.display = "none";
+
+        // delay for sample buffers
+        setTimeout(() => {
+            console.log(`is there preset data? : ${App.presetData}`);
+            if (App.presetData != undefined) {
+                App.initPresetData(App.presetData);
+            }
+        }, 500);
     }
 });
 
@@ -226,11 +238,9 @@ const submitComposition = (e) => {
                 presetRequest = true;
                 Socket.emit("requestPreset");
                 // mute app temporarily
-                App.handleSound(false);
                 setTimeout(() => {
-                    App.handleSound(true);
                     App.playAlert("enter");
-                }, 200);
+                }, 800);
             }
             if (data.success == false) App.playAlert("error");
         })
@@ -242,9 +252,11 @@ document.getElementById("compositionLoad").addEventListener("change", submitComp
 
 Socket.on("presetData", (message) => {
     if (presetRequest) {
-        // console.log("preset:", message);
+        console.log("preset arrived in client:", message);
         presetRequest = false;
-        App.loadPreset(message);
+        setTimeout(() => {
+            App.loadPreset(message);
+        }, 200);
     }
 });
 
