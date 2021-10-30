@@ -415,7 +415,7 @@ class WelleApp {
         Tone.context.resume();
         document.getElementById("selectInstruments").value = "";
         setTimeout(() => {
-            //this.currentSamplePack = "user";
+            this.currentSamplePack = "user";
             console.log(`current samplePack: ${this.currentSamplePack}, socket request files`);
             Socket.emit("requestUserSamples", { id: socketID });
         }, 100);
@@ -2321,12 +2321,14 @@ class WelleApp {
         }, 800);
         // // first delete all:
         // // this.deleteAll();
+        if (this.presetData.samplePack == "user") message.samplePack = undefined;
 
         if (message.samplePack) {
             console.log(`sample pack assigned in preset: ${message.samplePack}`);
             this.selectSamplePack(message.samplePack);
         } else {
             console.log(`no sample pack assigned in preset`);
+            this.initPresetData(this.presetData);
         }
 
         // clear screen
