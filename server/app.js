@@ -46,6 +46,7 @@ const downloadPresetURL = path.join(__dirname, "../data/presetDownload");
 const uploadPresetURL = path.join(__dirname, "../data/presetUpload");
 const samplePacksURL = path.join(__dirname, "../data/samplePacks");
 const presetsURL = path.join(__dirname, "../data/preset");
+let userURL = path.join(__dirname, "../data/user");
 // const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
 // let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
 
@@ -63,12 +64,13 @@ const presetsURL = path.join(__dirname, "../data/preset");
 // ================================
 app.use(express.static(clientDir));
 app.use("/audio", express.static(audioPath));
+app.use("/samplePacks", express.static(samplePacksURL));
+app.use("/user", express.static(userURL));
 app.use("/alerts", express.static(alertsPath));
 app.use("/uploadPresets", express.static(uploadPresetURL));
 app.get("/", function (req, res) {
     res.sendFile(clientDir + "/index.html");
 });
-// download files (presets, instruments)
 app.get("/downloadPreset", function (req, res) {
     const file = path.join(downloadPresetURL, "composition.json");
     res.download(file); // Set disposition and send it.
@@ -96,14 +98,25 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + path.extname(file.originalname));
     },
 });
-// const imageFilter = function (req, file, cb) {
-//     // Accept images only
-//     if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-//         req.fileValidationError = "Only image files are allowed!";
-//         return cb(new Error("Only image files are allowed!"), false);
-//     }
-//     cb(null, true);
-// };
+const storageSamples = multer.diskStorage({
+    destination: function (req, file, cb) {
+        // console.log("req body", req.body);
+        cb(null, userURL);
+    },
+    // By default, multer removes file extensions so let's add them back
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, file.originalname + "-" + uniqueSuffix + path.extname(file.originalname));
+    },
+});
+const samplesFilter = function (req, file, cb) {
+    // Accept mp3s only
+    if (!file.originalname.match(/\.(mp3|MP3)$/)) {
+        req.fileValidationError = "Only mp3 files are allowed!";
+        return cb(new Error("Only mp3 files are allowed!"), false);
+    }
+    cb(null, true);
+};
 const jsonFilter = function (req, file, cb) {
     // Accept  only json files
     if (!file.originalname.match(/\.(json)$/)) {
@@ -137,6 +150,93 @@ app.post("/upload-preset", (req, res, next) => {
             return res.json({
                 success: false,
                 message: "upload error",
+                data: "",
+            });
+        } else if (err) {
+            return res.json({
+                success: false,
+                message: "upload error",
+                data: "",
+            });
+        }
+        // success feedback
+        res.json({
+            success: true,
+            message: "upload success",
+            data: "",
+        });
+    });
+});
+
+app.post("/upload-samples", (req, res, next) => {
+    console.log("incoming sample files ..");
+    let userID = "";
+    let userDirPath = userURL;
+    let uploadText = undefined;
+    let upload = undefined;
+    let store = undefined;
+
+    store = multer.diskStorage({
+        destination: function (req, file, cb) {
+            console.log("store path multer:", userDirPath);
+            // console.log("req.files", req.files);
+            cb(null, userDirPath);
+        },
+        // By default, multer removes file extensions so let's add them back
+        filename: function (req, file, cb) {
+            const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+            cb(null, file.originalname);
+        },
+    });
+    upload = multer({
+        storage: store,
+        fileFilter: samplesFilter,
+        limits: { fileSize: 200000 },
+    }).fields([{ name: "samples", maxCount: 30 }]);
+    upload(req, res, (err) => {
+        // req.file contains information of uploaded file
+        // req.body contains information of text fields, if there were any
+        // console.log(`check files: `, req.files);
+        // console.log(`check id: `, req.body["id"]);
+        userID = req.body["id"];
+        userDirPath = `${userDirPath}/${userID}`;
+        if (!fs.existsSync(userDirPath)) {
+            console.log(`${userDirPath} doesn't exist..`);
+            console.log(`mkdir ${userID}`);
+            fs.mkdirSync(userDirPath);
+        }
+        Object.entries(req.files).forEach(([key, value]) => {
+            console.log(`${key} ${value}`);
+            value.forEach((file) => {
+                console.log(file.originalname);
+                var oldPath = file.path;
+                var newPath = `${userURL}/${userID}/${file.originalname.toLowerCase()}`;
+                // console.log(`paths from: ${oldPath}`);
+                // console.log(`paths to: ${newPath}`);
+                // console.log(`filename: ${file.originalname}, lowerCase: ${file.originalname.toLowerCase()}`);
+                fs.rename(oldPath, newPath, function (err) {
+                    if (err) throw err;
+                    // console.log(file.originalname, "Successfully renamed - AKA moved!");
+                });
+            });
+        });
+
+        if (req.fileValidationError) {
+            return res.json({
+                success: false,
+                message: "error: only mp3 files",
+                data: "",
+            });
+        } else if (!req.files) {
+            return res.json({
+                success: false,
+                message: "don't know",
+                data: "",
+            });
+        } else if (err instanceof multer.MulterError) {
+            return res.json({
+                success: false,
+                message: "too many or too big files",
                 data: "",
             });
         } else if (err) {
@@ -270,7 +370,17 @@ io.on("connection", (socket) => {
         }
         samples = getSamples({ path: audioPath });
         console.log(`app audioPath: ${audioPath}`);
-        io.sockets.emit("sampleFiles", samples);
+        io.sockets.emit("sampleFiles", { files: samples });
+    });
+
+    socket.on("requestUserSamples", (message) => {
+        console.log(`request samples from: ${message.id}`);
+        let socketID = message.id;
+        let samples = undefined;
+        let packPath = path.join(userURL, socketID);
+        samples = getSamples({ path: packPath });
+        console.log(`socketID: ${socketID}, app audioPath: ${packPath}`);
+        io.sockets.emit("sampleFiles", { files: samples, path: `/user/${socketID}` });
     });
 
     // ALERTS FILES
@@ -293,6 +403,11 @@ io.on("connection", (socket) => {
             fs.writeFile(file, history, (err) => {
                 if (err) throw err;
             });
+        }
+        let userDir = path.join(userURL, socket.id);
+        if (fs.existsSync(userDir)) {
+            console.log(`${socket.id} exist  -> delete !!`);
+            fs.rmdirSync(userDir, { recursive: true });
         }
         // if (clients[socket.id].user) {
         //     const index = users.indexOf(clients[socket.id].user);
@@ -338,7 +453,9 @@ const getSamplePacks = (message) => {
     });
     // console.log("samplePack entries: ", entries);
     const packs = entries.filter((entry) => {
-        if (!entry.startsWith(".")) return entry;
+        if (!entry.startsWith(".")) {
+            if (!entry.endsWith(".zip")) return entry;
+        }
     });
     return packs;
 };

@@ -22,6 +22,7 @@ export const App = new WelleApp();
 export const Socket = io.connect(); // socket var - server connect, also for exports
 const debug = true;
 let presetRequest = false;
+let socketID = "";
 //
 
 // IMPORTANT: teleport functions to document scope by creating
@@ -124,6 +125,7 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 // SOCKET on initial connection
 Socket.on("connect", function (data) {
     App.id = Socket.id;
+    socketID = Socket.id;
     console.log(`Socket Connected! Id: ${App.id}, user: ${App.user}`);
     if (App.getAlertsNum() == 0) Socket.emit("requestAlerts");
     if (App.getSamplesNum() == 0) Socket.emit("requestSampleFiles");
@@ -133,7 +135,10 @@ Socket.on("connect", function (data) {
 
 // SOCKET on receiving audioFile Paths
 Socket.on("sampleFiles", (message) => {
-    // console.log(`Socket: get (${message.count}) samples. `);
+    let samples = message.files.samples;
+    let samplesPath = undefined;
+    if (message.path) samplesPath = message.path;
+    console.log(`Incoming samples: path: ${samplesPath} get (${samples}) samples. `);
     // console.log(`#samples num ... (${App.getSamplesNum()})`);
 
     // check Transport state:
@@ -141,10 +146,11 @@ Socket.on("sampleFiles", (message) => {
 
     // if (Tone.Transport != undefined) Tone.Transport.get();
     if (App.getSamplesNum() == 0) {
-        App.addSamples(message.samples);
+        if (samplesPath) App.addSamples({ files: samples, path: samplesPath });
+        else App.addSamples({ files: samples });
     }
     // create all Instruments + Grid, when loading finished
-    if (App.getSamplesNum() == message.count) {
+    if (App.getSamplesNum() == message.files.count) {
         // console.log(`start instrument creation with ${App.getSamplesNum()} samples`);
         App.instruments = App.makeSynths({ count: App.getSamplesNum(), samples: App.samples });
         // console.log(`new instruments: `);
@@ -216,6 +222,16 @@ Socket.on("presetURL", (message) => {
     anchor.remove();
 });
 
+Socket.on("presetData", (message) => {
+    if (presetRequest) {
+        console.log("preset arrived in client:", message);
+        presetRequest = false;
+        setTimeout(() => {
+            App.loadPreset(message);
+        }, 200);
+    }
+});
+
 const submitComposition = (e) => {
     e.preventDefault();
     let message = "";
@@ -250,15 +266,41 @@ const submitComposition = (e) => {
 };
 document.getElementById("compositionLoad").addEventListener("change", submitComposition);
 
-Socket.on("presetData", (message) => {
-    if (presetRequest) {
-        console.log("preset arrived in client:", message);
-        presetRequest = false;
-        setTimeout(() => {
-            App.loadPreset(message);
-        }, 200);
-    }
-});
+const submitSamplePack = (e) => {
+    e.preventDefault();
+    let message = "";
+    let formData = new FormData(document.getElementById("uploadSamplePackForm"));
+    formData.append("id", socketID);
+    // console.log("form data: ", formData.get("samples"), "------ ID: ", formData.get("id"));
+    // formData.forEach((file) => console.log("File: ", file));
+    let options = { body: formData, method: "POST" };
+    fetch("/upload-samples", options)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            // have the JSON response from the POST operation here
+            console.log(data);
+            message = data.message;
+            document.getElementById("samplePackFeedbackText").style.display = "block";
+            document.getElementById(
+                "samplePackFeedbackText"
+            ).innerHTML = `<p><span class="serverFeedback">${message}</span></p>`;
+            if (data.success) {
+                console.log("load samples from server : )");
+                App.getUserSamples(socketID);
+
+                setTimeout(() => {
+                    App.playAlert("enter");
+                }, 800);
+            }
+            if (data.success == false) App.playAlert("error");
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
+};
+document.getElementById("uploadSamplePackFormLoad").addEventListener("change", submitSamplePack);
 
 //
 //

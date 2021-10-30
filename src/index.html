@@ -106,7 +106,7 @@
                             type="button"
                             value="load composition"
                             title="load composition"
-                            onclick="document.getElementById('compositionLoad').click(); document.getElementById('jsonFeedbackText').style.display = 'none';"
+                            onclick="document.getElementById('compositionLoad').click();"
                             
                         />
                         <form id="compositionForm" method="POST" action="/upload-preset" enctype="multipart/form-data" style="display: flex">
@@ -121,7 +121,7 @@
                         <span id="jsonFeedbackText" style="display: none;">feedback text</span>
                     </p>
 
-                    <!-- <p>
+                    <p>
                         <input
                             id="instrumentsDownload-button"
                             class="w3-button w3-round-large w3-border buttonSmall"
@@ -129,7 +129,7 @@
                             value="download instruments"
                             title="download instruments"
                         />
-                        
+                        <a id="downloadLinkSamplePack" href="" download style="display:none"></a>
                     </p>
                     <p>
                         <input
@@ -138,8 +138,23 @@
                             type="button"
                             value="upload instruments"
                             title="upload instruments"
+                            onclick="document.getElementById('uploadSamplePackFormLoad').click();"
                         />
+                        <form id="uploadSamplePackForm" method="POST" action="/upload-samples" enctype="multipart/form-data" style="display: flex">
+                            
+                            <input
+                                id="uploadSamplePackFormLoad"
+                                type="file"
+                                multiple
+                                name="samples"
+                                style="display: none"
+                            />
+                        </form>
+                        
+                        <span id="samplePackFeedbackText" style="display: none;">feedback text</span>
                     </p>
+                    <!-- 
+                   
                     <input
                             id="help-button"
                             class="w3-button w3-round-large w3-border buttonSmall"

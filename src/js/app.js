@@ -328,6 +328,10 @@ class WelleApp {
                 // console.log(`select samplePack.. ${c.target.value}`);
                 this.selectSamplePack(c.target.value);
             });
+            window.document.getElementById(`instrumentsDownload-button`).addEventListener("click", (c) => {
+                // console.log(`download samplePack > ${this.currentSamplePack}`);
+                this.downloadCurrentInstruments();
+            });
         });
 
         this.setLanguage("english");
@@ -357,6 +361,12 @@ class WelleApp {
             bpm: ${this.bpm}
 
         `);
+    }
+
+    downloadCurrentInstruments() {
+        console.log(`download samplePack > ${this.currentSamplePack}`);
+        window.document.getElementById(`downloadLinkSamplePack`).href = `/samplePacks/${this.currentSamplePack}.zip`;
+        window.document.getElementById(`downloadLinkSamplePack`).click();
     }
 
     addSamplePacks(message) {
@@ -396,6 +406,18 @@ class WelleApp {
             if (pack == "default") Socket.emit("requestSampleFiles");
             else Socket.emit("requestSampleFiles", { samplePack: pack });
             // this.currentSamplePack = pack;
+        }, 100);
+    }
+    getUserSamples(socketID) {
+        console.log(`get user samples`);
+        this.deleteAll();
+        this.clearSamplePlayer();
+        Tone.context.resume();
+        document.getElementById("selectInstruments").value = "";
+        setTimeout(() => {
+            //this.currentSamplePack = "user";
+            console.log(`current samplePack: ${this.currentSamplePack}, socket request files`);
+            Socket.emit("requestUserSamples", { id: socketID });
         }, 100);
     }
 
@@ -554,10 +576,13 @@ class WelleApp {
         else return Object.keys(this.samples).length;
     }
 
-    addSamples(files) {
+    addSamples(message) {
+        let files = message.files;
+        let samplePath = "/audio";
+        if (message.path) samplePath = message.path;
         files.map((file) => {
             const name = file.split(".")[0];
-            const path = `/audio/${file}`;
+            const path = `${samplePath}/${file}`;
             const buffer = new Tone.ToneAudioBuffer(path, () => {});
             const content = {
                 name: name,
