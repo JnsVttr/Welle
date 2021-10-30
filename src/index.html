@@ -115,6 +115,7 @@
                                 type="file"
                                 name="composition"
                                 style="display: none"
+                                onclick="this.value=null"
                             />
                         </form>
                         
@@ -138,7 +139,7 @@
                             type="button"
                             value="upload instruments"
                             title="upload instruments"
-                            onclick="document.getElementById('uploadSamplePackFormLoad').click();"
+                            onclick="document.getElementById('uploadSamplePackFormLoad').click(); "
                         />
                         <form id="uploadSamplePackForm" method="POST" action="/upload-samples" enctype="multipart/form-data" style="display: flex">
                             
@@ -148,6 +149,7 @@
                                 multiple
                                 name="samples"
                                 style="display: none"
+                                onclick="this.value=null"
                             />
                         </form>
                         
