@@ -56,6 +56,7 @@ class WelleApp {
             titleEN: "change language to english",
             titleDE: "ändere Sprache zu deutsch",
         },
+
         mute: {
             state: true,
             valueENoff: "mute all",
@@ -102,6 +103,22 @@ class WelleApp {
             valueon: "STOP RECORD",
             titleoff: "record",
             titleon: "stop record",
+        },
+        compSave: {
+            valueEN: "save composition",
+            valueDE: "Komposition speichern",
+        },
+        compLoad: {
+            valueEN: "load composition",
+            valueDE: "Komposition laden",
+        },
+        instDown: {
+            valueEN: "download instruments",
+            valueDE: "Instrumente speichern",
+        },
+        instUp: {
+            valueEN: "upload instruments",
+            valueDE: "Instrumente laden",
         },
     };
     // console
@@ -493,6 +510,14 @@ class WelleApp {
             document.documentElement.setAttribute("lang", "en");
             document.getElementById("language-button").value = "deutsch";
             document.getElementById("language-button").title = this.buttons.language.titleDE;
+            document.getElementById("compositionSave-button").value = this.buttons.compSave.valueEN;
+            document.getElementById("compositionSave-button").title = this.buttons.compSave.valueEN;
+            document.getElementById("compositionLoad-button").value = this.buttons.compLoad.valueEN;
+            document.getElementById("compositionLoad-button").title = this.buttons.compLoad.valueEN;
+            document.getElementById("instrumentsDownload-button").value = this.buttons.instDown.valueEN;
+            document.getElementById("instrumentsDownload-button").title = this.buttons.instDown.valueEN;
+            document.getElementById("instrumentsUpload-button").value = this.buttons.instUp.valueEN;
+            document.getElementById("instrumentsUpload-button").title = this.buttons.instUp.valueEN;
             // change headings
             document.getElementById("h.files").innerHTML = this.english.headings.files;
             document.getElementById("h.settings").innerHTML = this.english.headings.settings;
@@ -523,6 +548,14 @@ class WelleApp {
             document.documentElement.setAttribute("lang", "de");
             document.getElementById("language-button").value = "english";
             document.getElementById("language-button").title = this.buttons.language.titleEN;
+            document.getElementById("compositionSave-button").value = this.buttons.compSave.valueDE;
+            document.getElementById("compositionSave-button").title = this.buttons.compSave.valueDE;
+            document.getElementById("compositionLoad-button").value = this.buttons.compLoad.valueDE;
+            document.getElementById("compositionLoad-button").title = this.buttons.compLoad.valueDE;
+            document.getElementById("instrumentsDownload-button").value = this.buttons.instDown.valueDE;
+            document.getElementById("instrumentsDownload-button").title = this.buttons.instDown.valueDE;
+            document.getElementById("instrumentsUpload-button").value = this.buttons.instUp.valueDE;
+            document.getElementById("instrumentsUpload-button").title = this.buttons.instUp.valueDE;
             // change headings
             document.getElementById("h.files").innerHTML = this.german.headings.files;
             document.getElementById("h.settings").innerHTML = this.german.headings.settings;

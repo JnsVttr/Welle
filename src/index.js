@@ -245,10 +245,8 @@ const submitComposition = (e) => {
             // have the JSON response from the POST operation here
             console.log(data);
             message = data.message;
-            document.getElementById("jsonFeedbackText").style.display = "block";
-            document.getElementById(
-                "jsonFeedbackText"
-            ).innerHTML = `<p><span class="serverFeedback">${message}</span></p>`;
+            // document.getElementById("jsonFeedbackText").style.display = "block";
+            document.getElementById("jsonFeedbackText").innerHTML = message;
             if (data.success) {
                 console.log("load composition from server : )");
                 presetRequest = true;
@@ -282,10 +280,8 @@ const submitSamplePack = (e) => {
             // have the JSON response from the POST operation here
             console.log(data);
             message = data.message;
-            document.getElementById("samplePackFeedbackText").style.display = "block";
-            document.getElementById(
-                "samplePackFeedbackText"
-            ).innerHTML = `<p><span class="serverFeedback">${message}</span></p>`;
+            // document.getElementById("samplePackFeedbackText").style.display = "block";
+            document.getElementById("samplePackFeedbackText").innerHTML = message;
             if (data.success) {
                 console.log("load samples from server : )");
                 App.getUserSamples(socketID);

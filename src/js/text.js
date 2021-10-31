@@ -95,6 +95,55 @@ There will be a big and varying latency caused by the Webaudio timing, so using 
 mute the website's sound in the settings and only use MIDI sounds.
 </p>
 
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<h2 id="help">help</h2>
+
+
+<h3>saving and loading compositions</h3>
+
+<p>
+In WELLE it is possible to save the current composition as a file on your computer (option not enabled for smartphones, iPads). 
+The file will be a .json file.  Pay attention to your browser download settings - you may have to allow the download of the file, and you might want to enable a 
+donwload dialog window in the settings to select the download directory and the filename. 
+</p>
+<p>
+The composition file contains all instruments patterns, volume, etc. and also the snapshots you made. It also contains the names of 
+the active instruments you used, but not the instruments themselves. 
+If you used your own instruments via the 'upload instruments' button, it will store their names labeled as 'user' instruments. 
+</p>
+<p>
+Once you saved a composition, you can upload it back into WELLE. It will automatically select the right instruments selection and 
+activate instruments and recreate snapshots, so you are immediatly ready to play. A small status text after the 'load composition' button
+will contain some feedback about wether the upload was successfull. If you only see your snapshots, but no active instruments, then either 
+you used your own uploaded instruments and haven't uploaded them yet, or the instruments stored in the composition are not availible anymore on the server.
+You shouldn't change your local composition json file, because this could cause errors in WELLE. 
+</p>
+
+<h3>download and upload of instruments</h3>
+
+<p>
+In WELLE you can use the provided instruments to compose music. There are default instruments, and also instrument packs to select. 
+If you want to download the all the instruments currently displayed, just hit the 'download instruments' button. You will get a .zip folder with these instruments.
+The instruments are just short .mp3 files. On your computer you can copy your favourite instruments in a folder and upload them again.
+The download option is not active for your own uploaded instruments. 
+</p>
+<p>
+To upload instruments, hit the 'upload instruments' button and select multiple files. Only .mp3 files smaller than 200KB are allowed. You can upload up to 30 files.
+Their names will be converted to lowercase and the instruments will be displayed in WELLE. Now you can start to play with them.
+A small status text after the button will inform you about the upload success. 
+</p>
+
+<h3>contact and feedback</h3>
+<p>
+If you have issues or suggestions, please feel free to get in touch! A contact email address is shown at the bottom of the page. 
+</p>
+
+
 `;
 de.tutorial = `
 <h3>Überblick</h3>
@@ -163,6 +212,64 @@ Die ersten 14 Instrumente sind jetzt den MIDI-Kanälen 1-14 zugeordnet und sende
 WELLE hat beim Gebrauch von MIDI eine Latenz, die durch das Webaudio-Timing verursacht wird, so dass die Verwendung von internen Sounds und Sounds, die über MIDI angespielt werden, nicht synchron ist: 
 Schalten Sie den Sound der Website in den Einstellungen stumm und verwenden Sie nur MIDI-Sounds.
 </p>
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<h2 id="help">Hilfe</h2>
+
+
+<h3>Speichern und Laden von Kompositionen</h3>
+<p></p>
+<p>
+In WELLE ist es möglich, die aktuelle Komposition als Datei auf Ihrem Computer zu speichern (diese Option ist für Smartphones und iPads nicht verfügbar). 
+Bei der Datei handelt es sich um eine .json-Datei. Achten Sie auf die Download-Einstellungen Ihres Browsers - möglicherweise müssen Sie den Download der Datei 
+zulassen und in den Einstellungen ein Dialogfenster zum Herunterladen aktivieren, um das Download-Verzeichnis und den Dateinamen auszuwählen.
+</p>
+
+<p>
+Die Kompositionsdatei enthält alle Instrumenten Pattern, Lautstärke usw. sowie die von Ihnen erstellten Momente. 
+Sie enthält auch die Namen der aktiven Instrumente, die Sie verwendet haben, allerdings nicht die Instrumente selbst. 
+Wenn Sie Ihre eigenen Instrumente über die Schaltfläche "Instrumente laden" verwendet haben, werden deren Namen mit dem Zusatz "Benutzer"-Instrumente gespeichert.
+</p>
+<p>
+Sobald Sie eine Komposition gespeichert haben, können Sie sie wieder in WELLE hochladen. 
+Es werden automatisch die entsprechenden Instrumente ausgewählt, die Instrumente aktiviert und die Momente neu erstellt, so dass Sie sofort spielbereit sind. 
+Ein kleiner Statustext nach der Schaltfläche 'Komposition laden' gibt Ihnen eine Rückmeldung, ob der Upload erfolgreich war. 
+Wenn Sie nur Ihre Momente sehen, aber keine aktiven Instrumente, dann haben Sie entweder Ihre eigenen hochgeladenen Instrumente verwendet 
+und diese noch nicht wieder hochgeladen, oder die in der Komposition gespeicherten Instrumente sind auf dem Server nicht mehr verfügbar. 
+Sie sollten Ihre lokale Kompositions-Datei nicht ändern, da dies zu Fehlern in WELLE führen kann.
+</p>
+
+<h3>Speichern und Laden von Instrumenten</h3>
+
+<p>
+In WELLE können Sie die mitgelieferten Instrumente zum Komponieren von Musik verwenden. 
+Es gibt voreingestellte Instrumente und auch Instrumentenpakete, die Sie auswählen können. 
+Wenn Sie alle derzeit angezeigten Instrumente herunterladen möchten, klicken Sie einfach auf die Schaltfläche "Instrumente speichern". 
+Sie erhalten dann einen .zip-Ordner mit diesen Instrumenten. 
+Bei den Instrumenten handelt es sich um kurze .mp3-Dateien. Auf Ihrem Computer können Sie Ihre Lieblingsinstrumente z.B. in einen Ordner kopieren und wieder hochladen. 
+Die Download-Option ist nicht aktiv für Ihre eigenen hochgeladenen Instrumente.
+</p>
+<p>
+Um Instrumente hochzuladen, klicken Sie auf die Schaltfläche "Instrumente laden" und wählen Sie mehrere Dateien aus. 
+Es sind nur .mp3-Dateien erlaubt, die kleiner als 200KB sind. Sie können bis zu 30 Dateien hochladen. 
+Die Namen werden in Kleinbuchstaben umgewandelt und die Instrumente werden in WELLE angezeigt. 
+Jetzt können Sie mit ihnen spielen. Ein kleiner Statustext hinter der Schaltfläche informiert Sie über den erfolgreichen Upload.
+</p>
+
+<h3>Kontakt und Rückmeldung</h3>
+<p>
+Wenn Sie Probleme oder Vorschläge haben, melden Sie sich bitte! Eine Kontakt-E-Mail-Adresse finden Sie unten auf der Seite. 
+</p>
+
+
+
+
 `;
 
 en.info = `
@@ -180,6 +287,7 @@ The source code is published here: <a href="https://github.com/JnsVttr/Welle" ti
 This website was build with the Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> and
 <a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>.
 </p>
+<p>contact: jens.vetter|a|ufg.at
 <p>© Jens Vetter</p>
 `;
 
@@ -199,5 +307,6 @@ Quellcode auf Github: <a href="https://github.com/JnsVttr/Welle" title="go to Gi
 Diese Website nutzt das Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> und 
 <a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>.
 </p>
+<p>Kontakt: jens.vetter|a|ufg.at
 <p>© Jens Vetter</p>
 `;

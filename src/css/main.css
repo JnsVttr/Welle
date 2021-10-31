@@ -65,10 +65,7 @@ h3 {
     margin-top: 0.1em !important;
     margin-bottom: 0.1em !important;
 }
-.serverFeedback {
-    padding-left: 0.3em;
-    font-size: 12px;
-}
+
 .menu {
     padding-bottom: 3em;
 }
@@ -218,6 +215,10 @@ label {
     min-width: 0.6em;
     margin-right: 0.1em;
     margin-left: 0.3em;
+}
+.uploadStatus {
+    font-size: 10px;
+    padding-left: 0.5em;
 }
 /* loader */
 #loaderDiv {

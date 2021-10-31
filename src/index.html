@@ -119,7 +119,7 @@
                             />
                         </form>
                         
-                        <span id="jsonFeedbackText" style="display: none;">feedback text</span>
+                        <span id="jsonFeedbackText" class="uploadStatus">load info</span>
                     </p>
 
                     <p>
@@ -153,17 +153,17 @@
                             />
                         </form>
                         
-                        <span id="samplePackFeedbackText" style="display: none;">feedback text</span>
+                        <span id="samplePackFeedbackText" class="uploadStatus">upload info</span>
                     </p>
-                    <!-- 
-                   
                     <input
-                            id="help-button"
-                            class="w3-button w3-round-large w3-border buttonSmall"
-                            type="button"
-                            value="?"
-                            title="help"
-                        /> -->
+                        id="help-button"
+                        class="w3-button w3-round-large w3-border buttonSmall"
+                        type="button"
+                        value="?"
+                        title="help"
+                        onclick="document.getElementById('gotoHelp').click(); "
+                    />
+                    <a id="gotoHelp" href="#help" style="display:none"></a>
                 </div>
                     <!-- ===== SETTINGS ===============================  -->
                     <div class="menuSettings">
@@ -238,7 +238,7 @@
                                 title="record audio by clicking the button"
                             />
                         </p>
-                        <p id="file" class="w3-small recFile w3-hide-small">no recorded file</p>
+                        <p id="file" onclick="this.value=null" class="w3-small recFile w3-hide-small">no recorded file</p>
                     </div>
                 </div>
 

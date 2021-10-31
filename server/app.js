@@ -137,7 +137,7 @@ app.post("/upload-preset", (req, res, next) => {
         if (req.fileValidationError) {
             return res.json({
                 success: false,
-                message: "error: no json file",
+                message: "upload error: no json file",
                 data: "",
             });
         } else if (!req.file) {
@@ -224,7 +224,7 @@ app.post("/upload-samples", (req, res, next) => {
         if (req.fileValidationError) {
             return res.json({
                 success: false,
-                message: "error: only mp3 files",
+                message: "upload error: no mp3 file",
                 data: "",
             });
         } else if (!req.files) {
