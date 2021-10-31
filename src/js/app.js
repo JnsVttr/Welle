@@ -785,7 +785,8 @@ class WelleApp {
                 if (mute == false) {
                     if (event.isActive) {
                         ampEnv.triggerAttackRelease("8n", time);
-                        synth.triggerAttackRelease(event.note, "8n", time);
+                        // synth.triggerAttackRelease(event.note, "8n", time);
+                        synth.triggerAttack(event.note, time);
                         // MIDI - playnote in time
                         if (window.welle.app.MIDIOutput != undefined) {
                             // if midiTransmit = true eg. Midi channel < 14

@@ -36,7 +36,7 @@ class Instrument {
             attack: 0.01,
             decay: 0.31,
             sustain: 0.99,
-            release: 2.86,
+            release: 3,
         }; // attk, dec, sus, rel
         this.samplerEnvSettings = {
             attack: 0.01,
@@ -64,8 +64,8 @@ class Instrument {
 
         this.synth.connect(this.ampEnv);
         this.synth.attack = 0.01;
-        this.synth.sustain = 1;
-        this.synth.release = 2.5;
+        // this.synth.sustain = 1;
+        this.synth.release = 1;
     }
 
     // HELPER
