@@ -145,8 +145,6 @@ If you have issues or suggestions, please feel free to get in touch! A contact e
 
 <h3>Sample Packs</h3>
 
-<p>Sample Packs:</p>
-<p></p>
 <p>buchla - Omadowin </p>
 <p>diskette - Matteo Grilli "Ambient Diskette"</p>
 <p>electronique - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
@@ -282,8 +280,6 @@ Wenn Sie Probleme oder Vorschläge haben, melden Sie sich bitte! Eine Kontakt-E-
 
 <h3>Sample Packs/ Instrumente</h3>
 
-<p>Sample Packs:</p>
-<p></p>
 <p>buchla - Omadowin </p>
 <p>diskette - Matteo Grilli "Ambient Diskette"</p>
 <p>electronique - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
