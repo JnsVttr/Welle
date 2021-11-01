@@ -80,6 +80,7 @@ if (checkDevice() == "ios" || checkDevice() == "android" || checkDevice() == "wi
     document.getElementById("rec-button").style.display = "none";
     document.getElementById("file").style.display = "none";
     document.getElementById("filesDiv").style.display = "none";
+    document.getElementById("midiSelect").style.display = "none";
 }
 
 // ============================================
