@@ -49,7 +49,7 @@ const presetsURL = path.join(__dirname, "../data/preset");
 let userURL = path.join(__dirname, "../data/user");
 // const tonePresetsPath = path.join(__dirname, "../data/instruments/instruments.json");
 // let tonePresetsJSON = JSON.parse(fs.readFileSync(tonePresetsPath, "utf8"));
-
+const maxSizeMp3 = 130000; // max files 130KB = 3s at 320KB/s
 //
 //
 //
@@ -192,7 +192,7 @@ app.post("/upload-samples", (req, res, next) => {
     upload = multer({
         storage: store,
         fileFilter: samplesFilter,
-        limits: { fileSize: 200000 },
+        limits: { fileSize: maxSizeMp3 },
     }).fields([{ name: "samples", maxCount: 30 }]);
 
     upload(req, res, (err) => {

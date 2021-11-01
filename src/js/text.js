@@ -133,7 +133,7 @@ The instruments are just short .mp3 files. On your computer you can copy your fa
 The download option is not active for your own uploaded instruments. 
 </p>
 <p>
-To upload instruments, hit the 'upload instruments' button and select multiple files. Only .mp3 files smaller than 200KB are allowed. You can upload up to 30 files.
+To upload instruments, hit the 'upload instruments' button and select multiple files. Only .mp3 files smaller than 130KB are allowed (ca.3 seconds at 320Kb/s). You can upload up to 30 files.
 Their names will be converted to lowercase and the instruments will be displayed in WELLE. Now you can start to play with them.
 A small status text after the button will inform you about the upload success. 
 </p>
@@ -257,7 +257,7 @@ Die Download-Option ist nicht aktiv für Ihre eigenen hochgeladenen Instrumente.
 </p>
 <p>
 Um Instrumente hochzuladen, klicken Sie auf die Schaltfläche "Instrumente laden" und wählen Sie mehrere Dateien aus. 
-Es sind nur .mp3-Dateien erlaubt, die kleiner als 200KB sind. Sie können bis zu 30 Dateien hochladen. 
+Es sind nur .mp3-Dateien erlaubt, die kleiner als 130KB sind (ca. 3 Sekunden bei 320Kb/s). Sie können bis zu 30 Dateien hochladen. 
 Die Namen werden in Kleinbuchstaben umgewandelt und die Instrumente werden in WELLE angezeigt. 
 Jetzt können Sie mit ihnen spielen. Ein kleiner Statustext hinter der Schaltfläche informiert Sie über den erfolgreichen Upload.
 </p>

@@ -71,7 +71,7 @@
                     <!-- <a href="/download">download</a> -->
                 </div>
                 <div id="loaderDiv" class="flexDiv">
-                    <div class="w3-hide-small"><p>loading the website</p></div>
+                    <div><p>loading the website</p></div>
                     <div class="loader"></div>
                 </div>
                 
@@ -130,7 +130,7 @@
                             value="download instruments"
                             title="download instruments"
                         />
-                        <a id="downloadLinkSamplePack" href="" download style="display:none"></a>
+                        <a id="downloadLinkSamplePack" href="#" download style="display:none"></a>
                     </p>
                     <p>
                         <input
@@ -197,7 +197,7 @@
                             />
                         </p>
 
-                        <p class="w3-hide-small">
+                        <p>
                             <select id="midiSelect" class="w3-border w3-round" name="midi">
                                 <option value="" disabled selected>select midi</option>
                             </select>
@@ -232,13 +232,13 @@
                         <p>
                             <input
                                 id="rec-button"
-                                class="w3-button w3-round-large w3-border buttonSmall w3-hide-small"
+                                class="w3-button w3-round-large w3-border buttonSmall"
                                 type="button"
                                 value="RECORD"
                                 title="record audio by clicking the button"
                             />
                         </p>
-                        <p id="file" onclick="this.value=null" class="w3-small recFile w3-hide-small">no recorded file</p>
+                        <p id="file" onclick="this.value=null" class="w3-small recFile">no recorded file</p>
                     </div>
                 </div>
 
