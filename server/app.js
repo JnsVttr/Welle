@@ -401,23 +401,26 @@ io.on("connection", (socket) => {
                 if (err) throw err;
             });
         }
-        // DELETE USER DIR
-        let userDir = path.join(userURL, socket.id);
-        if (fs.existsSync(userDir)) {
-            console.log(`folder exists  -> delete !!`);
-            fs.rmdirSync(userDir, { recursive: true });
-        }
 
-        // REMOVE FROM CLIENTS ARRAY
-        if (clients[socket.id]) {
-            delete clients[socket.id];
-        }
+        setTimeout(() => {
+            // DELETE USER DIR
+            let userDir = path.join(userURL, socket.id);
+            if (fs.existsSync(userDir)) {
+                console.log(`folder exists  -> delete !!`);
+                fs.rmdirSync(userDir, { recursive: true });
+            }
 
-        console.log(`${JSON.stringify(clients)}`);
-        let clientsNum = Object.keys(clients).length;
-        console.log(`connected clients: ${clientsNum}`);
+            // REMOVE FROM CLIENTS ARRAY
+            if (clients[socket.id]) {
+                delete clients[socket.id];
+            }
 
-        console.log("==========================");
+            console.log(`${JSON.stringify(clients)}`);
+            let clientsNum = Object.keys(clients).length;
+            console.log(`connected clients: ${clientsNum}`);
+
+            console.log("==========================");
+        }, 300);
     });
 });
 
