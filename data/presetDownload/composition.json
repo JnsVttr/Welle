@@ -1,32 +1,7 @@
 {
     "name": "composition",
     "bpm": 120,
-    "samplePack": "user",
+    "samplePack": "default",
     "parts": {},
-    "activeInstruments": [
-        {
-            "name": "res5",
-            "mute": false,
-            "rand": 0,
-            "volume": 0.6,
-            "sequence": [
-                "C3",
-                "C3",
-                "C3",
-                "C3",
-                "C3",
-                "C3",
-                "C3",
-                "C3"
-            ],
-            "pattern": [
-                0,
-                0,
-                0,
-                0,
-                0
-            ],
-            "rawPattern": "#####"
-        }
-    ]
+    "activeInstruments": []
 }

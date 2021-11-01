@@ -126,7 +126,7 @@ const jsonFilter = function (req, file, cb) {
     cb(null, true);
 };
 app.post("/upload-preset", (req, res, next) => {
-    console.log("incoming composition file..");
+    console.log("incoming composition file. send it to client:");
 
     let upload = multer({ storage: storage, fileFilter: jsonFilter }).single("composition");
 
@@ -178,7 +178,7 @@ app.post("/upload-samples", (req, res, next) => {
 
     store = multer.diskStorage({
         destination: function (req, file, cb) {
-            console.log("store path multer:", userDirPath);
+            // console.log("store path multer:", userDirPath);
             // console.log("req.files", req.files);
             cb(null, userDirPath);
         },
@@ -188,11 +188,13 @@ app.post("/upload-samples", (req, res, next) => {
             cb(null, file.originalname);
         },
     });
+
     upload = multer({
         storage: store,
         fileFilter: samplesFilter,
         limits: { fileSize: 200000 },
     }).fields([{ name: "samples", maxCount: 30 }]);
+
     upload(req, res, (err) => {
         // req.file contains information of uploaded file
         // req.body contains information of text fields, if there were any
@@ -206,7 +208,7 @@ app.post("/upload-samples", (req, res, next) => {
             fs.mkdirSync(userDirPath);
         }
         Object.entries(req.files).forEach(([key, value]) => {
-            console.log(`${key} ${value}`);
+            // console.log(`${key} ${value}`);
             value.forEach((file) => {
                 console.log(file.originalname);
                 var oldPath = file.path;
@@ -254,9 +256,7 @@ app.post("/upload-samples", (req, res, next) => {
         });
     });
 });
-//
-////
-//
+
 //
 //
 //
@@ -265,88 +265,55 @@ app.post("/upload-samples", (req, res, next) => {
 //
 //
 //
+//
+//
+//
+
 // ======================================================================
 // SOCKETS connection: io.sockets.emit, socket.on
 // ======================================================================
+
+// send to all: io.sockets.emit
+// send to one: socket.emit
+// broadcast to specific: io.sockets.to.(ID).emit
 
 const clients = {};
 const users = [];
 
 io.on("connection", (socket) => {
     const date = new Date().toISOString().slice(0, 10);
-    console.log(`socket connects to client: id: ${socket.id}`);
+    console.log("");
+    console.log(`>>> Connect to new client:${socket.id}`);
 
-    clients[socket.id] = { history: [] };
-    socket.emit({ message: "new connection", clients: clients });
-    // const presets = getPresets({ path: presetsURL });
-    // socket.emit("presets", presets);
+    if (clients[socket.id]) {
+        console.log(`client already connected..`);
+    } else {
+        console.log(`init client dir.`);
+        clients[socket.id] = { history: [] };
+        // make new dir for user:
+        let userID = socket.id;
+        let userDirPath = `${userURL}/${userID}`;
+        if (!fs.existsSync(userDirPath)) {
+            console.log(`dir doesn't exist: mkdir`);
+            console.log(`path: ${userDirPath}`);
+            fs.mkdirSync(userDirPath);
+        }
+    }
+    let clientsNum = Object.keys(clients).length;
+    console.log(`clients: ${clientsNum}`);
+    console.log("-------------------");
+    //
+    //
+    //
+    //
 
-    // OSC tests
-
-    // HELLO MESSAGE
-    socket.on("message", (message) => {
-        // if (debug) console.log(`socket on message: ${message.string}`);
-        io.sockets.emit("allUsers", { users: users });
-    });
-
-    // new user
-    socket.on("newUser", (message) => {
-        clients[socket.id].user = message.user;
-        if (!users[message.user]) users.push(message.user);
-        console.log(`added new user: ${message.user}`);
-        io.sockets.emit("allUsers", { users: users });
-    });
-
-    // session data
-    // socket.on("sessionData", (message) => {
-    //     console.log(
-    //         `>> received session data from ${message.user}: ${message.string}. users: ${users}`
-    //     );
-    //     io.sockets.emit("sessionData", message);
-    // });
-
-    // console input
-    socket.on("consoleInput", (message) => {
-        // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
-        clients[socket.id].history.push(message.input);
-    });
-
-    // TONE PRESETS
-    // STORE PRESET
-    socket.on("storePreset", (message) => {
-        console.log(`receive preset ${message.name}`);
-        const fileName = `${message.name}.json`;
-        const fileURL = path.join(downloadPresetURL, fileName);
-        fs.writeFile(fileURL, JSON.stringify(message.preset, null, 4), (err) => {
-            if (err) throw err;
-            //const presets = getPresets({ path: presetsURL });
-            socket.emit("presetURL", { url: "/downloadPreset", file: fileName });
-        });
-    });
-    // REQUEST PRESET
-    socket.on("requestPreset", () => {
-        console.log(`request presets for client`);
-        let preset = JSON.parse(fs.readFileSync(path.join(uploadPresetURL, "composition.json"), "utf8"));
-        io.sockets.emit("presetData", preset);
-    });
-
-    // });
-    // socket on delete Preset
-    // socket.on("deletePreset", (message) => {
-    //     const file = path.join(presetsURL, `${message.name}.json`);
-    //     fs.unlink(file, function (err) {
-    //         if (err) throw err;
-    //         console.log(`File ${message.name}.json deleted!`);
-    //         const presets = getPresets({ path: presetsURL });
-    //         socket.emit("presets", presets);
-    //     });
-    // });
-    socket.on("requestSamplePacks", () => {
-        console.log(`request samplePacks for client`);
-        // let samplePacks = JSON.parse(fs.readFileSync(samplePacksURL, "utf8"));
-        const samplePacks = getSamplePacks({ path: samplePacksURL });
-        console.log(samplePacks);
-        io.sockets.emit("samplePacks", { samplePacks: samplePacks });
+    // ALERTS FILES
+    socket.on("requestAlerts", (message) => {
+        console.log(`requestAlerts for client`);
+        // read & print files 'samples'
+        const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
+        // io.sockets.to(socket.id).emit("alerts", samples);
+        socket.emit("alerts", samples);
     });
 
     // AUDIO FILES
@@ -369,8 +336,42 @@ io.on("connection", (socket) => {
             app.use("/audio", express.static(audioPath));
         }
         samples = getSamples({ path: audioPath });
-        console.log(`app audioPath: ${audioPath}`);
-        io.sockets.emit("sampleFiles", { files: samples });
+        // console.log(`app audioPath: ${audioPath}`);
+        socket.emit("sampleFiles", { files: samples });
+    });
+
+    // SAMPLE PACKS
+    socket.on("requestSamplePacks", () => {
+        console.log(`request samplePacks for client`);
+        // let samplePacks = JSON.parse(fs.readFileSync(samplePacksURL, "utf8"));
+        const samplePacks = getSamplePacks({ path: samplePacksURL });
+        console.log(samplePacks);
+        socket.emit("samplePacks", { samplePacks: samplePacks });
+    });
+
+    // store console input
+    socket.on("consoleInput", (message) => {
+        // console.log(`socket on consoleInput - id: ${message.id} input: ${message.input}`);
+        clients[socket.id].history.push(message.input);
+    });
+
+    // TONE PRESETS (COMPOSITION)
+    // STORE PRESET
+    socket.on("storePreset", (message) => {
+        console.log(`receive preset ${message.name}`);
+        const fileName = `${message.name}.json`;
+        const fileURL = path.join(downloadPresetURL, fileName);
+        fs.writeFile(fileURL, JSON.stringify(message.preset, null, 4), (err) => {
+            if (err) throw err;
+            //const presets = getPresets({ path: presetsURL });
+            socket.emit("presetURL", { url: "/downloadPreset", file: fileName });
+        });
+    });
+    // REQUEST PRESET
+    socket.on("requestPreset", () => {
+        console.log(`request presets for client`);
+        let preset = JSON.parse(fs.readFileSync(path.join(uploadPresetURL, "composition.json"), "utf8"));
+        socket.emit("presetData", preset);
     });
 
     socket.on("requestUserSamples", (message) => {
@@ -380,19 +381,15 @@ io.on("connection", (socket) => {
         let packPath = path.join(userURL, socketID);
         samples = getSamples({ path: packPath });
         console.log(`socketID: ${socketID}, app audioPath: ${packPath}`);
-        io.sockets.emit("sampleFiles", { files: samples, path: `/user/${socketID}` });
+        socket.emit("sampleFiles", { files: samples, path: `/user/${socketID}` });
     });
 
-    // ALERTS FILES
-    socket.on("requestAlerts", () => {
-        // if (debug) console.log(`requestAlerts for Client`);
-        // read & print files 'samples'
-        const samples = getSamples({ path: alertsPath }); // alertsPath, baseUrl, "alerts"
-        io.sockets.emit("alerts", samples);
-    });
-
-    // on disconnect
+    // ON DISCONNECT
     socket.on("disconnect", () => {
+        console.log("");
+        console.log("==========================");
+        console.log(`disconnect socket: ${socket.id}`);
+        // STORE CONSOLE
         // if there is some histoy, save it as file
         if (clients[socket.id].history.length > 0) {
             const file = path.join(historyURL, `${date}-${socket.id}.txt`);
@@ -404,22 +401,48 @@ io.on("connection", (socket) => {
                 if (err) throw err;
             });
         }
+        // DELETE USER DIR
         let userDir = path.join(userURL, socket.id);
         if (fs.existsSync(userDir)) {
-            console.log(`${socket.id} exist  -> delete !!`);
+            console.log(`folder exists  -> delete !!`);
             fs.rmdirSync(userDir, { recursive: true });
         }
-        // if (clients[socket.id].user) {
-        //     const index = users.indexOf(clients[socket.id].user);
-        //     if (index > -1) {
-        //         users.splice(index, 1);
-        //     }
-        // }
-        // io.sockets.emit("allUsers", { users: users });
-        // delete clients[socket.id];
-        // console.log(`deleted. client from clients: ${socket.id}`);
+
+        // REMOVE FROM CLIENTS ARRAY
+        if (clients[socket.id]) {
+            delete clients[socket.id];
+        }
+
+        console.log(`${JSON.stringify(clients)}`);
+        let clientsNum = Object.keys(clients).length;
+        console.log(`connected clients: ${clientsNum}`);
+
+        console.log("==========================");
     });
 });
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // start server
 // ================================

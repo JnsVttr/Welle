@@ -1,29 +1,30 @@
 {
-  "name": "welle",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost ",
-    "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
-    "start-server": "nodemon server/app.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1",
-    "multer": "^1.4.3",
-    "node-osc": "^5.2.3",
-    "nodemon": "^1.19.4",
-    "ohm-js": "^0.14.0",
-    "osc-js": "^2.1.2",
-    "parcel-bundler": "^1.12.5",
-    "socket.io": "^4.0.0",
-    "socket.io-client": "^4.1.2",
-    "tone": "^14.8.17",
-    "webmidi": "^2.5.2"
-  },
-  "homepage": "https://github.com/JnsVttr/welle#readme",
-  "description": ""
+    "name": "welle",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start-client": "rm -rf client && parcel src/index.html --out-dir client --hmr-hostname localhost ",
+        "build": "rm -rf client_build && parcel build src/index.html --public-url ./ --out-dir client_build",
+        "start-server": "killall -9 node && nodemon server/app.js",
+        "start-static-server": "killall -9 node && node server/app.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1",
+        "multer": "^1.4.3",
+        "node-osc": "^5.2.3",
+        "nodemon": "^1.19.4",
+        "ohm-js": "^0.14.0",
+        "osc-js": "^2.1.2",
+        "parcel-bundler": "^1.12.5",
+        "socket.io": "^4.0.0",
+        "socket.io-client": "^4.1.2",
+        "tone": "^14.8.17",
+        "webmidi": "^2.5.2"
+    },
+    "homepage": "https://github.com/JnsVttr/welle#readme",
+    "description": ""
 }

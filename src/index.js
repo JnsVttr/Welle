@@ -32,6 +32,34 @@ window.welle = { name: "welle", app: App, instruments: {} };
 // Window: this is the document window's name: ${window.welle.name}.
 // And this is the App: ${JSON.stringify(window.welle.app)}`);
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// ============================================
+// DOCUMENT HANDLING
+// ============================================
 function checkDevice() {
     let device = "else";
     var isMac = /(Mac)/i.test(navigator.platform);
@@ -117,6 +145,29 @@ document.getElementById("mainInput").addEventListener("keydown", (e) => {
 });
 
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 // ============================================
 // SOCKET HANDLING
@@ -127,10 +178,18 @@ Socket.on("connect", function (data) {
     App.id = Socket.id;
     socketID = Socket.id;
     console.log(`Socket Connected! Id: ${App.id}, user: ${App.user}`);
-    if (App.getAlertsNum() == 0) Socket.emit("requestAlerts");
+    if (App.getAlertsNum() == 0) Socket.emit("requestAlerts", { id: App.id });
     if (App.getSamplesNum() == 0) Socket.emit("requestSampleFiles");
     // if (App.getInstrumentsNum() == 0) Socket.emit("requestTonePresets");
     Socket.emit("requestSamplePacks");
+});
+
+// SOCKET receive alerts - createAlerts(alerts);
+Socket.on("alerts", (message) => {
+    console.log(`Socket: get (${message.count}) alerts. `);
+    if (App.getAlertsNum() == 0) {
+        App.addAlerts(message.samples);
+    }
 });
 
 // SOCKET on receiving audioFile Paths
@@ -138,7 +197,7 @@ Socket.on("sampleFiles", (message) => {
     let samples = message.files.samples;
     let samplesPath = undefined;
     if (message.path) samplesPath = message.path;
-    console.log(`Incoming samples: path: ${samplesPath} get (${samples}) samples. `);
+    console.log(`Incoming samples: path: ${samplesPath} get (${samples.length}) samples. `);
     // console.log(`#samples num ... (${App.getSamplesNum()})`);
 
     // check Transport state:
@@ -163,13 +222,14 @@ Socket.on("sampleFiles", (message) => {
         // console.log(`App.instruments .. ${App.instruments[1].sequence}`);
         // App.startTransport();
         App.renderContent();
-        console.log(`App files loaded`);
+        console.log("=========== app files loaded ==");
         document.getElementById("loaderDiv").style.display = "none";
 
         // delay for sample buffers
         setTimeout(() => {
-            console.log(`is there preset data? : ${App.presetData}`);
+            console.log("");
             if (App.presetData != undefined) {
+                console.log(`reading preset data....`);
                 App.initPresetData(App.presetData);
             }
         }, 500);
@@ -189,28 +249,9 @@ Socket.on("samplePacks", (message) => {
     App.addSamplePacks({ packs: packs });
 });
 
-// SOCKET receive alerts - createAlerts(alerts);
-Socket.on("alerts", (message) => {
-    // console.log(`Socket: get (${message.count}) alerts. `);
-    if (App.getAlertsNum() == 0) {
-        App.addAlerts(message.samples);
-    }
-});
-
-// SOCKET new User
-Socket.on("allUsers", (message) => {
-    console.log(`incoming all users: ${message.users}`);
-    App.updateUsers(message.users);
-});
-
-// SOCKET session data
-Socket.on("sessionData", (message) => {
-    console.log(`incoming session data: ${JSON.stringify(message)}`);
-    App.handleRemoteInput(message);
-});
-
 // SOCKET preset URL
 Socket.on("presetURL", (message) => {
+    console.log(`receive URL for saving composition:`);
     console.log(`message.url: ${message.url}, file: ${message.file}`);
     const anchor = document.createElement("a", { href: message.url });
     anchor.download = "composition.json";
@@ -231,6 +272,49 @@ Socket.on("presetData", (message) => {
         }, 200);
     }
 });
+
+// SOCKET receive tonePresets
+// Socket.on("tonePresets", (presets) => {
+//     if (App.getInstrumentsNum() == 0) {
+//         App.addInstruments(presets);
+//         App.printAllInstruments();
+//         App.renderInstrumentsOverview();
+//     }
+// });
+
+// SOCKET presets
+// Socket.on("presets", (presets) => {
+//     console.log(`incoming presets: `, presets);
+//     App.storePresets(presets);
+// });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// ============================================
+// SUBMIT DATA VIA ROUTES
+// ============================================
 
 const submitComposition = (e) => {
     e.preventDefault();
@@ -310,18 +394,3 @@ document.getElementById("uploadSamplePackFormLoad").addEventListener("change", s
 //
 //
 //
-
-// SOCKET receive tonePresets
-// Socket.on("tonePresets", (presets) => {
-//     if (App.getInstrumentsNum() == 0) {
-//         App.addInstruments(presets);
-//         App.printAllInstruments();
-//         App.renderInstrumentsOverview();
-//     }
-// });
-
-// SOCKET presets
-// Socket.on("presets", (presets) => {
-//     console.log(`incoming presets: `, presets);
-//     App.storePresets(presets);
-// });
