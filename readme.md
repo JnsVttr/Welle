@@ -21,11 +21,11 @@ Example Code:
 kick
 kick #-#-##
 string #-#23-
-: beat
+= beat
 vol 0.8 kick
 bpm 110
-bass > drums
-string %2
+bass + drums
+string &2
 ```
 
 ![Screenshot](screenshot.png?v=4&s=200)
@@ -40,7 +40,7 @@ University of Art and Design Linz, Austria.
 ## Live Demo
 
 Please check the live version at:
-[https://tangible.uber.space](https://tangible.uber.space).
+[https://welle.live](https://welle.live).
 
 ## Built With
 
