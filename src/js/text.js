@@ -69,14 +69,16 @@ HAVE FUN !
 
 <h3>playing sounds</h3>
 
-<p><span class="commands">bass</span> | the simplest way to start an instrument is to just type its name in the console and hit enter. 8 steps will be filled with a note #.</p>
+<p><span class="commands">bass</span> | preview the instrument either by clicking on the link in the list or by entering the name in the console.</p>
+<p><span class="commands">bass #</span> | the simplest way to start an instrument is to just type its name in the console plus a "#" and hit enter. 8 steps will be filled with a note #.</p>
 <p><span class="commands">bass #-#</span> | the instrument name followed by signs for notes and pause will define a pattern. If less than 8 signs are entered, they will be duplicated until 8 steps are filled.</p>
 <p><span class="commands">bass #-#3-#-12</span> | note signs followed by positive or negative number will change pitch</p>
 <p><span class="commands">. bass</span> | a dot before the instrument name will mute it</p>
 <p><span class="commands">> bass</span> | a greater sign before the instrument name will unmute it</p>
 <p><span class="commands">bass 0.3</span> | setting the volume of an instrument with a range between 0.0 and 1.0</p>
 <p><span class="commands">bass &3</span> | setting random parameter, e.g. after ho many cycles notes will be reordered randomly</p>
-<p><span class="commands">bass 0.6 ###2## &2</span> | setting multiple parameters at once</p>
+<p><span class="commands">bass 0.6 &3</span> | setting both volume and random paramter</p>
+<p><span class="commands">bass 0.6 &2 ###2## </span> | setting multiple parameters at once</p>
 <p><span class="commands">bass hh kick ###2##</span> | all commands can be set for multiple instruments</p>
 <p><span class="commands">bass + string hh</span> | copy pattern from one instrument to one or more other instruments</p>
 <p><span class="commands">/ bass</span> | delete instrument or snapshot</p>
@@ -197,14 +199,16 @@ um vorherige Eingaben abzurufen und erneut zu verwenden.
 
 <h3>Instrumente spielen</h3>
 
-<p><span class="commands">bass</span> | Der einfachste Weg, ein Instrument zu starten, ist, seinen Namen in die Konsole einzugeben und die Eingabetaste zu drücken. 8 Schritte werden mit der Note # gefüllt.</p>
+<p><span class="commands">bass</span> | Instrument vorhören: entweder den Link in der Instrumente Liste klicken oder den Namen in die Konsole eingeben.</p>
+<p><span class="commands">bass #</span> | Der einfachste Weg, ein Instrument zu starten, ist, seinen Namen plus "#" in die Konsole einzugeben und die Eingabetaste zu drücken. 8 Schritte werden mit der Note # gefüllt.</p>
 <p><span class="commands">bass #-#</span> | der Instrumentenname, gefolgt von Zeichen für Noten und Pause, definiert ein Pattern. Wenn weniger als 8 Zeichen eingegeben werden, werden sie dupliziert, bis 8 Schritte gefüllt sind.</p>
 <p><span class="commands">bass #-#3-#-12</span> | Notenzeichen, gefolgt von einer positiven oder negativen Zahl, ändern die Tonhöhe</p>
 <p><span class="commands">. bass</span> | ein Punkt vor dem Namen des Instruments schaltet es stumm</p>
 <p><span class="commands">> bass</span> | ein Größerzeichen vor dem Namen des Instruments hebt dessen Stummschaltung auf</p>
 <p><span class="commands">bass 0.3</span> | Einstellung der Lautstärke eines Instruments im Bereich zwischen 0.0 und 1.0</p>
 <p><span class="commands">bass &3</span> | Einstellung des Zufallsparameters, z.B. nach wie vielen Zyklen werden die Noten zufällig neu geordnet</p>
-<p><span class="commands">bass 0.6 ###2## &2</span> | Einstellen mehrerer Parameter auf einmal</p>
+<p><span class="commands">bass 0.3 &3</span> | Einstellung von Lautstärke und Zufallsparameters</p>
+<p><span class="commands">bass 0.6 &2 ###2## </span> | Einstellen aller Parameter auf einmal</p>
 <p><span class="commands">bass hh kick ###2##</span> | alle Befehle können auf mehrere Instrumente angewendet werden</p>
 <p><span class="commands">bass + string hh</span> | Kopieren eines Patterns von einem Instrument auf ein oder mehrere andere Instrumente</p>
 <p><span class="commands">/ bass</span> | Löschen von aktiven Instrument oder Moment</p>
