@@ -218,18 +218,12 @@ semantics.addOperation("eval", {
             random: random,
         };
     },
-    Assignments_plainStartEvent: (phrases, random) => {
-        if (random.sourceString == "") random = null;
-        else {
-            random = random.sourceString.replace("&", ""); // '%2'
-            random = parseInt(random);
-        }
+    Assignments_instrumentPreview: (phrases) => {
         phrases = phrasesToArray(phrases);
-        let event = "plainStartEvent";
+        let event = "instrumentPreview";
         return {
             event: event,
             phrases: phrases,
-            random: random,
         };
     },
     Assignments_emptyEvent: (_) => {

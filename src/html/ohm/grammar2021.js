@@ -57,7 +57,7 @@ livecode {
         | "bpm" intPos floatPos?                    --setBPM
         | PhraseList floatPos? random                --setVolumeRandom
         | PhraseList floatPos 		                --setVolume
-        | PhraseList random?			            --plainStartEvent
+        | PhraseList        			            --instrumentPreview
         | ""                                        --emptyEvent
         
         

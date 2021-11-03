@@ -15,10 +15,9 @@ export const parser = (input) => {
     // console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
 
     switch (input.event) {
-        case "plainStartEvent":
-            App.plainStartInstruments({
+        case "instrumentPreview":
+            App.instrumentPreview({
                 instruments: input.phrases,
-                random: input.random,
             });
             // App.sendMidiSelectedInstState();
             break;

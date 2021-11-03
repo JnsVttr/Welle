@@ -1015,6 +1015,13 @@ class WelleApp {
         this.renderContent();
     }
 
+    instrumentPreview(message) {
+        let list = message.instruments;
+        list.forEach((inst) => {
+            this.playOnce(inst);
+        });
+    }
+
     stopInstruments(instruments) {
         // validate message instruments input, can be multiple instruments at once
         instruments.forEach((inst) => {
