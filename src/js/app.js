@@ -1071,6 +1071,34 @@ class WelleApp {
         });
         this.renderContent();
     }
+    setVolumeRandom(message) {
+        console.log("setVolumeRandom message: ", message);
+        message.instruments.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    if (message.volume) entry.setVolume(message.volume);
+                    if (message.midi == undefined) {
+                        this.setSelected(entry);
+                        entry.activate();
+                    }
+                    entry.setRand(message.random);
+                    // entry.rand = message.random;
+                }
+            });
+            // console.log(`${inst} valid is ${valid}`);
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
+        });
+        this.renderContent();
+    }
 
     copyPattern(message) {
         console.log(`incoming message: ${JSON.stringify(message)}`);

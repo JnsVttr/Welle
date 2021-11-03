@@ -53,8 +53,9 @@ livecode {
 
     Assignments =
         | phrase "+" PhraseList                     --copyPattern
-        | PhraseList floatPos? Pattern random?      --assignPattern
+        | PhraseList floatPos? random? Pattern      --assignPattern
         | "bpm" intPos floatPos?                    --setBPM
+        | PhraseList floatPos? random                --setVolumeRandom
         | PhraseList floatPos 		                --setVolume
         | PhraseList random?			            --plainStartEvent
         | ""                                        --emptyEvent

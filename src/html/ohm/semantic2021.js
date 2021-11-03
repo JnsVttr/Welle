@@ -161,7 +161,7 @@ semantics.addOperation("eval", {
         };
     },
 
-    Assignments_assignPattern: (phrases, volume, pattern, random) => {
+    Assignments_assignPattern: (phrases, volume, random, pattern) => {
         volume = volume.eval();
         // console.log("semantics - assignPattern, randomSourceString: ", random.sourceString);
         if (random.sourceString == "") random = null;
@@ -202,6 +202,20 @@ semantics.addOperation("eval", {
             event: event,
             phrases: phrases,
             volume: volume,
+        };
+    },
+    Assignments_setVolumeRandom: (phrases, volume, random) => {
+        if (volume.sourceString == "") volume = null;
+        else volume = volume.eval();
+        phrases = phrasesToArray(phrases);
+        random = random.sourceString.replace("&", ""); // '%2'
+        random = parseInt(random);
+        let event = "setVolumeRandom";
+        return {
+            event: event,
+            phrases: phrases,
+            volume: volume,
+            random: random,
         };
     },
     Assignments_plainStartEvent: (phrases, random) => {
