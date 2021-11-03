@@ -1467,6 +1467,7 @@ class WelleApp {
     }
     renderArrows(dir) {
         const length = this.#consoleArray.length;
+        const mainInput = document.getElementById("mainInput");
         // console.log(`App render arrows on array length ${length} with dir '${dir}'.
         // pointer: ${this.#consolePointer}
         // pos length - pointer: ${parseInt(length - this.#consolePointer)}
@@ -1475,10 +1476,9 @@ class WelleApp {
             case "up":
                 if (length > 0 && this.#consolePointer < length) {
                     // set HTML
-                    document.getElementById("mainInput").value = "";
+                    mainInput.value = "";
                     const element = this.#consoleArray[length - 1 - this.#consolePointer].message;
-                    if (element != "&nbsp;") document.getElementById("mainInput").value = element;
-
+                    if (element != "&nbsp;") mainInput.value = element;
                     // update pointer
                     if (this.#consolePointer < length) {
                         this.#consolePointer += 1;
@@ -1490,16 +1490,25 @@ class WelleApp {
                     // update pointer
                     this.#consolePointer -= 1;
                     // set HTML
-                    document.getElementById("mainInput").value = "";
+                    mainInput.value = "";
                     if (this.#consolePointer != 0) {
                         const element = this.#consoleArray[length - this.#consolePointer].message;
-                        if (element != "&nbsp;") document.getElementById("mainInput").value = element;
+                        if (element != "&nbsp;") mainInput.value = element;
                     } else {
-                        document.getElementById("mainInput").value = "";
+                        mainInput.value = "";
                     }
                 }
                 break;
         }
+        setTimeout(function () {
+            // set cursor to end of input. In type:email this is forbidden.
+            // so change to type:text, set cursor, than back
+            mainInput.setAttribute("type", "text");
+            let valueLength = mainInput.value.length;
+            // console.log(`main input value length: ${valueLength}`);
+            mainInput.setSelectionRange(valueLength, valueLength);
+            mainInput.setAttribute("type", "email");
+        }, 30);
     }
     addToConsole(message) {
         switch (message.valid) {
