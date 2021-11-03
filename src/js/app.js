@@ -905,19 +905,24 @@ class WelleApp {
     }
 
     setBpm(message) {
-        // message = bpm, factor
-        const bpm = Math.min(440, Math.max(1, message.bpm));
-        // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
-        this.bpm = bpm;
-        if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
-        else Tone.Transport.bpm.rampTo(bpm, 0.1);
-        // if Transport running
-        // if (Tone.Transport.state == "started") {
-        //     if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
-        //     else Tone.Transport.bpm.rampTo(bpm, 0.1);
-        // }
-        // this.renderContent();
-        this.renderBpm();
+        // console.log("setBPM message: ", message);
+        if (message.bpm != undefined) {
+            // message = bpm, factor
+            const bpm = Math.min(440, Math.max(1, message.bpm));
+            // if (this.debug) console.log(`BPM math bpm: ${message.bpm}, limit Bpm: ${bpm}`);
+            this.bpm = bpm;
+            if (message.factor) Tone.Transport.bpm.rampTo(bpm, message.factor);
+            else Tone.Transport.bpm.rampTo(bpm, 0.1);
+            this.renderBpm();
+        } else {
+            // console.log("setBPM send to concole");
+            this.addToConsole({
+                valid: true,
+                string: "bpm",
+                comment: "",
+                return: this.bpm,
+            });
+        }
     }
 
     //
@@ -1549,7 +1554,12 @@ class WelleApp {
         switch (message.valid) {
             case true:
                 if (message.string == "") this.playAlert("return");
-                else {
+                if (message.return != undefined) {
+                    this.#consoleArray.push({ message: `${message.return}` });
+                    setTimeout(() => {
+                        this.playAlert("enter");
+                    }, 50);
+                } else {
                     if (message.user == "local") {
                         this.#consoleArray.push({ message: `${message.string}` });
                     } else {

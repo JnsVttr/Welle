@@ -185,8 +185,10 @@ semantics.addOperation("eval", {
     },
 
     Assignments_setBPM: (_, bpm, factor) => {
-        bpm = bpm.sourceString;
-        factor = factor.sourceString;
+        if (bpm.sourceString != "") bpm = bpm.sourceString;
+        else bpm = undefined;
+        if (factor.sourceString != "") factor = factor.sourceString;
+        else factor = undefined;
         let event = "setBPM";
         return {
             event: event,
