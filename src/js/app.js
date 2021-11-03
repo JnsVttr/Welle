@@ -1022,8 +1022,31 @@ class WelleApp {
 
     instrumentPreview(message) {
         let list = message.instruments;
+
         list.forEach((inst) => {
-            this.playOnce(inst);
+            let instExists = false;
+            this.instruments.forEach((entry) => {
+                if (inst == entry.name) instExists = true;
+            });
+            if (instExists) this.playOnce(inst);
+
+            let isPart = false;
+            const partName = message.instruments[0];
+            // check for parts if only one instrument
+            if (message.instruments.length == 1) {
+                if (this.parts[partName]) {
+                    // console.log(`part ${partName} detected`);
+                    isPart = true;
+                }
+            }
+            if (isPart) this.startPart(partName);
+            if (!instExists && !isPart) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument or part",
+                });
+            }
         });
     }
 
