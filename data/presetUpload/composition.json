@@ -1,32 +1,775 @@
 {
-    "name": "composition",
-    "bpm": 120,
-    "samplePack": "default",
-    "parts": {},
-    "activeInstruments": [
-        {
-            "name": "hh",
-            "mute": false,
-            "rand": 0,
-            "volume": 0.6,
-            "sequence": [
-                "C3",
-                null,
-                null,
-                null,
-                null,
-                "C3",
-                null,
-                null
-            ],
-            "pattern": [
-                0,
-                null,
-                null,
-                null,
-                null
-            ],
-            "rawPattern": "#----"
+  "activeInstruments": [
+    {
+      "mute": false,
+      "name": "bu12",
+      "pattern": [
+        0,
+        null,
+        0,
+        0,
+        null,
+        0,
+        null,
+        0
+      ],
+      "patternRaw": "#-##-#-#",
+      "rand": 11,
+      "rawPattern": "#-##-#-#",
+      "sequence": [
+        "C3",
+        null,
+        "C3",
+        "C3",
+        null,
+        "C3",
+        null,
+        "C3"
+      ],
+      "volume": 1
+    },
+    {
+      "mute": true,
+      "name": "bu3",
+      "pattern": [
+        0,
+        3,
+        5,
+        3,
+        0,
+        null,
+        5,
+        null
+      ],
+      "patternRaw": "##3#5#3#-#5-",
+      "rand": 13,
+      "rawPattern": "##3#5#3#-#5-",
+      "sequence": [
+        "C3",
+        "D#3",
+        "F3",
+        "D#3",
+        "C3",
+        null,
+        "F3",
+        null
+      ],
+      "volume": 0.30000001192092896
+    },
+    {
+      "mute": false,
+      "name": "bu16",
+      "pattern": [
+        0,
+        null,
+        null,
+        0,
+        null,
+        null,
+        0,
+        null
+      ],
+      "patternRaw": "#--#--#-",
+      "rand": 0,
+      "rawPattern": "#--#--#-",
+      "sequence": [
+        "C3",
+        null,
+        null,
+        "C3",
+        null,
+        null,
+        "C3",
+        null
+      ],
+      "volume": 2
+    },
+    {
+      "mute": false,
+      "name": "bu4",
+      "pattern": [
+        0,
+        null,
+        null,
+        null,
+        0,
+        null,
+        null,
+        null
+      ],
+      "patternRaw": "#---#---",
+      "rand": 0,
+      "rawPattern": "#---#---",
+      "sequence": [
+        "C3",
+        null,
+        null,
+        null,
+        "C3",
+        null,
+        null,
+        null
+      ],
+      "volume": 2
+    },
+    {
+      "mute": false,
+      "name": "bu31",
+      "pattern": [
+        0,
+        5,
+        null,
+        0,
+        null,
+        3,
+        5,
+        3
+      ],
+      "patternRaw": "##5-#-#3#5#3",
+      "rand": 7,
+      "rawPattern": "##5-#-#3#5#3",
+      "sequence": [
+        "C3",
+        "F3",
+        null,
+        "C3",
+        null,
+        "D#3",
+        "F3",
+        "D#3"
+      ],
+      "volume": 0.80000001192092896
+    },
+    {
+      "mute": false,
+      "name": "bu21",
+      "pattern": [
+        3,
+        5,
+        0,
+        0,
+        5,
+        3,
+        3,
+        0
+      ],
+      "patternRaw": "#3#5###5#3#3#",
+      "rand": 5,
+      "rawPattern": "#3#5###5#3#3#",
+      "sequence": [
+        "D#3",
+        "F3",
+        "C3",
+        "C3",
+        "F3",
+        "D#3",
+        "D#3",
+        "C3"
+      ],
+      "volume": 0.80000001192092896
+    },
+    {
+      "mute": false,
+      "name": "bu9",
+      "pattern": [
+        0,
+        5,
+        3,
+        3,
+        null,
+        null,
+        null,
+        0
+      ],
+      "patternRaw": "##5#3#3---#",
+      "rand": 4,
+      "rawPattern": "##5#3#3---#",
+      "sequence": [
+        "C3",
+        "F3",
+        "D#3",
+        "D#3",
+        null,
+        null,
+        null,
+        "C3"
+      ],
+      "volume": 0.5
+    },
+    {
+      "mute": false,
+      "name": "bu26",
+      "pattern": [
+        null,
+        null,
+        null,
+        null,
+        0,
+        0,
+        0,
+        0
+      ],
+      "patternRaw": "----####",
+      "rand": 6,
+      "rawPattern": "----####",
+      "sequence": [
+        null,
+        null,
+        null,
+        null,
+        "C3",
+        "C3",
+        "C3",
+        "C3"
+      ],
+      "volume": 1
+    },
+    {
+      "mute": false,
+      "name": "bu24",
+      "pattern": [
+        null,
+        0,
+        0,
+        null,
+        null,
+        0,
+        0,
+        null
+      ],
+      "patternRaw": "-##--##-",
+      "rand": 5,
+      "rawPattern": "-##--##-",
+      "sequence": [
+        null,
+        "C3",
+        "C3",
+        null,
+        null,
+        "C3",
+        "C3",
+        null
+      ],
+      "volume": 1
+    }
+  ],
+  "bpm": 240,
+  "name": "composition",
+  "parts": {
+    "a": {
+      "bpm": 240,
+      "instrumentCollection": {
+        "bu12": {
+          "mute": false,
+          "name": "bu12",
+          "pattern": [
+            null,
+            null,
+            0,
+            0,
+            0,
+            0,
+            null,
+            0
+          ],
+          "patternRaw": "--####-#",
+          "rand": 11,
+          "rawPattern": "--####-#",
+          "sequence": [
+            null,
+            null,
+            "C3",
+            "C3",
+            "C3",
+            "C3",
+            null,
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu16": {
+          "mute": false,
+          "name": "bu16",
+          "pattern": [
+            0,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0,
+            null
+          ],
+          "patternRaw": "#--#--#-",
+          "rand": 0,
+          "rawPattern": "#--#--#-",
+          "sequence": [
+            "C3",
+            null,
+            null,
+            "C3",
+            null,
+            null,
+            "C3",
+            null
+          ],
+          "volume": 2
+        },
+        "bu21": {
+          "mute": false,
+          "name": "bu21",
+          "pattern": [
+            3,
+            0,
+            5,
+            5,
+            0,
+            0,
+            3,
+            3
+          ],
+          "patternRaw": "#3##5#5###3#3",
+          "rand": 5,
+          "rawPattern": "#3##5#5###3#3",
+          "sequence": [
+            "D#3",
+            "C3",
+            "F3",
+            "F3",
+            "C3",
+            "C3",
+            "D#3",
+            "D#3"
+          ],
+          "volume": 0.80000001192092896
+        },
+        "bu24": {
+          "mute": false,
+          "name": "bu24",
+          "pattern": [
+            null,
+            0,
+            null,
+            null,
+            null,
+            0,
+            0,
+            0
+          ],
+          "patternRaw": "-#---###",
+          "rand": 5,
+          "rawPattern": "-#---###",
+          "sequence": [
+            null,
+            "C3",
+            null,
+            null,
+            null,
+            "C3",
+            "C3",
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu26": {
+          "mute": false,
+          "name": "bu26",
+          "pattern": [
+            null,
+            null,
+            0,
+            0,
+            null,
+            null,
+            0,
+            0
+          ],
+          "patternRaw": "--##--##",
+          "rand": 6,
+          "rawPattern": "--##--##",
+          "sequence": [
+            null,
+            null,
+            "C3",
+            "C3",
+            null,
+            null,
+            "C3",
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu3": {
+          "mute": false,
+          "name": "bu3",
+          "pattern": [
+            5,
+            3,
+            3,
+            null,
+            5,
+            0,
+            null,
+            0
+          ],
+          "patternRaw": "#5#3#3-#5#-#",
+          "rand": 13,
+          "rawPattern": "#5#3#3-#5#-#",
+          "sequence": [
+            "F3",
+            "D#3",
+            "D#3",
+            null,
+            "F3",
+            "C3",
+            null,
+            "C3"
+          ],
+          "volume": 0.25
+        },
+        "bu31": {
+          "mute": false,
+          "name": "bu31",
+          "pattern": [
+            null,
+            0,
+            3,
+            0,
+            5,
+            3,
+            5,
+            null
+          ],
+          "patternRaw": "-##3##5#3#5-",
+          "rand": 7,
+          "rawPattern": "-##3##5#3#5-",
+          "sequence": [
+            null,
+            "C3",
+            "D#3",
+            "C3",
+            "F3",
+            "D#3",
+            "F3",
+            null
+          ],
+          "volume": 0.80000001192092896
+        },
+        "bu4": {
+          "mute": false,
+          "name": "bu4",
+          "pattern": [
+            0,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            null
+          ],
+          "patternRaw": "#---#---",
+          "rand": 0,
+          "rawPattern": "#---#---",
+          "sequence": [
+            "C3",
+            null,
+            null,
+            null,
+            "C3",
+            null,
+            null,
+            null
+          ],
+          "volume": 2
+        },
+        "bu9": {
+          "mute": false,
+          "name": "bu9",
+          "pattern": [
+            null,
+            null,
+            3,
+            0,
+            null,
+            0,
+            5,
+            3
+          ],
+          "patternRaw": "--#3#-##5#3",
+          "rand": 4,
+          "rawPattern": "--#3#-##5#3",
+          "sequence": [
+            null,
+            null,
+            "D#3",
+            "C3",
+            null,
+            "C3",
+            "F3",
+            "D#3"
+          ],
+          "volume": 0.5
         }
-    ]
+      }
+    },
+    "b": {
+      "bpm": 240,
+      "instrumentCollection": {
+        "bu12": {
+          "mute": false,
+          "name": "bu12",
+          "pattern": [
+            0,
+            null,
+            null,
+            null,
+            0,
+            0,
+            0,
+            0
+          ],
+          "patternRaw": "#---####",
+          "rand": 11,
+          "rawPattern": "#---####",
+          "sequence": [
+            "C3",
+            null,
+            null,
+            null,
+            "C3",
+            "C3",
+            "C3",
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu16": {
+          "mute": false,
+          "name": "bu16",
+          "pattern": [
+            0,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0,
+            null
+          ],
+          "patternRaw": "#--#--#-",
+          "rand": 0,
+          "rawPattern": "#--#--#-",
+          "sequence": [
+            "C3",
+            null,
+            null,
+            "C3",
+            null,
+            null,
+            "C3",
+            null
+          ],
+          "volume": 2
+        },
+        "bu21": {
+          "mute": false,
+          "name": "bu21",
+          "pattern": [
+            0,
+            3,
+            0,
+            5,
+            3,
+            5,
+            0,
+            3
+          ],
+          "patternRaw": "##3##5#3#5##3",
+          "rand": 5,
+          "rawPattern": "##3##5#3#5##3",
+          "sequence": [
+            "C3",
+            "D#3",
+            "C3",
+            "F3",
+            "D#3",
+            "F3",
+            "C3",
+            "D#3"
+          ],
+          "volume": 0.80000001192092896
+        },
+        "bu24": {
+          "mute": false,
+          "name": "bu24",
+          "pattern": [
+            0,
+            0,
+            null,
+            null,
+            0,
+            null,
+            null,
+            0
+          ],
+          "patternRaw": "##--#--#",
+          "rand": 5,
+          "rawPattern": "##--#--#",
+          "sequence": [
+            "C3",
+            "C3",
+            null,
+            null,
+            "C3",
+            null,
+            null,
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu26": {
+          "mute": false,
+          "name": "bu26",
+          "pattern": [
+            null,
+            null,
+            0,
+            null,
+            0,
+            0,
+            null,
+            0
+          ],
+          "patternRaw": "--#-##-#",
+          "rand": 6,
+          "rawPattern": "--#-##-#",
+          "sequence": [
+            null,
+            null,
+            "C3",
+            null,
+            "C3",
+            "C3",
+            null,
+            "C3"
+          ],
+          "volume": 1
+        },
+        "bu3": {
+          "mute": true,
+          "name": "bu3",
+          "pattern": [
+            5,
+            null,
+            5,
+            0,
+            null,
+            3,
+            3,
+            0
+          ],
+          "patternRaw": "#5-#5#-#3#3#",
+          "rand": 13,
+          "rawPattern": "#5-#5#-#3#3#",
+          "sequence": [
+            "F3",
+            null,
+            "F3",
+            "C3",
+            null,
+            "D#3",
+            "D#3",
+            "C3"
+          ],
+          "volume": 0.30000001192092896
+        },
+        "bu31": {
+          "mute": false,
+          "name": "bu31",
+          "pattern": [
+            5,
+            null,
+            0,
+            null,
+            5,
+            3,
+            3,
+            0
+          ],
+          "patternRaw": "#5-#-#5#3#3#",
+          "rand": 7,
+          "rawPattern": "#5-#-#5#3#3#",
+          "sequence": [
+            "F3",
+            null,
+            "C3",
+            null,
+            "F3",
+            "D#3",
+            "D#3",
+            "C3"
+          ],
+          "volume": 0.80000001192092896
+        },
+        "bu4": {
+          "mute": false,
+          "name": "bu4",
+          "pattern": [
+            0,
+            null,
+            null,
+            null,
+            0,
+            null,
+            null,
+            null
+          ],
+          "patternRaw": "#---#---",
+          "rand": 0,
+          "rawPattern": "#---#---",
+          "sequence": [
+            "C3",
+            null,
+            null,
+            null,
+            "C3",
+            null,
+            null,
+            null
+          ],
+          "volume": 2
+        },
+        "bu9": {
+          "mute": false,
+          "name": "bu9",
+          "pattern": [
+            3,
+            3,
+            0,
+            null,
+            null,
+            5,
+            null,
+            0
+          ],
+          "patternRaw": "#3#3#--#5-#",
+          "rand": 4,
+          "rawPattern": "#3#3#--#5-#",
+          "sequence": [
+            "D#3",
+            "D#3",
+            "C3",
+            null,
+            null,
+            "F3",
+            null,
+            "C3"
+          ],
+          "volume": 0.5
+        }
+      }
+    }
+  },
+  "samplePack": "buchla"
 }

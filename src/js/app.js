@@ -2424,7 +2424,8 @@ class WelleApp {
     //
 
     loadPreset(message) {
-        console.log(`App load preset`, message);
+        console.log("=======================");
+        console.log(`App load preset: "${message.name}"`, message);
         this.presetData = message;
         this.muteApp(true);
         setTimeout(() => {
@@ -2434,6 +2435,7 @@ class WelleApp {
         // // this.deleteAll();
         if (this.presetData.samplePack == "user") message.samplePack = undefined;
 
+        // init all
         if (message.samplePack) {
             console.log(`sample pack assigned in preset: ${message.samplePack}`);
             this.selectSamplePack(message.samplePack);
@@ -2441,6 +2443,8 @@ class WelleApp {
             console.log(`no sample pack assigned in preset`);
             this.initPresetData(this.presetData);
         }
+        // set BPM
+        this.setBpm({ bpm: message.bpm });
 
         // clear screen
         // this.renderContent();
