@@ -1487,7 +1487,7 @@ class WelleApp {
             // clear Input
             document.getElementById("mainInput").value = "";
             // FOCUS - focus back on textfield
-            document.getElementById("mainInput").focus();
+            // document.getElementById("mainInput").focus();
         }
     }
     #inputValidation = (inputString) => {
