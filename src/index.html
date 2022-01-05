@@ -178,13 +178,9 @@
                         <h2 id="h.settings">settings</h2>
 
                         <p>
-                            <input
-                                id="mute-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
-                                type="button"
-                                value="mute audio"
-                                title="mute audio"
-                            />
+                            <select id="midiSelect" class="w3-border w3-round" name="midi">
+                                <option value="" disabled selected>select midi</option>
+                            </select>
                         </p>
                         <p>
                             <input
@@ -204,12 +200,16 @@
                                 title="unmute metronom"
                             />
                         </p>
-
                         <p>
-                            <select id="midiSelect" class="w3-border w3-round" name="midi">
-                                <option value="" disabled selected>select midi</option>
-                            </select>
+                            <input
+                                id="mute-button"
+                                class="w3-button w3-round-large w3-border buttonSmall"
+                                type="button"
+                                value="mute audio"
+                                title="mute audio"
+                            />
                         </p>
+                        
                         <!-- <p>
                             <input
                                 id="language-button"

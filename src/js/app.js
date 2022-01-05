@@ -1698,9 +1698,16 @@ class WelleApp {
     renderInstrumentsOverview() {
         let html = `<p>`;
         this.instruments.forEach((entry) => {
+            // <a id="play_${entry.name}"
+            //     title="click to play sound: ${entry.name}" href='#'>${entry.name}</a>
             html += `
-            <a id="play_${entry.name}"
-                title="click to play sound: ${entry.name}" href='#'>${entry.name}</a>
+            <input
+                id="play_${entry.name}"
+                class="w3-button w3-round-large w3-border buttonSmall"
+                type="button"
+                value="${entry.name}"
+                title="click to play sound ${entry.name}"
+            />
             `;
         });
 
