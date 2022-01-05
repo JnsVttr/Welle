@@ -147,13 +147,13 @@ If you have issues or suggestions, please feel free to get in touch! A contact e
 
 <h3>Sample Packs</h3>
 
-<p>buchla - Omadowin </p>
-<p>diskette - Matteo Grilli "Ambient Diskette"</p>
-<p>electronique - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
-<p>glass - kaffekrus "Glass Recordings"</p>
-<p>sounds-for-life - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
-<p>default - Jens Vetter</p>
-<p>hardstyle - Biochron "Hardstyle Force Sample Pack"</p>
+<p>buchla by Omadowin </p>
+<p>diskette by Matteo Grilli "Ambient Diskette"</p>
+<p>electronique by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
+<p>glass by kaffekrus "Glass Recordings"</p>
+<p>sounds-for-life by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
+<p>default by Jens Vetter</p>
+<p>hardstyle by Biochron "Hardstyle Force Sample Pack"</p>
 
 
 `;
@@ -284,13 +284,13 @@ Wenn Sie Probleme oder Vorschläge haben, melden Sie sich bitte! Eine Kontakt-E-
 
 <h3>Sample Packs/ Instrumente</h3>
 
-<p>buchla - Omadowin </p>
-<p>diskette - Matteo Grilli "Ambient Diskette"</p>
-<p>electronique - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
-<p>glass - kaffekrus "Glass Recordings"</p>
-<p>sounds-for-life - Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
-<p>default - Jens Vetter</p>
-<p>hardstyle - Biochron "Hardstyle Force Sample Pack"</p>
+<p>buchla by Omadowin </p>
+<p>diskette by Matteo Grilli "Ambient Diskette"</p>
+<p>electronique by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
+<p>glass by kaffekrus "Glass Recordings"</p>
+<p>sounds-for-life by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
+<p>default by Jens Vetter</p>
+<p>hardstyle by Biochron "Hardstyle Force Sample Pack"</p>
 
 `;
 
@@ -309,7 +309,7 @@ The source code is published here: <a href="https://github.com/JnsVttr/Welle" ti
 This website was build with the Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> and
 <a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>.
 </p>
-<p>free sample packs from: <a href="https://soundpacks.com/" title="online sample pack collection.">https://soundpacks.com/</a></p>
+
 <p>contact: jens.vetter|a|ufg.at
 <p>© Jens Vetter</p>
 `;
@@ -324,7 +324,6 @@ Das Forschungsprojekt wird gefördert durch das
 DOC-Stipendium der Österreichischen Akademie der Wissenschaften, Juni 2019.
 </p>
 <p>Projektwebsite "Tangible Signals": <a href="https://tamlab.ufg.at/projects/tangible-signals/" title="go to Tangible Music Lab's project website">tamlab.ufg.at/projects/tangible-signals</a></p>
-<p>Freie Sample Packs von: <a href="https://soundpacks.com/" title="online sample pack collection.">https://soundpacks.com/</a></p>
 <p>
 Quellcode auf Github: <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a>.
 Diese Website nutzt das Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> und 
