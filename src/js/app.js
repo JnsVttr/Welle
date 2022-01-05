@@ -1703,7 +1703,7 @@ class WelleApp {
             html += `
             <input
                 id="play_${entry.name}"
-                class="w3-button w3-round-large w3-border buttonSmall"
+                class="w3-button w3-round-large buttonSmall"
                 type="button"
                 value="${entry.name}"
                 title="click to play sound ${entry.name}"
@@ -1783,7 +1783,7 @@ class WelleApp {
             const partHtml = `
                 <input
                     type = "button"
-                    class = "w3-button w3-round w3-border w3-border-black buttonSmall"
+                    class = "w3-button w3-round w3-border buttonSmall"
                     value = "${part}"
                     title = "snapshot: ${part}"
                     id = "${part}">

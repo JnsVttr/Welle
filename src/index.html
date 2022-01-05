@@ -77,7 +77,7 @@
                 <p>
                     <input
                         id="language-button"
-                        class="w3-button w3-round-large w3-border buttonSmall"
+                        class="w3-button w3-round-large buttonSmall"
                         type="button"
                         value="deutsch"
                         title="Sprache einstellen"
@@ -100,7 +100,7 @@
                     <p>
                         <input
                             id="compositionSave-button"
-                            class="w3-button w3-round-large w3-border buttonSmall"
+                            class="w3-button w3-round-large buttonSmall"
                             type="button"
                             value="save composition"
                             title="save composition"
@@ -110,7 +110,7 @@
                         
                         <input
                             id="compositionLoad-button"
-                            class="w3-button w3-round-large w3-border buttonSmall"
+                            class="w3-button w3-round-large buttonSmall"
                             type="button"
                             value="load composition"
                             title="load composition"
@@ -133,7 +133,7 @@
                     <p>
                         <input
                             id="instrumentsDownload-button"
-                            class="w3-button w3-round-large w3-border buttonSmall"
+                            class="w3-button w3-round-large buttonSmall"
                             type="button"
                             value="download instruments"
                             title="download instruments"
@@ -143,7 +143,7 @@
                     <p>
                         <input
                             id="instrumentsUpload-button"
-                            class="w3-button w3-round-large w3-border buttonSmall"
+                            class="w3-button w3-round-large  buttonSmall"
                             type="button"
                             value="upload instruments"
                             title="upload instruments"
@@ -165,7 +165,7 @@
                     </p>
                     <input
                         id="help-button"
-                        class="w3-button w3-round-large w3-border buttonSmall"
+                        class="w3-button w3-round-large  buttonSmall"
                         type="button"
                         value="?"
                         title="help"
@@ -178,14 +178,14 @@
                         <h2 id="h.settings">settings</h2>
 
                         <p>
-                            <select id="midiSelect" class="w3-border w3-round" name="midi">
+                            <select id="midiSelect" class=" w3-round" name="midi">
                                 <option value="" disabled selected>select midi</option>
                             </select>
                         </p>
                         <p>
                             <input
                                 id="muteHelper-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
+                                class="w3-button w3-round-large  buttonSmall"
                                 type="button"
                                 value="mute helper sounds"
                                 title="mute helper"
@@ -194,7 +194,7 @@
                         <p>
                             <input
                                 id="muteMetronom-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
+                                class="w3-button w3-round-large  buttonSmall"
                                 type="button"
                                 value="unmute metronom"
                                 title="unmute metronom"
@@ -203,7 +203,7 @@
                         <p>
                             <input
                                 id="mute-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
+                                class="w3-button w3-round-large  buttonSmall"
                                 type="button"
                                 value="mute audio"
                                 title="mute audio"
@@ -231,7 +231,7 @@
                         <p>
                             <input
                                 id="transport-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
+                                class="w3-button w3-round-large  buttonSmall"
                                 type="button"
                                 value="PLAY"
                                 title="start transport"
@@ -240,7 +240,7 @@
                         <p>
                             <input
                                 id="rec-button"
-                                class="w3-button w3-round-large w3-border buttonSmall"
+                                class="w3-button w3-round-large  buttonSmall"
                                 type="button"
                                 value="RECORD"
                                 title="record audio by clicking the button"
@@ -253,13 +253,15 @@
                 <!-- ===== INSTRUMENTS  ==============================  -->
                 <div id="instrumentslist">
                     <h2 id="h.instruments">instruments</h2>
-                    <select id="selectInstruments" class="w3-border w3-round" name="selectInstruments">
+                    <select id="selectInstruments" class="w3-border w3-round selector" name="selectInstruments">
                         <option value="" disabled selected>select instruments</option>
                     </select>
                     <div id="listOfInstruments" class="w3-medium sounds" title="list of instruments"></div>
                 </div>
             </div>
 
+
+            
             <!-- ====== CONSOLE ==============================  -->
             <div id="consoleField" title="console" class="w3-large mainConsole">
                 <h2 id="h.console">console</h2>
