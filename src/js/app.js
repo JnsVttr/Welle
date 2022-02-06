@@ -2231,6 +2231,8 @@ class WelleApp {
                         volume: vol,
                         midi: true,
                     });
+
+                    if (window.welle.app.selected) window.welle.app.selected.vol = vol;
                     // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
                     console.log(`MIDI input (${selected.name}) vol: ${vol} `);
                 }
@@ -2244,8 +2246,11 @@ class WelleApp {
                     let sequenceMidi = [];
                     let sequencePattern = "";
 
+                    // replace existing sequence
+                    // if input is null, overwrite
                     if (val == 0) sequence[index] = null;
-                    else sequence[index] = "C3";
+                    // else only overwrite if steps has been empty
+                    else if (sequence[index] == null) sequence[index] = "C3";
 
                     sequence.forEach((e) => {
                         // convert to pattern

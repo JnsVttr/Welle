@@ -75,7 +75,7 @@ class Instrument {
     // =========================================
 
     updateSequence(pattern, patternRaw) {
-        console.log(`incoming updateSequence pattern:`, pattern);
+        console.log(`INSTRUMENT incoming updateSequence pattern:`, pattern);
         this.patternRaw = patternRaw || "";
         this.pattern = pattern;
         const midiPattern = this.#translatePatternToMidi(this.pattern);
