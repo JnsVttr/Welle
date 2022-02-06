@@ -28,6 +28,7 @@ class Instrument {
         });
         this.sequence = [null, null, null, null, null, null, null, null];
         this.patternRaw = "";
+        this.fakePatternRaw = "";
         this.pattern = "";
         this.rand = 0;
         this.volume = 0.6;
@@ -37,13 +38,15 @@ class Instrument {
             decay: 0.31,
             sustain: 0.99,
             release: 3,
-        }; // attk, dec, sus, rel
-        this.samplerEnvSettings = {
-            attack: 0.01,
-            decay: 0.3,
-            sustain: 0.71,
-            release: 0.8,
-        }; // attk, dec, sus, rel
+        };
+        this.envSettingsCC = [0, 30, 120, 30];
+        // attk, dec, sus, rel
+        // this.samplerEnvSettings = {
+        //     attack: 0.01,
+        //     decay: 0.3,
+        //     sustain: 0.71,
+        //     release: 0.8,
+        // }; // attk, dec, sus, rel
         this.eqSettings = {
             high: 0,
             highFrequency: 5000,
@@ -83,6 +86,10 @@ class Instrument {
         for (let i = 0; i < 8; i++) {
             this.sequence[i] = slicedArray[i];
         }
+
+        // create fake rawPattern
+        this.fakePatternRaw = this.#convertMidiPatternToFakeRawPattern(slicedArray);
+        this.patternRaw = this.#convertToString(this.fakePatternRaw);
         // console.log(
         //     `finished midiPattern: ${midiPattern},
         //     slice: ${slicedArray}
@@ -118,6 +125,38 @@ class Instrument {
         return midiPattern;
     };
 
+    // convert midiPattern back to fake input e.g. ["C1", null, "D2"] -> ["#", "-", "#14"]
+    #convertMidiPatternToFakeRawPattern = (midiPattern) => {
+        let newRawPattern = [];
+
+        for (let i = 0; i < midiPattern.length; i++) {
+            let temp = midiPattern[i];
+            // console.log(`midiPattern temp: ${temp}`);
+            if (temp == null) {
+                newRawPattern.push("-");
+            } else {
+                temp = Tone.Frequency(midiPattern[i]).toMidi();
+                temp = temp - this.baseNote;
+                let entry = ``;
+                if (temp == 0) entry = `#`;
+                else entry = `#${temp}`;
+                newRawPattern.push(entry);
+            }
+        }
+        // console.log(`fake raw pattern: ${newRawPattern}`);
+        // totn_string.concat('On','The','Net')
+        return newRawPattern;
+    };
+
+    #convertToString = (array) => {
+        let newPatternString = "";
+        for (let i = 0; i < array.length; i++) {
+            newPatternString = newPatternString.concat(array[i]);
+            newPatternString = newPatternString.concat(" ");
+        }
+        return newPatternString;
+    };
+
     random(random) {
         this.rand = random;
         console.log(`set random to ${random}`);
@@ -135,6 +174,11 @@ class Instrument {
                 if (!this.randomized) {
                     // console.log(`condition true rand`);
                     const sequenceRand = this.#createRandomPattern(this.sequence);
+                    // update also string patterns
+                    // create fake rawPattern
+                    this.fakePatternRaw = this.#convertMidiPatternToFakeRawPattern(sequenceRand);
+                    this.patternRaw = this.#convertToString(this.fakePatternRaw);
+
                     for (let i = 0; i < 8; i++) {
                         this.sequence[i] = sequenceRand[i];
                     }
@@ -159,7 +203,7 @@ class Instrument {
             pattern[randomIndex] = pattern[i];
             pattern[i] = itemAtIndex;
         }
-        // console.log("pattern randomized: ", pattern);
+
         return pattern;
     }
 
@@ -186,6 +230,22 @@ class Instrument {
     getEnvSettings() {
         return this.envSettings;
     }
+    getEnvSettingsCC() {
+        const env = [
+            this.envSettings.attack,
+            this.envSettings.decay,
+            this.envSettings.sustain,
+            this.envSettings.release,
+        ];
+        const newEnv = [];
+
+        env.forEach((e) => {
+            const val = Math.round(e * 10);
+            if (val < 127) newEnv.push(val);
+            else newEnv.push(126);
+        });
+        return newEnv;
+    }
 
     getRand() {
         return this.rand;
@@ -198,6 +258,10 @@ class Instrument {
     }
     getPatternRaw() {
         return this.patternRaw;
+        // return this.fakePatternRaw;
+    }
+    getPatternRawArray() {
+        return this.fakePatternRaw;
     }
 
     // mute describes the checkbox value, if the instrument is playing or not

@@ -129,6 +129,14 @@ h3 {
     display: flex;
     justify-content: left;
 }
+.instHeadLine {
+    /* font-weight: bold !important; */
+    padding-top: 0em;
+    padding-bottom: 0.2em;
+    padding-left: 0.1em;
+    display: flex;
+    justify-content: left;
+}
 .instName {
     min-width: 8em;
     max-width: 8em;
@@ -136,20 +144,36 @@ h3 {
     margin-right: 0.1em;
 }
 .instVol {
-    min-width: 3em;
-    max-width: 3em;
+    min-width: 4em;
+    max-width: 4em;
     margin-right: 0.1em;
 }
 .instRand {
-    min-width: 3em;
-    max-width: 3em;
+    min-width: 5.3em;
+    max-width: 5.3em;
     padding-left: 0.3em;
     padding-right: 0.3em;
     /* margin-right: 1.4em; */
 }
 .instPattern {
     word-wrap: break-word;
-    max-width: 20em;
+    min-width: 21.4em;
+    max-width: 21.4em;
+}
+.instPatternPart {
+    word-wrap: break-word;
+    min-width: 2.5em !important;
+    max-width: 2.5em !important;
+    padding-left: 0.2em;
+}
+.instEnvelope {
+    word-wrap: break-word;
+    min-width: 5em;
+    max-width: 5em;
+}
+.beatDark {
+    background-color: #e4e4e4 !important;
+    /* color: #f3f3f3; */
 }
 
 #mainInput:focus,
@@ -294,10 +318,6 @@ label {
         max-width: 5.5em;
         padding-left: 0.1em;
         margin-right: 0.1em;
-    }
-    .instPattern {
-        word-wrap: break-word;
-        max-width: 10em;
     }
     .commands {
         min-width: 2em;

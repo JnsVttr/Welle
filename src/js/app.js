@@ -826,6 +826,39 @@ class WelleApp {
                 else this.metronom2.triggerAttackRelease("C5", "8n", time);
             }
 
+            // color the beats in the pattern
+            let beatArray = [
+                document.getElementsByName("beat0"),
+                document.getElementsByName("beat1"),
+                document.getElementsByName("beat2"),
+                document.getElementsByName("beat3"),
+                document.getElementsByName("beat4"),
+                document.getElementsByName("beat5"),
+                document.getElementsByName("beat6"),
+                document.getElementsByName("beat7"),
+            ];
+
+            beatArray.forEach((e) => {
+                // if (e) e.classList.remove("beatDark");
+                if (e) {
+                    e.forEach((s) => {
+                        if (s) s.classList.remove("beatDark");
+                    });
+                }
+            });
+            if (this.beat == 0) {
+                if (beatArray[7]) {
+                    beatArray[7].forEach((s) => {
+                        s.classList.add("beatDark");
+                    });
+                }
+            }
+            if (beatArray[this.beat - 1]) {
+                beatArray[this.beat - 1].forEach((s) => {
+                    s.classList.add("beatDark");
+                });
+            }
+
             // update the beat counter
             this.beat = (this.beat + 1) % 8;
             // send MIDI Clock
@@ -1728,8 +1761,23 @@ class WelleApp {
     renderInstruments() {
         // create empty html content
         let html = ``;
+        let instrumentsThere = false;
         document.getElementById(this.instDiv).innerHTML = "";
 
+        if (this.activeInstruments.length > 0) instrumentsThere = true;
+
+        if (instrumentsThere) {
+            const headerHTML = `
+                <div id="instHeader" class="instHeadLine">
+                    <span class="stateHtml"> </span>
+                    <span class="instName">|&nbsp;name</span>
+                    <span class="instVol">| volume</span>
+                    <span class="instRand">| random</span>
+                    <span class="instPattern">| pattern</span>
+                    <span class="instEnvelope">| envelope</span>
+                </div>`;
+            html += headerHTML;
+        }
         // iterate through storedInstruments collection
         this.activeInstruments.forEach((inst) => {
             this.instruments.forEach((entry) => {
@@ -1737,6 +1785,7 @@ class WelleApp {
                     // round volume
                     const volume = Math.round(entry.getVolume() * 100) / 100;
                     // sequence
+                    let patternArray = entry.getPatternRawArray();
                     let sequence = entry.getSequence();
                     let sequenceRender = "";
                     sequence.forEach((e) => {
@@ -1764,9 +1813,24 @@ class WelleApp {
                         <span class="instName">| ${entry.name}</span>
                         <span id="vol_${entry.name}" class="instVol">| ${volume}</span>
                         <span id="rand_${entry.name}" class="instRand">| & ${entry.getRand()}</span>
-                        <span id="pattern_${entry.name}" class="instPattern">| ${entry.getPatternRaw()}</span>
-                    </div>`;
+                        
+                        `;
+                    // <span id="pattern_${entry.name}" class="instPattern">| ${entry.getPatternRaw()}</span>
                     html += instHtml;
+
+                    patternArray.forEach((e, c) => {
+                        let part = "";
+                        if (c == 0) part += "|&nbsp;&nbsp;";
+                        part += `<span name="beat${c}" class="instPatternPart">${e}</span>`;
+                        if (c == 7) part += "&nbsp;&nbsp;&nbsp;";
+                        html += part;
+                    });
+
+                    const instEnv = `<span id="pattern_${
+                        entry.name
+                    }" class="instEnvelope">| ${entry.getEnvSettingsCC()}</span>
+                    </div>`;
+                    html += instEnv;
                 }
             });
         });
