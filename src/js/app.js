@@ -1153,11 +1153,11 @@ class WelleApp {
                     delete settings.instruments;
                     // add limitations 0.01 - 2
                     if (settings.attack < 0.01) settings.attack = 0.01;
-                    else if (settings.attack > 2) settings.attack = 2;
+                    else if (settings.attack > 1) settings.attack = 1;
                     if (settings.decay < 0.01) settings.decay = 0.01;
-                    else if (settings.decay > 2) settings.decay = 2;
+                    else if (settings.decay > 1) settings.decay = 1;
                     if (settings.release < 0.01) settings.release = 0.01;
-                    else if (settings.release > 2) settings.release = 2;
+                    else if (settings.release > 1) settings.release = 1;
 
                     entry.setEnvSettings(message);
                     console.log(
@@ -2186,13 +2186,14 @@ class WelleApp {
 
             // Send ENV
             // ==================================================
-            // how to scale messages 0.01 - 2 --> 0 - 126 == * 63
+            // how to scale messages 0.01 - 2 --> 0 - 126 == *
+            // how to scale messages 0.01 - 1 --> 0 - 126 == * 126
 
             const env = [message.env.attack, message.env.decay, message.env.release];
             const newEnv = [];
 
             env.forEach((e) => {
-                const val = Math.round(e * 63);
+                const val = Math.round(e * 126);
                 if (val < 127) newEnv.push(val);
                 else newEnv.push(126);
             });
@@ -2331,7 +2332,7 @@ class WelleApp {
                 // ENVELOPE
                 if (cc >= 16 && cc <= 18) {
                     const index = cc - 16;
-                    const envVal = Math.round((val / 63) * 100) / 100;
+                    const envVal = Math.round((val / 126) * 100) / 100;
                     window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
                     // let envIncoming = { attack: undefined, decay: undefined, release: undefined };
 
