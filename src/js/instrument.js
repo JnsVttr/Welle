@@ -35,11 +35,10 @@ class Instrument {
         this.chan = message.chan + 1;
         this.envSettings = {
             attack: 0.01,
-            decay: 0.31,
-            sustain: 0.99,
-            release: 3,
+            decay: 0.3,
+            release: 0.1,
         };
-        this.envSettingsCC = [0, 30, 120, 30];
+        this.envSettingsCC = [0, 30, 30];
         // attk, dec, sus, rel
         // this.samplerEnvSettings = {
         //     attack: 0.01,
@@ -65,10 +64,12 @@ class Instrument {
         this.ampEnv.connect(this.gain);
         this.setVolume(this.volume);
 
+        // this.synth.chain(this.ampEnv, this.gain);
         this.synth.connect(this.ampEnv);
-        this.synth.attack = 0.01;
+        this.synth.attack = this.envSettings.attack;
+        // this.synth.decay = 1;
         // this.synth.sustain = 1;
-        this.synth.release = 1;
+        this.synth.release = this.envSettings.release;
     }
 
     // HELPER
@@ -88,7 +89,7 @@ class Instrument {
         }
 
         // create fake rawPattern
-        this.fakePatternRaw = this.#convertMidiPatternToFakeRawPattern(slicedArray);
+        this.fakePatternRaw = this.#convertMidiPatternToFakeRawPattern(this.sequence);
         this.patternRaw = this.#convertToString(this.fakePatternRaw);
         // console.log(
         //     `finished midiPattern: ${midiPattern},
@@ -226,17 +227,19 @@ class Instrument {
 
     setEnvSettings(object) {
         this.envSettings = object;
+        this.ampEnv.attack = this.envSettings.attack;
+        this.ampEnv.decay = this.envSettings.decay;
+        this.ampEnv.release = this.envSettings.release;
+
+        this.synth.attack = this.envSettings.attack;
+        this.synth.decay = this.envSettings.decay;
+        this.synth.release = this.envSettings.release;
     }
     getEnvSettings() {
         return this.envSettings;
     }
     getEnvSettingsCC() {
-        const env = [
-            this.envSettings.attack,
-            this.envSettings.decay,
-            this.envSettings.sustain,
-            this.envSettings.release,
-        ];
+        const env = [this.envSettings.attack, this.envSettings.decay, this.envSettings.release];
         const newEnv = [];
 
         env.forEach((e) => {
@@ -245,6 +248,10 @@ class Instrument {
             else newEnv.push(126);
         });
         return newEnv;
+    }
+    getEnvSettingsHTML() {
+        const env = [this.envSettings.attack, this.envSettings.decay, this.envSettings.release];
+        return env;
     }
 
     getRand() {
@@ -259,6 +266,12 @@ class Instrument {
     getPatternRaw() {
         return this.patternRaw;
         // return this.fakePatternRaw;
+    }
+    setPatternRaw(pattern) {
+        this.patternRaw = pattern;
+        // create fake rawPattern
+        this.fakePatternRaw = this.#convertMidiPatternToFakeRawPattern(this.sequence);
+        this.patternRaw = this.#convertToString(this.fakePatternRaw);
     }
     getPatternRawArray() {
         return this.fakePatternRaw;

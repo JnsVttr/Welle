@@ -176,7 +176,7 @@ class WelleApp {
     midiCountEnv = 0;
     midiPattern = [0, 0, 0, 0, 0, 0, 0, 0];
     midiEq = { high: 0, highFrequency: 5000, mid: 0, lowFrequency: 400, low: 0 };
-    midiEnv = { attack: 0, decay: 0, sustain: 0, release: 0 };
+    midiEnv = { attack: 0, decay: 0, release: 0 };
     // MIDI Interaction (name, vol, env, pattern, eq?)
     selected = {
         name: "",
@@ -775,6 +775,7 @@ class WelleApp {
                 const synth = this.instruments[index].synth;
                 const name = this.instruments[index].name;
                 const ampEnv = this.instruments[index].ampEnv;
+                const envSettings = this.instruments[index].envSettings;
                 const event = row[this.beat];
                 const mute = this.instruments[index].getMute();
                 let midiChan = 0;
@@ -784,9 +785,10 @@ class WelleApp {
 
                 if (mute == false) {
                     if (event.isActive) {
-                        ampEnv.triggerAttackRelease("8n", time);
-                        // synth.triggerAttackRelease(event.note, "8n", time);
-                        synth.triggerAttack(event.note, time);
+                        // triggerAttackRelease: note, duration time(decay), execute time
+                        synth.triggerAttackRelease(event.note, envSettings.decay, time);
+                        ampEnv.triggerAttackRelease(envSettings.decay, time);
+
                         // MIDI - playnote in time
                         if (window.welle.app.MIDIOutput != undefined) {
                             // if midiTransmit = true eg. Midi channel < 14
@@ -1139,6 +1141,46 @@ class WelleApp {
         });
         this.renderContent();
     }
+
+    setEnvelope(message) {
+        message.instruments.forEach((inst) => {
+            let valid = false;
+            // compare with list of instruments
+            this.instruments.forEach((entry) => {
+                if (entry.name == inst) {
+                    valid = true;
+                    let settings = message;
+                    delete settings.instruments;
+                    // add limitations 0.01 - 2
+                    if (settings.attack < 0.01) settings.attack = 0.01;
+                    else if (settings.attack > 2) settings.attack = 2;
+                    if (settings.decay < 0.01) settings.decay = 0.01;
+                    else if (settings.decay > 2) settings.decay = 2;
+                    if (settings.release < 0.01) settings.release = 0.01;
+                    else if (settings.release > 2) settings.release = 2;
+
+                    entry.setEnvSettings(message);
+                    console.log(
+                        `set envelope for inst:${inst} - ${message.attack},${message.decay}, ${message.release}`
+                    );
+                    if (message.midi == undefined) {
+                        this.setSelected(entry);
+                        entry.activate();
+                    }
+                }
+            });
+            // console.log(`${inst} valid is ${valid}`);
+            if (valid == false) {
+                this.addToConsole({
+                    valid: false,
+                    string: inst,
+                    comment: "no such instrument",
+                });
+            }
+        });
+        this.renderContent();
+    }
+
     setVolumeRandom(message) {
         console.log("setVolumeRandom message: ", message);
         message.instruments.forEach((inst) => {
@@ -1393,6 +1435,7 @@ class WelleApp {
                         if (entry.name == storedInst.name) {
                             console.log(`recall inst ${entry.name}, mute: ${storedInst.mute}`);
                             entry.setSequence(storedInst.sequence, storedInst.patternRaw);
+                            entry.setPatternRaw(storedInst.patternRaw);
                             entry.setVolume(storedInst.volume);
                             entry.setMute(storedInst.mute);
                             entry.setRand(storedInst.rand);
@@ -1410,12 +1453,14 @@ class WelleApp {
             });
         });
 
-        // BPM change
-        this.setBpm({ bpm: this.parts[name].bpm });
+        // BPM change - okay, here not activated after start parts
+        // this.setBpm({ bpm: this.parts[name].bpm });
+
         // this.beat = 0;
         // start Tone Transport
         if (Tone.Transport.state != "started") this.startTransport();
         // this.renderParts();
+        this.renderInstruments();
     }
 
     //
@@ -1774,7 +1819,7 @@ class WelleApp {
                     <span class="instVol">| volume</span>
                     <span class="instRand">| random</span>
                     <span class="instPattern">| pattern</span>
-                    <span class="instEnvelope">| envelope</span>
+                    <span class="instEnvelope">| &nbsp; ADR envelope</span>
                 </div>`;
             html += headerHTML;
         }
@@ -1786,6 +1831,7 @@ class WelleApp {
                     const volume = Math.round(entry.getVolume() * 100) / 100;
                     // sequence
                     let patternArray = entry.getPatternRawArray();
+                    const envArray = entry.getEnvSettingsHTML();
                     let sequence = entry.getSequence();
                     let sequenceRender = "";
                     sequence.forEach((e) => {
@@ -1826,11 +1872,16 @@ class WelleApp {
                         html += part;
                     });
 
-                    const instEnv = `<span id="pattern_${
-                        entry.name
-                    }" class="instEnvelope">| ${entry.getEnvSettingsCC()}</span>
-                    </div>`;
-                    html += instEnv;
+                    envArray.forEach((e, c) => {
+                        let add = "";
+                        if (c == 0) add += "|&nbsp;&nbsp;";
+                        add += `<span class="instPatternPart">${e}</span>`;
+                        html += add;
+                    });
+
+                    // const instEnv = `<span id="pattern_${entry.name}" class="instEnvelope">| ${env}</span>
+
+                    html += `</div>`;
                 }
             });
         });
@@ -2130,16 +2181,13 @@ class WelleApp {
 
             // Send ENV
             // ==================================================
-            // env problem: how to scale numbers? 0.01 - 3.00
-            // solution: multiple of 10, if 0 => 0.01
-            //
-            // wait: in SuperCollider, Envelope values are always 0.0 - 1.0
-            // so maybe I should adapt this to Tonejs
-            const env = [message.env.attack, message.env.decay, message.env.sustain, message.env.release];
+            // how to scale messages 0.01 - 2 --> 0 - 126 == * 63
+
+            const env = [message.env.attack, message.env.decay, message.env.release];
             const newEnv = [];
 
             env.forEach((e) => {
-                const val = Math.round(e * 10);
+                const val = Math.round(e * 63);
                 if (val < 127) newEnv.push(val);
                 else newEnv.push(126);
             });
@@ -2275,6 +2323,33 @@ class WelleApp {
                     });
                 }
 
+                // ENVELOPE
+                if (cc >= 16 && cc <= 18) {
+                    const index = cc - 16;
+                    const envVal = Math.round((val / 63) * 100) / 100;
+                    window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
+                    // let envIncoming = { attack: undefined, decay: undefined, release: undefined };
+
+                    if (index == 0) window.welle.app.midiEnv.attack = envVal;
+                    if (index == 1) window.welle.app.midiEnv.decay = envVal;
+                    if (index == 2) window.welle.app.midiEnv.release = envVal;
+
+                    if (window.welle.app.midiCountEnv == 3) {
+                        window.welle.app.midiCountEnv = 0;
+
+                        window.welle.app.setEnvelope({
+                            instruments: [selected.name],
+                            attack: window.welle.app.midiEnv.attack,
+                            decay: window.welle.app.midiEnv.decay,
+                            release: window.welle.app.midiEnv.release,
+                            midi: true,
+                        });
+                        console.log(
+                            `MIDI input (${selected.name}) env: ${window.welle.app.midiEnv.attack}, ${window.welle.app.midiEnv.decay},  ${window.welle.app.midiEnv.release}`
+                        );
+                    }
+                }
+
                 // // EQ
                 // if (num >= 10 && num <= 14) {
                 //     const index = num - 10;
@@ -2330,28 +2405,6 @@ class WelleApp {
                 //         window.welle.app.midiCountEq = 0;
                 //         console.log(
                 //             `MIDI input (${selected.name}) eq: ${selected.eq.low}, ${selected.eq.lowFrequency}, ${selected.eq.mid}, ${selected.eq.highFrequency}, ${selected.eq.high} `
-                //         );
-                //     }
-                // }
-
-                // // ENVELOPE
-                // if (num >= 16 && num <= 19) {
-                //     const index = num - 16;
-                //     const env = round(val / 126);
-                //     window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
-
-                //     window.welle.app.midiEnv.name = selected.name;
-                //     if (index == 0) window.welle.app.midiEnv.attack = env;
-                //     if (index == 1) window.welle.app.midiEnv.decay = env;
-                //     if (index == 2) window.welle.app.midiEnv.sustain = env;
-                //     if (index == 3) window.welle.app.midiEnv.release = env;
-
-                //     if (window.welle.app.midiCountEnv == 4) {
-                //         window.welle.app.setEnvToSelected(window.welle.app.midiEnv);
-                //         selected.env = window.welle.app.midiEnv;
-                //         window.welle.app.midiCountEnv = 0;
-                //         console.log(
-                //             `MIDI input (${selected.name}) env: ${selected.env.attack}, ${selected.env.decay}, ${selected.env.sustain}, ${selected.env.release}`
                 //         );
                 //     }
                 // }

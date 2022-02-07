@@ -55,6 +55,7 @@ livecode {
         | phrase "+" PhraseList                     --copyPattern
         | PhraseList floatPos? random? Pattern      --assignPattern
         | "bpm" intPos? floatPos?                    --setBPM
+        | PhraseList Envelope 		                 --setEnvelope
         | PhraseList floatPos? random                --setVolumeRandom
         | PhraseList floatPos 		                --setVolume
         | PhraseList        			            --instrumentPreview
@@ -79,6 +80,7 @@ livecode {
         | "#" int?	                --soundNote
         | "-"                       --soundPause
 
+    Envelope =  floatPos " "? floatPos " "? floatPos 
         
     /*
       HELPERS - for calculation

@@ -77,6 +77,15 @@ export const parser = (input) => {
             App.setBpm({ bpm: input.bpm, factor: input.factor });
             break;
 
+        case "setEnv":
+            App.setEnvelope({
+                instruments: input.phrases,
+                attack: input.attack,
+                decay: input.decay,
+                release: input.release,
+            });
+            break;
+
         case "deleteEvent":
             App.delete(input.phrases);
             break;

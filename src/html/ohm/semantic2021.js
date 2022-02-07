@@ -196,6 +196,20 @@ semantics.addOperation("eval", {
             factor: factor,
         };
     },
+    Assignments_setEnvelope: (phrases, env) => {
+        // console.log(`setEnv: ${env.sourceString}`);
+        let envelope = env.eval();
+        phrases = phrasesToArray(phrases);
+        // console.log(`setEnv env: ${envelope}`);
+        let event = "setEnv";
+        return {
+            event: event,
+            phrases: phrases,
+            attack: envelope[0],
+            decay: envelope[1],
+            release: envelope[2],
+        };
+    },
     Assignments_setVolume: (phrases, volume) => {
         volume = volume.eval();
         phrases = phrasesToArray(phrases);
@@ -291,6 +305,16 @@ semantics.addOperation("eval", {
     Events_soundPause: function (_) {
         return null;
     },
+
+    Envelope: (attack, a, decay, b, release) => {
+        attack = attack.eval();
+        decay = decay.eval();
+        release = release.eval();
+        // console.log(`eval result: `);
+        // console.log(attack, decay, sustain, release);
+        return [attack, decay, release];
+    },
+
     floatPos: function (float) {
         float = parseFloat(float.sourceString);
         return float;
