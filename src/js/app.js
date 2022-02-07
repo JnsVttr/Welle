@@ -817,7 +817,7 @@ class WelleApp {
                     // send only if instrument = selected instrument
                     if (name == this.selected.name) {
                         this.selected.sequence = this.instruments[index].getSequence();
-                        this.sendMidiSelectedInstState(this.selected);
+                        this.sendMidiSelectedInstState({ message: this.selected, pins: true });
                     }
                     this.renderInstruments();
                 }
@@ -1513,7 +1513,8 @@ class WelleApp {
 
         // midi transfer ongoing is a delay for send midi, and not receiving in the same time
         if (this.midiTransferOngoing == false) {
-            if (window.welle.app.MIDIOutput != undefined) this.sendMidiSelectedInstState(this.selected);
+            if (window.welle.app.MIDIOutput != undefined)
+                this.sendMidiSelectedInstState({ message: this.selected, pins: false });
         }
     }
 
@@ -2142,7 +2143,9 @@ class WelleApp {
         }
     }
 
-    sendMidiSelectedInstState(message) {
+    sendMidiSelectedInstState(content) {
+        const message = content.message;
+        const pinsOnly = content.pins;
         // send message to MIDI, channels defined in class variables midiChanInput 15, midiChanOutput 16
         if (window.welle.app.MIDIInput != undefined) {
             console.log(`Send MIDI Message: `, message);
@@ -2159,11 +2162,13 @@ class WelleApp {
             // ==================================================
             let vol = message.vol;
             vol = window.welle.app.map(vol, 0, 1, 0, 126);
-            window.welle.app.MIDIOutput.sendControlChange(
-                9, // cc controller
-                vol, // CC value
-                this.midiChanOutput // channel
-            );
+            if (!pinsOnly) {
+                window.welle.app.MIDIOutput.sendControlChange(
+                    9, // cc controller
+                    vol, // CC value
+                    this.midiChanOutput // channel
+                );
+            }
 
             // Send Pattern
             // ==================================================
@@ -2194,7 +2199,7 @@ class WelleApp {
 
             newEnv.map((e, c) => {
                 const cc = 16 + c;
-                window.welle.app.MIDIOutput.sendControlChange(cc, e, this.midiChanOutput);
+                if (!pinsOnly) window.welle.app.MIDIOutput.sendControlChange(cc, e, this.midiChanOutput);
             });
         }
 
