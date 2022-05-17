@@ -793,14 +793,18 @@ class WelleApp {
                         if (window.welle.app.MIDIOutput != undefined) {
                             // if midiTransmit = true eg. Midi channel < 14
                             if (midiTransmit) {
-                                const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
-                                const diffTime = nextEventTime - WebMidi.time;
+                                //const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
+                                // const diffTime = nextEventTime - WebMidi.time;
+                                // console.log(`MIDI ${diffTime} = ${nextEventTime} - ${WebMidi.time}`);
+                                const diffTime = WebMidi.time - Tone.now() * 1000;
+                                const nextEventTime = Tone.Time("@8n").toSeconds() * 1000 + diffTime;
+
                                 this.playMidiNote({
                                     note: event.note,
                                     channel: midiChan,
                                     velocity: this.instruments[index].getVolume(),
                                     duration: 10,
-                                    time: diffTime, // midiChan short delay for MIDI connection
+                                    time: nextEventTime, // midiChan short delay for MIDI connection
                                 });
                             }
                         }
@@ -2128,17 +2132,16 @@ class WelleApp {
         if (message.channel != undefined) chan = message.channel + 1;
         const vel = message.velocity || 1;
         const dur = message.duration || 200;
-        let midiTime = 0;
-        if (message.time != undefined) midiTime = message.time;
-        // console.log([note, chan, vel, dur, midiTime]);
+        let nextTime = message.time;
+        // console.log([note, chan, vel, dur, nextTime]);
 
         // if MIDI device is connected
         if (window.welle.app.MIDIOutput != undefined) {
             // console.log(`play MIDI note ${note}`);
             window.welle.app.MIDIOutput.playNote(note, chan, {
-                time: WebMidi.time + midiTime,
                 velocity: vel,
                 duration: dur,
+                time: nextTime,
             });
         }
     }
