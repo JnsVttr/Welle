@@ -132,7 +132,7 @@ class WelleApp {
     #consoleID = "console";
     // sound
     #playSound = true; // bool html
-    #playAlerts = true; // bool html
+    #playAlerts = false; // bool html
     #playMetronom = false; // bool html
     #alerts = {}; // incoming alerts list from server
     samples = []; // incoming sample list from server
