@@ -47,6 +47,14 @@ semantics.addOperation("eval", {
             phrase: phrase,
         };
     },
+    Commands_soloEvent: (_, phrase) => {
+        phrase = phrase.sourceString;
+        let event = "soloEvent";
+        return {
+            event: event,
+            phrase: phrase,
+        };
+    },
     Commands_deleteEvent: (_, phrases) => {
         phrases = phrasesToArray(phrases);
         let event = "deleteEvent";

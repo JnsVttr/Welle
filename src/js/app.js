@@ -33,6 +33,9 @@ grid = main storage array for note events of the sample-based instruments (sampl
 // ===========================================================================
 
 class WelleApp {
+    // show envArray
+    showEnv = false;
+
     // debug
     debug = true;
 
@@ -1120,6 +1123,18 @@ class WelleApp {
         this.renderContent();
     }
 
+    soloInstrument(message) {
+        //stopInstruments(instruments)
+        this.instruments.forEach((entry) => {
+            this.activeInstruments.forEach((name) => {
+                if (entry.name == name) {
+                    window.welle.app.stopInstruments([entry.name]);
+                }
+            });
+        });
+        this.plainStartInstruments(message);
+    }
+
     setVolume(message) {
         message.instruments.forEach((inst) => {
             let valid = false;
@@ -1824,8 +1839,8 @@ class WelleApp {
                     <span class="instVol">| volume</span>
                     <span class="instRand">| random</span>
                     <span class="instPattern">| pattern</span>
-                    <span class="instEnvelope">| &nbsp; ADR envelope</span>
                 </div>`;
+            //  <span class="instEnvelope">| &nbsp; ADR envelope</span>
             html += headerHTML;
         }
         // iterate through storedInstruments collection
@@ -1877,12 +1892,14 @@ class WelleApp {
                         html += part;
                     });
 
-                    envArray.forEach((e, c) => {
-                        let add = "";
-                        if (c == 0) add += "|&nbsp;&nbsp;";
-                        add += `<span class="instPatternPart">${e}</span>`;
-                        html += add;
-                    });
+                    if (this.showEnv) {
+                        envArray.forEach((e, c) => {
+                            let add = "";
+                            if (c == 0) add += "|&nbsp;&nbsp;";
+                            add += `<span class="instPatternPart">${e}</span>`;
+                            html += add;
+                        });
+                    }
 
                     // const instEnv = `<span id="pattern_${entry.name}" class="instEnvelope">| ${env}</span>
 

@@ -48,9 +48,14 @@ export const parser = (input) => {
             break;
 
         case "plainStartEvent":
-            console.log("plainStartEvent fired in parser.js");
             App.plainStartInstruments({
                 instruments: input.phrases,
+            });
+            break;
+
+        case "soloEvent":
+            App.soloInstrument({
+                instruments: [input.phrase],
             });
             break;
 

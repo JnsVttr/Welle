@@ -60,7 +60,8 @@ HAVE FUN !
 <p><span class="commands">#3</span> | pitch for a note, can be positive or negative, e.g. #2, #-12</p>
 <p><span class="commands">0.4</span> | volume for an instrument, range 0.0 to 1.0</p>
 <p><span class="commands">&2</span> | set random value for an instrument. notes will be reordered after 2 cycles. Set & 0 for no randomization. </p>
-<p><span class="commands">/</span> | clear one, multiple or all instruments and snapshots. To clear one write the name behind the command</p>
+<p><span class="commands">s</span> | solo one of the running instruments. To solo write the name behind the command</p>
+<p><span class="commands">/</span> | clear one, multiple or all instruments and snapshots. To clear write the name behind the command</p>
 <p><span class="commands">+</span> | copy instrument pattern to one or more instruments and start them</p>
 <p><span class="commands">=</span> | save current instruments as snapshots. </p>
 <p><span class="commands">bpm</span> | set BPM for the sequencer, e.g. bpm 170. Add a number for transition in seconds, e.g. bpm 170 4</p>
@@ -190,6 +191,7 @@ um vorherige Eingaben abzurufen und erneut zu verwenden.
 <p><span class="commands">#3</span> | Tonhöhe für eine Note, kann positib oder negativ sein, z.B. #2, #-12</p>
 <p><span class="commands">0.4</span> | Lautstärke für ein Instrument, zwischen 0.0 und 1.0</p>
 <p><span class="commands">&2</span> | Setzt den Zufallswert für ein Instrument. Die Noten werden nach 2 Zyklen neu sortiert. Zurücksetzen mit &0 .</p>
+<p><span class="commands">s</span> | Instrument solo hören und alle anderen stumm schalten. z.B.: s bass</p>
 <p><span class="commands">/</span> | ein, mehrere oder alle Instrumente und Momente löschen. Um ein Instrument zu löschen z.B.: / bass</p>
 <p><span class="commands">+</span> | Pattern auf ein oder mehrere Instrumente kopieren und diese starten</p>
 <p><span class="commands">=</span> | speichert aktivierte Instrumente als "Momente". </p>
