@@ -47,12 +47,12 @@ semantics.addOperation("eval", {
             phrase: phrase,
         };
     },
-    Commands_soloEvent: (_, phrase) => {
-        phrase = phrase.sourceString;
+    Commands_soloEvent: (_, phrases) => {
+        phrases = phrasesToArray(phrases);
         let event = "soloEvent";
         return {
             event: event,
-            phrase: phrase,
+            phrases: phrases,
         };
     },
     Commands_deleteEvent: (_, phrases) => {
@@ -141,6 +141,12 @@ semantics.addOperation("eval", {
     },
     Commands_playAllEvent: (_) => {
         let event = "playAllEvent";
+        return {
+            event: event,
+        };
+    },
+    Commands_startAllEvent: (_) => {
+        let event = "startAllEvent";
         return {
             event: event,
         };

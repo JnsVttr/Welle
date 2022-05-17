@@ -29,11 +29,12 @@ livecode {
 
 
     Commands =
+        | ">>" PhraseList           --soloEvent
+        | ">>"               		--startAllEvent
         | "?" PhraseList?           --questionEvent
     	| ">" PhraseList        	--playMultiEvent
         | "." PhraseList        	--stopMultiEvent
         | "=" phrase           	    --savePartEvent
-        | "s" phrase           	    --soloEvent
         | "/" PhraseList		    --deleteEvent
         | "save" phrase         	--saveEvent
         | "delete" phrase         	--deleteWordEvent
@@ -50,10 +51,11 @@ livecode {
         | "/"               		--deleteAllEvent
         
         
+        
                 
 
     Assignments =
-        | phrase "+" PhraseList                     --copyPattern
+        | phrase ">" PhraseList                     --copyPattern
         | PhraseList floatPos? random? Pattern      --assignPattern
         | "bpm" intPos? floatPos?                    --setBPM
         | PhraseList Envelope 		                 --setEnvelope
@@ -61,6 +63,7 @@ livecode {
         | PhraseList floatPos 		                --setVolume
         | PhraseList        			            --instrumentPreview
         | ""                                        --emptyEvent
+        | "s" PhraseList           	                --soloEvent
         
         
         

@@ -47,6 +47,10 @@ export const parser = (input) => {
             App.playAll();
             break;
 
+        case "startAllEvent":
+            App.startAll();
+            break;
+
         case "plainStartEvent":
             App.plainStartInstruments({
                 instruments: input.phrases,
@@ -55,7 +59,7 @@ export const parser = (input) => {
 
         case "soloEvent":
             App.soloInstrument({
-                instruments: [input.phrase],
+                instruments: input.phrases,
             });
             break;
 

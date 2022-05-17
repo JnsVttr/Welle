@@ -940,6 +940,19 @@ class WelleApp {
         if (Tone.Transport.state != "started") this.startTransport();
     }
 
+    startAll() {
+        if (Tone.Transport.state != "started") this.startTransport();
+        this.instruments.forEach((entry) => {
+            this.activeInstruments.forEach((name) => {
+                if (entry.name == name) {
+                    this.plainStartInstruments({
+                        instruments: [name],
+                    });
+                }
+            });
+        });
+    }
+
     stopAll() {
         // this.renderContent();
         this.stopTransport();
@@ -1133,14 +1146,17 @@ class WelleApp {
                 }
             });
         });
-        this.instruments.forEach((entry) => {
-            this.activeInstruments.forEach((name) => {
-                if (entry.name == name) {
-                    if (name == message.instruments[0]) {
-                        this.plainStartInstruments(message);
-                        instCreated = true;
+
+        message.instruments.forEach((inst) => {
+            this.instruments.forEach((entry) => {
+                this.activeInstruments.forEach((name) => {
+                    if (entry.name == name) {
+                        if (name == inst) {
+                            this.plainStartInstruments({ instruments: [inst] });
+                            instCreated = true;
+                        }
                     }
-                }
+                });
             });
         });
 
@@ -1259,20 +1275,24 @@ class WelleApp {
             let valid = false;
             // compare with list of instruments
             this.instruments.forEach((entry) => {
-                if (entry.name == inst) {
-                    valid = true;
-                    source = entry;
-                    sequence = entry.sequence;
-                    patternRaw = entry.patternRaw;
-                    this.setSelected(entry);
-                    entry.activate();
-                }
+                this.activeInstruments.forEach((name) => {
+                    if (entry.name == name) {
+                        if (entry.name == inst) {
+                            valid = true;
+                            source = entry;
+                            sequence = entry.sequence;
+                            patternRaw = entry.patternRaw;
+                            this.setSelected(entry);
+                            entry.activate();
+                        }
+                    }
+                });
             });
             if (valid == false) {
                 this.addToConsole({
                     valid: false,
                     string: inst,
-                    comment: "no such instrument",
+                    comment: "instrument not created",
                 });
             }
         });
@@ -1299,6 +1319,7 @@ class WelleApp {
                 }
             });
         }
+        console.log(destinations);
 
         if (source != undefined && destinations.length > 0) {
             console.log(
@@ -1307,17 +1328,33 @@ class WelleApp {
             );
             destinations.forEach((inst) => {
                 this.instruments.forEach((entry) => {
-                    if (entry.name == inst) {
-                        entry.patternRaw = patternRaw;
-                        for (let i = 0; i < 8; i++) {
-                            entry.sequence[i] = sequence[i];
+                    this.activeInstruments.forEach((name) => {
+                        if (entry.name == name) {
+                            // instrument already created:
+                            if (entry.name == inst) {
+                                entry.patternRaw = patternRaw;
+                                entry.setSequence(sequence, patternRaw);
+                                entry.setPatternRaw(patternRaw);
+                                this.setSelected(entry);
+                                entry.setMute(false);
+                                entry.activate();
+                            }
+                        } else {
+                            // instrument not created, create it;
+                            if (entry.name == inst) {
+                                entry.patternRaw = patternRaw;
+                                entry.setSequence(sequence, patternRaw);
+                                entry.setPatternRaw(patternRaw);
+                                this.setSelected(entry);
+                                entry.setMute(false);
+                                entry.activate();
+                            }
                         }
-                        this.setSelected(entry);
-                        entry.setMute(false);
-                        entry.activate();
-                    }
+                    });
                 });
             });
+            // start the sequencer when copied
+            this.startAll();
         } else console.log(`copy error`);
 
         this.renderContent();

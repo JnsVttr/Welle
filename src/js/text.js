@@ -53,16 +53,16 @@ HAVE FUN !
 </p>
 <h3>console commands</h3>
 
-<p><span class="commands">></span> | start the sequencer or unmute single/ multiple instruments</p>
+<p><span class="commands">></span> | start the sequencer. Unmute single/ multiple instruments</p>
+<p><span class="commands">>></span> | start the sequencer and unmute all instruments, or solo instruments</p>
 <p><span class="commands">.</span> | stop the sequencer or mute single/ multiple instruments</p>
 <p><span class="commands">#</span> | sign for a note</p>
 <p><span class="commands">-</span> | sign for a pause</p>
 <p><span class="commands">#3</span> | pitch for a note, can be positive or negative, e.g. #2, #-12</p>
 <p><span class="commands">0.4</span> | volume for an instrument, range 0.0 to 1.0</p>
 <p><span class="commands">&2</span> | set random value for an instrument. notes will be reordered after 2 cycles. Set & 0 for no randomization. </p>
-<p><span class="commands">s</span> | solo one of the running instruments. To solo write the name behind the command</p>
 <p><span class="commands">/</span> | clear one, multiple or all instruments and snapshots. To clear write the name behind the command</p>
-<p><span class="commands">+</span> | copy instrument pattern to one or more instruments and start them</p>
+<p><span class="commands">></span> | copy instrument pattern to one or more instruments and start them, e.g. bass > string</p>
 <p><span class="commands">=</span> | save current instruments as snapshots. </p>
 <p><span class="commands">bpm</span> | set BPM for the sequencer, e.g. bpm 170. Add a number for transition in seconds, e.g. bpm 170 4</p>
 <p><span class="commands">record start</span> | start recording the sound (instead of hitting record button)</p>
@@ -81,7 +81,7 @@ HAVE FUN !
 <p><span class="commands">bass 0.6 &3</span> | setting both volume and random paramter</p>
 <p><span class="commands">bass 0.6 &2 ###2## </span> | setting multiple parameters at once</p>
 <p><span class="commands">bass hh kick ###2##</span> | all commands can be set for multiple instruments</p>
-<p><span class="commands">bass + string hh</span> | copy pattern from one instrument to one or more other instruments</p>
+<p><span class="commands">bass > string hh</span> | copy pattern from one instrument to one or more other instruments</p>
 <p><span class="commands">/ bass</span> | delete instrument or snapshot</p>
 <p><span class="commands">/ bass hh</span> | delete multiple instruments or snapshots</p>
 <p><span class="commands">/ </span> | delete all instruments and snapshots</p>
@@ -188,15 +188,15 @@ um vorherige Eingaben abzurufen und erneut zu verwenden.
 <h3>Konsolenbefehle</h3>
 
 <p><span class="commands">></span> | startet den Sequenzer oder schaltet ein oder mehrere Instrumente an</p>
+<p><span class="commands">>></span> | startet den Sequenzer und schaltet alle Instrumente an, oder schaltet einzelne Instrumente solo</p>
 <p><span class="commands">.</span> | stoppt den Sequenzer oder schaltet ein oder mehrere Instrumente stumm</p>
 <p><span class="commands">#</span> | Zeichen für eine Note</p>
 <p><span class="commands">-</span> | Zeichen für eine Pause</p>
 <p><span class="commands">#3</span> | Tonhöhe für eine Note, kann positib oder negativ sein, z.B. #2, #-12</p>
 <p><span class="commands">0.4</span> | Lautstärke für ein Instrument, zwischen 0.0 und 1.0</p>
 <p><span class="commands">&2</span> | Setzt den Zufallswert für ein Instrument. Die Noten werden nach 2 Zyklen neu sortiert. Zurücksetzen mit &0 .</p>
-<p><span class="commands">s</span> | Instrument solo hören und alle anderen stumm schalten. z.B.: s bass</p>
 <p><span class="commands">/</span> | ein, mehrere oder alle Instrumente und Momente löschen. Um ein Instrument zu löschen z.B.: / bass</p>
-<p><span class="commands">+</span> | Pattern auf ein oder mehrere Instrumente kopieren und diese starten</p>
+<p><span class="commands">></span> | Pattern auf ein oder mehrere Instrumente kopieren und diese starten, z.B. bass > string</p>
 <p><span class="commands">=</span> | speichert aktivierte Instrumente als "Momente". </p>
 <p><span class="commands">bpm</span> | BPM für den Sequenzer festlegen, z. B. bpm 170. Fügen Sie eine Zahl für den Übergang in Sekunden hinzu, z. B. bpm 170 4</p>
 <p><span class="commands">record start</span> | Starten Sie die Aufnahme des Tons (anstatt die Aufnahmetaste zu drücken)</p>
@@ -215,7 +215,7 @@ um vorherige Eingaben abzurufen und erneut zu verwenden.
 <p><span class="commands">bass 0.3 &3</span> | Einstellung von Lautstärke und Zufallsparameters</p>
 <p><span class="commands">bass 0.6 &2 ###2## </span> | Einstellen aller Parameter auf einmal</p>
 <p><span class="commands">bass hh kick ###2##</span> | alle Befehle können auf mehrere Instrumente angewendet werden</p>
-<p><span class="commands">bass + string hh</span> | Kopieren eines Patterns von einem Instrument auf ein oder mehrere andere Instrumente</p>
+<p><span class="commands">bass > string hh</span> | Kopieren eines Patterns von einem Instrument auf ein oder mehrere andere Instrumente</p>
 <p><span class="commands">/ bass</span> | Löschen von aktiven Instrument oder Moment</p>
 <p><span class="commands">/ bass hh</span> | Löschen von mehreren aktiven Instrumenten und Momenten</p>
 <p><span class="commands">/ </span> | Löschen von allen aktiven Instrumenten und Momenten</p>
