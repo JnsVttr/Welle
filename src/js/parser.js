@@ -12,7 +12,7 @@ import { App, Socket } from "/index";
 // function to interpret input and send to TONE via transport or to html etc.
 export const parser = (input) => {
     // show parser input
-    // console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
+    console.log(`Parser inputs: ${JSON.stringify(input, null, 2)}`);
 
     switch (input.event) {
         case "instrumentPreview":
@@ -45,6 +45,13 @@ export const parser = (input) => {
 
         case "playAllEvent":
             App.playAll();
+            break;
+
+        case "plainStartEvent":
+            console.log("plainStartEvent fired in parser.js");
+            App.plainStartInstruments({
+                instruments: input.phrases,
+            });
             break;
 
         case "stopAllEvent":
