@@ -806,7 +806,7 @@ class WelleApp {
                                     note: event.note,
                                     channel: midiChan,
                                     velocity: this.instruments[index].getVolume(),
-                                    duration: 10,
+                                    duration: 100,
                                     time: nextEventTime, // midiChan short delay for MIDI connection
                                 });
                             }
@@ -871,10 +871,10 @@ class WelleApp {
             // update the beat counter
             this.beat = (this.beat + 1) % 8;
             // send MIDI Clock
-            const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
-            const diffTime = nextEventTime - WebMidi.time;
+            const diffTime = WebMidi.time - Tone.now() * 1000;
+            const nextEventTime = Tone.Time("@8n").toSeconds() * 1000 + diffTime;
             if (window.welle.app.MIDIOutput != undefined) {
-                window.welle.app.MIDIOutput.sendClock({ time: WebMidi.time + diffTime });
+                window.welle.app.MIDIOutput.sendClock({ time: nextEventTime });
             }
         };
         // Tone.Transport.bpm.value = 120;
@@ -912,10 +912,10 @@ class WelleApp {
         this.beat = 0;
         if (Tone.Transport.state != "started") Tone.Transport.start();
         // send MIDI start
-        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
-        const diffTime = nextEventTime - WebMidi.time;
+        const diffTime = WebMidi.time - Tone.now() * 1000;
+        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000 + diffTime;
         if (window.welle.app.MIDIOutput != undefined) {
-            window.welle.app.MIDIOutput.sendStart({ time: WebMidi.time + diffTime });
+            window.welle.app.MIDIOutput.sendStart({ time: nextEventTime });
         }
         // change play button
         document.getElementById("transport-button").value = "STOP";
@@ -925,10 +925,10 @@ class WelleApp {
     stopTransport() {
         if (Tone.Transport.state != "stopped") Tone.Transport.stop();
         // send MIDI stop
-        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000;
-        const diffTime = nextEventTime - WebMidi.time;
+        const diffTime = WebMidi.time - Tone.now() * 1000;
+        const nextEventTime = Tone.Time("@8n").toSeconds() * 1000 + diffTime;
         if (window.welle.app.MIDIOutput != undefined) {
-            window.welle.app.MIDIOutput.sendStop({ time: WebMidi.time + diffTime });
+            window.welle.app.MIDIOutput.sendStop({ time: nextEventTime });
         }
         // change play button
         document.getElementById("transport-button").value = "PLAY";
@@ -2150,7 +2150,7 @@ class WelleApp {
         const vel = message.velocity || 1;
         const dur = message.duration || 200;
         let nextTime = message.time;
-        // console.log([note, chan, vel, dur, nextTime]);
+        console.log("MIDI message: " + [note, chan, vel, dur, nextTime]);
 
         // if MIDI device is connected
         if (window.welle.app.MIDIOutput != undefined) {
@@ -2160,6 +2160,15 @@ class WelleApp {
                 duration: dur,
                 time: nextTime,
             });
+            // window.welle.app.MIDIOutput.stopNote(note, chan, {
+            //     velocity: 0,
+            //     time: nextTime + 10,
+            // });
+            // setTimeout(() => {
+            //     window.welle.app.MIDIOutput.stopNote(note, chan, {
+            //         velocity: vel,
+            //     });
+            // }, nextTime + 20);
         }
     }
 
