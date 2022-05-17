@@ -94,8 +94,11 @@ HAVE FUN !
 <p>
 WELLE can work as text-based MIDI sequencer. It will send MIDI start/stop/clock commands. To enable MIDI go to settings and select a MIDI device.
 The first 14 instruments are assigned to MIDI channels 1-14 and will transmit note on, note off and velocity values. 
-There will be a big and varying latency caused by the Webaudio timing, so using both internal sounds and sounds trigger via MIDI is not synchronous: 
+There will be a latency caused by the Webaudio timing, so using both internal sounds and sounds trigger via MIDI is not synchronous: 
 mute the website's sound in the settings and only use MIDI sounds.
+</p>
+<p>
+To route MIDI to external devices, use a MIDI pipe through a virtual MIDI device. On Mac I use <a href="http://www.subtlesoft.square7.net/MidiPipe.html" title="MidiPipe">MidiPipe by Nico Wald</a>.
 </p>
 
 <br>
@@ -227,6 +230,9 @@ WELLE kann als textbasierter MIDI-Sequenzer arbeiten. WELLE sendet MIDI Start/St
 Die ersten 14 Instrumente sind jetzt den MIDI-Kanälen 1-14 zugeordnet und senden Note On, Note Off und Velocity-Werte. 
 WELLE hat beim Gebrauch von MIDI eine Latenz, die durch das Webaudio-Timing verursacht wird, so dass die Verwendung von internen Sounds und Sounds, die über MIDI angespielt werden, nicht synchron ist: 
 Schalten Sie den Sound der Website in den Einstellungen stumm und verwenden Sie nur MIDI-Sounds.
+</p>
+<p>
+Um MIDI zu externen Geräten zu routen, nutze ich eine MIDI pipe durch ein virtuelles MIDI Gerät (IAC bei Mac) mit der Software <a href="http://www.subtlesoft.square7.net/MidiPipe.html" title="MidiPipe">MidiPipe von Nico Wald</a>.
 </p>
 
 

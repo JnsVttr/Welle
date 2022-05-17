@@ -2150,7 +2150,7 @@ class WelleApp {
         const vel = message.velocity || 1;
         const dur = message.duration || 200;
         let nextTime = message.time;
-        console.log("MIDI message: " + [note, chan, vel, dur, nextTime]);
+        // console.log("MIDI message: " + [note, chan, vel, dur, nextTime]);
 
         // if MIDI device is connected
         if (window.welle.app.MIDIOutput != undefined) {
