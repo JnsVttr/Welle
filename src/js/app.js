@@ -1125,6 +1125,7 @@ class WelleApp {
 
     soloInstrument(message) {
         //stopInstruments(instruments)
+        let instCreated = false;
         this.instruments.forEach((entry) => {
             this.activeInstruments.forEach((name) => {
                 if (entry.name == name) {
@@ -1132,7 +1133,24 @@ class WelleApp {
                 }
             });
         });
-        this.plainStartInstruments(message);
+        this.instruments.forEach((entry) => {
+            this.activeInstruments.forEach((name) => {
+                if (entry.name == name) {
+                    if (name == message.instruments[0]) {
+                        this.plainStartInstruments(message);
+                        instCreated = true;
+                    }
+                }
+            });
+        });
+
+        if (!instCreated) {
+            this.addToConsole({
+                valid: false,
+                string: message.instruments[0],
+                comment: "not yet created",
+            });
+        }
     }
 
     setVolume(message) {
