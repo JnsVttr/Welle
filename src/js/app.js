@@ -1354,7 +1354,7 @@ class WelleApp {
                 });
             });
             // start the sequencer when copied
-            this.startAll();
+            this.playAll();
         } else console.log(`copy error`);
 
         this.renderContent();
