@@ -34,7 +34,7 @@ grid = main storage array for note events of the sample-based instruments (sampl
 
 class WelleApp {
     // show envArray
-    showEnv = false;
+    showEnv = true;
 
     // debug
     debug = true;
@@ -188,6 +188,14 @@ class WelleApp {
         eq: [],
         pattern: [1, null, 1, null],
     };
+    storedInstsOnWheel = [];
+    storedInstsOnWheelSelectedName = "";
+    wheelPos = 0;
+    setWheelasSelector = false;
+    setWheelasSelectorInit = false;
+    setWheelasSelectorReset = false;
+    wheelInstSelect = 0;
+    wheelTempSelect = 0;
     // html
     instDiv = "instruments";
     partDiv = "parts";
@@ -1586,10 +1594,12 @@ class WelleApp {
         // this.sendMidiSelectedInstState();
 
         // midi transfer ongoing is a delay for send midi, and not receiving in the same time
-        if (this.midiTransferOngoing == false) {
-            if (window.welle.app.MIDIOutput != undefined)
-                this.sendMidiSelectedInstState({ message: this.selected, pins: false });
-        }
+        // if (this.midiTransferOngoing == false) {
+        //     if (window.welle.app.MIDIOutput != undefined)
+        //         this.sendMidiSelectedInstState({ message: this.selected, pins: false });
+        // }
+        if (window.welle.app.MIDIOutput != undefined)
+            this.sendMidiSelectedInstState({ message: this.selected, pins: false });
     }
 
     //
@@ -1894,8 +1904,9 @@ class WelleApp {
                     <span class="instVol">| volume</span>
                     <span class="instRand">| random</span>
                     <span class="instPattern">| pattern</span>
+                    <span class="instEnvelope">| &nbsp; ADR envelope</span>
                 </div>`;
-            //  <span class="instEnvelope">| &nbsp; ADR envelope</span>
+
             html += headerHTML;
         }
         // iterate through storedInstruments collection
@@ -1955,8 +1966,6 @@ class WelleApp {
                             html += add;
                         });
                     }
-
-                    // const instEnv = `<span id="pattern_${entry.name}" class="instEnvelope">| ${env}</span>
 
                     html += `</div>`;
                 }
@@ -2191,6 +2200,7 @@ class WelleApp {
         });
         if (this.MIDIInput) {
             console.log(`MIDI In connected to ${this.MIDIInput.name}`);
+
             this.addMIDIInputListeners();
         }
     }
@@ -2242,17 +2252,49 @@ class WelleApp {
                 16-19   = Env 4 values
             */
 
-            // Send Volume
+            // Send tracks to cycle
             // ==================================================
-            let vol = message.vol;
-            vol = window.welle.app.map(vol, 0, 1, 0, 126);
-            if (!pinsOnly) {
-                window.welle.app.MIDIOutput.sendControlChange(
-                    9, // cc controller
-                    vol, // CC value
-                    this.midiChanOutput // channel
-                );
-            }
+            // reset variables and pushpoints
+            window.welle.app.storedInstsOnWheel = [];
+            window.welle.app.MIDIOutput.sendControlChange(
+                27, // cc controller
+                0, // CC value
+                this.midiChanOutput // channel
+            );
+
+            let instCountTotal = Object.entries(window.welle.app.activeInstruments).length;
+            let instCounter = 0;
+            window.welle.app.activeInstruments.forEach((inst) => {
+                let min = 0;
+                let max = 0;
+                if (instCountTotal == 1) {
+                    min = 0;
+                    max = 120;
+                } else {
+                    min = instCounter * (120 / instCountTotal);
+                    max = (instCounter + 1) * (120 / instCountTotal);
+                }
+                instCounter = instCounter + 1;
+                window.welle.app.storedInstsOnWheel.push({
+                    name: inst,
+                    pos: instCounter,
+                    minVal: min,
+                    maxVal: max,
+                    diff: max - min,
+                });
+                setTimeout(() => {
+                    window.welle.app.MIDIOutput.sendControlChange(
+                        26, // cc controller
+                        min, // CC value
+                        this.midiChanOutput // channel
+                    );
+                }, instCounter * 50);
+            });
+
+            console.log(window.welle.app.storedInstsOnWheel);
+            // caculate positions for push points and send them:
+            //
+            //
 
             // Send Pattern
             // ==================================================
@@ -2273,7 +2315,11 @@ class WelleApp {
             // how to scale messages 0.01 - 2 --> 0 - 126 == *
             // how to scale messages 0.01 - 1 --> 0 - 126 == * 126
 
-            const env = [message.env.attack, message.env.decay, message.env.release];
+            let vol = message.vol;
+            // vol = window.welle.app.map(vol, 0, 1, 0, 126);
+
+            const env = [message.env.attack, vol, message.env.decay, message.env.release];
+            console.log(`Midi send vol in env ${env}`);
             const newEnv = [];
 
             env.forEach((e) => {
@@ -2287,6 +2333,18 @@ class WelleApp {
                 if (!pinsOnly) window.welle.app.MIDIOutput.sendControlChange(cc, e, this.midiChanOutput);
             });
         }
+
+        // Send Volume
+        // ==================================================
+        // let vol = message.vol;
+        // vol = window.welle.app.map(vol, 0, 1, 0, 126);
+        // if (!pinsOnly) {
+        //     window.welle.app.MIDIOutput.sendControlChange(
+        //         9, // cc controller
+        //         vol, // CC value
+        //         this.midiChanOutput // channel
+        //     );
+        // }
 
         //     // Send EQ
         //     // ==================================================
@@ -2350,7 +2408,7 @@ class WelleApp {
             const selected = window.welle.app.selected;
             let vol = 0;
 
-            // console.log(`Received 'controlchange' message. CC: ${cc}, val: ${val}`);
+            //console.log(`Received 'controlchange' message. CC: ${cc}, val: ${val}`);
 
             // set time out to avoid midi receive/send issues, only valid on input midi channel
             window.welle.app.midiTransferOngoing = true;
@@ -2358,22 +2416,164 @@ class WelleApp {
                 window.welle.app.midiTransferOngoing = false;
             }, 5);
 
+            // Navigation with buttons / wheel
+            if (cc >= 30 && cc <= 33) {
+                let wheelBtn = (30 - cc) * -1;
+                let wheelBtnVal = val;
+                console.log(`MIDI input (cc ${cc}) btn: ${wheelBtn} | ${wheelBtnVal} `);
+            }
+            if (cc == 9) {
+                //console.log(`MIDI input (cc ${cc}) wheel: ${val}`);
+            }
+
+            // SYSTEM CONTROL
+            // start/ stop WELLE
+            if (cc == 30 && val == 1) {
+                if (Tone.Transport.state != "started") window.welle.app.startTransport();
+                else window.welle.app.stopTransport();
+            }
+            // play/stop selected instrument
+            if (cc == 31 && val == 1) {
+                window.welle.app.instruments.forEach((entry) => {
+                    if (entry.name == window.welle.app.selected.name) {
+                        if (entry.mute == true) window.welle.app.plainStartInstruments({ instruments: [entry.name] });
+                        else window.welle.app.stopInstruments([entry.name]);
+                    }
+                });
+            }
+            // set selected instrument
+            if (cc == 32 && val == 1) {
+                // set selected
+                window.welle.app.storedInstsOnWheel.forEach((entry) => {
+                    console.log(`entry name: ${entry.name}, min: ${entry.minVal}, diff: ${entry.diff}`);
+                    if (
+                        entry.minVal < window.welle.app.wheelPos &&
+                        entry.minVal + entry.diff > window.welle.app.wheelPos
+                    ) {
+                        console.log(`preview selected: ${entry.name}`);
+                        window.welle.app.storedInstsOnWheelSelectedName = entry.name;
+                        // preview sound
+                        // window.welle.app.instrumentPreview({ instruments: [entry.name] });
+                        // set selected
+                        window.welle.app.instruments.forEach((inst) => {
+                            if (inst.name == entry.name) {
+                                window.welle.app.setSelected(inst);
+                                window.welle.app.plainStartInstruments({ instruments: [inst.name] });
+                            }
+                        });
+                    }
+                });
+                // window.welle.app.instruments.forEach((inst) => {
+                //     if (inst.name == window.welle.app.storedInstsOnWheelSelectedName)
+                //         window.welle.app.setSelected(inst);
+                // });
+            }
+            // store wheel position
+            if (cc == 9) window.welle.app.wheelPos = val;
+
+            // preview next selected with touch button
+            if (cc == 33 && val == 1) {
+                console.log(`touch preview.. wheel at ${window.welle.app.wheelPos}`);
+                window.welle.app.storedInstsOnWheel.forEach((entry) => {
+                    console.log(`entry name: ${entry.name}, min: ${entry.minVal}, diff: ${entry.diff}`);
+                    if (
+                        entry.minVal < window.welle.app.wheelPos &&
+                        entry.minVal + entry.diff > window.welle.app.wheelPos
+                    ) {
+                        console.log(`preview selected: ${entry.name}`);
+                        window.welle.app.storedInstsOnWheelSelectedName = entry.name;
+                        // preview sound
+                        window.welle.app.instrumentPreview({ instruments: [entry.name] });
+                        // set selected
+                        // window.welle.app.instruments.forEach((inst) => {
+                        //     if (inst.name == entry.name) window.welle.app.setSelected(inst);
+                        // });
+                    }
+                });
+                // activate selector
+                // window.welle.app.setWheelasSelector = true;
+                window.welle.app.setWheelasSelector = false;
+            }
+            if (cc == 33 && val == 0) {
+                window.welle.app.setWheelasSelector = false;
+                window.welle.app.setWheelasSelectorReset = true;
+            }
+
+            if (window.welle.app.setWheelasSelector) {
+                if (!window.welle.app.setWheelasSelectorInit) {
+                    console.log(`make wheel selector`);
+                    // clear previous pushpoints
+                    window.welle.app.MIDIOutput.sendControlChange(
+                        27, // cc controller
+                        0, // CC value
+                        window.welle.app.midiChanOutput // channel
+                    );
+                    // make grid with 8 points
+                    const points = 8;
+                    const diff = 15;
+                    for (let i = 0; i < points; i++) {
+                        const pos = i * diff;
+                        setTimeout(() => {
+                            window.welle.app.MIDIOutput.sendControlChange(
+                                26, // cc controller
+                                pos, // CC value
+                                window.welle.app.midiChanOutput // channel
+                            );
+                        }, i * 50);
+                    }
+
+                    // leave init mode
+                    window.welle.app.setWheelasSelectorInit = true;
+                }
+                // cycle through
+                // if (cc == 9) {
+                //     if (val % 15 == 0) {
+                //         window.welle.app.wheelInstSelect = window.welle.app.wheelInstSelect + 1;
+                //         console.log(`selected preview num: ${window.welle.app.wheelInstSelect}`);
+                //     }
+                // }
+            } else {
+                if (window.welle.app.setWheelasSelectorReset) {
+                    console.log(`return to wheel normal. selected name: ${window.welle.app.selected.name}`);
+                    if (window.welle.app.selected.name != "")
+                        window.welle.app.sendMidiSelectedInstState({ message: window.welle.app.selected, pins: false });
+                    window.welle.app.setWheelasSelectorReset = false;
+                    window.welle.app.setWheelasSelectorInit = false;
+                    window.welle.app.wheelInstSelect = 0;
+                }
+            }
+
+            // detect push points
+            if (cc == 34) {
+                // if (window.welle.app.wheelTempSelect < val)
+                //     window.welle.app.wheelInstSelect = window.welle.app.wheelInstSelect + 1;
+                // else window.welle.app.wheelInstSelect = window.welle.app.wheelInstSelect - 1;
+                // console.log(`MIDI receive push point val: ${val} and ${window.welle.app.wheelInstSelect}`);
+                // window.welle.app.wheelTempSelect = val;
+            }
+
+            //
+            //
+            //
+            //
+            //
+            //
             // only assign, if some instrument is selected
             if (selected.name != "") {
-                // VOLUME
-                if (cc == 9) {
-                    vol = roundFunc(val / 126);
+                // VOLUME - from wheel no longer accepted
+                // if (cc == 9) {
+                //     vol = roundFunc(val / 126);
 
-                    window.welle.app.setVolume({
-                        instruments: [selected.name],
-                        volume: vol,
-                        midi: true,
-                    });
+                //     window.welle.app.setVolume({
+                //         instruments: [selected.name],
+                //         volume: vol,
+                //         midi: true,
+                //     });
 
-                    if (window.welle.app.selected) window.welle.app.selected.vol = vol;
-                    // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
-                    console.log(`MIDI input (${selected.name}) vol: ${vol} `);
-                }
+                //     if (window.welle.app.selected) window.welle.app.selected.vol = vol;
+                //     // console.log(`In Volume: ${vol} for inst: ${selected.name}`);
+                //     console.log(`MIDI input (${selected.name}) vol: ${vol} `);
+                // }
 
                 // PATTERN
                 if (cc >= 1 && cc <= 8) {
@@ -2414,17 +2614,26 @@ class WelleApp {
                 }
 
                 // ENVELOPE
-                if (cc >= 16 && cc <= 18) {
+                if (cc >= 16 && cc <= 19) {
                     const index = cc - 16;
                     const envVal = Math.round((val / 126) * 100) / 100;
                     window.welle.app.midiCountEnv = window.welle.app.midiCountEnv + 1;
                     // let envIncoming = { attack: undefined, decay: undefined, release: undefined };
 
                     if (index == 0) window.welle.app.midiEnv.attack = envVal;
-                    if (index == 1) window.welle.app.midiEnv.decay = envVal;
-                    if (index == 2) window.welle.app.midiEnv.release = envVal;
+                    if (index == 1) {
+                        vol = envVal;
+                        window.welle.app.setVolume({
+                            instruments: [selected.name],
+                            volume: vol,
+                            midi: true,
+                        });
+                        if (window.welle.app.selected) window.welle.app.selected.vol = vol;
+                    }
+                    if (index == 2) window.welle.app.midiEnv.decay = envVal;
+                    if (index == 3) window.welle.app.midiEnv.release = envVal;
 
-                    if (window.welle.app.midiCountEnv == 3) {
+                    if (window.welle.app.midiCountEnv == 4) {
                         window.welle.app.midiCountEnv = 0;
 
                         window.welle.app.setEnvelope({
