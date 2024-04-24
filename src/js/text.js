@@ -158,6 +158,7 @@ If you have issues or suggestions, please feel free to get in touch! A contact e
 <p>sounds-for-life by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
 <p>default by Jens Vetter</p>
 <p>hardstyle by Biochron "Hardstyle Force Sample Pack"</p>
+<p>studio by Jens Vetter</p>
 
 
 `;
@@ -299,6 +300,7 @@ Wenn Sie Probleme oder Vorschläge haben, melden Sie sich bitte! Eine Kontakt-E-
 <p>sounds-for-life by Valentine "55,5 Sample Pack" | www.instagram.com/ketchup.hostage</p>
 <p>default by Jens Vetter</p>
 <p>hardstyle by Biochron "Hardstyle Force Sample Pack"</p>
+<p>studio by Jens Vetter</p>
 
 `;
 
