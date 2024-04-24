@@ -34,7 +34,7 @@ grid = main storage array for note events of the sample-based instruments (sampl
 
 class WelleApp {
     // show envArray
-    showEnv = true;
+    showEnv = false;
 
     // debug
     debug = true;
@@ -1904,8 +1904,7 @@ class WelleApp {
                     <span class="instVol">| volume</span>
                     <span class="instRand">| random</span>
                     <span class="instPattern">| pattern</span>
-                    <span class="instEnvelope">| &nbsp; ADR envelope</span>
-                </div>`;
+                </div>`; // <span class="instEnvelope">| &nbsp; ADR envelope</span>
 
             html += headerHTML;
         }
