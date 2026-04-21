@@ -78,7 +78,7 @@ class WelleApp {
             titleENoff: "mute helper sounds",
             titleDEoff: "Hilfsklänge ausschalten",
             valueENon: "unmute helper sounds",
-            valueDEon: "Hilfklänge an",
+            valueDEon: "Hilfsklänge an",
             titleENon: "unmute helper sounds",
             titleDEon: "Hilfsklänge anschalten",
         },

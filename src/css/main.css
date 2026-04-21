@@ -1,9 +1,9 @@
 /* CSS for WELLE */
 
 body {
-    /* background: black; */
+    background: black;
     font-family: "Roboto", sans-serif !important;
-    /* color: white; */
+    color: #dddddd;
 }
 .mainBody {
     margin: auto;
@@ -178,18 +178,18 @@ h3 {
 
 #mainInput:focus,
 #input:focus {
-    background-color: #ffffff;
-    border: 2px solid black;
+    background-color: #3c3c3c;
+    border: 2px solid rgb(230, 230, 230);
     font-weight: bold;
 }
 #mainInput {
-    /* background: black; */
-    /* color: white; */
+    background: rgb(50, 50, 50);
+    color: white;
     outline: none;
     box-sizing: border-box;
     border: 1px solid black;
     border-radius: 1px;
-    border-color: #0e0e0e;
+    border-color: #e7e7e7;
     padding: 5px 2px;
     /* font-size: 0.8em; */
     width: 100%;
@@ -227,8 +227,8 @@ h3 {
 }
 
 .selectedInst {
-    margin-left: -2px;
-    border-left: 2px solid rgb(60, 179, 56);
+    margin-left: -6px;
+    border-left: 6px solid rgb(60, 179, 56);
 }
 input[type="checkbox"] {
     width: 1rem;

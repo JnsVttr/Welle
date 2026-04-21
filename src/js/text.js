@@ -306,39 +306,35 @@ Wenn Sie Probleme oder Vorschläge haben, melden Sie sich bitte! Eine Kontakt-E-
 
 en.info = `
 <p>
-WELLE is a web-based music environment and was developed as 
-part of the research project Tangible Signals by Jens Vetter, 
-supervised by Martin Kaltenbrunner 
-at the Tangible Music Lab, University of Art and Design  Linz, Austria.
-The research project is funded with the 
-DOC fellowship by the Austrian Academy of Sciences, starting June 2019.
+WELLE is an accessible web-based music environment. It was developed as 
+part of the research project Tangible Signals by Jens Vetter 
+at the Tangible Music Lab, University of Arts Linz, Austria.
+The research project was funded with the 
+DOC fellowship by the Austrian Academy of Sciences.
 </p>
 <p>
-Link to research project website: <a href="https://tamlab.ufg.at/projects/tangible-signals/" title="go to Tangible Music Lab's project website">tamlab.ufg.at/projects/tangible-signals/</a>.
-The source code is published here: <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a>.
-This website was build with the Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> and
+Link to research project website: <a href="https://tamlab.kunstuni-linz.at/projects/tangible-signals/" title="go to Tangible Music Lab's project website">tamlab.kunstuni-linz.at/projects/tangible-signals</a> <br>
+The source code is published here: <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a> <br>
+This website was build with <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> and
 <a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>.
 </p>
 
-<p>contact: jens.vetter|a|ufg.at
-<p>© Jens Vetter</p>
+<p>contact: post |a| jensvetter.de </p>
+<p>published as CC BY-NC-SA 4.0</p>
 `;
 
 de.info = `
 <p>
 WELLE ist ein barrierefreies webbasiertes Musikprogramm. Die Website wurde entwickelt als Teil 
-des Forschungsprojekts Tangible Signals von Jens Vetter, 
-unter der Leitung von Martin Kaltenbrunner 
-am Tangible Music Lab, Kunstuniversität Linz, Österreich.
-Das Forschungsprojekt wird gefördert durch das 
-DOC-Stipendium der Österreichischen Akademie der Wissenschaften, Juni 2019.
+des Forschungsprojekts Tangible Signals von Jens Vetter am Tangible Music Lab, Kunstuniversität Linz, Österreich.
+Das Projekt wurde gefördert durch das 
+DOC-Stipendium der Österreichischen Akademie der Wissenschaften.
 </p>
-<p>Projektwebsite "Tangible Signals": <a href="https://tamlab.ufg.at/projects/tangible-signals/" title="go to Tangible Music Lab's project website">tamlab.ufg.at/projects/tangible-signals</a></p>
-<p>
-Quellcode auf Github: <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a>.
-Diese Website nutzt das Webaudio framework <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> und 
-<a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>.
+<p>Projektwebsite: <a href="https://tamlab.kunstuni-linz.at/projects/tangible-signals/" title="go to Tangible Music Lab's project website">tamlab.kunstuni-linz.at/projects/tangible-signals</a></p>
+<p>Github: <a href="https://github.com/JnsVttr/Welle" title="go to Github WELLE code">github.com/welle</a> <br>
+Diese Website nutzt <a href="https://tonejs.github.io/" title="Tone.js">Tone.js</a> und 
+<a href="https://ohmlang.github.io/" title="Ohm">Ohm.js</a>
 </p>
-<p>Kontakt: jens.vetter|a|ufg.at
-<p>© Jens Vetter</p>
+<p>Kontakt: post |a| jensvetter.de </p>
+<p>published as CC BY-NC-SA 4.0</p>
 `;
