@@ -1900,10 +1900,10 @@ class WelleApp {
             const headerHTML = `
                 <div id="instHeader" class="instHeadLine">
                     <span class="stateHtml"> </span>
-                    <span class="instName">|&nbsp;name</span>
-                    <span class="instVol">| volume</span>
-                    <span class="instRand">| random</span>
-                    <span class="instPattern">| pattern</span>
+                    <span class="instName">&nbsp;name</span>
+                    <span class="instVol"> volume</span>
+                    <span class="instRand"> random</span>
+                    <span class="instPattern"> pattern</span>
                 </div>`; // <span class="instEnvelope">| &nbsp; ADR envelope</span>
 
             html += headerHTML;
@@ -1941,9 +1941,9 @@ class WelleApp {
                     const instHtml = `
                     <div id="inst_${entry.name}" class="${selHtml} instLine">
                         <span class="stateHtml">${stateHtml}</span>
-                        <span class="instName">| ${entry.name}</span>
-                        <span id="vol_${entry.name}" class="instVol">| ${volume}</span>
-                        <span id="rand_${entry.name}" class="instRand">| & ${entry.getRand()}</span>
+                        <span class="instName">&nbsp; ${entry.name}</span>
+                        <span id="vol_${entry.name}" class="instVol"> ${volume}</span>
+                        <span id="rand_${entry.name}" class="instRand"> & ${entry.getRand()}</span>
                         
                         `;
                     // <span id="pattern_${entry.name}" class="instPattern">| ${entry.getPatternRaw()}</span>
@@ -1951,7 +1951,7 @@ class WelleApp {
 
                     patternArray.forEach((e, c) => {
                         let part = "";
-                        if (c == 0) part += "|&nbsp;&nbsp;";
+                        if (c == 0) part += "&nbsp;&nbsp;";
                         part += `<span name="beat${c}" class="instPatternPart">${e}</span>`;
                         if (c == 7) part += "&nbsp;&nbsp;&nbsp;";
                         html += part;

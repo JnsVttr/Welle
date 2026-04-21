@@ -3,23 +3,111 @@
     "bpm": 120,
     "samplePack": "default",
     "parts": {
-        "beauty": {
+        "dance": {
             "instrumentCollection": {
-                "hush": {
-                    "name": "hush",
+                "bowl": {
+                    "name": "bowl",
                     "mute": false,
                     "sequence": [
-                        "C3",
-                        "D3",
+                        null,
+                        null,
                         null,
                         "C3",
                         null,
-                        "D#3",
-                        "C4",
+                        null,
+                        null,
                         null
                     ],
-                    "patternRaw": "# #2 - # - #3 #12 - ",
+                    "patternRaw": "- - - # - - - - ",
                     "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass1": {
+                    "name": "glass1",
+                    "mute": false,
+                    "sequence": [
+                        "D1",
+                        null,
+                        null,
+                        "D1",
+                        null,
+                        null,
+                        "D1",
+                        null
+                    ],
+                    "patternRaw": "#-22 - - #-22 - - #-22 - ",
+                    "volume": 0.4,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass2": {
+                    "name": "glass2",
+                    "mute": false,
+                    "sequence": [
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2"
+                    ],
+                    "patternRaw": "#-12 #-12 #-12 #-12 #-12 #-12 #-12 #-12 ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass3": {
+                    "name": "glass3",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "E0",
+                        null,
+                        null,
+                        null,
+                        "E0",
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- #-32 - - - #-32 - - ",
+                    "volume": 0.2,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass4": {
+                    "name": "glass4",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "C#5",
+                        null,
+                        null,
+                        "A#4",
+                        null,
+                        "D#5",
+                        "A#4"
+                    ],
+                    "patternRaw": "- #25 - - #22 - #27 #22 ",
+                    "volume": 0.5,
                     "rand": 1,
                     "envSettings": {
                         "attack": 0.01,
@@ -27,20 +115,20 @@
                         "release": 0.1
                     }
                 },
-                "kickly": {
-                    "name": "kickly",
+                "laser": {
+                    "name": "laser",
                     "mute": false,
                     "sequence": [
                         "C3",
                         null,
-                        "C3",
                         null,
-                        "C3",
                         null,
-                        "C3",
+                        "D#3",
+                        null,
+                        "C4",
                         null
                     ],
-                    "patternRaw": "# - # - # - # - ",
+                    "patternRaw": "# - - - #3 - #12 - ",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -53,16 +141,16 @@
                     "name": "loop",
                     "mute": false,
                     "sequence": [
-                        "D#3",
+                        null,
                         null,
                         "C3",
-                        "D3",
                         null,
-                        "C4",
                         null,
-                        "C3"
+                        "C3",
+                        null,
+                        null
                     ],
-                    "patternRaw": "#3 - # #2 - #12 - # ",
+                    "patternRaw": "- - # - - # - - ",
                     "volume": 0.6,
                     "rand": 0,
                     "envSettings": {
@@ -71,22 +159,379 @@
                         "release": 0.1
                     }
                 },
-                "mix": {
-                    "name": "mix",
+                "metal": {
+                    "name": "metal",
                     "mute": false,
                     "sequence": [
-                        "D#3",
                         null,
                         "C3",
-                        "D3",
                         null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- # - - - - - - ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "pizz1": {
+                    "name": "pizz1",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "D#4",
+                        "D3",
                         "C4",
+                        "E3",
+                        "C3",
+                        "C4",
+                        "D#3"
+                    ],
+                    "patternRaw": "- #15 #2 #12 #4 # #12 #3 ",
+                    "volume": 0.3,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "pizz2": {
+                    "name": "pizz2",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "C3",
+                        "D#3",
+                        "D#4",
+                        "C4",
+                        "D3",
+                        "C4",
+                        "E3"
+                    ],
+                    "patternRaw": "- # #3 #15 #12 #2 #12 #4 ",
+                    "volume": 0.3,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "trom1": {
+                    "name": "trom1",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
                         null,
                         "C3"
                     ],
-                    "patternRaw": "#3 - # #2 - #12 - # ",
+                    "patternRaw": "- - - - - - - # ",
+                    "volume": 0.6,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "trom2": {
+                    "name": "trom2",
+                    "mute": false,
+                    "sequence": [
+                        "D1",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "#-22 - - - - - - - ",
+                    "volume": 0.6,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                }
+            },
+            "bpm": 120
+        },
+        "mega": {
+            "instrumentCollection": {
+                "bowl": {
+                    "name": "bowl",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- - - # - - - - ",
                     "volume": 0.6,
                     "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass1": {
+                    "name": "glass1",
+                    "mute": true,
+                    "sequence": [
+                        "D1",
+                        null,
+                        null,
+                        "D1",
+                        null,
+                        null,
+                        "D1",
+                        null
+                    ],
+                    "patternRaw": "#-22 - - #-22 - - #-22 - ",
+                    "volume": 0.4,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass2": {
+                    "name": "glass2",
+                    "mute": true,
+                    "sequence": [
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2",
+                        "C2"
+                    ],
+                    "patternRaw": "#-12 #-12 #-12 #-12 #-12 #-12 #-12 #-12 ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass3": {
+                    "name": "glass3",
+                    "mute": true,
+                    "sequence": [
+                        null,
+                        "E0",
+                        null,
+                        null,
+                        null,
+                        "E0",
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- #-32 - - - #-32 - - ",
+                    "volume": 0.2,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "glass4": {
+                    "name": "glass4",
+                    "mute": false,
+                    "sequence": [
+                        "D#5",
+                        "C#5",
+                        null,
+                        null,
+                        "A#4",
+                        "A#4",
+                        null,
+                        null
+                    ],
+                    "patternRaw": "#27 #25 - - #22 #22 - - ",
+                    "volume": 0.5,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "laser": {
+                    "name": "laser",
+                    "mute": false,
+                    "sequence": [
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        "D#3",
+                        null,
+                        "C4",
+                        null
+                    ],
+                    "patternRaw": "# - - - #3 - #12 - ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "loop": {
+                    "name": "loop",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        null,
+                        "C3",
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- - # - - # - - ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "metal": {
+                    "name": "metal",
+                    "mute": false,
+                    "sequence": [
+                        null,
+                        "C3",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "- # - - - - - - ",
+                    "volume": 0.6,
+                    "rand": 0,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "pizz1": {
+                    "name": "pizz1",
+                    "mute": true,
+                    "sequence": [
+                        "D#4",
+                        "C4",
+                        "D3",
+                        "C3",
+                        "D#3",
+                        "E3",
+                        "C4",
+                        null
+                    ],
+                    "patternRaw": "#15 #12 #2 # #3 #4 #12 - ",
+                    "volume": 0.3,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "pizz2": {
+                    "name": "pizz2",
+                    "mute": false,
+                    "sequence": [
+                        "D3",
+                        "D#4",
+                        null,
+                        "C4",
+                        "C4",
+                        "D#3",
+                        "E3",
+                        "C3"
+                    ],
+                    "patternRaw": "#2 #15 - #12 #12 #3 #4 # ",
+                    "volume": 0.3,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "trom1": {
+                    "name": "trom1",
+                    "mute": true,
+                    "sequence": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "C3",
+                        null
+                    ],
+                    "patternRaw": "- - - - - - # - ",
+                    "volume": 0.6,
+                    "rand": 1,
+                    "envSettings": {
+                        "attack": 0.01,
+                        "decay": 0.3,
+                        "release": 0.1
+                    }
+                },
+                "trom2": {
+                    "name": "trom2",
+                    "mute": true,
+                    "sequence": [
+                        "D1",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "patternRaw": "#-22 - - - - - - - ",
+                    "volume": 0.6,
+                    "rand": 1,
                     "envSettings": {
                         "attack": 0.01,
                         "decay": 0.3,
@@ -99,30 +544,31 @@
     },
     "activeInstruments": [
         {
-            "name": "hush",
+            "name": "laser",
             "mute": false,
-            "rand": 1,
+            "rand": 0,
             "volume": 0.6,
             "sequence": [
+                "C3",
+                null,
+                null,
+                null,
                 "D#3",
-                "C3",
+                null,
                 "C4",
-                null,
-                "D3",
-                "C3",
-                null,
                 null
             ],
             "pattern": [
                 0,
                 null,
-                2,
-                3,
-                12,
                 null,
+                null,
+                3,
+                null,
+                12,
                 null
             ],
-            "rawPattern": "#3 # #12 - #2 # - - "
+            "rawPattern": "# - - - #3 - #12 - "
         },
         {
             "name": "loop",
@@ -130,56 +576,283 @@
             "rand": 0,
             "volume": 0.6,
             "sequence": [
-                "D3",
                 null,
-                "C3",
-                "C3",
-                "D#3",
-                null,
-                "C4",
-                null
-            ],
-            "pattern": "",
-            "rawPattern": "#2 - # # #3 - #12 - "
-        },
-        {
-            "name": "mix",
-            "mute": false,
-            "rand": 0,
-            "volume": 0.6,
-            "sequence": [
-                "D3",
-                null,
-                "C3",
-                "C3",
-                "D#3",
-                null,
-                "C4",
-                null
-            ],
-            "pattern": "",
-            "rawPattern": "#2 - # # #3 - #12 - "
-        },
-        {
-            "name": "kickly",
-            "mute": false,
-            "rand": 0,
-            "volume": 0.6,
-            "sequence": [
-                "C3",
                 null,
                 "C3",
                 null,
-                "C3",
                 null,
                 "C3",
+                null,
                 null
             ],
             "pattern": [
+                null,
+                null,
                 0,
+                null,
+                null,
+                0,
+                null,
                 null
             ],
-            "rawPattern": "# - # - # - # - "
+            "rawPattern": "- - # - - # - - "
+        },
+        {
+            "name": "metal",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                null,
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "pattern": [
+                null,
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "rawPattern": "- # - - - - - - "
+        },
+        {
+            "name": "bowl",
+            "mute": false,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                null,
+                null,
+                null,
+                "C3",
+                null,
+                null,
+                null,
+                null
+            ],
+            "pattern": [
+                null,
+                null,
+                null,
+                0,
+                null,
+                null,
+                null,
+                null
+            ],
+            "rawPattern": "- - - # - - - - "
+        },
+        {
+            "name": "trom1",
+            "mute": true,
+            "rand": 1,
+            "volume": 0.6,
+            "sequence": [
+                null,
+                null,
+                "C3",
+                null,
+                null,
+                null,
+                null,
+                null
+            ],
+            "pattern": [
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                null,
+                null,
+                null
+            ],
+            "rawPattern": "- - # - - - - - "
+        },
+        {
+            "name": "trom2",
+            "mute": true,
+            "rand": 1,
+            "volume": 0.6,
+            "sequence": [
+                null,
+                null,
+                null,
+                "D1",
+                null,
+                null,
+                null,
+                null
+            ],
+            "pattern": [
+                null,
+                null,
+                null,
+                null,
+                -22,
+                null,
+                null,
+                null,
+                null
+            ],
+            "rawPattern": "- - - #-22 - - - - "
+        },
+        {
+            "name": "glass2",
+            "mute": true,
+            "rand": 0,
+            "volume": 0.6,
+            "sequence": [
+                "C2",
+                "C2",
+                "C2",
+                "C2",
+                "C2",
+                "C2",
+                "C2",
+                "C2"
+            ],
+            "pattern": [
+                -12
+            ],
+            "rawPattern": "#-12 #-12 #-12 #-12 #-12 #-12 #-12 #-12 "
+        },
+        {
+            "name": "glass1",
+            "mute": true,
+            "rand": 0,
+            "volume": 0.4,
+            "sequence": [
+                "D1",
+                null,
+                null,
+                "D1",
+                null,
+                null,
+                "D1",
+                null
+            ],
+            "pattern": [
+                -22,
+                null,
+                null
+            ],
+            "rawPattern": "#-22 - - #-22 - - #-22 - "
+        },
+        {
+            "name": "glass3",
+            "mute": true,
+            "rand": 0,
+            "volume": 0.2,
+            "sequence": [
+                null,
+                "E0",
+                null,
+                null,
+                null,
+                "E0",
+                null,
+                null
+            ],
+            "pattern": [
+                null,
+                -32,
+                null,
+                null
+            ],
+            "rawPattern": "- #-32 - - - #-32 - - "
+        },
+        {
+            "name": "pizz1",
+            "mute": true,
+            "rand": 1,
+            "volume": 0.3,
+            "sequence": [
+                "D#3",
+                "C4",
+                null,
+                "C4",
+                "E3",
+                "D3",
+                "C3",
+                "D#4"
+            ],
+            "pattern": [
+                0,
+                2,
+                3,
+                4,
+                12,
+                12,
+                null,
+                15
+            ],
+            "rawPattern": "#3 #12 - #12 #4 #2 # #15 "
+        },
+        {
+            "name": "pizz2",
+            "mute": false,
+            "rand": 1,
+            "volume": 0.3,
+            "sequence": [
+                "C3",
+                "E3",
+                "C4",
+                null,
+                "D#4",
+                "D3",
+                "D#3",
+                "C4"
+            ],
+            "pattern": [
+                0,
+                2,
+                3,
+                4,
+                12,
+                12,
+                null,
+                15
+            ],
+            "rawPattern": "# #4 #12 - #15 #2 #3 #12 "
+        },
+        {
+            "name": "glass4",
+            "mute": false,
+            "rand": 1,
+            "volume": 0.5,
+            "sequence": [
+                null,
+                null,
+                null,
+                "A#4",
+                "C#5",
+                "A#4",
+                "D#5",
+                null
+            ],
+            "pattern": [
+                null,
+                22,
+                null,
+                25,
+                27
+            ],
+            "rawPattern": "- - - #22 #25 #22 #27 - "
         }
     ]
 }
