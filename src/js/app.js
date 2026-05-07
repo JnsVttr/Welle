@@ -184,7 +184,7 @@ class WelleApp {
     selected = {
         name: "",
         vol: 1,
-        env: [0.1, 0.2, 0.3, 0.1],
+        env: [0.1, 0.2, 0.9, 0.1], // here is the relevant envelope decay
         eq: [],
         pattern: [1, null, 1, null],
     };

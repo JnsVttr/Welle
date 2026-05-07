@@ -35,8 +35,8 @@ class Instrument {
         this.chan = message.chan + 1;
         this.envSettings = {
             attack: 0.01,
-            decay: 0.3,
-            release: 0.1,
+            decay: 0.6,
+            release: 0.7,
         };
         this.envSettingsCC = [0, 30, 30];
         // attk, dec, sus, rel
