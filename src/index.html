@@ -128,7 +128,8 @@
                             />
                         </form>
                         
-                        <span id="jsonFeedbackText" class="uploadStatus">load info</span>
+                        
+                        <span id="jsonFeedbackText" class="uploadStatus" style="display:none">upload info</span>
                     </p>
 
                     <p>
@@ -162,9 +163,9 @@
                             />
                         </form>
                         
-                        <span id="samplePackFeedbackText" class="uploadStatus">upload info</span>
+                        <span id="samplePackFeedbackText" class="uploadStatus" style="display:none">upload info</span>
                     </p>
-                    <input
+                    <!-- <input
                         id="help-button"
                         class="w3-button w3-round-large  buttonSmall"
                         type="button"
@@ -172,7 +173,7 @@
                         title="help"
                         onclick="document.getElementById('gotoHelp').click(); "
                     />
-                    <a id="gotoHelp" href="#help" style="display:none"></a>
+                    <a id="gotoHelp" href="#help" style="display:none"></a> -->
                 </div>
                     <!-- ===== SETTINGS ===============================  -->
                     <div class="menuSettings">
@@ -195,6 +196,7 @@
                                 type="button"
                                 value="mute helper sounds"
                                 title="mute helper"
+                                style="display:none"
                             />
                         </p>
                         <p>
@@ -204,6 +206,7 @@
                                 type="button"
                                 value="unmute metronom"
                                 title="unmute metronom"
+                                style="display:none"
                             />
                         </p>
                         <p>

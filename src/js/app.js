@@ -1916,14 +1916,15 @@ class WelleApp {
         if (this.activeInstruments.length > 0) instrumentsThere = true;
 
         if (instrumentsThere) {
-            const headerHTML = `
-                <div id="instHeader" class="instHeadLine">
-                    <span class="stateHtml"> </span>
-                    <span class="instName">&nbsp;name</span>
-                    <span class="instVol"> volume</span>
-                    <span class="instRand"> random</span>
-                    <span class="instPattern"> pattern</span>
-                </div>`; // <span class="instEnvelope">| &nbsp; ADR envelope</span>
+            const headerHTML = "";
+            // const headerHTML = `
+            //     <div id="instHeader" class="instHeadLine">
+            //         <span class="stateHtml"> </span>
+            //         <span class="instName instHeader">&nbsp;name</span>
+            //         <span class="instVol instHeader"> volume</span>
+            //         <span class="instRand instHeader"> random</span>
+            //         <span class="instPattern instHeader"> pattern</span>
+            //     </div>`; // <span class="instEnvelope">| &nbsp; ADR envelope</span>
 
             html += headerHTML;
         }
