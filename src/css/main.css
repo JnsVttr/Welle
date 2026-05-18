@@ -49,8 +49,10 @@ h3 {
     display:none;
 }
 .selector {
-    margin-top: 0.7em;
-    margin-bottom: 0.7em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+    background-color: #303030;
+    color: #cccccc;
 }
 .flexDiv {
     display: flex;
@@ -364,3 +366,4 @@ label {
 .instHeader {
     color: grey;
 }
+
