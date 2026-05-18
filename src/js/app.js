@@ -1145,22 +1145,16 @@ class WelleApp {
     }
 
     soloInstrument(message) {
-        //stopInstruments(instruments)
+        // var to store if instrument is created        
         let instCreated = false;
-        this.instruments.forEach((entry) => {
-            this.activeInstruments.forEach((name) => {
-                if (entry.name == name) {
-                    window.welle.app.stopInstruments([entry.name]);
-                }
-            });
-        });
 
+        // check if instruments are created
         message.instruments.forEach((inst) => {
             this.instruments.forEach((entry) => {
                 this.activeInstruments.forEach((name) => {
                     if (entry.name == name) {
                         if (name == inst) {
-                            this.plainStartInstruments({ instruments: [inst] });
+                            // this.plainStartInstruments({ instruments: [inst] });
                             instCreated = true;
                         }
                     }
@@ -1168,13 +1162,38 @@ class WelleApp {
             });
         });
 
+        // handle the two cases (no instrument OR instruments)
         if (!instCreated) {
             this.addToConsole({
                 valid: false,
                 string: message.instruments[0],
                 comment: "not yet created",
             });
+        } else {
+            //stopInstruments(instruments)
+            this.instruments.forEach((entry) => {
+                this.activeInstruments.forEach((name) => {
+                    if (entry.name == name) {
+                        window.welle.app.stopInstruments([entry.name]);
+                    }
+                });
+            });
+
+            // start the instruments that are passed
+            message.instruments.forEach((inst) => {
+                this.instruments.forEach((entry) => {
+                    this.activeInstruments.forEach((name) => {
+                        if (entry.name == name) {
+                            if (name == inst) {
+                                this.plainStartInstruments({ instruments: [inst] });
+                                instCreated = true;
+                            }
+                        }
+                    });
+                });
+            });
         }
+
     }
 
     setVolume(message) {
